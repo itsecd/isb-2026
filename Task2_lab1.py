@@ -45,3 +45,28 @@ key = {
     'J': 'ж',
     '9': 'о'  
 }
+
+def decrypt(text, key):
+    result = []
+    for line in text.split('\n'):
+        decrypted_line = ''
+        for char in line:
+            if char in key:
+                decrypted_line += key[char]
+            else:
+                decrypted_line += char  #как есть, если нет в ключе
+        result.append(decrypted_line)
+    return '\n'.join(result)
+
+decrypted_text = decrypt(cipher_text, key)
+
+with open('Task2_decrypted_text.txt', 'w', encoding='utf-8') as f:
+    f.write(decrypted_text)
+
+with open('Text2_key.txt', 'w', encoding='utf-8') as f:
+    f.write("ИСПОЛЬЗОВАННЫЙ КЛЮЧ:\n")
+    f.write("=" * 30 + "\n")
+    for k in sorted(key.keys()):
+        f.write(f"'{k}' -> '{key[k]}'\n")
+
+print("\nГотово!")
