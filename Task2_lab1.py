@@ -1,4 +1,4 @@
-cipher_text = """PE!WFxZ!CFU!9Fn!CAS$nFSZtI!IOZ>hIKn!9AAW$ZU9tnWZEAnI!AInFCLnx
+original_text = """PE!WFxZ!CFU!9Fn!CAS$nFSZtI!IOZ>hIKn!9AAW$ZU9tnWZEAnI!AInFCLnx
 ZFYQVAxIZA9FEnIhEZEZ=!WBEIZKCAChx
 9AEZV9BWnZVCFKE!9PCnFSZU9=ZU9hIOAxIZU!9B!CVVxZEhEZ3CLhxZtn9MxZ9MVCAWn-ZU9hO9PCnIhSZEZOCFnCPEn-ZIB9ZOCUWFnEn-ZPE!WF
 tn9MxZOC8EnEn-FSZ9nZPE!WF9PZAI9MG9=EV9ZEFU9h-O9PCnZCAnEPE!WFA9IZU!9B!CVVA9IZ9MIFUItIAEIZK9n9!9IZV9JInZ9MAC!WJ
@@ -10,40 +10,40 @@ OWLnIZCAnEPE!WFAW$ZU!9B!CVVWZ=hSZFKCAE!9PCAESZEZ9tEFnKE
 ZFEFnIVx"""
 
 key = {
-    'n': 'т',
-    '-': 'ь',
-    'h': 'л',
-    'E': 'и',
-    'g': 'о',
-    'O': 'з',
+    'n': 'Т',
+    '-': 'Ь',
+    'h': 'Л',
+    'E': 'И',
+    'g': 'О',
+    'O': 'З',
     'Z': ' ',
-    'U': 'п',
-    '=': 'д',
-    '!': 'р',
-    'I': 'е',
-    'A': 'н',
-    'x': 'ы',
-    'F': 'с',
-    'V': 'м',
-    'W': 'у',
-    'R': 'ц',
-    'K': 'к',
-    '$': 'ю',
-    'C': 'а',
-    'P': 'в',
-    'S': 'я',
-    'M': 'б',
-    'B': 'г',
-    't': 'ч',
-    '8': 'щ',
-    '>': 'э',
-    'L': 'й',
-    'Y': 'ъ',
-    'Q': 'ё',
-    '3': 'ф',
-    'G': 'х',
-    'J': 'ж',
-    '9': 'о'  
+    'U': 'П',
+    '=': 'Д',
+    '!': 'Р',
+    'I': 'Е',
+    'A': 'Н',
+    'x': 'Ы',
+    'F': 'С',
+    'V': 'М',
+    'W': 'У',
+    'R': 'Ц',
+    'K': 'К',
+    '$': 'Ю',
+    'C': 'А',
+    'P': 'В',
+    'S': 'Я',
+    'M': 'Б',
+    'B': 'Г',
+    't': 'Ч',
+    '8': 'Щ',
+    '>': 'Э',
+    'L': 'Й',
+    'Y': 'Ъ',
+    'Q': 'Ё',
+    '3': 'Ф',
+    'G': 'Х',
+    'J': 'Ж',
+    '9': 'О'  
 }
 
 def decrypt(text, key):
@@ -58,7 +58,10 @@ def decrypt(text, key):
         result.append(decrypted_line)
     return '\n'.join(result)
 
-decrypted_text = decrypt(cipher_text, key)
+decrypted_text = decrypt(original_text, key)
+
+with open('Task2_original_text.txt', 'w', encoding='utf-8') as f:
+    f.write(original_text)
 
 with open('Task2_decrypted_text.txt', 'w', encoding='utf-8') as f:
     f.write(decrypted_text)
@@ -69,4 +72,4 @@ with open('Text2_key.txt', 'w', encoding='utf-8') as f:
     for k in sorted(key.keys()):
         f.write(f"'{k}' -> '{key[k]}'\n")
 
-print("\nГотово!")
+print("\nДешефрирование прошло успешно!")
