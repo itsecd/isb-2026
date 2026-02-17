@@ -27,9 +27,45 @@ def decode_text(text: str) -> None:
     :param text: Encoded text to decode
     :type text: str
     """
-    replaced_table = {"Z": " "}
+    replace_table = {
+        "Z": " ",
+        "9": "о",
+        "E": "и",
+        "n": "т",
+        "I": "е",
+        "A": "н",
+        "C": "а",
+        "F": "с",
+        "!": "р",
+        "V": "м",
+        "h": "л",
+        "x": "ы",
+        "P": "в",
+        "K": "к",
+        "W": "у",
+        "U": "п",
+        "S": "я",
+        "$": "ю",
+        "O": "з",
+        "t": "ч",
+        "=": "д",
+        "-": "ь",
+        chr(10): "ь",
+        "M": "б",
+        "B": "г",
+        "J": "ж",
+        "Q": "ё",
+        "L": "й",
+        "R": "ц",
+        "3": "ф",
+        ">": "э",
+        "G": "х",
+        "d": "ш",
+        "8": "щ",
+        "Y": "ъ",
+    }
 
-    for i, j in replaced_table.items():
+    for i, j in replace_table.items():
         text = text.replace(i, j)
 
     print(text)
