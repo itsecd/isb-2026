@@ -1,5 +1,7 @@
 import sys
 
+from ordered_set import OrderedSet
+
 
 def read_text(filename: str) -> str:
     """
@@ -11,7 +13,7 @@ def read_text(filename: str) -> str:
     :rtype: str
     """
     try:
-        with open(filename) as f:
+        with open(filename, encoding="utf-8") as f:
             return f.read()
 
     except FileExistsError:
@@ -23,6 +25,36 @@ def read_text(filename: str) -> str:
     except Exception as e:
         print(e)
         exit(2)
+
+
+def encode(source: str, key: str) -> str:
+    """
+    Docstring for encode
+
+    :param source: Source text to encode
+    :type source: str
+    :param key: Secret key (English chars + digits only)
+    :type key: str
+    :return: Encoded text
+    :rtype: str
+    """
+    result = source.lower()
+    source_alphabet = OrderedSet(x for x in result)
+    encode_alphabet = OrderedSet(sorted(key.lower()))
+    print(source_alphabet)
+    print(encode_alphabet)
+    allowed_symbols = (
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ !@#$%&*0123456789\nabcdefghijklmnopqrstuvwxyz"
+    )
+    for i in allowed_symbols:
+        if len(encode_alphabet) < len(source_alphabet):
+            encode_alphabet.add(i)
+    source_alphabet = list(source_alphabet)
+    encode_alphabet = list(encode_alphabet)
+    for i in range(len(encode_alphabet)):
+        result = result.replace(source_alphabet[i], encode_alphabet[i])
+
+    return result
 
 
 def main() -> None:
@@ -41,8 +73,9 @@ def main() -> None:
     key = read_text(key_file)
 
     try:
-        with open(output_file, "w") as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             f.write(encode(input_text, key))
+            print(f"Saved to {output_file}")
     except PermissionError:
         print(f"Permission denied for {output_file}")
         exit(2)
