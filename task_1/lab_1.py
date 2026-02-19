@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
         self.input_file = input_file
         self.key_file = key_file
         self.output_file = output_file
-        self.RUSSIAN_ALPHABET = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя.-,"
+        self.RUSSIAN_ALPHABET = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя. ,"
         self.setWindowTitle("Шифр Полибия")
         self.resize(400, 350)
 
@@ -106,7 +106,7 @@ def polybius_cipher(text, char_to_codes):
     encoded = ""
     for char in text:
         if char in char_to_codes:
-            encoded += char_to_codes[char] + " "
+            encoded += char_to_codes[char]
     return encoded.strip()
 
 
