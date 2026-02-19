@@ -1,11 +1,11 @@
-A_set = set("АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ")
-A_list = list("АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ")
+A_set = set("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ")
+A_list = list("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ")
 
 
 def encode(text: str, key: str) -> str:
     """Шифр Виженера"""
     if not set(key).issubset(A_set):
-        return text # Ошибка ключа
+        raise Exception("Ошибка ключа")
     res = ""
 
     n = 0
@@ -21,7 +21,7 @@ def encode(text: str, key: str) -> str:
 def decode(text: str, key: str) -> str:
     """Шифр Виженера"""
     if not set(key).issubset(A_set):
-        return text # Ошибка ключа
+        raise Exception("Ошибка ключа")
     res = ""
 
     n = 0
@@ -37,15 +37,14 @@ def decode(text: str, key: str) -> str:
 
 
 def main() -> None:
-    with open("lab_1/text.txt", encoding="utf-8", mode="r") as f:
+    with open("text.txt", encoding="utf-8", mode="r") as f:
         data = f.read()
     data = data.replace("\n", " ").upper()
 
     print(enc := encode(data, "ШИФР"))
 
-    with open("lab_1/text_enc.txt", encoding="utf-8", mode="w") as f:
+    with open("text_enc.txt", encoding="utf-8", mode="w") as f:
         f.write(enc)
-    #print(decode(code, "ШИФР"))
 
 
 if __name__ == "__main__":
