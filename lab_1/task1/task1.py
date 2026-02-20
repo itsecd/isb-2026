@@ -33,8 +33,8 @@ def file_writter(filename: str, data: str) -> None:
 
 def main():
     parser = argparse.ArgumentParser(description="Извлечение данных из файла на основе шаблонов.")
-    parser.add_argument("--readfile", "-r", default="lab_1/mytext.txt", type=str, help="Путь к файлу для чтения.")
-    parser.add_argument("--writefile", "-w", default="lab_1/res.txt", type=str, help="Путь к файлу для записи результата.")
+    parser.add_argument("--readfile", "-r", default="lab_1/task1/mytext.txt", type=str, help="Путь к файлу для чтения.")
+    parser.add_argument("--writefile", "-w", default="lab_1/task1/res.txt", type=str, help="Путь к файлу для записи результата.")
     args = parser.parse_args()
 
     try:
