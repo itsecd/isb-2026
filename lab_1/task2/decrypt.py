@@ -47,14 +47,19 @@ def main():
     
     freq_sample = work_file2.read_file("sample_frequency")
 
-    key_fi =  get_key(freq_encrypted, freq_sample)
+    key_first =  get_key(freq_encrypted, freq_sample)
 
-    work_file2.write_file("key_fi",key_fi)
+    work_file2.write_file("key_fi",key_first)
 
-    decrypted_text = repalce_text(encrypted_text, key_fi) 
+    decrypted_text = repalce_text(encrypted_text, key_first) 
 
     work_file2.write_file_txt("decrypted_text", decrypted_text)
 
+    key_second = work_file2.read_file("key_se")
+
+    decrypted_text_final = repalce_text(decrypted_text, key_second)
+
+    work_file2.write_file_txt("decrypted_text_final", decrypted_text_final)
 
 if __name__ == "__main__":
     main()
