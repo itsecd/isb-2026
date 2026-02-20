@@ -1,5 +1,34 @@
 #!/usr/bin/env python3
 
+import argparse
+
+
+def arg_parse():
+    parser = argparse.ArgumentParser(
+        prog="vigenere",
+        description="Encrypt or decrypt text using a cipher",
+    )
+    parser.add_argument("filename", help="Input file")
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("-e", "--encrypt", action="store_true", help="Encrypt input file")
+    mode.add_argument("-d", "--decrypt", action="store_true", help="Decrypt input file")
+
+    parser.add_argument("-k", "--key", required=True, help="Encryption key")
+    parser.add_argument("-o", "--output", required=True, help="Output file")
+
+    return parser.parse_args()
+
+
+def read_file(filename):
+    with open(filename, "r", encoding="utf-8") as file:
+        return file.read()
+
+
+def write_file(filename, data):
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(data)
+
+
 def encrypt_vigenere(plaintext, key):
     plaintext = plaintext.upper()
     key = key.upper()
@@ -8,13 +37,14 @@ def encrypt_vigenere(plaintext, key):
 
     for char in plaintext:
         if char.isalpha():
-            shift = ord(key[key_index % len(key)]) - ord('A')
-            encrypted_char = chr((ord(char) - ord('A') + shift) % 26 + ord('A'))
+            shift = ord(key[key_index % len(key)]) - ord("A")
+            encrypted_char = chr((ord(char) - ord("A") + shift) % 26 + ord("A"))
             ciphertext += encrypted_char
             key_index += 1
         else:
             ciphertext += char
     return ciphertext
+
 
 def decrypt_vigenere(ciphertext, key):
     ciphertext = ciphertext.upper()
@@ -24,16 +54,26 @@ def decrypt_vigenere(ciphertext, key):
 
     for char in ciphertext:
         if char.isalpha():
-            shift = ord(key[key_index % len(key)]) - ord('A')
-            decrypted_char = chr((ord(char) - ord('A') - shift + 26) % 26 + ord('A'))
+            shift = ord(key[key_index % len(key)]) - ord("A")
+            decrypted_char = chr((ord(char) - ord("A") - shift + 26) % 26 + ord("A"))
             plaintext += decrypted_char
             key_index += 1
         else:
             plaintext += char
     return plaintext
 
+
 def main():
-    pass
+    args = arg_parse()
+    key = args.key
+    data = read_file(args.filename)
+    result = ""
+    if args.encrypt:
+        result = encrypt_vigenere(data, key)
+    elif args.decrypt:
+        result = decrypt_vigenere(data, key)
+    write_file(args.output, result)
+
 
 if __name__ == "__main__":
     main()
