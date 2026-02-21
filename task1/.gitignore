@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project specific - ignore generated files
+original_text.txt
+encrypted_text.txt
+key_cardano.txt
+
+# Virtual environment
+venv/
+env/
+ENV/
+.env
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
