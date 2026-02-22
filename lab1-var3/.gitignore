@@ -1,0 +1,28 @@
+# Сгенерированные файлы (результаты работы программ)
+encrypted.txt
+decrypted_text.txt
+key.txt
+found_key.txt
+
+# Исходные тексты
+input_text.txt
+input.txt
+cod3.txt
+cod.txt
+
+# Системные файлы macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Spotlight-V100/
+.Trashes/
+
+# Редактор VSCode
+.vscode/
+
+# Файлы с настройками окружения
+.env
+.venv
+env/
+venv/
+ENV/
