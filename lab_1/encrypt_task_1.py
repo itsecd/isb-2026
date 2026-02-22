@@ -1,7 +1,5 @@
 import argparse
 
-import array
-
 def ReadFile(filename: str) -> None:
     """
     Reading text from a file. 
@@ -49,6 +47,29 @@ def WriteFile(text: tuple[str], filename: str) -> None:
             file.write(word)
 
 
+def DecryptionTrithemiusCipher(encrypted_text: tuple[str]) -> tuple[str]:
+    """ 
+    Text decryption using a trithemius cipher.
+    """
+    alphabet = None
+    decrypted_text = []
+    key = 0
+    
+    for letter in encrypted_text:
+        if not letter.isalpha():
+            decrypted_text.append(letter)
+            continue
+
+        alphabet = ALPHABET_LOWERCASE if letter.islower() else ALPHABET_UPPERCASE
+        letter_index = alphabet.index(letter)
+        new_letter_index = (letter_index - KEY[key]) % len(alphabet)
+        letter = alphabet[new_letter_index]
+        decrypted_text.append(letter)
+        key = (key + 1) % len(KEY)
+    
+    return decrypted_text
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--original_text', '-o', type=str, help="Path to the file with the original text")
@@ -64,6 +85,9 @@ def main():
         original_text = ReadFile(args.original_text)
         encrypted_text = TrithemiusCipher(original_text)
         WriteFile(encrypted_text, args.encrypted_text)
+        decrypted_text = DecryptionTrithemiusCipher(encrypted_text)
+        decrypted_text.extend(["\n\nключ - НОВОКУЙБЫШЕВСК"])
+        WriteFile(decrypted_text, "check_task_1_result.txt")
 
     except FileNotFoundError:
         print("Error: file not found")
