@@ -28,18 +28,34 @@ def encode_polibius(text: str, key: pd.DataFrame) -> str:
             cell = key.iloc[i, j]
             if cell and str(cell).strip():
                 map[cell] = f"{i+1}{j+1}"
-    result = []
+    result = ""
     for char in text:
         if char in map:
-            result.append(map[char])
+            result+=map[char]
         elif char == ' ':
-            result.append(' ')
+            result+= ' '
         else:
-            result.append(char)
-    return ' '.join(result)
+            result+= char 
+    return result
 
 def main() -> None:
-    print()    
-
+    parser = argparse.ArgumentParser(description='Polibius encode')
+    parser.add_argument('--input_file', required=True, help='file with text')
+    parser.add_argument('--key', required=True, help='key for encode')
+    parser.add_argument('--output_file', required=True, help='file for encode text')
+    args = parser.parse_args()
+    text = read_text(args.input_file)
+    key = pd.read_excel(args.key)
+    try:
+        with open(args.output_file, "w", encoding="utf-8") as f:
+            f.write(encode_polibius(text, key))    
+            print(f"Your text is encode")
+    except PermissionError:
+        print(f"Permission denied")
+        exit(2)
+    except Exception as e:
+        print(e)
+        exit(2)
+        
 if __name__ == "__main__":
     main()
