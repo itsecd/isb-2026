@@ -1,6 +1,4 @@
-import argparse
-
-def ReadFile(filename: str) -> None:
+def ReadFile(filename: str) -> tuple[str]:
     """
     Reading text from a file. 
     """
@@ -15,7 +13,7 @@ ALPHABET_UPPERCASE = tuple('АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШ
 KEY = (15, 16, 3, 16, 12, 21, 11, 2, 29, 26, 6, 3, 19, 12)
 
 
-def TrithemiusCipher(original_text) -> tuple[str]:
+def TrithemiusCipher(original_text: tuple[str]) -> list[str]:
     """ 
     Text encryption using a trithemius cipher.
     """
@@ -38,7 +36,7 @@ def TrithemiusCipher(original_text) -> tuple[str]:
     return encrypted_text
 
 
-def WriteFile(text: tuple[str], filename: str) -> None:
+def WriteFile(text: list[str], filename: str) -> None:
     """ 
     Writing to a file.
     """
@@ -47,7 +45,7 @@ def WriteFile(text: tuple[str], filename: str) -> None:
             file.write(word)
 
 
-def DecryptionTrithemiusCipher(encrypted_text: tuple[str]) -> tuple[str]:
+def DecryptionTrithemiusCipher(encrypted_text: list[str]) -> list[str]:
     """ 
     Text decryption using a trithemius cipher.
     """
@@ -71,22 +69,11 @@ def DecryptionTrithemiusCipher(encrypted_text: tuple[str]) -> tuple[str]:
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--original_text', '-o', type=str, help="Path to the file with the original text")
-    parser.add_argument('--encrypted_text', '-e', type=str, help="Path to the file with the encrypted text")
-    args = parser.parse_args()
-
-    if args.original_text is None:
-        args.original_text = "non_encrypted_text_task_1.txt"
-    if args.encrypted_text is None:
-        args.encrypted_text = "task_1_result.txt"
-
     try:
-        original_text = ReadFile(args.original_text)
+        original_text = ReadFile('non_encrypted_text_task_1.txt')
         encrypted_text = TrithemiusCipher(original_text)
-        WriteFile(encrypted_text, args.encrypted_text)
+        WriteFile(encrypted_text, 'task_1_result.txt')
         decrypted_text = DecryptionTrithemiusCipher(encrypted_text)
-        decrypted_text.extend(["\n\nключ - НОВОКУЙБЫШЕВСК"])
         WriteFile(decrypted_text, "check_task_1_result.txt")
 
     except FileNotFoundError:
