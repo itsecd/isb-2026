@@ -6,8 +6,6 @@ def counter(text):
         return {}
     
     for char in text:
-        if char == "\n":
-            continue
         counts[char] = counts.get(char, 0) + 1
     
     for char in counts:
@@ -22,18 +20,18 @@ def read_mapping(filename):
     with open(filename, 'r', encoding='utf-8') as f:
         for line in f:
             key, value = line.split('=', 1)
-            mapping[key.strip()] = value.strip()
+            mapping[key] = value.strip('\n')
     
     return mapping
 
 
 def decrypt_text(text, mapping):
     result = []
-    for char in text:
-        if char in mapping:  
-            result.append(mapping[char])
+    for char in range(len(text)):
+        if text[char] in mapping:  
+            result.append(mapping[text[char]])
         else:
-            result.append(char) 
+            result.append(text[char]) 
     return ''.join(result)
 
 
