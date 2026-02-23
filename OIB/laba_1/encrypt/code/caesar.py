@@ -2,6 +2,7 @@ Alphabet_rus = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ
 Alphabet_size = len(Alphabet_rus)
 
 def caesar_encrypt(text: str, key: int) -> str:
+    """Функция-реализация шифра Цезаря."""
     encrypted_text = ""
     key = key % Alphabet_size
 
@@ -14,3 +15,8 @@ def caesar_encrypt(text: str, key: int) -> str:
             encrypted_text += char
             
     return encrypted_text 
+
+def caesar_decrypt(text: str, key: int) -> str:
+    """Функция дешифратор шифра Цезаря."""
+    decryption_key = Alphabet_size - (key % Alphabet_size)
+    return caesar_encrypt(text, decryption_key)

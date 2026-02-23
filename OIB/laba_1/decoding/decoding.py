@@ -2,6 +2,7 @@ import json
 from rw import read, write 
 
 def decrypt(encrypted_text: str, key: dict) -> str:
+    """Функция дешифровки текста"""
     d_text = ""
     for char in encrypted_text:
         d_text += key.get(char, char)
