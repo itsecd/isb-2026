@@ -30,6 +30,9 @@ def parser() -> argparse.Namespace:
         help="Название файла на выходе",
     )
 
+
+
+
     return parser.parse_args()
 
 def open_file(path : str) -> str:
@@ -88,6 +91,46 @@ def cipher_Vigenere(text : str, key : str) -> str:
 
     return "".join(result)
     
+def decrypt_Vigenere(text : str, key : str) -> str:
+    
+    alphabet = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+    len_Alphabet = len(alphabet)
+
+    char_Ind = {char: i for i, char in enumerate(alphabet)}
+    index_Char = {i: char for i, char in enumerate(alphabet)}
+
+    key_indexes = [char_Ind[k] for k in key if k in alphabet]
+
+    if not key_indexes:
+        return text
+    
+    
+    result = []
+    key_idx = 0
+
+
+    for char in text:
+
+        char_upper = char.upper()
+
+        if char_upper in alphabet:
+            
+            c_ind = char_Ind[char_upper]
+            k_ind = key_indexes[key_idx % len(key_indexes)] 
+
+            new_ind = (c_ind - k_ind) % len_Alphabet
+            new_char = index_Char[new_ind]
+
+
+            result.append(new_char)
+
+            key_idx += 1
+
+        else:
+            result.append(char)
+
+    return "".join(result)
+
 
 def main() -> None:
     try: 
@@ -96,6 +139,7 @@ def main() -> None:
         key = args.key
         write_file(args.output, cipher_Vigenere(msg,key))
         print(cipher_Vigenere(msg,key))
+        print(decrypt_Vigenere(cipher_Vigenere(msg,key),key))
 
 
     except Exception as error:
