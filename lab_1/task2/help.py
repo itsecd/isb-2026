@@ -9,9 +9,9 @@ def mapper(text: str):
     result = {}
     for i in text:
         if i in result:
-            result[i]+=1/1100
+            result[i]+=1/len(text)
         else:
-            result[i]=1/1100
+            result[i]=1/len(text)
             
     result = {k: round(v, 5) for k, v in result.items()}
     result = sorted(result.items(), key=lambda item: item[1], reverse=True)
