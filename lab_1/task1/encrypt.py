@@ -28,6 +28,7 @@ def encryption(file_name: str) -> None:
 
 def decryption(file_name: str, key: dict) -> None:
     """
+    Расшифровка зашифрованного текста
     """
 
     text = work_file1.read_file_txt("encrypted_text")
