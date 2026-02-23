@@ -2,6 +2,8 @@ import sys
 
 from ordered_set import OrderedSet
 
+from values import ALLOWED_SYMBOLS, RUSSIAN_ALPHBET, CHECK_RESULT
+
 
 def read_text(filename: str) -> str:
     """
@@ -27,6 +29,27 @@ def read_text(filename: str) -> str:
         exit(2)
 
 
+def get_alphabets(key: str) -> str | str:
+    """
+    Docstring for get_alphabets
+
+    :param key: Seceret key
+    :type key: str
+    :return: Source and encoding alphabets for this key
+    :rtype: str
+    """
+    encode_alphabet = OrderedSet(key.lower())
+
+    for i in ALLOWED_SYMBOLS:
+        if len(encode_alphabet) < len(RUSSIAN_ALPHBET):
+            encode_alphabet.add(i)
+
+    source_alphabet = list(RUSSIAN_ALPHBET.lower())
+    encode_alphabet = list(encode_alphabet)
+
+    return source_alphabet, encode_alphabet
+
+
 def encode(source: str, key: str) -> str:
     """
     Docstring for encode
@@ -39,22 +62,32 @@ def encode(source: str, key: str) -> str:
     :rtype: str
     """
     result = source.lower()
-    source_alphabet = OrderedSet(x for x in result)
-    encode_alphabet = OrderedSet(sorted(key.lower()))
-    print(source_alphabet)
-    print(encode_alphabet)
-    allowed_symbols = (
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ !@#$%&*0123456789\nabcdefghijklmnopqrstuvwxyz"
-    )
-    for i in allowed_symbols:
-        if len(encode_alphabet) < len(source_alphabet):
-            encode_alphabet.add(i)
-    source_alphabet = list(source_alphabet)
-    encode_alphabet = list(encode_alphabet)
-    for i in range(len(encode_alphabet)):
+
+    source_alphabet, encode_alphabet = get_alphabets(key)
+
+    for i in range(len(RUSSIAN_ALPHBET)):
         result = result.replace(source_alphabet[i], encode_alphabet[i])
 
     return result
+
+
+def decode(data: str, key: str) -> str:
+    """
+    Docstring for decode
+
+    :param data: Encoded text to decode
+    :type data: str
+    :param key: Secret key
+    :type key: str
+    :return: Decoded text
+    :rtype: str
+    """
+    source_alphabet, encode_alphabet = get_alphabets(key)
+
+    for i in range(len(RUSSIAN_ALPHBET)):
+        data = data.replace(encode_alphabet[i], source_alphabet[i])
+
+    return data
 
 
 def main() -> None:
@@ -72,9 +105,11 @@ def main() -> None:
     input_text = read_text(input_file)
     key = read_text(key_file)
 
+    encode_text = encode(input_text, key)
+
     try:
         with open(output_file, "w", encoding="utf-8") as f:
-            f.write(encode(input_text, key))
+            f.write(encode_text)
             print(f"Saved to {output_file}")
     except PermissionError:
         print(f"Permission denied for {output_file}")
@@ -82,6 +117,16 @@ def main() -> None:
     except Exception as e:
         print(e)
         exit(2)
+
+    if CHECK_RESULT:
+        print("Source text: ")
+        print(input_text)
+        print("===============")
+        print("Key: ")
+        print(key)
+        print("===============")
+        print("Decode text: ")
+        print(decode(encode_text, key))
 
 
 if __name__ == "__main__":

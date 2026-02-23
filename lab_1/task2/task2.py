@@ -1,3 +1,6 @@
+import json
+
+
 def get_freq_file(text: str) -> None:
     """
     Docstring for get_freq_file
@@ -27,43 +30,7 @@ def decode_text(text: str) -> None:
     :param text: Encoded text to decode
     :type text: str
     """
-    replace_table = {
-        "Z": " ",
-        "9": "о",
-        "E": "и",
-        "n": "т",
-        "I": "е",
-        "A": "н",
-        "C": "а",
-        "F": "с",
-        "!": "р",
-        "V": "м",
-        "h": "л",
-        "x": "ы",
-        "P": "в",
-        "K": "к",
-        "W": "у",
-        "U": "п",
-        "S": "я",
-        "$": "ю",
-        "O": "з",
-        "t": "ч",
-        "=": "д",
-        "-": "ь",
-        chr(10): "ь",
-        "M": "б",
-        "B": "г",
-        "J": "ж",
-        "Q": "ё",
-        "L": "й",
-        "R": "ц",
-        "3": "ф",
-        ">": "э",
-        "G": "х",
-        "d": "ш",
-        "8": "щ",
-        "Y": "ъ",
-    }
+    replace_table = json.load(open("key.txt", "r", encoding="utf-8"))
 
     for i, j in replace_table.items():
         text = text.replace(i, j)
