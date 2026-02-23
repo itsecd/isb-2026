@@ -1,3 +1,5 @@
+from text_key import KEY
+
 A_set = set("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ")
 A_list = list("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ")
 
@@ -41,10 +43,12 @@ def main() -> None:
         data = f.read()
     data = data.replace("\n", " ").upper()
 
-    print(enc := encode(data, "ШИФР"))
+    print(enc := encode(data, KEY))
 
     with open("text_enc.txt", encoding="utf-8", mode="w") as f:
         f.write(enc)
+    print()
+    print(decode(enc, KEY))
 
 
 if __name__ == "__main__":
