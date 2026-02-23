@@ -46,6 +46,8 @@ def main():
     with open(input_path, "r", encoding="utf-8") as input_file:
         encoded_text = input_file.read()
     key = read_key("key2.txt")
+    frequency = create_frequency(encoded_text)
+    print(frequency)
     result_text = decrypt_text(encoded_text, key)
     with open(output_path, "w", encoding="utf-8") as output_file:
         output_file.write(result_text)
@@ -53,4 +55,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
