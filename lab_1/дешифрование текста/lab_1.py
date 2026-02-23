@@ -1,116 +1,177 @@
+from __future__ import annotations
+
 from collections import Counter
+from pathlib import Path
+from typing import Dict, Tuple
 
 
-cipher_text = """!9$!KCMU9YIKMhLGYMhRG$9G$>ZPYdIZd!RMZP9$F$VC$!MIYWhRMRM>IYIRCMhZ!Z9W$M!9$GLn!dCMdP$ARYVRd!LMPZMhRG$9G$>
-ZPYdIZd!RMFVCM>YJR!WMhRG$9P9Zd!9YId!-Y
-FVCM>YJR!WMFYIIWQM-MhRG$9P9Zd!9YId!-
-$MdP$ARYVRd!YSMPZMhRG$9G$>ZPYdIZd!RMI$ZGQZFRSZMRdPZVK>
-Z-Y!KM9Y>IW$MIY-WhRMRM>IYIRCMRS$nJR$dCMMRQM9YdPZ9CB$IRR
-ZIRMFZVBIWMF$VY!KM3!ZMZd!Y-YCdKMIYMd!Z9ZI$M>YhZIY
-hLGMhRG$9G$>ZPYdIZd!RM-WF$VC$!M!9RM-RFYMIY-WhZMRM>IYIRtMI$ZGQZFRSWQMFVCMZG$dP$O$IRCMFZVBIZUZML9ZICM>YJR!W
-P$9-WtMIY-WhM-hVnOY$!M-Md$GCMRdPZVK>ZYIR$M!$QIZVZURtMLd!9Ztd!-MRMP9ZFLh!ZMFVCM>YJR!WMRIEZ9SYARZIIWQMdRd!$SMRMdF$9BRYIRCMhRG$9P9$d!LPIRhZdP$ARYVRd!WMPZMhRG$9G$>ZPYdIZd!RMR>-$d!IWMZ!VROIWSMVYF$IR$SM!$QIRO$dhRSRMd9$Fd!-YSRMRS$nJRSRdCMMRQM9YdPZ9CB$IRR
-ZFIYhZMSYhhYSG$9MIYPZSRIY$!MRSMO!ZMZFIRQM!$QIRO$dhRQMd9
-$Fd!-MI$FZd!Y!ZOIZMO!ZGWMPZG$FR!KMhRG$9P9$d!LPIRhZdP$ARYVRd!WMPZMhRG$9G$>ZPYdIZd!RMFZVBIWM!YhB$MPZd!9ZR!
-KMdRVKILnMZGZ9ZILMPL!$SMdZ>FYIRCMPZVR!RhMP9ZA$FL9MRM9
-$hZS$IFYARtMhZ!Z9W$MPZ>-ZVCn!MPZVK>ZY!$VCSMhRG$9P9Zd!9YId!-YMP9RS$IC!KM3EE$h!RIW$MS$!ZFWM>YJR!WMRMZd!Y-Y!KdCM-MG$>ZPYdIZd!R
-IYhZI$AMPZVK>Z-Y!$VRMhRG$9P9Zd!9YId!-
-YMFZVBIWMd!9$SR!KdCMGW!KMGZV$$MRIEZ9SR9ZYIIWSRMZGMLU9Z>YQMhRG$9P9Zd!9YId!-YMRMEZ9SR9ZY!KMhLVK!L9LMhZ!Z9YCMPZ>-ZVC$!MLOR!KdCMRMPZVLOY!KMIZLnMRIEZ9SYARn"""
+def read_cipher_text(filepath: str | Path, keep_newlines: bool = False) -> str:
+    """Считывает шифртекст из файла."""
+    path = Path(filepath)
+    text = path.read_text(encoding="utf-8")
+    if not keep_newlines:
+        text = text.replace("\n", "")
+    return text
 
 
-cipher_text = cipher_text.replace("\n", "")
+def frequency_analysis(text: str, top_n: int | None = 10) -> Tuple[Counter, str]:
+    """Выполняет частотный анализ текста."""
+    freq = Counter(text)
+    items = freq.most_common() if top_n is None else freq.most_common(top_n)
 
-#Частотный анализ
-freq = Counter(cipher_text)
-print("Частота символов (топ-10):")
-for char, count in freq.most_common(10):
-    print(f"'{char}': {count}")
+    lines = []
+    lines.append("Частота символов:")
+    lines.append("-" * 30)
+    for ch, count in items:
+        lines.append(f"{repr(ch)}: {count}")
+    report = "\n".join(lines)
+    return freq, report
 
 
+def write_frequency_report(
+    freq: Counter,
+    filepath: str | Path,
+    *,
+    include_total: bool = True,
+    sort_by: str = "count_desc",
+) -> None:
+    """Сохраняет таблицу частот символов в файл."""
+    path = Path(filepath)
 
-def replace_symbol_in_text():
+    if sort_by == "count_desc":
+        rows = freq.most_common()
+    elif sort_by == "symbol_asc":
+        rows = sorted(freq.items(), key=lambda x: x[0])
+    else:
+        raise ValueError("sort_by must be 'count_desc' or 'symbol_asc'")
 
+    lines = []
+    lines.append("Частотный анализ (символ -> количество)")
+    lines.append("=" * 45)
+    for ch, count in rows:
+        lines.append(f"{repr(ch)}\t{count}")
+
+    if include_total:
+        lines.append("-" * 45)
+        lines.append(f"TOTAL_LEN\t{sum(freq.values())}")
+        lines.append(f"UNIQUE_CHARS\t{len(freq)}")
+
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def apply_replacements(text: str, replacements: Dict[str, str]) -> str:
+    """Применяет таблицу замен символов к тексту."""
+    for old, new in replacements.items():
+        if len(old) != 1 or len(new) != 1:
+            raise ValueError("All replacement keys/values must be single characters.")
+
+    modified = text
+    for old, new in replacements.items():
+        modified = modified.replace(old, new)
+    return modified
+
+
+def interactive_replace_symbols(cipher_text: str) -> None:
+    """Запускает интерактивный режим замены символов."""
     print("=== ПРОГРАММА ЗАМЕНЫ СИМВОЛОВ ===")
     print(cipher_text)
-    
-    replacements = {}
-    
+
+    replacements: Dict[str, str] = {}
+
     while True:
-        print("\n" + "="*50)
+        print("\n" + "=" * 50)
         print("Текущие замены:")
         if replacements:
             for old, new in replacements.items():
                 print(f"  '{old}' -> '{new}'")
         else:
             print("  Замен пока нет")
-        
+
         print("\nВыберите действие:")
         print("1. Добавить/изменить замену")
         print("2. Показать текст с текущими заменами")
         print("3. Сбросить все замены")
         print("4. Сохранить результат в файл")
         print("5. Выйти")
-        
+
         choice = input("\nВаш выбор (1-5): ").strip()
-        
-        if choice == '1':
+
+        if choice == "1":
             old_symbol = input("Введите символ, который нужно заменить: ")
             if len(old_symbol) != 1:
                 print("Ошибка: введите один символ!")
                 continue
-            
+
             new_symbol = input("Введите символ для замены: ")
             if len(new_symbol) != 1:
                 print("Ошибка: введите один символ!")
                 continue
-            
+
             replacements[old_symbol] = new_symbol
             print(f"Замена '{old_symbol}' -> '{new_symbol}' добавлена")
-        
-        elif choice == '2':
+
+        elif choice == "2":
             if not replacements:
                 print("Нет замен для применения!")
                 continue
-            
-            modified_text = cipher_text
-            for old, new in replacements.items():
-                modified_text = modified_text.replace(old, new)
-            
-            print("\n" + "="*50)
+
+            modified_text = apply_replacements(cipher_text, replacements)
+
+            print("\n" + "=" * 50)
             print("ТЕКСТ ПОСЛЕ ВСЕХ ЗАМЕН:")
-            print("="*50)
+            print("=" * 50)
             print(modified_text)
-        
-        elif choice == '3':
+
+        elif choice == "3":
             replacements.clear()
             print("Все замены сброшены")
-        
-        elif choice == '4':
+
+        elif choice == "4":
             if not replacements:
                 print("Нет замен для сохранения!")
                 continue
-            
-            modified_text = cipher_text
-            for old, new in replacements.items():
-                modified_text = modified_text.replace(old, new)
-            
-            filename = input("Введите имя файла для сохранения (по умолчанию: replaced_text.txt): ").strip()
+
+            modified_text = apply_replacements(cipher_text, replacements)
+
+            filename = input(
+                "Введите имя файла для сохранения (по умолчанию: replaced_text.txt): "
+            ).strip()
             if not filename:
                 filename = "replaced_text.txt"
-            
-            with open(filename, "w", encoding="utf-8") as f:
-                f.write(modified_text)
-            
+
+            Path(filename).write_text(modified_text, encoding="utf-8")
             print(f"Текст сохранен в файл: {filename}")
-        
-        elif choice == '5':
+
+        elif choice == "5":
             print("Программа завершена")
             break
-        
+
         else:
             print("Неверный выбор, попробуйте снова")
 
+
+def main() -> None:
+    """Запускает полный процесс анализа и интерактивной расшифровки."""
+    input_file = input("Путь к файлу с cipher_text (по умолчанию: cipher_text.txt): ").strip()
+    if not input_file:
+        input_file = "cipher_text.txt"
+
+    cipher_text = read_cipher_text(input_file, keep_newlines=False)
+
+    freq, report = frequency_analysis(cipher_text, top_n=10)
+    print(report)
+
+    out_file = input(
+        "Файл для сохранения частот (по умолчанию: freq_report.txt): "
+    ).strip()
+    if not out_file:
+        out_file = "freq_report.txt"
+
+    write_frequency_report(freq, out_file, include_total=True, sort_by="count_desc")
+    print(f"Частоты сохранены в файл: {out_file}")
+
+    interactive_replace_symbols(cipher_text)
+
+
 if __name__ == "__main__":
-    replace_symbol_in_text()
-
-
-
+    main()
