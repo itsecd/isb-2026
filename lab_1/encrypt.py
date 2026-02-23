@@ -31,8 +31,6 @@ def parser() -> argparse.Namespace:
     )
 
 
-
-
     return parser.parse_args()
 
 def open_file(path : str) -> str:
@@ -138,8 +136,8 @@ def main() -> None:
         msg = open_file(args.input)
         key = args.key
         write_file(args.output, cipher_Vigenere(msg,key))
-        print(cipher_Vigenere(msg,key))
-        print(decrypt_Vigenere(cipher_Vigenere(msg,key),key))
+        print(f"Зашифрованный текст:\n{cipher_Vigenere(msg,key)}")
+        print(f"Расшифрованный текст:\n{decrypt_Vigenere(cipher_Vigenere(msg,key),key)}")
 
 
     except Exception as error:
