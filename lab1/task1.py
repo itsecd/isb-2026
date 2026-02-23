@@ -1,18 +1,27 @@
-alphabet = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЬЭЮЯ'
+import constants
 
+def load_text_from_file(filename):
+    """Читает исходный текст из файла"""
+    with open(filename, 'r', encoding='utf-8') as f:
+        return f.read().strip()
+        
 def load_key_from_file(filename):
+    """Загружает ключевое слово из файла"""
     with open(filename, 'r', encoding='utf-8') as f:
         content = f.read()
     words = content.split()
     return words[-1].strip() if words else ''
 
 def char_to_index(char):
+     """Преобразует символ в индекс в алфавите"""
     return alphabet.index(char)
 
 def index_to_char(index):
+    """Преобразует индекс обратно в символ"""
     return alphabet[index % len(alphabet)]
 
 def encryption(text, keyword):
+    """Шифрует текст методом Виженера"""
     text = text.upper()
     keyword = keyword.upper()
     key_indices = [char_to_index(k) for k in keyword if k in alphabet]
@@ -31,16 +40,26 @@ def encryption(text, keyword):
 
     return ''.join(result)
 
-keyword = load_key_from_file('task1_key.txt')
+def main():
+    try:
+        keyword = load_key_from_file('task1_key.txt')
+        original_text = load_text_from_file('task1_original.txt')
 
-text = """Масленица — это древний славянский праздник проводов зимы, который длится целую неделю перед Великим постом. Главное угощение на Масленицу — блины, они символизируют солнце и тепло. Каждый день недели имеет своё название. В конце праздничной недели, сжигают чучело зимы, чтобы весна скорее вступила в свои права. Люди просят друг у друга прощения и готовятся к самому строгому посту. Все радуются блинам ходят в гости и веселятся перед долгим воздержанием. Традиция печь блины пришла из глубины веков и сохранилась до наших дней."""
+        if not keyword:
+            print("Ошибка: ключ не найден в файле task1_key.txt")
+            return
 
-encrypted_text = encryption(text, keyword)
+        encrypted_text = encryption(original_text, keyword)
 
-with open('task1_original.txt', 'w', encoding='utf-8') as f:
-    f.write(text)
+        with open('task1_encryption.txt', 'w', encoding='utf-8') as f:
+            f.write(encrypted_text)
 
-with open('task1_encryption.txt', 'w', encoding='utf-8') as f:
-    f.write(encrypted_text)
+        print("Шифрование успешно завершено")
 
-print(f"\nШифрование успешно завершено")
+    except FileNotFoundError as e:
+        print(f"Ошибка: файл не найден — {e}")
+    except Exception as e:
+        print(f"Произошла ошибка: {e}")
+
+if __name__ == "__main__":
+    main()
