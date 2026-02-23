@@ -12,6 +12,8 @@ def decrypt_text(text : str) -> str:
 
     plaintext = "".join(crypto_key.get(char,char) for char in text)
 
+    return plaintext
+
 def get_freq(text:str) -> str:
     len_t = len(text)
     char_freq = {i: text.count(i)/len_t for i in text}
@@ -23,9 +25,14 @@ def write_file(path : str,text : str) -> None:
         f.write(text)
 
 def open_file(path : str) -> str:
-    with open(path, "r", encoding="utf-8")
-
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
 
 
 def main() -> None:
+    print(f"Зашифрованный текст:\n{open_file("cod18.txt")}\n")
+    print(f"Расшифрованный текст:\n{decrypt_text("cod18.txt")}")
 
+
+if __name__ == "__main__":
+    main()
