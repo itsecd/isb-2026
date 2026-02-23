@@ -1,58 +1,109 @@
-key = {
-    "z": " ",
-    "/": "А",
-    "\\": "Б",
-    "R": "В",
-    "E": "Г",
-    "W": "Д",
-    "Q": "Е",
-    "7": "Ж",
-    "8": "З",
-    "9": "И",
-    "0": "Й",
-    "m": "К",
-    "N": "Л",
-    "I": "М",
-    "O": "Н",
-    "P": "О",
-    "1": "П",
-    "2": "Р",
-    "3": "С",
-    "t": "Т",
-    "f": "У",
-    "6": "Ф",
-    "5": "Х",
-    "4": "Ц",
-    "k": "Ч",
-    "d": "Ш",
-    "c": "Щ",
-    "v": "Ъ",
-    ";": "Ы",
-    "`": "Ь",
-    "-": "Э",
-    "s": "Ю",
-    "x": "Я",
-    "?": ""
-}                       
-text = r"""m291tPE2/69xz-tPzt/0OP193`z1Pt2Q\OP3t`zd962PR/t`z9z1Q2QW/R/t`zd962PR/OO;Qz3PP\cQO
-9xzRP8O9mN/zPkQO`zW/ROPzQcQzWPzO/dQ0z-2;zE2Qm9z129IQOxN9z31Q49/N`OPQzd962fscQQzf3t?2P03tRPz1PzP193/O9sz
-1Nft/25/zPOPz3P3tPxNPz98zWRf5z1/NPmzPW9O/mPRP0zWN9O;z9ztPNc9O;
-zPWOfzP3t/RNxN9z3Q\Qz/zW2fEfszPtW/R/N9zPtvQ87/scQIfzt9z1/Nm9zO/8;R/N9z3m9t/N/I9zmPEW/z12/R9tQNxIzOf7OPz\;NPz3PP\c9t`zm/
-mfs?O9\fW`zR/7Ofszt/0OfzPO9zR;2Q8/N9zWN9OOfsz9zf8mfszR2PWQz2QIO
-xz1PNP?3fz1/192f3/zO/I/t;R/N9zQQzO/z3RPsz3m9t/NfzOQzP3t/RNxxzO/zOQ0
-zO9m/mPEPz12PIQ?7ftm/zt/mzktP\;zR3xz1PRQ25OP3t`z1/Nm9z\;N/zP5R/kQO/
-ztP0z1PNP3P0z8/tQIzP3?t/RNxxz1/192f3zO/z3m9t/NQzRztPIzR9WQzm/mzPOz
-Q3t`z193/N9zO/zOQIzR3QzktPzOf7OPz/zO/193/Rz3O9I/N9z1PNP3fz9z\Q8z1/
-Nm9zPt12/RNxN9z/W2Q3/tfzt/mzm/mz\fm?R;zO/zOQ0z2/8\2P3/O;zRz\Q31P2x
-WmQztPz12Pk9t/t`zO/193/OOPQzPOzIPEztPN`mPzR8xRz3RPsz3m9t/Nfz9zO/I
-Pt/RzO/zOQQz\Q8z12P1f3mPRz-tfz1PNP3f?"""
+import argparse
 
-normal_text = ""
+def take_key(filenamekey):
+    """
+    Читает файл к ключом
+    
+    :param filenamekey(str): Имя файла с ключом
 
-for char in text:
-    if char in key:
-        normal_text += key[char]
-    else:
-        normal_text += char
+    Возвращает:
+    dict:Ключ 
+    """
+    key={}
+    with open(filenamekey,"r",encoding="utf-8") as file:
+        for line in file:
+            line=line.strip()
+            if not line:
+                continue
+            parts=line.split(":",1)
+            if len(parts) != 2:
+                continue
+            key_part=parts[0].strip().strip('"').strip("'")
+            value_part=parts[1].strip().strip('"').strip("'")
+            key[key_part]=value_part
+    return key
 
-print(normal_text)
+
+def take_text(filenametext):
+    """
+    Читает файл с текстом
+    
+    :param filenametext(str): Имя файла с текстом
+
+    Возвращает:
+    str:Текст
+    """
+    with open(filenametext,"r",encoding="utf-8") as file:
+        text=file.read()
+        return text
+    
+def write_result_text(encode_text,filenameoutput):
+    """
+    Записывает расшифрованный текст в файл
+    
+    :param encode_text: Расшифрованный текст
+    :param filenameoutput: Название файла
+    """
+    with open(filenameoutput,"w",encoding="utf-8") as file:
+        file.write(encode_text)
+
+def write_result_frequency(frequency,filenameoutput,len_text):
+    """
+    Записывает частоты в файл
+    
+    :param frequency(dict): Словарь частот
+    :param filenameoutput(str): Название файла
+    :param len_tex(int): Длина текста
+    """
+    with open(filenameoutput,"w",encoding="utf-8") as file:
+        for char,value in frequency.items():
+            file.write(f"{char}:{value/len_text}\n")
+
+def parsing():
+    """
+    Получение аргументов командной строки
+    """
+    parser=argparse.ArgumentParser()
+    parser.add_argument("filenametext",type=str,help="Введите названия файла с исходным текстом")
+    parser.add_argument("filenamekey",type=str,help="Введите название файла с ключом")
+    parser.add_argument("filenametextoutput",type=str,help="Введите названия файла с результатом")
+    parser.add_argument("filenametextfrequency",type=str,help="Введите названия файла с частотой")
+    args=parser.parse_args()
+    return args.filenametext,args.filenamekey,args.filenametextoutput,args.filenametextfrequency
+
+def count_frequency_manual(text,key):
+    """
+    Подсчёт количества появления символов в тексте
+    
+    :param text: Текст
+    :param key: Ключ
+
+    Возвращает:
+    dict:Словарь количества появления символов в тексте
+    """
+    frequency={}
+    for char in key.keys():
+        frequency[char]=0
+    for char in text:
+        if char in frequency:
+            frequency[char]+=1
+    return frequency
+
+def main():
+    filenametext,filenamekey,filenametextoutput,filenametextfrequency=parsing()
+    text=take_text(filenametext)
+    key=take_key(filenamekey)
+    frequency = count_frequency_manual(text,key)
+    
+    normal_text = ""
+
+    for char in text:
+        if char in key:
+            normal_text += key[char]
+        else:
+            normal_text += char
+    write_result_text(normal_text,filenametextoutput)
+    write_result_frequency(frequency,filenametextfrequency,len(text))
+
+if __name__=="__main__":
+    main()
