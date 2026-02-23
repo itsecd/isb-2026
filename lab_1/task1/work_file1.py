@@ -1,6 +1,5 @@
 import json
-
-
+    
 def read_file(file_name: str) -> dict:
     """Чтение JSON-файлов"""
     

@@ -26,6 +26,20 @@ def encryption(file_name: str) -> None:
     text = text.translate(str.maketrans(dict1))
     work_file1.write_file_txt(file_name, text)
 
+def decryption(file_name: str, key: dict) -> None:
+    """
+    """
+
+    text = work_file1.read_file_txt("encrypted_text")
+    text = text.translate(str.maketrans(key))
+    work_file1.write_file_txt(file_name, text)
+
+def main() -> None:
+    """Основная функция"""
+    encryption("encrypted_text")
+
+    key = work_file1.read_file("decryption_key")
+    decryption("decrypted_text", key)
 
 if __name__ == "__main__":
-    encryption("encrypted_text")
+    main()
