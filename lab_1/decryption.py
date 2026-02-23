@@ -30,8 +30,11 @@ def open_file(path : str) -> str:
 
 
 def main() -> None:
-    print(f"Зашифрованный текст:\n{open_file("cod18.txt")}\n")
-    print(f"Расшифрованный текст:\n{decrypt_text("cod18.txt")}")
+    encrypted_text = open_file("cod18.txt")
+    print(f"Зашифрованный текст:\n{encrypted_text}\n")
+    print(f"Расшифрованный текст:\n{decrypt_text(encrypted_text)}")
+    write_file("frequency.txt", get_freq(encrypted_text))
+    write_file("decrypted_2.txt", decrypt_text(encrypted_text))
 
 
 if __name__ == "__main__":
