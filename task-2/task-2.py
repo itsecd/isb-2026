@@ -41,7 +41,7 @@ def decrypt(ciphertext: str, key: dict[str, str]) -> str:
 
 def main():
 
-    """либо читает готовый ключ (--use-existing-key), либо строит и сохраняет key."""
+    """Либо читает готовый ключ (--use-existing-key), либо строит и сохраняет key."""
     
     parser = argparse.ArgumentParser()
     parser.add_argument("--in", dest="in_path", required=True)
