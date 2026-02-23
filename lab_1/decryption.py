@@ -1,14 +1,6 @@
-
-def decrypt_text(text : str) -> str:
-    crypto_key = {
-        'c': ' ', 'А': 'О', 'Х': 'И', '8': 'Е', 'М': 'Т', 
-        'r': 'Н', 'Л': 'С', 'О': 'А', '2': 'К', 'b': 'Я', 
-        'К': 'Р', 'Е': 'М', 'Д': 'Л', 'Б': 'П', 'Р': 'В', 
-        '7': 'Д', '4': 'Ь', 't': 'У', '<': 'Ч', '1': 'Й', 
-        'Ф': 'З', 'У': 'Ж', '5': 'Э', '>': 'Г', 'Ч': 'Ц', 
-        '?': 'Ы', 'И': 'Ф', 'П': 'Б', 'a': 'Ю', 'Й': 'Х', 
-        'Ь': 'Щ', 'Ы': 'Ш'
-    }
+import ast
+def decrypt_text(key : str, text : str) -> str:
+    crypto_key = ast.literal_eval(key)
 
     plaintext = "".join(crypto_key.get(char,char) for char in text)
 
@@ -31,10 +23,11 @@ def open_file(path : str) -> str:
 
 def main() -> None:
     encrypted_text = open_file("cod18.txt")
+    key = open_file("key_2.txt")
     print(f"Зашифрованный текст:\n{encrypted_text}\n")
-    print(f"Расшифрованный текст:\n{decrypt_text(encrypted_text)}")
+    print(f"Расшифрованный текст:\n{decrypt_text(key,encrypted_text)}")
     write_file("frequency.txt", get_freq(encrypted_text))
-    write_file("decrypted_2.txt", decrypt_text(encrypted_text))
+    write_file("decrypted_2.txt", decrypt_text(key,encrypted_text))
 
 
 if __name__ == "__main__":
