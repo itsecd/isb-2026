@@ -1,3 +1,7 @@
+import argparse
+import json
+
+
 def decrypt_text(encrypted_text, decryption_key):
     result = ""
     for char in encrypted_text:
@@ -8,65 +12,77 @@ def decrypt_text(encrypted_text, decryption_key):
     return result
 
 
-if __name__ == "__main__":
-    key = {
-        "Y": " ",
-        "Ё": "о",
-        "К": "е",
-        "Я": "и",
-        "s": "л",
-        "Й": "т",
-        "U": "н",
-        "Д": "к",
-        "i": "ь",
-        "ю": "р",
-        "7": "п",
-        "Q": "с",
-        "И": "в",
-        "R": "а",
-        "г": "б",
-        "@": "з",
-        "Ж": "я",
-        "О": "ш",
-        "Т": "ж",
-        "F": "э",
-        "J": "й",
-        "G": "ч",
-        "Р": "ю",
-        "1": "ы",
-        "у": "ъ",
-        "%": "д",
-        "3": "м",
-        "=": "г",
-        "Z": "ц",
-        "Х": "х",
-        "N": "ф",
-        "П": "щ",
-        "<": "у",
-    }
-    encrypted_text = """7КUЙКQЙYЯsЯYЙКQЙЯюЁИRUЯКYURY7юЁUЯДUЁИКUЯКYЖИsЖКЙ
-QЖYИRТUЁJYGRQЙiРYЁгКQ7КGКUЯЖYЯUNЁю3RZЯЁUUЁJYгК@Ё7RQUЁQЙЯ
-FЙЁY3КЙЁ%YДЁЙЁю1JY7Ё@ИЁsЖКЙYИ1ЖИЯЙiY<Ж@ИЯ3ЁQЙЯYИY
-ДЁ37iРЙКюU1ХYQЯQЙК3RХYQКЙЖХYЯYИКг7юЯsЁТКUЯЖХY7юКТ%
-КYGК3YЯХYQ3Ё=<ЙYЯQ7Ёsi@ЁИRЙiY@sЁ<31ОsКUUЯДЯ
-7юЁZКQQY7КUЙКQЙRYИДsРGRКЙYИYQКгЖYUКQДЁsiДЁYFЙR7ЁИY7
-sRUЯюЁИRUЯКYQДRUЯюЁИRUЯКY7Ёs<GКUЯКY%ЁQЙ<7RY7Ё%%Кю
-ТRUЯКY%ЁQЙ<7RYЯYRURsЯ@
-URY7КюИЁ3YFЙR7КYQ7КZЯRsЯQЙ1YЁ7юК%КsЖРЙYЁгуК3YЙКQЙЯю
-ЁИRUЯЖYИ1гЯюRЖYQЯQЙК31YЯY7юЯsЁТКUЯЖYДЁЙЁю1КYг<%<ЙY
-7Ё%ИКю=RЙiQЖY7юЁИКюДК
-@RЙК3YQY7Ё3ЁПiРYQ7КZЯRsЯ@ЯюЁИRUU1ХYЯUQЙю<3КUЙЁИY7ю
-ЁИЁ%ЖЙQЖYQДRUЯюЁИRUЯЖY%sЖYИ1ЖИsКUЯЖY7ЁЙКUZЯRsiU1
-ХY<Ж@ИЯ3ЁQЙКJ
-URYFЙR7КY7Ёs<GКUЯЖY%ЁQЙ<7RY7КUЙКQЙКю1YЯQ7Ёsi@<РЙYюR
-@sЯGU1КY3КЙЁ%1YЙRДЯКYДRДYFДQ7s<RЙRZЯЖY<Ж@ИЯ3ЁQЙКJY
-ЯYQЁZЯRsiURЖYЯUТКUКюЯЖYGЙЁг1Y7юЁИКюЯЙiY3Ё=<ЙYsЯYЁUЯ
-Y7Ёs<GЯЙiYUКQRUДZЯЁUЯюЁИRUU1JY%ЁQЙ<7YДYQЯQЙК3К
-7ЁQsКY@RИКюОКUЯЖYЙКQЙЯюЁИRUЯЖYQЁQЙRИsЖКЙQЖYЁЙGК
-ЙYИYДЁЙЁюЁ3YЁ7ЯQ1ИRРЙQЖYURJ%КUU1КY<Ж@ИЯ3ЁQЙЯYЯYюКДЁ3КU%R
-ZЯЯY7ЁYЯХY<QЙюRUКUЯР
-7КUЙКQЙYUКYЙЁsiДЁY7Ё3Ё=RКЙYИ1ЖИЯЙiYQsRг1КY3КQЙRYUЁYЯ
-Y7ЁИ1ОRКЙYЁгПЯJY<юЁИКUiYгК@Ё7RQUЁQЙЯYЁю=RUЯ@RZЯЯY7Ё
-@ИЁsЖЖY@RюRUККY7Ё%=ЁЙЁИЯЙiQЖYДYИЁ@3ЁТU13YRЙRДR3"""
+def count_frequencies(text):
+    frequencies = {}
+    for ch in text:
+        frequencies[ch] = frequencies.get(ch, 0) + 1
 
-    print("Расшифрованный текст:", decrypt_text(encrypted_text, key))
+    items = list(frequencies.items())
+
+    for i in range(len(items)):
+        for j in range(i + 1, len(items)):
+            if items[i][1] > items[j][1]:
+                items[i], items[j] = items[j], items[i]
+
+    return items
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("input_file", nargs="?", help="Путь к файлу для обработки")
+    parser.add_argument("output_file", help="Путь к файлу для записи результата")
+    parser.add_argument("key", help="Путь к файлу с ключом шифрования")
+    parser.add_argument("frequencies_file", help="файл с частотами")
+    return parser.parse_args()
+
+
+def read_file(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"Ошибка: Файл '{file_path}' не найден")
+        return None
+    except Exception as e:
+        print(f"Ошибка при чтении файла: {e}")
+        return None
+
+
+def read_json_key(file_path):
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except Exception as e:
+        print(f"Ошибка при чтении JSON ключа: {e}")
+        return None
+
+
+def write_file(file_path, content):
+    try:
+        with open(file_path, "w", encoding="utf-8") as file:
+            file.write(content)
+    except Exception as e:
+        print(f"Ошибка при записи файла: {e}")
+
+
+def write_frequencies(file_path, frequencies):
+    try:
+        with open(file_path, "w", encoding="utf-8") as file:
+            for char, count in frequencies:
+                line = repr(char) + ": " + str(count) + "\n"
+                file.write(line)
+    except Exception as e:
+        print("Ошибка при записи частот:", e)
+
+
+if __name__ == "__main__":
+    args = parse_arguments()
+    encrypted_text = read_file(args.input_file)
+    decryption_key = read_json_key(args.key)
+    frequencies = count_frequencies(encrypted_text)
+    print("\nЧастоты символов в шифровке:")
+    for char, count in frequencies:
+        print(f"'{char}': {count}")
+    decrypted = decrypt_text(encrypted_text, decryption_key)
+    print(f"\nРасшифрованный текст: {decrypted}")
+    write_frequencies(args.frequencies_file, frequencies)

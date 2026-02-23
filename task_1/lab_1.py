@@ -1,6 +1,7 @@
 import string
 import sys
 import argparse
+import re
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -45,6 +46,11 @@ class MainWindow(QMainWindow):
         btn.clicked.connect(self.encrypt)
         layout.addWidget(btn)
 
+        decrypt_btn = QPushButton("Расшифровать")
+        decrypt_btn.setFixedSize(100, 50)
+        decrypt_btn.clicked.connect(self.decrypt)
+        layout.addWidget(decrypt_btn)
+
         central.setLayout(layout)
 
         if self.input_file:
@@ -72,6 +78,20 @@ class MainWindow(QMainWindow):
         self.result_output.setPlainText(result)
         if self.output_file:
             write_result_to_file(result, self.output_file)
+
+    def decrypt(self):
+        key = self.key_input.text().strip()
+        text = self.text_input.toPlainText().strip()
+        if not key or not text:
+            error_msg = "Ошибка: отсутствует ключ или текст"
+            self.result_output.setPlainText(error_msg)
+            return
+        key_chars = create_key(key)
+        full_alphabet = create_full_alphabet(self.RUSSIAN_ALPHABET, key_chars)
+        char_to_codes = create_polybius(full_alphabet)
+        result = decryption(char_to_codes, text)
+
+        self.result_output.setPlainText(result)
 
 
 def create_key(key):
@@ -136,6 +156,19 @@ def write_result_to_file(result, output_path):
             file.write(result)
     except Exception as e:
         print("Ошибка при записи результата в файл:", e)
+
+
+def decryption(char_to_coders, encoded):
+    decoded = ""
+    coders_to_char = {}
+    for ch in char_to_coders:
+        code = char_to_coders[ch]
+        coders_to_char[code] = ch
+    encoded_strip = re.findall(r"\d\d", encoded)
+    for code in encoded_strip:
+        if code in coders_to_char:
+            decoded += coders_to_char[code]
+    return decoded
 
 
 if __name__ == "__main__":
