@@ -81,7 +81,11 @@ def main():
     output_encrypted = 'encrypted_task1.txt'
     output_key = 'key_task1.txt'
     
-    KEY = 5
+    try:
+        KEY = int(input("Введите ключ шифрования (сдвиг): "))
+    except ValueError:
+        print("Ошибка: ключ должен быть числом!")
+        return
     
     try:
         original_text = read_file(input_file)
