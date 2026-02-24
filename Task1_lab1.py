@@ -1,4 +1,3 @@
-import os
 
 def load_polybius_square(filename):
     """Загружает квадрат Полибия из файла
@@ -99,18 +98,14 @@ def save_text(filename, text):
 
 def main():
     try:
-        # Загрузка квадрата Полибия из файла
         polybius_square = load_polybius_square('key.txt')
         
-        # Загрузка исходного текста из файла
         text = load_text('Task1_original_text.txt')
         
         print("Работа квадрата Полибия")
 
-        # Шифрование текста
         encrypted_text = encryption(text, polybius_square)
         
-        # Дешифрирование
         decrypted_text = decryption(encrypted_text, polybius_square)
         
         print("\n1. Исходный текст (первые 121 символов):")
