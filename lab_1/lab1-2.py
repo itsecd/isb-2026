@@ -14,12 +14,11 @@ def parse_args():
     return args.input, args.output, args.key, args.frequency
 
 
-def create_frequency(input_str: str) -> dict:
-    alphabet=set(input_str)
-    char_frequency = dict.fromkeys(alphabet, 0)
-    for j in input_str:
-        char_frequency[j] += (1/len(input_str))
-    return char_frequency
+def create_frequency(text:str) -> str:
+    len_t = len(text)
+    char_frequency = {i: text.count(i)/len_t for i in text}
+    char_frequency = {key: value for key, value in sorted(char_frequency.items(), key= lambda item: item[1], reverse=True)}
+    return str(char_frequency)
 
 
 def decrypt_text(input_text: str, key: dict) -> str:
@@ -44,8 +43,7 @@ def write_dict(filepath: str, input_dict: dict) -> None:
 
 def write_frequency(filepath: str, input_dict: dict) -> None:
     with open(filepath, "w", encoding="utf-8") as file:
-        for key in input_dict:
-            file.write(key+" - "+str(input_dict.get(key))+'\n')
+        file.write(input_dict)
 
 
 def main():
