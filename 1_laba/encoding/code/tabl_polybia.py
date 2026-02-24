@@ -1,4 +1,5 @@
 def encrypt(alphabet: str, text: str) -> str:
+    """Шифрование текста квадратом Птолемея"""
 
     encrypt_dic = {}
 
@@ -17,6 +18,7 @@ def encrypt(alphabet: str, text: str) -> str:
     return text_another
 
 def decrypt(alphabet: str, text: str) -> str:
+    """Дешифрование текста, зашифрованного квадратом Птолемея"""
     decrypt_dic = {}
 
     for index, char in enumerate(alphabet):
