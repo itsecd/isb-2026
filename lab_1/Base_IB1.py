@@ -5,7 +5,10 @@ import os
 def parse_args() -> argparse.Namespace:
     """Настраивает и возвращает аргументы командной строки."""
     parser = argparse.ArgumentParser(
-        description="Шифрование/Дешифрование Атбаш с использованием внешних файлов. Пример: py Base_IB1.py --key key.txt --input encrypted.txt --output decrypted.txt"
+        description="""Шифрование/Дешифрование Атбаш с использованием внешних файлов. 
+        Пример: py Base_IB1.py --key key.txt --input orig.txt --output encrypted.txt
+        (--input encrypted.txt --output decrypted.txt) для расшифровки условно
+        """
     )
     parser.add_argument(
         '--key', 
