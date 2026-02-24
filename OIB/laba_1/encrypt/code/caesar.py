@@ -1,16 +1,15 @@
-Alphabet_rus = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ "
-Alphabet_size = len(Alphabet_rus)
+import const
 
 def caesar_encrypt(text: str, key: int) -> str:
     """Функция-реализация шифра Цезаря."""
     encrypted_text = ""
-    key = key % Alphabet_size
+    key = key % const.ALPHABET_SIZE
 
     for char in text.upper():
-        if char in Alphabet_rus:
-            orig_index = Alphabet_rus.index(char)
-            new_index = (key + orig_index) % Alphabet_size
-            encrypted_text += Alphabet_rus[new_index]
+        if char in const.ALPHABET_RUS:
+            orig_index = const.ALPHABET_RUS.index(char)
+            new_index = (key + orig_index) % const.ALPHABET_SIZE
+            encrypted_text += const.ALPHABET_RUS[new_index]
         else:
             encrypted_text += char
             
@@ -18,5 +17,5 @@ def caesar_encrypt(text: str, key: int) -> str:
 
 def caesar_decrypt(text: str, key: int) -> str:
     """Функция дешифратор шифра Цезаря."""
-    decryption_key = Alphabet_size - (key % Alphabet_size)
+    decryption_key = const.ALPHABET_SIZE - (key % const.ALPHABET_SIZE)
     return caesar_encrypt(text, decryption_key)

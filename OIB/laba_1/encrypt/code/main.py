@@ -3,7 +3,7 @@ from caesar import caesar_encrypt, caesar_decrypt
 from rw import read, write 
 
 def parser_args():
-    parser = argparse.ArgumentParser(description="Шифр Цезаря.")
+    parser = argparse.ArgumentParser(description="Реализация шифра Цезаря.")
     
     parser.add_argument("-m", "--mode", 
                         type=str, 
