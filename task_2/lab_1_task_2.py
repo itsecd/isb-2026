@@ -27,6 +27,14 @@ def count_frequencies(text):
     return items
 
 
+def frequen(text, items):
+    n = len(text)
+    fren = {}
+    for ch, freq in items:
+        fren[ch] = freq / n
+    return fren
+
+
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("input_file", nargs="?", help="Путь к файлу для обработки")
@@ -65,24 +73,26 @@ def write_file(file_path, content):
         print(f"Ошибка при записи файла: {e}")
 
 
-def write_frequencies(file_path, frequencies):
+def write_frequencies(file_path, frequencies_dict):
     try:
         with open(file_path, "w", encoding="utf-8") as file:
-            for char, count in frequencies:
-                line = repr(char) + ": " + str(count) + "\n"
+            for char, freq in frequencies_dict.items():
+                line = repr(char) + ": " + str(freq) + "\n"
                 file.write(line)
     except Exception as e:
-        print("Ошибка при записи частот:", e)
+        print(f"Ошибка при записи частот в файл {file_path}: {e}")
 
 
 if __name__ == "__main__":
     args = parse_arguments()
     encrypted_text = read_file(args.input_file)
     decryption_key = read_json_key(args.key)
-    frequencies = count_frequencies(encrypted_text)
+    frequencies_list = count_frequencies(encrypted_text)
+    frequencies_dict = frequen(encrypted_text, frequencies_list)
     print("\nЧастоты символов в шифровке:")
-    for char, count in frequencies:
-        print(f"'{char}': {count}")
+    for char, freq in frequencies_dict.items():
+        print(f"'{char}': {freq}")
     decrypted = decrypt_text(encrypted_text, decryption_key)
     print(f"\nРасшифрованный текст: {decrypted}")
-    write_frequencies(args.frequencies_file, frequencies)
+    write_frequencies(args.frequencies_file, frequencies_dict)
+    write_file(args.output_file, decrypted)
