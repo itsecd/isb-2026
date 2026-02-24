@@ -47,17 +47,16 @@ def write_result_text(encode_text,filenameoutput):
     with open(filenameoutput,"w",encoding="utf-8") as file:
         file.write(encode_text)
 
-def write_result_frequency(frequency,filenameoutput,len_text):
+def write_result_frequency(frequency,filenameoutput):
     """
     Записывает частоты в файл
     
     :param frequency(dict): Словарь частот
     :param filenameoutput(str): Название файла
-    :param len_tex(int): Длина текста
     """
     with open(filenameoutput,"w",encoding="utf-8") as file:
         for char,value in frequency.items():
-            file.write(f"{char}:{value/len_text}\n")
+            file.write(f"{char}:{value}\n")
 
 def parsing():
     """
@@ -87,6 +86,8 @@ def count_frequency_manual(text,key):
     for char in text:
         if char in frequency:
             frequency[char]+=1
+    for char,value in frequency.items():
+        frequency[char]=value/len(text)
     return frequency
 
 def main():
@@ -103,7 +104,8 @@ def main():
         else:
             normal_text += char
     write_result_text(normal_text,filenametextoutput)
-    write_result_frequency(frequency,filenametextfrequency,len(text))
+    write_result_frequency(frequency,filenametextfrequency)
 
 if __name__=="__main__":
     main()
+
