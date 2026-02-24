@@ -15,7 +15,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         '--input', 
         required=True, 
-        help="Путь к входному файлу с текстом"
+        help="Путь к входному файлу с текстом. Сюда указывать файл для шифровки/дешифровки"
     )
     parser.add_argument(
         '--output', 
