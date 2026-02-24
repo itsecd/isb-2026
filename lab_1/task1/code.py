@@ -33,55 +33,51 @@ def parse_args() -> argparse.Namespace:
                         "-wf",
                         type=str,
                         help="Path where encrypted text will be saved")
-    parser.add_argument("--keyword_file",
-                        "-kwf",
+    parser.add_argument("--key_file",
+                        "-kf",
                         type=str,
-                        help="Path where keyword is located")
+                        help="Path where key is located")
     return parser.parse_args()
 
-def create_substitution_table(key: str) -> set:
+def create_substitution_table(key: str, is_reversed:bool = False) -> set:
     """
     Create substitution table between alphabets
     """
     alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     table = {}
-    for i in range(27):
-        table[alphabet[i]] = keyword[i]
+    if is_reversed == 0:
+        for i in range(len(alphabet)):
+            table[alphabet[i]] = key[i]
+    else:
+        for i in range(len(alphabet)):
+            table[key[i]] = alphabet[i]
     return table
 
 def encrypting_text(text: str, table: set) -> str:
     """
-    Encrypting text with substitution table
+    Encrypting or decrypting text with substitution table
     """
-
-    text = text.lower()
-    encrypted_text = ""
+    result = ""
+    
     for ch in text:
-        for
-        encrypted_text += chr(ch3)
-    return encrypted_text
+        if ch in table:
+            result += table[ch]
+        else:
+            result += ch
+    return result
 
-# def decrypting_text(encrypted_text: str, table: set) -> str:
-#     """
-#     Decrypting text with substitution table
-#     """
-#     decrypted_text = ""
-#     for i, ch in enumerate(encrypted_text):
-#         ch1 = ord(ch)
-#         ch2 = ord(keyword[i % len(keyword)])
-#         ch3 = ch1 - ch2
-#         decrypted_text += chr(ch3)
-#     return decrypted_text
 
 def main() -> None:
     args = parse_args()
     try:
         text = read_file(args.read_file)
-        keyword = args.keyword_file
-        encrypted_text = encrypting_text(text, args.keyword_file)
-        decrypted_text = decrypting_text(encrypted_text, args.keyword_file)
+        key = read_file(args.key_file)
+
+        encryption_table = create_substitution_table(key)
+        decryption_table = create_substitution_table(key, True)
+        encrypted_text = encrypting_text(text, encryption_table)
+        # decrypted_text = encrypting_text(encrypted_text, decryption_table)
         write_file(args.write_file, encrypted_text)
-        write_file(args.write_file, decrypted_text)
     except Exception as e:
         print(f"Произошла ошибка: {e}")
 
