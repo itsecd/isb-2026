@@ -3,7 +3,8 @@
 import argparse
 
 
-def arg_parse():
+def arg_parse() -> argparse.Namespace:
+    """Парсинг аргументов командной строки для шифрования/дешифрования."""
     parser = argparse.ArgumentParser(
         prog="vigenere",
         description="Encrypt or decrypt text using a cipher",
@@ -12,24 +13,25 @@ def arg_parse():
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("-e", "--encrypt", action="store_true", help="Encrypt input file")
     mode.add_argument("-d", "--decrypt", action="store_true", help="Decrypt input file")
-
     parser.add_argument("-k", "--key", required=True, help="Encryption key")
     parser.add_argument("-o", "--output", required=True, help="Output file")
-
     return parser.parse_args()
 
 
-def read_file(filename):
+def read_file(filename: str) -> str:
+    """Чтение содержимого файла и возврат как строки."""
     with open(filename, "r", encoding="utf-8") as file:
         return file.read()
 
 
-def write_file(filename, data):
+def write_file(filename: str, data: str) -> None:
+    """Запись строки data в файл filename."""
     with open(filename, "w", encoding="utf-8") as file:
         file.write(data)
 
 
-def encrypt_vigenere(plaintext, key):
+def encrypt_vigenere(plaintext: str, key: str) -> str:
+    """Шифрование текста шифром Виженера."""
     plaintext = plaintext.upper()
     key = key.upper()
     ciphertext = ""
@@ -46,7 +48,8 @@ def encrypt_vigenere(plaintext, key):
     return ciphertext
 
 
-def decrypt_vigenere(ciphertext, key):
+def decrypt_vigenere(ciphertext: str, key: str) -> str:
+    """Дешифрование текста шифром Виженера."""
     ciphertext = ciphertext.upper()
     key = key.upper()
     plaintext = ""
@@ -63,7 +66,8 @@ def decrypt_vigenere(ciphertext, key):
     return plaintext
 
 
-def main():
+def main() -> None:
+    """Основная функция программы."""
     args = arg_parse()
     key = args.key
     data = read_file(args.filename)
