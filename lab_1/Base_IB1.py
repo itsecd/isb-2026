@@ -1,61 +1,91 @@
-def atbash_cipher(text):
+import argparse
+import sys
+import os
+
+def parse_args() -> argparse.Namespace:
+    """Настраивает и возвращает аргументы командной строки."""
+    parser = argparse.ArgumentParser(
+        description="Шифрование/Дешифрование Атбаш с использованием внешних файлов. Пример: py Base_IB1.py --key key.txt --input encrypted.txt --output decrypted.txt"
+    )
+    parser.add_argument(
+        '--key', 
+        required=True, 
+        help="Путь к файлу с ключом (алфавитом)"
+    )
+    parser.add_argument(
+        '--input', 
+        required=True, 
+        help="Путь к входному файлу с текстом"
+    )
+    parser.add_argument(
+        '--output', 
+        required=True, 
+        help="Путь к выходному файлу для результата"
+    )
     
-    alpha_lower = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
-    alpha_upper = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+    return parser.parse_args()
+
+def load_key(key_file_path: str) -> str:
+    """Загружает алфавит из файла ключа."""
+    if not os.path.exists(key_file_path):
+        raise FileNotFoundError(f"Файл ключа не найден: {key_file_path}")
     
-    rev_lower = alpha_lower[::-1]
-    rev_upper = alpha_upper[::-1]
+    with open(key_file_path, 'r', encoding='utf-8') as f:
+        key_content = f.read().strip()
     
-    # Таблицы трансляции для str.translate (самый быстрый способ в Python)
+    if len(key_content) < 2:
+        raise ValueError("Файл ключа слишком короткий или пуст.")
+    
+    return key_content
+
+def load_text(text_file_path: str) -> str:
+    """Загружает текст для обработки."""
+    if not os.path.exists(text_file_path):
+        raise FileNotFoundError(f"Файл текста не найден: {text_file_path}")
+    
+    with open(text_file_path, 'r', encoding='utf-8') as f:
+        return f.read()
+
+def save_text(text: str, output_file_path: str) -> None:
+    """Сохраняет результат в файл."""
+    with open(output_file_path, 'w', encoding='utf-8') as f:
+        f.write(text)
+
+def atbash_cipher(text: str, key_alphabet: str) -> str:
+
+    half_len = len(key_alphabet) // 2
+    lower_alpha = key_alphabet[:half_len]
+    upper_alpha = key_alphabet[half_len:]
+    
+    rev_lower = lower_alpha[::-1]
+    rev_upper = upper_alpha[::-1]
+    
     trans_table = str.maketrans(
-        alpha_lower + alpha_upper,
+        lower_alpha + upper_alpha,
         rev_lower + rev_upper
     )
     
     return text.translate(trans_table)
 
+def main():
+    args = parse_args()
+    
+    try:
+        key_alphabet = load_key(args.key) #ключ
+        
+        original_text = load_text(args.input) #ориг текст
+        
+        result_text = atbash_cipher(original_text, key_alphabet) #шифровка
+        
+        save_text(result_text, args.output) # сохранение результата
+        
+        print(f"Входной файл: {args.input}")
+        print(f"Файл ключа: {args.key}")
+        print(f"Результат сохранен в: {args.output}")
+        
+    except Exception as e:
+        print(f"[ОШИБКА] Произошла ошибка: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
-    original_text = """
-     Как преданный специалист по ПК и периферии, моя ежедневная рутина включает 
-     диагностику сложных аппаратных сбоев и настройку запутанных программных систем. 
-     Будь то ремонт поврежденной материнской платы, оптимизация настроек BIOS для 
-     максимальной производительности или настройка безопасной домашней сети с правильными 
-     правилами брандмауэра, точность является ключевым фактором. Я часто трачу часы на 
-     анализ технической документации, чтобы решить obscure ошибки, которые стандартные 
-     инструменты не могут исправить. Помимо железа, мне нравится собирать компьютеры 
-     на заказ с нуля, подбирая идеальные компоненты для баланса цены и мощности. 
-     В свободное время я исследую миры Deep Rock Galactic со своей командой, координируя 
-     стратегии для добычи золота и борьбы с инопланетными роями. Я также ценю сюжетные 
-     игры вроде Dark Souls, где каждая победа ощущается заслуженной благодаря терпению 
-     и мастерству. Время от времени я беру в руки гитару, чтобы расслабиться, играя 
-     мелодии, которые помогают очистить мой ум после долгого дня устранения неполадок 
-     серверов и установки операционных систем. Технологии — это не просто моя работа; 
-     это моя страсть и мое главное хобби.
-     """
-    
-    print("="*100)
-    print("ОРИГИНАЛЬНЫЙ ТЕКСТ:")
-    print(original_text)
-    print("="*100)
-    
-    # Шифрование
-    encrypted_text = atbash_cipher(original_text)
-    print("\nЗАШИФРОВАННЫЙ ТЕКСТ (Атбаш):")
-    print(encrypted_text)
-    print("="*100)
-    
-    # Дешифрование 
-    decrypted_text = atbash_cipher(encrypted_text)
-    print("\nРАСШИФРОВАННЫЙ ТЕКСТ (Проверка):")
-    print(decrypted_text)
-    print("="*100)
-    
-    # проверка корректности
-    if original_text == decrypted_text:
-        print("\n[УСПЕХ] Алгоритм работает корректно! Текст полностью восстановлен.")
-    else:
-        print("\n[ОШИБКА] Текст не совпадает после расшифровки.")
-        for i, (o, d) in enumerate(zip(original_text, decrypted_text)):
-            if o != d:
-                print(f"Разница на позиции {i}: ожидалось '{o}', получено '{d}'")
+    main()
