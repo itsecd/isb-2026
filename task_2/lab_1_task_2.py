@@ -3,6 +3,7 @@ import json
 
 
 def decrypt_text(encrypted_text, decryption_key):
+    "Заменяет символы в зашифрованном тексте согласно ключу дешифровки"
     result = ""
     for char in encrypted_text:
         if char in decryption_key:
@@ -13,6 +14,7 @@ def decrypt_text(encrypted_text, decryption_key):
 
 
 def count_frequencies(text):
+    "Подсчитывает количество вхождений каждого символа в тексте и сортирует по возрастанию"
     frequencies = {}
     for ch in text:
         frequencies[ch] = frequencies.get(ch, 0) + 1
@@ -28,6 +30,7 @@ def count_frequencies(text):
 
 
 def frequen(text, items):
+    "Преобразует абсолютные частоты символов в относительные"
     n = len(text)
     fren = {}
     for ch, freq in items:
@@ -36,6 +39,7 @@ def frequen(text, items):
 
 
 def parse_arguments():
+    "Считывает и обрабатывает аргументы командной строки"
     parser = argparse.ArgumentParser()
     parser.add_argument("input_file", nargs="?", help="Путь к файлу для обработки")
     parser.add_argument("output_file", help="Путь к файлу для записи результата")
@@ -45,6 +49,7 @@ def parse_arguments():
 
 
 def read_file(file_path):
+    "Читает содержимое текстового файла с обработкой ошибок"
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             return file.read()
@@ -57,6 +62,7 @@ def read_file(file_path):
 
 
 def read_json_key(file_path):
+    "Читает JSON файл с ключом дешифровки"
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             return json.load(file)
@@ -66,6 +72,7 @@ def read_json_key(file_path):
 
 
 def write_file(file_path, content):
+    "Записывает текст в файл"
     try:
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(content)
@@ -74,6 +81,7 @@ def write_file(file_path, content):
 
 
 def write_frequencies(file_path, frequencies_dict):
+    "Записывает словарь с частотами символов в файл"
     try:
         with open(file_path, "w", encoding="utf-8") as file:
             for char, freq in frequencies_dict.items():
