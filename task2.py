@@ -20,6 +20,8 @@ def read_mapping(filename):
     with open(filename, 'r', encoding='utf-8') as f:
         for line in f:
             key, value = line.split('=', 1)
+            if key == '\\n':
+                key = '\n'
             mapping[key] = value.strip('\n')
     
     return mapping
@@ -27,11 +29,11 @@ def read_mapping(filename):
 
 def decrypt_text(text, mapping):
     result = []
-    for char in range(len(text)):
-        if text[char] in mapping:  
-            result.append(mapping[text[char]])
+    for char in text:
+        if char in mapping:  
+            result.append(mapping[char])    
         else:
-            result.append(text[char]) 
+            result.append(char) 
     return ''.join(result)
 
 
