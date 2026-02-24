@@ -1,3 +1,5 @@
+from task_2_key import KEY
+
 def ReadFile(filename: str) -> tuple[str]:
     """
     Reading text from a file. 
@@ -24,48 +26,13 @@ def CountTheFrequencyOfLetters(text: tuple[str]) -> dict[str, int]:
     return sorted_frequency
 
 
-def Decryption(encryted_text: tuple[str]) -> list[str]:
+def Decryption(encrypted_text: tuple[str], key: dict[str, str]) -> list[str]:
     """ 
     Decrypting the text.
     """
-    key = {
-        'Р': ' ',
-        'Ё': 'и',
-        'Д': 'в',
-        'Ж': 'к',
-        'Я': 'т',
-        '3': 'е',
-        '1': 'о',
-        'U': 'с',
-        '@': 'а',
-        '<': 'ч',
-        'Т': 'л',
-        'Z': 'б',
-        'К': 'м',
-        '9': 'н',
-        'П': 'ы',
-        'N': 'д',
-        'J': 'з',
-        'О': 'ь',
-        'ю': 'я',
-        'F': 'у',
-        'Y': 'ш',
-        '%': 'ж',
-        'Х': 'р',
-        'г': 'x',
-        's': 'п',
-        '=': 'щ',
-        'Й': 'ю',
-        'G': 'ц',
-        'Q': 'ф',
-        'И': 'э',
-        'i': 'г',
-        'у': 'й'
-        # I don't think that '-' might be 'ъ'(
-    }
     decrypted_text = []
 
-    for letter in encryted_text:
+    for letter in encrypted_text:
         if letter in key:
             decrypted_text.append(key[letter])
         else:
@@ -74,21 +41,26 @@ def Decryption(encryted_text: tuple[str]) -> list[str]:
     return decrypted_text
 
 
-def WriteFile(text: list[str], filename: str) -> None:
+def WriteFile(data, filename: str) -> None:
     """ 
     Writing to a file.
     """
     with open(filename, "w", encoding="utf-8") as file:
-        for word in text:
-            file.write(word)
+        if isinstance(data, dict):
+            for key, value in data.items():
+                file.write(f"{key} = {value}\n")
+        
+        elif isinstance(data, (list, tuple)):
+            for char in data:
+                file.write(char)
 
 
 def main():
     try:
         encrypted_text = ReadFile("cod22.txt")
         frequency_of_letters = CountTheFrequencyOfLetters(encrypted_text)
-        print(frequency_of_letters)
-        decrypted_text = Decryption(encrypted_text)
+        WriteFile(frequency_of_letters, "frequency_of_letters_task_2.txt")
+        decrypted_text = Decryption(encrypted_text, KEY)
         WriteFile(decrypted_text, "cod22_result.txt")
     
     except FileNotFoundError:

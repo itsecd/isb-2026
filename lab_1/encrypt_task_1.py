@@ -1,3 +1,7 @@
+ALPHABET_LOWERCASE = tuple('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
+ALPHABET_UPPERCASE = tuple('АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ')
+
+
 def ReadFile(filename: str) -> tuple[str]:
     """
     Reading text from a file. 
@@ -8,12 +12,7 @@ def ReadFile(filename: str) -> tuple[str]:
     return text
 
 
-ALPHABET_LOWERCASE = tuple('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')
-ALPHABET_UPPERCASE = tuple('АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ')
-KEY = (15, 16, 3, 16, 12, 21, 11, 2, 29, 26, 6, 3, 19, 12)
-
-
-def TrithemiusCipher(original_text: tuple[str]) -> list[str]:
+def TrithemiusCipher(original_text: tuple[str], KEY: list[int]) -> list[str]:
     """ 
     Text encryption using a trithemius cipher.
     """
@@ -45,7 +44,7 @@ def WriteFile(text: list[str], filename: str) -> None:
             file.write(word)
 
 
-def DecryptionTrithemiusCipher(encrypted_text: list[str]) -> list[str]:
+def DecryptionTrithemiusCipher(encrypted_text: list[str], KEY: list[int]) -> list[str]:
     """ 
     Text decryption using a trithemius cipher.
     """
@@ -68,16 +67,37 @@ def DecryptionTrithemiusCipher(encrypted_text: list[str]) -> list[str]:
     return decrypted_text
 
 
+def TranslateTheKey(key_word: list[str]) -> list[int]:
+    """ 
+    Records the letter indexes of the key.
+    """
+    if not key_word:
+        raise ValueError('"file does not contain a key"')
+
+    KEY = []
+    for letter in key_word:
+        if not letter.isalpha() or letter.upper() not in ALPHABET_UPPERCASE:
+            raise ValueError('not a valid key')
+        
+        index = ALPHABET_UPPERCASE.index(letter.upper()) + 1
+        KEY.append(index)
+    
+    return KEY
+
+
 def main():
     try:
         original_text = ReadFile('non_encrypted_text_task_1.txt')
-        encrypted_text = TrithemiusCipher(original_text)
+        KEY = TranslateTheKey(ReadFile('task_1_key.txt'))
+        encrypted_text = TrithemiusCipher(original_text, KEY)
         WriteFile(encrypted_text, 'task_1_result.txt')
-        decrypted_text = DecryptionTrithemiusCipher(encrypted_text)
+        decrypted_text = DecryptionTrithemiusCipher(encrypted_text, KEY)
         WriteFile(decrypted_text, "check_task_1_result.txt")
 
     except FileNotFoundError:
         print("Error: file not found")
+    except ValueError as e:
+        print(f"Error: {e}")
 
 
 if __name__ == "__main__":
