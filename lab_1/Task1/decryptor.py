@@ -2,7 +2,7 @@ from key import decrypt_key
 
 
 def  decrypt_text(text, decrypt_key_dict):
-    """Шифрует текст с помощью словаря замены"""
+    """Дешифрует текст с помощью словаря замены"""
     result = ''
     for char in text:
         if char in decrypt_key_dict:
