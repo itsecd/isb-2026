@@ -1,5 +1,5 @@
 import argparse
-
+from alphabet.py import ALPHABET
 
 def parse_args():
     """
@@ -80,8 +80,7 @@ def main():
     """
     Это мэйн. !!!ИНВАЛИДНАЯ КОЛЯСКА ALERET!!! Зато без вайбкодинга, только шизокод
     """
-    alphabet = sorted("йцукенгшщзхъфывапролджэячсмитьбюqwertyuiopasdfghjklzxcvbnmЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮQWERTYUIOPASDFGHJKLZXCVBNM")
-    alphabet_dict = dict.fromkeys(alphabet, 0)
+    alphabet_dict = dict.fromkeys(ALPHABET, 0)
     j=0
     for i in alphabet:
         alphabet_dict[i] += j
@@ -89,15 +88,16 @@ def main():
     
     input_path, output_path, key_path = parse_args()
     with open(key_path, "r", encoding="utf-8") as key_file:
-        key = format_str(key_file.read(), alphabet)
+        key = format_str(key_file.read(), ALPHABET)
     with open (input_path, "r", encoding="utf-8") as input_file:
         text = input_file.read()
-    cipher_text = encrypt_text(text, key, alphabet, alphabet_dict)
+    cipher_text = encrypt_text(text, key, ALPHABET, alphabet_dict)
     with open(output_path, "w", encoding="utf-8") as output_file:
         output_file.write(cipher_text)
-    print(decrypt_text(cipher_text, key, alphabet, alphabet_dict))
+    print(decrypt_text(cipher_text, key, ALPHABET, alphabet_dict))
 
 
 if __name__ == "__main__":
     main()
+
 
