@@ -9,15 +9,17 @@ def parse_args():
     parser.add_argument("-i", "--input", type=str, required=True, help="Путь к файлу с исходным текстом")
     parser.add_argument("-o", "--output", type=str, required=True, help="Путь для записи файла с зашифрованным текстом")
     parser.add_argument("-k", "--key", type=str, required=True, help="Путь до файла с ключом")
+    parser.add_argument("-f", "--frequency", type=str, required=True, help="Путь для записи файла с частотами")
     args = parser.parse_args()
-    return args.input, args.output, args.key
+    return args.input, args.output, args.key, args.frequency
 
 
 def create_frequency(input_str: str) -> dict:
     alphabet=set(input_str)
-    frequency = dict.fromkeys(alphabet, 0)
+    char_frequency = dict.fromkeys(alphabet, 0)
     for j in input_str:
-        frequency[j] += (1/len(input_str))
+        char_frequency[j] += (1/len(input_str))
+    return char_frequency
 
 
 def decrypt_text(input_text: str, key: dict) -> str:
@@ -40,20 +42,24 @@ def write_dict(filepath: str, input_dict: dict) -> None:
         for key in input_dict:
             file.write(key+input_dict.get(key)+'\n')
 
+def write_frequency(filepath: str, input_dict: dict) -> None:
+    with open(filepath, "w", encoding="utf-8") as file:
+        for key in input_dict:
+            file.write(key+" - "+str(input_dict.get(key))+'\n')
+
 
 def main():
-    input_path, output_path, key_path = parse_args()
+    input_path, output_path, key_path, frequency_path = parse_args()
     with open(input_path, "r", encoding="utf-8") as input_file:
         encoded_text = input_file.read()
-    key = read_key("key2.txt")
-    frequency = create_frequency(encoded_text)
-    print(frequency)
+    key = read_key("key.txt")
+    print(key)
+    char_frequency = create_frequency(encoded_text)
     result_text = decrypt_text(encoded_text, key)
     with open(output_path, "w", encoding="utf-8") as output_file:
         output_file.write(result_text)
+    write_frequency(frequency_path, char_frequency)
 
 
 if __name__ == "__main__":
     main()
-
-
