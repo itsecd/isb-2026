@@ -88,7 +88,8 @@ def count_frequency_manual(text,key):
             frequency[char]+=1
     for char,value in frequency.items():
         frequency[char]=value/len(text)
-    return frequency
+    sorted_frequency = dict(sorted(frequency.items(), key=lambda x: x[1], reverse=True))
+    return sorted_frequency
 
 def main():
     filenametext,filenamekey,filenametextoutput,filenametextfrequency=parsing()
