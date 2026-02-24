@@ -1,17 +1,28 @@
 from collections import Counter
+import os
+import sys
+
+root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(root)
 
 from utils import read, write
 
-path_text = input("Введите название файла для получения текста: ")
-path_output = input("Введите название файла для ввода в файл: ")
+def count_freq(text: str):
+    text_count = Counter(text)
 
-text = read(path_text)
+    count = sum(text_count.values())
 
-text_count = Counter(text)
+    for key in text_count:
+        text_count[key] /= count
 
-count = sum(text_count.values())
+    return text_count
 
-for key in text_count:
-    text_count[key] /= count
+if __name__ == "__main__":
+    path_text = input("Введите название файла для получения текста: ")
+    path_output = input("Введите название файла для ввода в файл: ")
 
-write(path_output, str(text_count))
+    text = read(path_text)
+
+    text_count = count_freq(text)
+
+    write(path_output, str(text_count))

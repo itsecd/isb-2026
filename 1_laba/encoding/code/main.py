@@ -1,8 +1,13 @@
 import argparse
+import os
+import sys
 
 from tabl_polybia import encrypt, decrypt
-from utils import write, read
 
+root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(root)
+
+from utils import write, read
 
 def parser_args():
     parser = argparse.ArgumentParser(description="Шифрование методом таблицы Полибия")
