@@ -8,66 +8,68 @@ alphabet = {
     'Э': 31, 'Ю': 32, 'Я': 33, '.': 34, ',': 35, '-': 36, ' ': 37
 }
 
-
 alphabet_by_number = {i: k for k, i in alphabet.items()}
+
 
 def encryption(text, key):
     result = []
     k = -1
     key_len = len(key)
-    
-    for char in text:
-        if char not in alphabet:
-            result.append(char)
-            continue 
-            
-        k += 1
-        if k == key_len: 
-            k = 0
-        
-        num = alphabet[char]+alphabet[key[k]]
-        
-        if num > len(alphabet): 
-            num -= len(alphabet)
-            
-        result.append(alphabet_by_number[num])
-    
-    return ''.join(result)
 
-def decryption(text, key):
-    result = []
-    k = -1
-    
     for char in text:
         if char not in alphabet:
             result.append(char)
             continue
 
         k += 1
-        if k == len(key): 
+        if k == key_len:
             k = 0
-        
+
+        num = alphabet[char] + alphabet[key[k]]
+
+        if num > len(alphabet):
+            num -= len(alphabet)
+
+        result.append(alphabet_by_number[num])
+
+    return ''.join(result)
+
+
+def decryption(text, key):
+    result = []
+    k = -1
+
+    for char in text:
+        if char not in alphabet:
+            result.append(char)
+            continue
+
+        k += 1
+        if k == len(key):
+            k = 0
+
         num = alphabet[char] - alphabet[key[k]]
-        
+
         if num <= 0:
             num += len(alphabet)
-            
+
         result.append(alphabet_by_number[num])
-    
-    return ''.join(result) 
+
+    return ''.join(result)
+
 
 def main():
     try:
         with open('text1_original.txt', 'r', encoding='utf-8') as f:
             text = f.read().strip().upper()
-        
+
         with open('key.txt', 'r', encoding='utf-8') as f:
             key = f.read()
-            
+
         if not text:
             print("Ошибка: файл текста пуст!")
             return
-        
+
         if not key:
             print("Ошибка: файл ключа пуст!")
             return
@@ -81,7 +83,7 @@ def main():
         with open('task1_decryption.txt', 'w', encoding='utf-8') as f:
             f.write(dec_text)
         print("Расшифровка завершена. Результат в task1_decryption.txt")
-        
+
         if text == dec_text:
             print("Успех: исходный и расшифрованный тексты совпадают.")
         else:
@@ -91,6 +93,7 @@ def main():
         print(f"Ошибка: файл не найден - {e}")
     except Exception as e:
         print(f"Произошла ошибка: {e}")
+
 
 if __name__ == "__main__":
     main()
