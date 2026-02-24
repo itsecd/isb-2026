@@ -1,6 +1,6 @@
 ALPHABET = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789.,!?«»"
 
-def find_pos(matrix, a) -> str:
+def find_pos(matrix: list, a: str) -> str:
     for i in range(7):
         for j in range(7):
             if matrix[i][j] == a:
@@ -33,7 +33,7 @@ def alphabet_to_matrix() -> list:
             val += 1
     return matrix
 
-def translate_to_positions(path, matrix) -> str:
+def translate_to_positions(path: str, matrix: str) -> str:
     if matrix == None:
         return None
     with open(path, encoding='utf-8') as f:
@@ -44,7 +44,7 @@ def translate_to_positions(path, matrix) -> str:
             string += find_pos(matrix, text[i]) + ' ' if find_pos(matrix, text[i]) != None else text[i]
     return string
 
-def uncoding(string) -> str:
+def uncoding(string: str) -> str:
     matrix = alphabet_to_matrix()
     if matrix == None:
         return None
@@ -62,7 +62,7 @@ def uncoding(string) -> str:
 
 def main() -> None:
     encrypted = translate_to_positions("input.txt", alphabet_to_matrix())
-    with open ("output.txt", 'w') as file:
+    with open ("output.txt", 'w', encoding='utf-8') as file:
         file.write(encrypted)
     print(encrypted)
     print('\n')
