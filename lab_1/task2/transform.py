@@ -45,7 +45,10 @@ def read_bijection(bijection_path: str) -> dict:
         with open(bijection_path, 'r', encoding='utf-8') as file:
             d = dict()
             for string in file.readlines():
-                key, value = string.replace(' \n', '').split('\t')
+                print(string.replace(
+                    ' \n', '').replace('\n', '').split('\t'))
+                key, value = string.replace(
+                    ' \n', '').replace('\n', '').split('\t')
                 d[key] = value
             return d
 
