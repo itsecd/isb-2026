@@ -1,4 +1,4 @@
-alphabet = {
+ALPHABET = {
     'А': 1, 'Б': 2, 'В': 3, 'Г': 4, 'Д': 5,
     'Е': 6, 'Ё': 7, 'Ж': 8, 'З': 9, 'И': 10,
     'Й': 11, 'К': 12, 'Л': 13, 'М': 14, 'Н': 15,
@@ -8,16 +8,17 @@ alphabet = {
     'Э': 31, 'Ю': 32, 'Я': 33, '.': 34, ',': 35, '-': 36, ' ': 37
 }
 
-alphabet_by_number = {i: k for k, i in alphabet.items()}
+ALPHABET_BY_NUMBER = {i: k for k, i in ALPHABET.items()}
 
 
 def encryption(text, key):
+    """Шифрование текста"""
     result = []
     k = -1
     key_len = len(key)
 
     for char in text:
-        if char not in alphabet:
+        if char not in ALPHABET:
             result.append(char)
             continue
 
@@ -25,22 +26,23 @@ def encryption(text, key):
         if k == key_len:
             k = 0
 
-        num = alphabet[char] + alphabet[key[k]]
+        num = ALPHABET[char] + ALPHABET[key[k]]
 
-        if num > len(alphabet):
-            num -= len(alphabet)
+        if num > len(ALPHABET):
+            num -= len(ALPHABET)
 
-        result.append(alphabet_by_number[num])
+        result.append(ALPHABET_BY_NUMBER[num])
 
     return ''.join(result)
 
 
 def decryption(text, key):
+    """Дешифрование текста"""
     result = []
     k = -1
 
     for char in text:
-        if char not in alphabet:
+        if char not in ALPHABET:
             result.append(char)
             continue
 
@@ -48,12 +50,12 @@ def decryption(text, key):
         if k == len(key):
             k = 0
 
-        num = alphabet[char] - alphabet[key[k]]
+        num = ALPHABET[char] - ALPHABET[key[k]]
 
         if num <= 0:
-            num += len(alphabet)
+            num += len(ALPHABET)
 
-        result.append(alphabet_by_number[num])
+        result.append(ALPHABET_BY_NUMBER[num])
 
     return ''.join(result)
 

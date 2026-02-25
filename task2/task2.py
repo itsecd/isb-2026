@@ -1,4 +1,5 @@
 def counter(text):
+    """Подсчёт частоты символов"""
     counts = {}
     len_txt = len(text)
 
@@ -15,6 +16,7 @@ def counter(text):
 
 
 def read_mapping(filename):
+    """Создание словаря замен"""
     mapping = {}
 
     with open(filename, 'r', encoding='utf-8') as f:
@@ -28,6 +30,7 @@ def read_mapping(filename):
 
 
 def decrypt_text(text, mapping):
+    """Расшифровка текста"""
     result = []
     for char in text:
         if char in mapping:
