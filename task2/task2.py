@@ -1,18 +1,20 @@
-def counter(text):
+from const import *
+
+def frequency(text):
     """Подсчёт частоты символов"""
-    counts = {}
+    frequency = {}
     len_txt = len(text)
 
     if len_txt == 0:
         return {}
 
     for char in text:
-        counts[char] = counts.get(char, 0) + 1
+        frequency[char] = frequency.get(char, 0) + 1
 
-    for char in counts:
-        counts[char] = counts[char] / len_txt
+    for char in frequency:
+        frequency[char] = frequency[char] / len_txt
 
-    return counts
+    return frequency
 
 
 def read_mapping(filename):
@@ -41,21 +43,21 @@ def decrypt_text(text, mapping):
 
 
 def main():
-    with open("cod24.txt", 'r', encoding='utf-8') as f:
+    with open(COD24, 'r', encoding='utf-8') as f:
         text = f.read()
 
-    frequency = counter(text)
-    sorted_freq = sorted(frequency.items(), key=lambda x: x[1], reverse=True)
+    freq = frequency(text)
+    sorted_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)
 
-    with open('frequency.txt', 'w', encoding='utf-8') as f:
+    with open(FREQUENCY, 'w', encoding='utf-8') as f:
         for key, value in sorted_freq:
             f.write(f"'{key}' = {value:.4f}\n")
 
-    mapping = read_mapping('key2.txt')
+    mapping = read_mapping(KEY)
 
     decrypted = decrypt_text(text, mapping)
 
-    with open('text2_decrypt.txt', 'w', encoding='utf-8') as f:
+    with open(TEXT_DECRYPTION, 'w', encoding='utf-8') as f:
         f.write(decrypted)
 
 

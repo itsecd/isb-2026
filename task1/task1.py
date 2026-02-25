@@ -1,15 +1,4 @@
-ALPHABET = {
-    'А': 1, 'Б': 2, 'В': 3, 'Г': 4, 'Д': 5,
-    'Е': 6, 'Ё': 7, 'Ж': 8, 'З': 9, 'И': 10,
-    'Й': 11, 'К': 12, 'Л': 13, 'М': 14, 'Н': 15,
-    'О': 16, 'П': 17, 'Р': 18, 'С': 19, 'Т': 20,
-    'У': 21, 'Ф': 22, 'Х': 23, 'Ц': 24, 'Ч': 25,
-    'Ш': 26, 'Щ': 27, 'Ъ': 28, 'Ы': 29, 'Ь': 30,
-    'Э': 31, 'Ю': 32, 'Я': 33, '.': 34, ',': 35, '-': 36, ' ': 37
-}
-
-ALPHABET_BY_NUMBER = {i: k for k, i in ALPHABET.items()}
-
+from const import *
 
 def encryption(text, key):
     """Шифрование текста"""
@@ -62,10 +51,10 @@ def decryption(text, key):
 
 def main():
     try:
-        with open('text1_original.txt', 'r', encoding='utf-8') as f:
+        with open(TEXT_ORIGINAL, 'r', encoding='utf-8') as f:
             text = f.read().strip().upper()
 
-        with open('key.txt', 'r', encoding='utf-8') as f:
+        with open(KEY, 'r', encoding='utf-8') as f:
             key = f.read()
 
         if not text:
@@ -77,12 +66,12 @@ def main():
             return
 
         enc_text = encryption(text, key)
-        with open('task1_encryption.txt', 'w', encoding='utf-8') as f:
+        with open(TASK1_ENCRYPTION, 'w', encoding='utf-8') as f:
             f.write(enc_text)
         print("Шифрование завершено. Результат в task1_encryption.txt")
 
         dec_text = decryption(enc_text, key)
-        with open('task1_decryption.txt', 'w', encoding='utf-8') as f:
+        with open(TASK1_DECRYPTION, 'w', encoding='utf-8') as f:
             f.write(dec_text)
         print("Расшифровка завершена. Результат в task1_decryption.txt")
 
