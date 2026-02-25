@@ -1,4 +1,5 @@
 from cod4_key import KEY
+from constants import TASK2_INPUT, TASK2_OUTPUT
 
 def mapper(text: str, map: dict) -> str:
     """Заменяет символы в исходном тексте на основе словаря map"""
@@ -23,17 +24,13 @@ def frequencies(text: str) -> list[(str, float)]:
 
 
 def main() -> None:
-    A = " ОИЕАНТСРВМЛДЯКПЗЫЬУЧЖГХФЙЮБЦШЩЭЪ"
-
-    with open("cod4.txt", encoding="utf-8", mode="r") as f:
+    with open(TASK2_INPUT, encoding="utf-8", mode="r") as f:
         data = f.read()
     
     char_frequencies = frequencies(data)
 
     for char, value in char_frequencies:
         print(f'"{char.strip()}": {value:.5f}')
-    print(f"{len(KEY.keys())}/{len(A)}")
-
 
     data_map = mapper(data, map=KEY)
     n = 1
@@ -43,7 +40,7 @@ def main() -> None:
             print()
         n += 1
     
-    with open("cod4_decrypted.txt", encoding="utf-8", mode="w") as f:
+    with open(TASK2_OUTPUT, encoding="utf-8", mode="w") as f:
         f.write(data_map)
     
 
