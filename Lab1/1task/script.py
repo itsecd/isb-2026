@@ -1,3 +1,6 @@
+import sys
+import argparse
+
 def intput_file(filename: str) -> str:
     """Функция для считывания файла
     На вход принимается имя необходимого файла
@@ -31,7 +34,7 @@ def normalize_str(start_string: str) -> str:
            produce_string += liter.upper()
     return produce_string
 
-def code_produce(produce_string: str,polybius_square: list) -> list:
+def code_produce(produce_string: str, polybius_square: list) -> list:
     """Функция для конвертации букв исходного текста в пары чисел
     для последующего шифрования
     """
@@ -54,7 +57,7 @@ def code_produce(produce_string: str,polybius_square: list) -> list:
                 break
     return number_vector
 
-def final_code(number_vector: list,polybius_square: list, shift: int)->str:
+def final_code(number_vector: list, polybius_square: list, shift: int) -> str:
     """Функция для финального шифрования, преобразовывая пары чисел
     в соответствии с шагом
     """
@@ -67,7 +70,6 @@ def final_code(number_vector: list,polybius_square: list, shift: int)->str:
             buffer = 'I'
         final_string += buffer
     return final_string
-
 
 def build_mapping(square):
     """Создаёт словарь для быстрого поиска координат буквы
@@ -104,29 +106,73 @@ def decrypt(encoded_text: str, shift: int, square: list) -> str:
         result.append(cell)
     return ''.join(result)
 
+def polybius_const(filename: str) -> list:
+    """Читает файл с квадратом Полибия.
+    Ожидается, что в файле через пробелы перечислены 25 символов/обозначений.
+    Возвращает квадрат в виде списка списков 5x5.
+    """
+    content = intput_file(filename)
+    items = content.split()
+    if len(items) != 25:
+        print(f"Warning: expected 25 elements in square file, got {len(items)}")
+    square = []
+    for i in range(5):
+        row = items[i*5:(i+1)*5]
+        square.append(row)
+    return square
 
+def parse_command_line():
+    """Разбор аргументов командной строки с помощью argparse."""
+    parser = argparse.ArgumentParser(
+        description="Шифрование/дешифрование текста с использованием квадрата Полибия и сдвига по строкам."
+    )
+    parser.add_argument(
+        "square_file",
+        help="Файл с квадратом Полибия (25 элементов, разделённых пробелами)"
+    )
+    parser.add_argument(
+        "input_text_file",
+        help="Файл с исходным текстом для шифрования"
+    )
+    parser.add_argument(
+        "key_file",
+        help="Файл с ключом (целое число - сдвиг)"
+    )
+    parser.add_argument(
+        "output_decoded_file",
+        help="Файл для записи расшифрованного текста (после проверки)"
+    )
+    parser.add_argument(
+        "output_encoded_file",
+        help="Файл для записи зашифрованного текста"
+    )
+    args = parser.parse_args()
+    return (args.square_file, args.input_text_file, args.key_file,
+            args.output_decoded_file, args.output_encoded_file)
 
-polybius_square = [
-    ['A', 'B', 'C', 'D', 'E'],
-    ['F', 'G', 'H', 'I/J', 'K'],
-    ['L', 'M', 'N', 'O', 'P'],
-    ['Q', 'R', 'S', 'T', 'U'],
-    ['V', 'W', 'X', 'Y', 'Z']
-    ]
 def main():
     """
     Основная функция с вызовом раннее приведённых алгоритмов
     """
-    start_string = intput_file("text.txt")
-    produce_string=normalize_str(start_string)
-    number_vector=code_produce(produce_string,polybius_square)
-    key_str = intput_file("key.txt").strip()
-    shift = int(key_str) if key_str else 1
-    final_string=final_code(number_vector,polybius_square,shift)
-    decrypt_string=decrypt(final_string,shift,polybius_square)
-    output_file("decoded.txt", decrypt_string)
-    output_file("code.txt", final_string)
+    (square_filename, text_filename, key_filename,
+     decoded_filename, encoded_filename) = parse_command_line()
 
+    polybius_square = polybius_const(square_filename)
+    
+    start_string = intput_file(text_filename)
+    produce_string = normalize_str(start_string)
+    
+    number_vector = code_produce(produce_string, polybius_square)
+    
+    key_str = intput_file(key_filename).strip()
+    shift = int(key_str) if key_str else 1
+    
+    final_string = final_code(number_vector, polybius_square, shift)
+    
+    decrypt_string = decrypt(final_string, shift, polybius_square)
+    
+    output_file(decoded_filename, decrypt_string)
+    output_file(encoded_filename, final_string)
 
 if __name__ == "__main__":
     main()

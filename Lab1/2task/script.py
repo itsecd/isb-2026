@@ -1,4 +1,5 @@
 import re
+import argparse
 
 def intput_file(filename: str) -> str:
     """Функция для считывания файла
@@ -29,7 +30,7 @@ def parse_alfa(text: str):
     matches = re.findall(pattern, text)
     return {(' ' if letter == '=' else letter): float(value) for letter, value in matches}       
         
-def counting_number_liter(start_string: str,total:int) -> dict:
+def counting_number_liter(start_string: str, total: int) -> dict:
     """Функция для подсчета частоты встречаемости букв
     в исходном тексте
     """
@@ -39,7 +40,7 @@ def counting_number_liter(start_string: str,total:int) -> dict:
     freq_percent = {ch: count / total for ch, count in freq_abs.items()}
     return freq_percent
         
-def normalize_list(alfa_text: str)->dict:
+def normalize_list(alfa_text: str) -> dict:
     """Функция для нормализации словаря с добавлением ПРОБЕЛА
     как символа
     """
@@ -49,7 +50,7 @@ def normalize_list(alfa_text: str)->dict:
         del ref_freq['\n']
     return ref_freq
 
-def frequency_analysis_dict(sorted_text:dict,sorted_ref:dict)-> None:
+def frequency_analysis_dict(sorted_text: list, sorted_ref: list) -> None:
     """Функция для создания и вывода результатов сравнения
     частотного анализа
     """
@@ -61,7 +62,7 @@ def frequency_analysis_dict(sorted_text:dict,sorted_ref:dict)-> None:
     print("Словарь (буква -> символ):")
     print(dictionary, "\n")
     
-def decrypt_with_key(key_content:dict,start_string:str)->str:
+def decrypt_with_key(key_content: list, start_string: str) -> str:
     """Функция для расшифровки текста при помощи ключа
     """
     replace_dict = {}
@@ -76,25 +77,51 @@ def decrypt_with_key(key_content:dict,start_string:str)->str:
     decrypted_text = start_string.translate(trans_table)
     return decrypted_text
 
+def parse_command_line():
+    """Разбор аргументов командной строки
+    с помощью argparse."""
+    parser = argparse.ArgumentParser(
+        description="Частотный анализ и расшифровка текста по ключу замены."
+    )
+    parser.add_argument(
+        "input_text_file",
+        help="Файл с исходным зашифрованным текстом"
+    )
+    parser.add_argument(
+        "alfa_file",
+        help="Файл с эталонными частотами букв (alfa.txt)"
+    )
+    parser.add_argument(
+        "key_file",
+        help="Файл с ключом замены (формат: буква:замена)"
+    )
+    parser.add_argument(
+        "output_file",
+        help="Файл для записи расшифрованного текста"
+    )
+    return parser.parse_args()
+
 def main():
-    """Функция для вызова всех фунций и совокупности действия 
+    """Функция для вызова всех функций и совокупности действий
     """
-    start_string = intput_file("text.txt")
-    alfa_text = intput_file("alfa.txt")
+    args = parse_command_line()
+
+    start_string = intput_file(args.input_text_file)
+    alfa_text = intput_file(args.alfa_file)
     total = len(start_string)
-    freq_percent=counting_number_liter(start_string,total)
-    ref_freq=normalize_list(alfa_text)
+    freq_percent = counting_number_liter(start_string, total)
+    ref_freq = normalize_list(alfa_text)
 
     sorted_ref = sorted(ref_freq.items(), key=lambda x: x[1], reverse=True)
     sorted_text = sorted(freq_percent.items(), key=lambda x: x[1], reverse=True)
-    frequency_analysis_dict(sorted_text,sorted_ref)
+    frequency_analysis_dict(sorted_text, sorted_ref)
 
-    key_content = intput_file("key.txt").strip().splitlines()
-    decrypted_text=decrypt_with_key(key_content,start_string)
+    key_content = intput_file(args.key_file).strip().splitlines()
+    decrypted_text = decrypt_with_key(key_content, start_string)
 
     print("Результат расшифровки:")
     print(decrypted_text)
-    output_file("decrypted.txt", decrypted_text)
+    output_file(args.output_file, decrypted_text)
 
 if __name__ == "__main__":
     main()
