@@ -57,15 +57,16 @@ def code_produce(produce_string: str, polybius_square: list) -> list:
                 break
     return number_vector
 
-def final_code(number_vector: list, polybius_square: list, shift: int) -> str:
+def final_code(number_vector: list, polybius_square: list, shift_rows: int, shift_cols: int) -> str:
     """Функция для финального шифрования, преобразовывая пары чисел
-    в соответствии с шагом
+    в соответствии с шагом по строкам и столбцам
     """
     final_string = ""
     for pair in number_vector:
         i, j = pair[0], pair[1]
-        new_i = (i + shift) % 5
-        buffer = polybius_square[new_i][j]
+        new_i = (i + shift_rows) % 5
+        new_j = (j + shift_cols) % 5
+        buffer = polybius_square[new_i][new_j]
         if buffer == 'I/J':
             buffer = 'I'
         final_string += buffer
@@ -85,22 +86,20 @@ def build_mapping(square):
                 mapping[cell] = (i, j)
     return mapping
 
-def decrypt(encoded_text: str, shift: int, square: list) -> str:
+def decrypt(encoded_text: str, shift_rows: int, shift_cols: int, square: list) -> str:
     """
-    Дешифрует текст, зашифрованный сдвигом по строкам в квадрате Полибия
-    Действует в обратном порядке с шифрованием
-    Перебирает символы(на всякий случай сравнивает с алфавитом,
-    для универсальности функции)
-    Затем ищет правильную букву, относительно заданной и шага
+    Дешифрует текст, зашифрованный сдвигом по строкам и столбцам
+    в квадрате Полибия. Действует в обратном порядке с шифрованием.
     """
     mapping = build_mapping(square)
     result = []
     for ch in encoded_text:
         if ch not in mapping:
             continue 
-        i_enc, j = mapping[ch]
-        i_orig = (i_enc - shift) % 5
-        cell = square[i_orig][j]
+        i_enc, j_enc = mapping[ch]
+        i_orig = (i_enc - shift_rows) % 5
+        j_orig = (j_enc - shift_cols) % 5
+        cell = square[i_orig][j_orig]
         if cell == 'I/J':
             cell = 'I'
         result.append(cell)
@@ -124,7 +123,7 @@ def polybius_const(filename: str) -> list:
 def parse_command_line():
     """Разбор аргументов командной строки с помощью argparse."""
     parser = argparse.ArgumentParser(
-        description="Шифрование/дешифрование текста с использованием квадрата Полибия и сдвига по строкам."
+        description="Шифрование/дешифрование текста с использованием квадрата Полибия и сдвига по строкам/столбцам."
     )
     parser.add_argument(
         "square_file",
@@ -136,7 +135,7 @@ def parse_command_line():
     )
     parser.add_argument(
         "key_file",
-        help="Файл с ключом (целое число - сдвиг)"
+        help="Файл с ключом: одно или два целых числа (сдвиг по строкам и сдвиг по столбцам), разделённых пробелами"
     )
     parser.add_argument(
         "output_decoded_file",
@@ -165,11 +164,19 @@ def main():
     number_vector = code_produce(produce_string, polybius_square)
     
     key_str = intput_file(key_filename).strip()
-    shift = int(key_str) if key_str else 1
+    parts = key_str.split()
+    if not parts:
+        shift_rows = shift_cols = 0
+    else:
+        shift_rows = int(parts[0])
+        if len(parts) > 1:
+            shift_cols = int(parts[1])
+        else:
+            shift_cols = 0 
     
-    final_string = final_code(number_vector, polybius_square, shift)
+    final_string = final_code(number_vector, polybius_square, shift_rows, shift_cols)
     
-    decrypt_string = decrypt(final_string, shift, polybius_square)
+    decrypt_string = decrypt(final_string, shift_rows, shift_cols, polybius_square)
     
     output_file(decoded_filename, decrypt_string)
     output_file(encoded_filename, final_string)
