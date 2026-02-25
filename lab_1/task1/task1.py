@@ -1,11 +1,8 @@
 import os
 import random
 import sys
-
-ALPHABET: str = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ '  
-
-# Набор символов для ключа: символы псевдографики (U+2500 – U+257F)
-KEY_CHARSET: str = ''.join(chr(i) for i in range(0x2500, 0x2580))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from constants import ALPHABET, KEY_CHARSET, ENCRYPTED_FILE, KEY_FILE, DECRYPTED_CHECK_FILE
 
 
 def generate_key() -> str:
@@ -97,10 +94,10 @@ def main() -> None:
 
     ciphertext: str = encrypt(plaintext, key)
 
-    with open('encrypted.txt', 'w', encoding='utf-8') as f:
+    with open(ENCRYPTED_FILE, 'w', encoding='utf-8') as f:
         f.write(ciphertext)
 
-    with open('key.txt', 'w', encoding='utf-8') as f:
+    with open(KEY_FILE, 'w', encoding='utf-8') as f:
         f.write(key)
 
     print("Шифрование выполнено успешно.")
@@ -108,7 +105,7 @@ def main() -> None:
     print(f"Ключ сохранён в: key.txt")
 
     decrypted: str = decrypt(ciphertext, key)
-    with open('decrypted_check.txt', 'w', encoding='utf-8') as f:
+    with open(DECRYPTED_CHECK_FILE, 'w', encoding='utf-8') as f:
         f.write(decrypted)
     print("Проверочная расшифровка сохранена в: decrypted_check.txt")
     print("Сравните её с исходным текстом (учитывайте, что буквы приведены к заглавным, а 'ё' заменена на 'Е').")

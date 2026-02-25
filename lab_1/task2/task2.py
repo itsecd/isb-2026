@@ -1,11 +1,9 @@
 import os
 from collections import Counter
 from typing import List, Tuple, Dict
-
-REFERENCE_ORDER: List[str] = [
-    ' ', 'О', 'И', 'Е', 'А', 'Н', 'Т', 'С', 'Р', 'В', 'М', 'Л', 'Д', 'Я', 'К', 'П',
-    'З', 'Ы', 'Ь', 'У', 'Ч', 'Ж', 'Г', 'Х', 'Ф', 'Й', 'Ю', 'Б', 'Ц', 'Ш', 'Щ', 'Э', 'Ъ'
-]
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from constants import REFERENCE_ORDER, DECRYPTED_TEXT
 
 def load_text(filename: str) -> str:
     """Загружает текст из файла."""
@@ -16,7 +14,7 @@ def count_frequencies(text: str) -> Tuple[List[Tuple[str, float]], Counter]:
     """Подсчитывает частоты символов, возвращает список (символ, процент) и счётчик."""
     counter: Counter = Counter(text)
     total: int = len(text)
-    freq_list: List[Tuple[str, float]] = [(ch, count / total * 100) for ch, count in counter.most_common()]
+    freq_list: List[Tuple[str, float]] = [(ch, count / total) for ch, count in counter.most_common()]
     return freq_list, counter
 
 def save_frequencies(freq_list: List[Tuple[str, float]], filename: str) -> None:
@@ -28,7 +26,7 @@ def save_frequencies(freq_list: List[Tuple[str, float]], filename: str) -> None:
                 ch_disp: str = 'пробел'
             else:
                 ch_disp = ch
-            f.write(f"{ch_disp}: {perc:.4f}%\n")
+            f.write(f"{ch_disp}: {perc:.4f}\n")
 
 def initial_mapping(freq_list: List[Tuple[str, float]]) -> Dict[str, str]:
     """Строит начальное отображение, сопоставляя самые частые символы с эталонными."""
@@ -63,7 +61,7 @@ def interactive_mode(text: str, mapping: Dict[str, str]) -> None:
             print(preview)
         elif cmd.lower() == 'save':
             decrypted = apply_mapping(text, mapping)
-            with open('decrypted.txt', 'w', encoding='utf-8') as f:
+            with open(DECRYPTED_TEXT, 'w', encoding='utf-8') as f:
                 f.write(decrypted)
             save_key(mapping, 'decryption_key.txt')
             print("Результаты сохранены в decrypted.txt и decryption_key.txt")
