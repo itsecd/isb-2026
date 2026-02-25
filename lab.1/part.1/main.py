@@ -1,10 +1,68 @@
 """
 Лабораторная работа: Шифр простой подстановки (моноалфавитная замена)
-Упрощенная версия для пользователя
 """
 
 import random
-from text_data import TEXT
+import os
+
+def read_text_from_file():
+    """Читает текст из txt файла """
+    while True:
+        # Показываем доступные txt файлы
+        txt_files = [f for f in os.listdir('.') if f.endswith('.txt') and f not in ['encrypted.txt', 'my_key.txt']]
+        
+        print("\nДОСТУПНЫЕ ТЕКСТОВЫЕ ФАЙЛЫ:")
+        if not txt_files:
+            print("  Нет доступных .txt файлов (кроме encrypted.txt и my_key.txt)")
+            filename = input("Введите имя файла вручную (или 'exit' для выхода): ").strip()
+            if filename.lower() == 'exit':
+                print("Программа завершена.")
+                exit()
+        else:
+            for i, file in enumerate(txt_files, 1):
+                # Показываем размер файла
+                size = os.path.getsize(file)
+                print(f"  {i} - {file} ({size} байт)")
+            print("  0 - Ввести имя вручную")
+            print("  q - Выход")
+            
+            choice = input("\nВыберите файл (номер, имя или 0): ").strip()
+            
+            if choice.lower() == 'q':
+                print("Программа завершена.")
+                exit()
+            
+            # Проверяем, является ли выбор числом (номером из списка)
+            if choice.isdigit():
+                choice_num = int(choice)
+                if choice_num == 0:
+                    filename = input("Введите имя файла вручную: ").strip()
+                elif 1 <= choice_num <= len(txt_files):
+                    filename = txt_files[choice_num - 1]
+                else:
+                    print(f"✗ Неверный номер. Введите число от 0 до {len(txt_files)}")
+                    continue
+            else:
+                # Пользователь ввёл имя файла напрямую
+                filename = choice
+        
+        # Пробуем прочитать файл
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                content = f.read()
+                if len(content) == 0:
+                    print(f"✗ Файл '{filename}' пуст!")
+                    continue
+                print(f"✓ Файл '{filename}' успешно загружен")
+                print(f"  • Размер: {len(content)} символов")
+                print(f"  • Первые 50 символов: {repr(content[:50])}...")
+                return content
+        except FileNotFoundError:
+            print(f"✗ Файл '{filename}' не найден!")
+        except UnicodeDecodeError:
+            print(f"✗ Файл '{filename}' имеет неправильную кодировку. Используйте UTF-8.")
+        except Exception as e:
+            print(f"✗ Ошибка при чтении файла: {e}")
 
 
 class Cipher:
@@ -143,9 +201,13 @@ def main():
     # Создаем шифр
     cipher = Cipher()
     
+    # Читаем текст из выбранного файла
+    TEXT = read_text_from_file()
+    
     # Показываем информацию о тексте
-    print(f"\nИсходный текст: {len(TEXT)} символов")
-    print(f"Уникальных символов: {len(set(TEXT))}")
+    print(f"\nИСХОДНЫЙ ТЕКСТ:")
+    print(f"  • Полная длина: {len(TEXT)} символов")
+    print(f"  • Уникальных символов: {len(set(TEXT))}")
     
     # Генерируем ключ
     cipher.generate_key(TEXT)
