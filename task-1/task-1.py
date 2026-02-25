@@ -2,9 +2,6 @@ import json
 import argparse
 from pathlib import Path
 
-ALPHABET = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ "
-
-
 def load_key(key_path: Path) -> dict[str,str]:
 
     """Читает key.json и возвращает mapping plaintext->cipher. 
@@ -14,8 +11,6 @@ def load_key(key_path: Path) -> dict[str,str]:
     alphabet=data["alphabet"]
     cipher_alphabet=data["cipher_alphabet"]
 
-    if alphabet != ALPHABET:
-        raise ValueError("Ошибка: alphabet в key.json не совпадает с алфавитом задания")
     if len(cipher_alphabet) != len(alphabet):
         raise ValueError("Ошибка: cipher_alphabet должен иметь ту же длину, что и alphabet")
     if sorted(cipher_alphabet) != sorted(alphabet):
