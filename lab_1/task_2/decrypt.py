@@ -5,44 +5,35 @@
 
 import os
 
-# Ключ шифрования
-key = {
-    'Z': ' ',
-    'P': 'в',
-    'E': 'и',
-    '!': 'р',
-    'W': 'у',
-    'F': 'с',
-    'x': 'ы',
-    'C': 'а',
-    'U': 'п',
-    '9': 'о',
-    'n': 'т',
-    'A': 'н',
-    '$': 'ю',
-    'S': 'я',
-    't': 'ч',
-    'I': 'е',
-    'O': 'з',
-    '>': 'э',
-    'h': 'л',
-    'K': 'к',
-    'L': 'й',
-    'V': 'м',
-    'B': 'г',
-    'M': 'б',
-    'Q': 'ё',
-    'Y': 'ъ',
-    '8': 'щ',
-    '-': 'ь',
-    '=': 'д',
-    'J': 'ж',
-    'G': 'х',
-    'H': 'ь',
-    'R': 'ц',
-    '3': 'ф',
-    'd': 'ш',
-}
+
+KEY_FILE = 'key.txt'
+
+def read_key(key_file: str) -> dict[str, str]:
+    """Читает файл с ключом и создаёт словарь подстановки.
+
+    Формат ключа: пары символов (символ шифра + расшифровка) без разделителей.
+    Пример: '!р$ю' → {'!': 'р', '$': 'ю'}.
+
+    Args:
+        key_file (str): Путь к файлу с ключом.
+
+    Returns:
+        dict[str, str]: Словарь расшифровки (шифр → оригинал).
+
+    Raises:
+        FileNotFoundError: Если файл с ключом не найден.
+    """
+    with open(key_file, 'r', encoding='utf-8') as f:
+        key = f.read().strip()
+
+    substitution = {}
+    for i in range(0, len(key) - 1, 2):
+        cipher = key[i]
+        plain = key[i + 1]
+        substitution[cipher] = plain
+    return substitution
+
+key=read_key(KEY_FILE)
 
 # Читаем зашифрованный текст
 with open('cod11.txt', 'r', encoding='utf-8') as f:
@@ -71,13 +62,7 @@ if not os.path.exists('results'):
 with open('results/decrypted.txt', 'w', encoding='utf-8') as f:
     f.write(decrypted)
 
-# Сохраняем ключ
-key_text = ""
-for symbol, letter in sorted(key.items()):
-    key_text += symbol + letter
 
-with open('results/key2.txt', 'w', encoding='utf-8') as f:
-    f.write(key_text)
 
 print()
-print("Сохранено в results/decrypted.txt и results/key2.txt")
+print("Сохранено в results/decrypted.txt ")

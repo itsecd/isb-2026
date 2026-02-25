@@ -6,10 +6,7 @@
 import os
 import sys
 
-# Пути по умолчанию
-DEFAULT_KEY_FILE = 'key.txt'
-DEFAULT_TEXT_FILE = 'text.txt'
-RESULTS_DIR = 'results'
+from constants import DEFAULT_KEY_FILE, DEFAULT_TEXT_FILE, RESULTS_DIR
 
 
 def ensure_results_dir():
