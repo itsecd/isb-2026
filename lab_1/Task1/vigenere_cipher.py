@@ -4,7 +4,20 @@ def main():
     alphabet = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ '
     key = 'КРИПТОГРАФИЯ'
     
-    text = """Это криптографический алгоритм полиалфавитной подстановки, придуманный в шестнадцатом веке. Дипломаты и солдаты его обожали за кажущуюся непробиваемость. Принцип действия базируется на ключевом слове, которое повторяется над длиной сообщения. Каждая буква ключа указывает, насколько надо сдвинуть букву текста, используя таблицу, именуемую квадратом Виженера. Так текст превращается в нечитаемую абракадабру. Мощь метода заключается в уничтожении частотности, поэтому простой подбор тут не работает. Потребовалось столетие, чтобы математики научились его взламывать, анализируя повторы."""
+    try:
+        with open('original.txt', 'r', encoding='utf-8') as f:
+            text = f.read()
+    except FileNotFoundError:
+        print("Ошибка: файл original.txt не найден")
+        print("Создайте файл original.txt с текстом для шифрования")
+        return
+    except IOError as e:
+        print(f"Ошибка при чтении файла original.txt: {e}")
+        return
+    
+    if not text:
+        print("Ошибка: файл original.txt пуст")
+        return
     
     try:
         text = text.upper()
@@ -25,8 +38,6 @@ def main():
     encrypted_text = ''.join(result)
     
     try:
-        with open('original.txt', 'w', encoding='utf-8') as f:
-            f.write(text)
         with open('encrypted.txt', 'w', encoding='utf-8') as f:
             f.write(encrypted_text)
         with open('key.txt', 'w', encoding='utf-8') as f:
@@ -51,7 +62,8 @@ def main():
         print(f"Ошибка при записи файла check.txt: {e}")
         return
     
-    print("Созданы файлы: original.txt, encrypted.txt, key.txt, check.txt")
+    print("Созданы файлы: encrypted.txt, key.txt, check.txt")
+    print("Исходный текст прочитан из файла: original.txt")
 
 if __name__ == '__main__':
     main()
