@@ -7,6 +7,9 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'lab_1', 'task2'))
 from key import key 
 
 def fileopen(filename: str) -> str:
+    """
+    Чтение файла.
+    """
     try:
         with open(filename, encoding="utf-8") as file:
             return file.read()
@@ -14,6 +17,10 @@ def fileopen(filename: str) -> str:
         raise e
 
 def mapper(text: str):
+    """
+    Поиск частот для каждого символа
+    встречающегося в строке.
+    """
     result = ""
     start_map = {}
     for i in text:
@@ -29,6 +36,9 @@ def mapper(text: str):
     return result
 
 def dechiper(text: str, key: map) -> str:
+    """
+    Дешифрование по ключу.
+    """
     result = ""
 
     for char in text:
@@ -39,6 +49,9 @@ def dechiper(text: str, key: map) -> str:
 
 
 def file_writter(filename: str, data: str) -> None:
+    """
+    Запись в файл.
+    """
     try:
         with open(filename, "w", encoding="utf-8") as file:
             file.write(data)

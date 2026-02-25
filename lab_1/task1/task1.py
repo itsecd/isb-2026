@@ -1,5 +1,10 @@
 import argparse
+import sys
+import os
 
+sys.path.append(os.path.join(os.path.dirname(__file__), 'lab_1', 'task1'))
+
+from consts import AB 
 
 def fileopen(filename: str) -> str:
     try:
@@ -11,14 +16,13 @@ def fileopen(filename: str) -> str:
 
 def chiper(text: str) -> str:
     result = ""
-    alphabet = ["абвгдеёжзийклмнопрстуфхцчшщъыьэюя", "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"]
     for char in text:
-        if char in alphabet[0]:
-            i = alphabet[0].index(char)
-            char = alphabet[0][32-i]
-        if char in alphabet[1]:
-            i = alphabet[1].index(char)
-            char = alphabet[1][32-i]
+        if char in AB[0]:
+            i = AB[0].index(char)
+            char = AB[0][32-i]
+        if char in AB[1]:
+            i = AB[1].index(char)
+            char = AB[1][32-i]
         result += char
     return result
 
