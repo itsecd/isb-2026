@@ -1,5 +1,8 @@
 ﻿from collections import Counter
+<<<<<<< HEAD
 import path_file as pf
+=======
+>>>>>>> 2ab1c3a8a7fc68eb2b4b8e12e4181499f6e590f9
 
 def load_key(filename):
     """Загружает ключ подстановки из файла"""
@@ -47,6 +50,7 @@ def main():
     print("ЗАДАНИЕ 2: РАСШИФРОВКА ТЕКСТА (ШИФР ПРОСТОЙ ПОДСТАНОВКИ)")
     
     try:
+<<<<<<< HEAD
         key = load_key(pf.INPUT_KEY)
     except FileNotFoundError:
         print(f"Файл {pf.INPUT_KEY} не найден!")
@@ -57,6 +61,18 @@ def main():
             encrypted_text = f.read()
     except FileNotFoundError:
         print(f"Файл {pf.INPUT_TEXT} не найден!")
+=======
+        key = load_key('key_task2.txt')
+    except FileNotFoundError:
+        print("Файл 'key_task2.txt' не найден!")
+        return
+    
+    try:
+        with open('encrypted_task2.txt', 'r', encoding='utf-8') as f:
+            encrypted_text = f.read()
+    except FileNotFoundError:
+        print("Файл 'encrypted_task2.txt' не найден!")
+>>>>>>> 2ab1c3a8a7fc68eb2b4b8e12e4181499f6e590f9
         return
     
     calculate_and_save_frequencies(encrypted_text, "task2_frequencies.txt")
@@ -64,7 +80,11 @@ def main():
     
     decrypted_text = decrypt_text(encrypted_text, key)
     
+<<<<<<< HEAD
     with open(pf.OUTPUT_TEXT, "w", encoding='utf-8') as f:
+=======
+    with open("decrypted_task2.txt", "w", encoding='utf-8') as f:
+>>>>>>> 2ab1c3a8a7fc68eb2b4b8e12e4181499f6e590f9
         f.write(decrypted_text)
     
     print("Результаты сохранены:")

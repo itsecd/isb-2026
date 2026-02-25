@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 ﻿import path_file as pf
 
 def caesar_cipher(text, shift):
+=======
+﻿def caesar_cipher(text, shift):
+>>>>>>> 2ab1c3a8a7fc68eb2b4b8e12e4181499f6e590f9
     """Шифрует или дешифрует текст алгоритмом Цезаря"""
     result = []
     for char in text:
@@ -79,6 +83,13 @@ def main():
     """Главная функция для задания 1"""
     print("ЗАДАНИЕ 1: ШИФРОВКА И ДЕШИФРОВКА ТЕКСТА АЛГОРИТМОМ ЦЕЗАРЯ")
     
+<<<<<<< HEAD
+=======
+    input_file = 'input_text.txt'
+    output_encrypted = 'encrypted_task1.txt'
+    output_key = 'key_task1.txt'
+    
+>>>>>>> 2ab1c3a8a7fc68eb2b4b8e12e4181499f6e590f9
     try:
         KEY = int(input("Введите ключ шифрования (сдвиг): "))
     except ValueError:
@@ -86,9 +97,15 @@ def main():
         return
     
     try:
+<<<<<<< HEAD
         original_text = read_file(pf.INPUT_FILE)
     except FileNotFoundError:
         print(f"Файл '{pf.INPUT_FILE}' не найден!")
+=======
+        original_text = read_file(input_file)
+    except FileNotFoundError:
+        print(f"Файл '{input_file}' не найден!")
+>>>>>>> 2ab1c3a8a7fc68eb2b4b8e12e4181499f6e590f9
         return
     
     substitution_key = generate_substitution_key(KEY)
@@ -96,10 +113,17 @@ def main():
     encrypted_text = caesar_cipher(original_text, KEY)
     print(f"Текст зашифрован (ключ: {KEY})")
     
+<<<<<<< HEAD
     write_file(pf.OUTPUT_ENCRYPTED, encrypted_text)
     write_key(pf.OUTPUT_KEY, substitution_key, KEY)
     print(f"  - {pf.OUTPUT_ENCRYPTED} (зашифрованный текст)")
     print(f"  - {pf.OUTPUT_KEY} (ключ шифрования с таблицей подстановки)")
+=======
+    write_file(output_encrypted, encrypted_text)
+    write_key(output_key, substitution_key, KEY)
+    print(f"  - {output_encrypted} (зашифрованный текст)")
+    print(f"  - {output_key} (ключ шифрования с таблицей подстановки)")
+>>>>>>> 2ab1c3a8a7fc68eb2b4b8e12e4181499f6e590f9
     
     decrypted_text = caesar_cipher(encrypted_text, -KEY)
     print(f"Текст дешифрован (ключ: {-KEY})")
