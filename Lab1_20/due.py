@@ -15,15 +15,24 @@ def load_encrypted_data(file_path: str | Path, preserve_linebreaks: bool = False
 
 
 def perform_symbol_analysis(input_text: str, limit_results: int | None = 10) -> Tuple[Counter, str]:
-    """Проводит подсчет частоты встречаемости символов."""
+    """Проводим подсчет частоты встречаемости символов и процентного соотношения."""
     symbol_counter = Counter(input_text)
+    total_symbols = sum(symbol_counter.values())
     top_symbols = symbol_counter.most_common() if limit_results is None else symbol_counter.most_common(limit_results)
 
     output_lines = []
     output_lines.append("Статистика встречаемости символов:")
-    output_lines.append("-" * 30)
+    output_lines.append("-" * 45)
+    output_lines.append(f"{'Символ':<10} {'Количество':<12} {'Частота (%)':<15}") #Частота с 4 знаками после ,
+    output_lines.append("-" * 45)
+    
     for character, occurrence in top_symbols:
-        output_lines.append(f"{repr(character)}: {occurrence}")
+        frequency_percentage = (occurrence / total_symbols) * 100 if total_symbols > 0 else 0
+        output_lines.append(f"{repr(character):<10} {occurrence:<12} {frequency_percentage:>10.4f}%")
+    
+    output_lines.append("-" * 55)
+    output_lines.append(f"Всего символов: {total_symbols}")
+    
     formatted_report = "\n".join(output_lines)
     return symbol_counter, formatted_report
 
@@ -34,9 +43,11 @@ def export_frequency_table(
     *,
     add_summary: bool = True,
     sort_criteria: str = "by_frequency",
+    include_percentage: bool = True,
 ) -> None:
     """Экспортирует результаты частотного анализа в текстовый файл."""
     destination = Path(output_path)
+    total_symbols = sum(symbol_data.values())
 
     if sort_criteria == "by_frequency":
         data_rows = symbol_data.most_common()
@@ -47,14 +58,26 @@ def export_frequency_table(
 
     report_lines = []
     report_lines.append("Результаты анализа частоты символов")
-    report_lines.append("=" * 45)
+    report_lines.append("=" * 65)
+    
+    if include_percentage:
+        report_lines.append(f"{'Символ':<15} {'Количество':<12} {'Частота (%)':<15}")
+    else:
+        report_lines.append(f"{'Символ':<15} {'Количество':<12}")
+    
+    report_lines.append("-" * 65)
+    
     for character, frequency in data_rows:
-        report_lines.append(f"{repr(character)}\t{frequency}")
+        if include_percentage:
+            freq_percentage = (frequency / total_symbols) * 100 if total_symbols > 0 else 0
+            report_lines.append(f"{repr(character):<15} {frequency:<12} {freq_percentage:>12.4f}%")
+        else:
+            report_lines.append(f"{repr(character):<15} {frequency:<12}")
 
     if add_summary:
-        report_lines.append("-" * 45)
-        report_lines.append(f"ОБЩАЯ_ДЛИНА\t{sum(symbol_data.values())}")
-        report_lines.append(f"УНИКАЛЬНЫХ\t{len(symbol_data)}")
+        report_lines.append("-" * 55)
+        report_lines.append(f"{'ОБЩАЯ_ДЛИНА':<15} {total_symbols:<12}")
+        report_lines.append(f"{'УНИКАЛЬНЫХ':<15} {len(symbol_data):<12}")
 
     destination.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
 
@@ -73,8 +96,8 @@ def perform_substitutions(original_text: str, substitution_rules: Dict[str, str]
 
 def start_interactive_mode(encrypted_content: str) -> None:
     """Запускает интерактивный режим подбора замен."""
-    print("=== СИСТЕМА РАСШИФРОВКИ ТЕКСТА ===")
-    print(encrypted_content)
+    print("\n=== СИСТЕМА РАСШИФРОВКИ ТЕКСТА ===")
+    print(encrypted_content[:500] + "..." if len(encrypted_content) > 500 else encrypted_content)
 
     substitution_map: Dict[str, str] = {}
 
@@ -90,11 +113,12 @@ def start_interactive_mode(encrypted_content: str) -> None:
         print("\nДоступные операции:")
         print("1. Добавить/изменить правило замены")
         print("2. Показать текст с примененными заменами")
-        print("3. Сбросить все правила")
+        print("3. Сбросить все правила замен")
         print("4. Сохранить результат в файл")
-        print("5. Выйти из программы")
+        print("5. Показать статистику символов")
+        print("6. Выйти из программы")
 
-        user_choice = input("\nВаш выбор (1-5): ").strip()
+        user_choice = input("\nВаш выбор (1-6): ").strip()
 
         if user_choice == "1":
             source_char = input("Введите символ, который нужно заменить: ")
@@ -112,7 +136,7 @@ def start_interactive_mode(encrypted_content: str) -> None:
 
         elif user_choice == "2":
             if not substitution_map:
-                print("Нет правил для применения!")
+                print("Нет правил замен для применения!")
                 continue
 
             transformed_text = perform_substitutions(encrypted_content, substitution_map)
@@ -120,7 +144,7 @@ def start_interactive_mode(encrypted_content: str) -> None:
             print("\n" + "=" * 50)
             print("РЕЗУЛЬТАТ ПРИМЕНЕНИЯ ПОДСТАНОВОК:")
             print("=" * 50)
-            print(transformed_text)
+            print(transformed_text[:1000] + "..." if len(transformed_text) > 1000 else transformed_text)
 
         elif user_choice == "3":
             substitution_map.clear()
@@ -143,6 +167,10 @@ def start_interactive_mode(encrypted_content: str) -> None:
             print(f"Результат сохранен в файл: {output_filename}")
 
         elif user_choice == "5":
+            frequencies, analysis_output = perform_symbol_analysis(encrypted_content, limit_results=20)
+            print(analysis_output)
+
+        elif user_choice == "6":
             print("Работа программы завершена")
             break
 
@@ -156,18 +184,22 @@ def run_application() -> None:
     if not source_file:
         source_file = "encrypted_data.txt"
 
-    encrypted_data = load_encrypted_data(source_file, preserve_linebreaks=False)
+    try:
+        encrypted_data = load_encrypted_data(source_file, preserve_linebreaks=False)
+    except FileNotFoundError:
+        print(f"Файл {source_file} не найден. Создайте его или укажите правильный путь.")
+        return
 
     frequencies, analysis_output = perform_symbol_analysis(encrypted_data, limit_results=10)
     print(analysis_output)
 
     result_file = input(
-        "Файл для сохранения результатов анализа (по умолчанию: symbol_stats.txt): "
+        "\nФайл для сохранения результатов анализа (по умолчанию: symbol_stats.txt): "
     ).strip()
     if not result_file:
         result_file = "symbol_stats.txt"
 
-    export_frequency_table(frequencies, result_file, add_summary=True, sort_criteria="by_frequency")
+    export_frequency_table(frequencies, result_file, add_summary=True, sort_criteria="by_frequency", include_percentage=True)
     print(f"Статистика символов сохранена в файл: {result_file}")
 
     start_interactive_mode(encrypted_data)
