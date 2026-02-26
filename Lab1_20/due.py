@@ -1,209 +1,114 @@
 from __future__ import annotations
-
 from collections import Counter
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict
 
+def load_data(file: str | Path, strip_nl: bool = True) -> str:
+    """Загружаем текст из файла."""
+    text = Path(file).read_text(encoding="utf-8")
+    return text.replace("\n", "") if strip_nl else text
 
-def load_encrypted_data(file_path: str | Path, preserve_linebreaks: bool = False) -> str:
-    """Загружает зашифрованный текст из указанного файла."""
-    target_path = Path(file_path)
-    raw_content = target_path.read_text(encoding="utf-8")
-    if not preserve_linebreaks:
-        raw_content = raw_content.replace("\n", "")
-    return raw_content
-
-
-def perform_symbol_analysis(input_text: str, limit_results: int | None = 10) -> Tuple[Counter, str]:
-    """Проводим подсчет частоты встречаемости символов и процентного соотношения."""
-    symbol_counter = Counter(input_text)
-    total_symbols = sum(symbol_counter.values())
-    top_symbols = symbol_counter.most_common() if limit_results is None else symbol_counter.most_common(limit_results)
-
-    output_lines = []
-    output_lines.append("Статистика встречаемости символов:")
-    output_lines.append("-" * 45)
-    output_lines.append(f"{'Символ':<10} {'Количество':<12} {'Частота (%)':<15}") #Частота с 4 знаками после ,
-    output_lines.append("-" * 45)
+def get_stats(text: str, limit: int | None = 10) -> tuple[Counter, str]:
+    """Анализ частоты символов."""
+    cnt = Counter(text)
+    total = sum(cnt.values())
+    top = cnt.most_common() if limit is None else cnt.most_common(limit)
     
-    for character, occurrence in top_symbols:
-        frequency_percentage = (occurrence / total_symbols) * 100 if total_symbols > 0 else 0
-        output_lines.append(f"{repr(character):<10} {occurrence:<12} {frequency_percentage:>10.4f}%")
+    lines = ["Статистика встречаемости символов:", "-" * 45,
+             f"{'Символ':<10} {'Кол-во':<12} {'Частота':<15}", "-" * 45]
     
-    output_lines.append("-" * 55)
-    output_lines.append(f"Всего символов: {total_symbols}")
+    for ch, occ in top:
+        lines.append(f"{repr(ch):<10} {occ:<12} {(occ/total):>10.4f}" if total else "")
     
-    formatted_report = "\n".join(output_lines)
-    return symbol_counter, formatted_report
+    lines.extend(["-" * 55, f"Всего символов: {total}"])
+    return cnt, "\n".join(lines)
 
-
-def export_frequency_table(
-    symbol_data: Counter,
-    output_path: str | Path,
-    *,
-    add_summary: bool = True,
-    sort_criteria: str = "by_frequency",
-    include_percentage: bool = True,
-) -> None:
-    """Экспортирует результаты частотного анализа в текстовый файл."""
-    destination = Path(output_path)
-    total_symbols = sum(symbol_data.values())
-
-    if sort_criteria == "by_frequency":
-        data_rows = symbol_data.most_common()
-    elif sort_criteria == "by_symbol":
-        data_rows = sorted(symbol_data.items(), key=lambda pair: pair[0])
-    else:
-        raise ValueError("sort_criteria должен быть 'by_frequency' или 'by_symbol'")
-
-    report_lines = []
-    report_lines.append("Результаты анализа частоты символов")
-    report_lines.append("=" * 65)
+def save_stats(data: Counter, path: str | Path, summary: bool = True, percent: bool = True) -> None:
+    """Сохраняем статистику в файл."""
+    total = sum(data.values())
+    lines = ["Результаты анализа частоты символов", "=" * 65,
+             f"{'Символ':<15} {'Кол-во':<12}" + (f"{'Частота':<15}" if percent else ""),
+             "-" * 65]
     
-    if include_percentage:
-        report_lines.append(f"{'Символ':<15} {'Количество':<12} {'Частота (%)':<15}")
-    else:
-        report_lines.append(f"{'Символ':<15} {'Количество':<12}")
-    
-    report_lines.append("-" * 65)
-    
-    for character, frequency in data_rows:
-        if include_percentage:
-            freq_percentage = (frequency / total_symbols) * 100 if total_symbols > 0 else 0
-            report_lines.append(f"{repr(character):<15} {frequency:<12} {freq_percentage:>12.4f}%")
+    for ch, freq in data.most_common():
+        if percent:
+            pct = (freq / total)  if total else 0
+            lines.append(f"{repr(ch):<15} {freq:<12} {pct:>12.4f}")
         else:
-            report_lines.append(f"{repr(character):<15} {frequency:<12}")
+            lines.append(f"{repr(ch):<15} {freq:<12}")
+    
+    if summary:
+        lines.extend(["-" * 55, f"{'ВСЕГО':<15} {total:<12}", f"{'УНИКАЛЬНЫХ':<15} {len(data):<12}"])
+    
+    Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    if add_summary:
-        report_lines.append("-" * 55)
-        report_lines.append(f"{'ОБЩАЯ_ДЛИНА':<15} {total_symbols:<12}")
-        report_lines.append(f"{'УНИКАЛЬНЫХ':<15} {len(symbol_data):<12}")
+def substitute(text: str, rules: Dict[str, str]) -> str:
+    """Заменяеv символы по правилам."""
+    if any(len(k) != 1 or len(v) != 1 for k, v in rules.items()):
+        raise ValueError("Правила должны быть одиночными символами")
+    for s, t in rules.items():
+        text = text.replace(s, t)
+    return text
 
-    destination.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
-
-
-def perform_substitutions(original_text: str, substitution_rules: Dict[str, str]) -> str:
-    """Выполняет замену символов согласно заданным правилам."""
-    for source, target in substitution_rules.items():
-        if len(source) != 1 or len(target) != 1:
-            raise ValueError("Все ключи и значения замен должны быть одиночными символами.")
-
-    processed_text = original_text
-    for source, target in substitution_rules.items():
-        processed_text = processed_text.replace(source, target)
-    return processed_text
-
-
-def start_interactive_mode(encrypted_content: str) -> None:
-    """Запускает интерактивный режим подбора замен."""
-    print("\n=== СИСТЕМА РАСШИФРОВКИ ТЕКСТА ===")
-    print(encrypted_content[:500] + "..." if len(encrypted_content) > 500 else encrypted_content)
-
-    substitution_map: Dict[str, str] = {}
-
+def interactive(text: str) -> None:
+    """Табличка для ввода команд."""
+    print(f"\n=== РАСШИФРОВКА ===\n{text[:500]}{'...' if len(text)>500 else ''}")
+    rules = {}
+    
     while True:
-        print("\n" + "=" * 50)
-        print("Текущие подстановки:")
-        if substitution_map:
-            for source, target in substitution_map.items():
-                print(f"  '{source}' -> '{target}'")
-        else:
-            print("  Подстановки отсутствуют")
+        print("\n" + "="*50 + "\nТекущие подстановки:")
+        [print(f"  '{k}' -> '{v}'") for k, v in rules.items()] or print("  Нет правил")
+        
+        cmd = input("\n1:Добавить правило замены\n2:Показать текст \n3:Сброс правил замены \n4:Сохранить в файл \n5:Статистика символов \n6:Выход\n> ").strip()
+        
+        if cmd == "1":
+            s, t = input("Заменить: "), input("На: ")
+            if len(s) == 1 and len(t) == 1:
 
-        print("\nДоступные операции:")
-        print("1. Добавить/изменить правило замены")
-        print("2. Показать текст с примененными заменами")
-        print("3. Сбросить все правила замен")
-        print("4. Сохранить результат в файл")
-        print("5. Показать статистику символов")
-        print("6. Выйти из программы")
-
-        user_choice = input("\nВаш выбор (1-6): ").strip()
-
-        if user_choice == "1":
-            source_char = input("Введите символ, который нужно заменить: ")
-            if len(source_char) != 1:
-                print("Ошибка: необходимо ввести один символ!")
-                continue
-
-            target_char = input("Введите символ для подстановки: ")
-            if len(target_char) != 1:
-                print("Ошибка: необходимо ввести один символ!")
-                continue
-
-            substitution_map[source_char] = target_char
-            print(f"Правило '{source_char}' -> '{target_char}' добавлено")
-
-        elif user_choice == "2":
-            if not substitution_map:
-                print("Нет правил замен для применения!")
-                continue
-
-            transformed_text = perform_substitutions(encrypted_content, substitution_map)
-
-            print("\n" + "=" * 50)
-            print("РЕЗУЛЬТАТ ПРИМЕНЕНИЯ ПОДСТАНОВОК:")
-            print("=" * 50)
-            print(transformed_text[:1000] + "..." if len(transformed_text) > 1000 else transformed_text)
-
-        elif user_choice == "3":
-            substitution_map.clear()
-            print("Все правила замены удалены")
-
-        elif user_choice == "4":
-            if not substitution_map:
-                print("Нет данных для сохранения!")
-                continue
-
-            transformed_text = perform_substitutions(encrypted_content, substitution_map)
-
-            output_filename = input(
-                "Укажите имя файла для сохранения (по умолчанию: transformed_output.txt): "
-            ).strip()
-            if not output_filename:
-                output_filename = "transformed_output.txt"
-
-            Path(output_filename).write_text(transformed_text, encoding="utf-8")
-            print(f"Результат сохранен в файл: {output_filename}")
-
-        elif user_choice == "5":
-            frequencies, analysis_output = perform_symbol_analysis(encrypted_content, limit_results=20)
-            print(analysis_output)
-
-        elif user_choice == "6":
-            print("Работа программы завершена")
+                rules[s] = t
+                print(f"Добавлено: '{s}' -> '{t}'")
+            else:
+                print("Ошибка: нужен 1 символ")
+        
+        elif cmd == "2" and rules:
+            res = substitute(text, rules)
+            print(f"\n{'='*50}\nРЕЗУЛЬТАТ:\n{'='*50}\n{res[:1000]}{'...' if len(res)>1000 else ''}")
+        
+        elif cmd == "3":
+            rules.clear()
+            print("Правила сброшены")
+        
+        elif cmd == "4" and rules:
+            name = input("Имя файла: ").strip() or "out.txt"
+            Path(name).write_text(substitute(text, rules), encoding="utf-8")
+            print(f"Сохранено в {name}")
+        
+        elif cmd == "5":
+            print(get_stats(text, 20)[1])
+        
+        elif cmd == "6":
+            print("Выход")
             break
-
         else:
-            print("Некорректный выбор, повторите попытку")
+            print("Неверный ввод")
 
-
-def run_application() -> None:
-    """Запускает основной рабочий процесс: анализ и интерактивную расшифровку."""
-    source_file = input("Путь к файлу с зашифрованным текстом (по умолчанию: encrypted_data.txt): ").strip()
-    if not source_file:
-        source_file = "encrypted_data.txt"
-
+def main() -> None:
+    """мэйн."""
+    src = input("Файл с текстом: ").strip() or "encrypted.txt"
+    
     try:
-        encrypted_data = load_encrypted_data(source_file, preserve_linebreaks=False)
+        data = load_data(src)
     except FileNotFoundError:
-        print(f"Файл {source_file} не найден. Создайте его или укажите правильный путь.")
+        print(f"Файл {src} не найден")
         return
-
-    frequencies, analysis_output = perform_symbol_analysis(encrypted_data, limit_results=10)
-    print(analysis_output)
-
-    result_file = input(
-        "\nФайл для сохранения результатов анализа (по умолчанию: symbol_stats.txt): "
-    ).strip()
-    if not result_file:
-        result_file = "symbol_stats.txt"
-
-    export_frequency_table(frequencies, result_file, add_summary=True, sort_criteria="by_frequency", include_percentage=True)
-    print(f"Статистика символов сохранена в файл: {result_file}")
-
-    start_interactive_mode(encrypted_data)
-
+    
+    stats, report = get_stats(data)
+    print(report)
+    
+    out = input("\nСохранить статистику: ").strip() or "symbol_stats.txt"
+    save_stats(stats, out)
+    print(f"Статистика сохранена в {out}")
+    interactive(data)
 
 if __name__ == "__main__":
-    run_application()
+    main()
