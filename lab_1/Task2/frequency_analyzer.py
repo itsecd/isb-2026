@@ -1,9 +1,14 @@
 import json
 
-INPUT_FILE = "cod17.txt"
-FREQ_FILE = "frequency_analysis.txt"
-KEY_FILE = "key2.txt"
-DECODE_FILE = "decrypted.txt"
+from files import KEY_FILE, DECODE_FILE, INPUT_FILE, FREQ_FILE
+
+
+SPECIAL_CHARS = {
+    '\n': '\\n',
+    '\r': '\\r',
+    '\t': '\\t',
+    ' ': 'пробел'
+}
 
 def freq_file(text: str) -> None:
     """Выполняет частотный анализ символов в тексте и сохраняет результаты в файл"""
@@ -25,21 +30,15 @@ def freq_file(text: str) -> None:
     try:
         with open(FREQ_FILE, "w", encoding="utf-8") as f:
             for char, count in sorted_freq:
-                if char == '\n':
-                    display = '\\n'
-                elif char == '\r':
-                    display = '\\r'
-                elif char == '\t':
-                    display = '\\t'
-                elif char == ' ':
-                    display = 'пробел'
+    
+                if char in SPECIAL_CHARS:
+                    display = SPECIAL_CHARS[char]
                 else:
                     display = char
                 frequency = count / total_chars
                 f.write(f"{display} {frequency:.6f}\n")
     except IOError as e:
         raise IOError(f"Не удалось записать файл с частотным анализом: {e}")
-
 
 def decode(text: str) -> None:
     """Дешифрует текст используя JSON файл с ключом и сохраняет результат с переносом строк."""
@@ -92,5 +91,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-
     main()
