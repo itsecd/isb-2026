@@ -5,7 +5,6 @@ FREQ_FILE = "frequency_analysis.txt"
 KEY_FILE = "key2.txt"
 DECODE_FILE = "decrypted.txt"
 
-
 def freq_file(text: str) -> None:
     """Выполняет частотный анализ символов в тексте и сохраняет результаты в файл"""
     freq = {}
@@ -36,7 +35,8 @@ def freq_file(text: str) -> None:
                     display = 'пробел'
                 else:
                     display = char
-                f.write(f"{display} {count}\n")
+                frequency = count / total_chars
+                f.write(f"{display} {frequency:.6f}\n")
     except IOError as e:
         raise IOError(f"Не удалось записать файл с частотным анализом: {e}")
 
@@ -92,4 +92,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+
     main()
