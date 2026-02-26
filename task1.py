@@ -65,12 +65,4 @@ else:
 save_file(config.ENCRYPTED_FILE, enc)
 save_file(config.DECRYPTED_FILE, dec)
 
-key_text = '''КВАДРАТ ПОЛИБИЯ 6x6
-   1 2 3 4 5 6
-1  А Б В Г Д Е
-2  Ж З И Й К Л
-3  М Н О П Р С
-4  Т У Ф Х Ц Ч
-5  Ш Щ Ъ Ы Ь Э
-6  Ю Я   (пробел)'''
-save_file(config.KEY_FILE, key_text)
+save_file(config.KEY_FILE, config.KEY_DISPLAY)
