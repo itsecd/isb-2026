@@ -7,10 +7,10 @@ def load_polybius_square(filename):
     try:
         with open(filename, 'r', encoding='utf-8') as f:
             for line_num, line in enumerate(f, 1):
-                row = line.strip().split()
-                if len(row) != 6:
+                row = line.strip().split()                     #line.strip() — удаляет все лишние пробелы и символы переноса строки
+                if len(row) != 6:                              #.split() — разбивает строку на части по пробелам и возвращает список
                     raise ValueError(f"Строка {line_num} должна содержать 6 символов")
-                square.append(row)
+                square.append(row)#добавляем строку в конец этого списка
         
         if len(square) != 6:
             raise ValueError("Квадрат Полибия должен содержать 6 строк")
@@ -53,13 +53,13 @@ def encryption(text, polybius_square):
         if not found and char != '\n':
             print(f"Предупреждение: символ '{char}' не найден в квадрате Полибия")
     
-    return ' '.join(result)
+    return ' '.join(result)#объединяет через пробел
 
 def decryption(encrypted_text, polybius_square):
     """Дешифрует текст из числового представления обратно в символы(encrypted_text (str): зашифрованный текст в виде строки чисел
         polybius_square (list): квадрат Полибия), вернет str: расшифрованный текст"""
    
-    codes = encrypted_text.split()
+    codes = encrypted_text.split()#split() разбивает строку на список13 24 35->['13', '24', '35']
     result = []
     
     for code in codes:
@@ -67,15 +67,15 @@ def decryption(encrypted_text, polybius_square):
             result.append(' ')
             continue
             
-        row = int(code[0]) - 1
-        col = int(code[1]) - 1
+        row = int(code[0]) - 1#code[0] — первый символ строки (например, '1'
+        col = int(code[1]) - 1#code[1] — второй символ строки (например, '3'
         
         if 0 <= row < 6 and 0 <= col < 6:
             result.append(polybius_square[row][col])
         else:
             result.append('?')
     
-    return ''.join(result)
+    return ''.join(result)#объединяет через пробел
 
 def save_key_info(filename, polybius_square):
     """Сохраняет информацию о ключе шифрования в файл(filename (str): имя файла для сохранения, polybius_square (list): квадрат Полибия)"""
@@ -83,7 +83,7 @@ def save_key_info(filename, polybius_square):
         with open(filename, 'w', encoding='utf-8') as f:
             f.write("Квадрат Полибия (ключ шифрования):\n")
             f.write("   1 2 3 4 5 6\n")
-            for i, row in enumerate(polybius_square, 1):
+            for i, row in enumerate(polybius_square, 1):#проходит по всем строкам квадрата начиная с 1 строки
                 f.write(f"{i}  {' '.join(row)}\n")
     except Exception as e:
         raise Exception(f"Ошибка при сохранении ключа: {e}")
