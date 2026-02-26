@@ -1,30 +1,48 @@
 # -*- coding: utf-8 -*-
-def main():
-    """Основная функция для шифрования и расшифровки текста методом Виженера"""
-    alphabet = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ '
-    key = 'КРИПТОГРАФИЯ'
-    
+import os
+from pathlib import Path
+from files1 import INPUT_FILE, KEY_FILE, ENCRYPTED_FILE, CHECK_FILE
+
+ALPHABET = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ '
+
+def read_key_from_file(key_filepath):
+    """Чтение ключа из файла"""
     try:
-        with open('original.txt', 'r', encoding='utf-8') as f:
-            text = f.read()
+        with open(key_filepath, 'r', encoding='utf-8') as f:
+            key = f.read().strip()
+            return key
     except FileNotFoundError:
-        print("Ошибка: файл original.txt не найден")
-        print("Создайте файл original.txt с текстом для шифрования")
-        return
+        raise FileNotFoundError(f"Ошибка: файл {key_filepath} не найден")
     except IOError as e:
-        print(f"Ошибка при чтении файла original.txt: {e}")
-        return
-    
-    if not text:
-        print("Ошибка: файл original.txt пуст")
-        return
-    
+        raise IOError(f"Ошибка при чтении файла {key_filepath}: {e}")
+
+def read_text_from_file(filepath):
+    """Чтение текста из файла"""
     try:
-        text = text.upper()
+        with open(filepath, 'r', encoding='utf-8') as f:
+            text = f.read()
+            if not text:
+                raise ValueError(f"Файл {filepath} пуст")
+            return text.upper()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Ошибка: файл {filepath} не найден")
+    except IOError as e:
+        raise IOError(f"Ошибка при чтении файла {filepath}: {e}")
+
+def write_text_to_file(filepath, content):
+    """Запись текста в файл"""
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(content)
+    except IOError as e:
+        raise IOError(f"Ошибка при записи файла {filepath}: {e}")
+
+def encrypt_vigenere(text, key, alphabet):
+    """Шифрование текста методом Виженера"""
+    try:
         key_indices = [alphabet.index(k) for k in key]
     except ValueError as e:
-        print(f"Ошибка: символ не найден в алфавите - {e}")
-        return
+        raise ValueError(f"Ошибка: символ в ключе не найден в алфавите - {e}")
     
     result = []
     for i, char in enumerate(text):
@@ -35,35 +53,48 @@ def main():
         else:
             result.append(char)
     
-    encrypted_text = ''.join(result)
-    
+    return ''.join(result)
+
+def decrypt_vigenere(encrypted_text, key, alphabet):
+    """Расшифровка текста методом Виженера"""
     try:
-        with open('encrypted.txt', 'w', encoding='utf-8') as f:
-            f.write(encrypted_text)
-        with open('key.txt', 'w', encoding='utf-8') as f:
-            f.write(key)
-    except IOError as e:
-        print(f"Ошибка при записи файлов: {e}")
-        return
+        key_indices = [alphabet.index(k) for k in key]
+    except ValueError as e:
+        raise ValueError(f"Ошибка: символ в ключе не найден в алфавите - {e}")
     
-    decrypted = []
+    result = []
     for i, char in enumerate(encrypted_text):
         if char in alphabet:
             char_index = alphabet.index(char)
             key_index = key_indices[i % len(key)]
-            decrypted.append(alphabet[(char_index - key_index) % len(alphabet)])
+            result.append(alphabet[(char_index - key_index) % len(alphabet)])
         else:
-            decrypted.append(char)
+            result.append(char)
     
+    return ''.join(result)
+
+def main():
+    """Основная функция для шифрования и расшифровки текста методом Виженера"""
     try:
-        with open('check.txt', 'w', encoding='utf-8') as f:
-            f.write(''.join(decrypted))
-    except IOError as e:
-        print(f"Ошибка при записи файла check.txt: {e}")
-        return
     
-    print("Созданы файлы: encrypted.txt, key.txt, check.txt")
-    print("Исходный текст прочитан из файла: original.txt")
+        key = read_key_from_file(KEY_FILE)
+        
+        text = read_text_from_file(INPUT_FILE)
+        
+        encrypted_text = encrypt_vigenere(text, key, ALPHABET)
+        
+        write_text_to_file(ENCRYPTED_FILE, encrypted_text)
+        
+        decrypted_text = decrypt_vigenere(encrypted_text, key, ALPHABET)
+        
+        write_text_to_file(CHECK_FILE, decrypted_text)
+        
+        print("Созданы файлы: encrypted.txt, check.txt")
+        print(f"Исходный текст прочитан из файла: {INPUT_FILE}")
+        
+    except (FileNotFoundError, IOError, ValueError) as e:
+        print(f"Ошибка: {e}")
+        return
 
 if __name__ == '__main__':
     main()
