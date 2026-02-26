@@ -1,9 +1,30 @@
 """Задание 1: шифрование текста квадратом Полибия"""
 
-import config
 import os
 
-REVERSE = {v: k for k, v in config.POLYBIUS_SQUARE.items()}
+def load_polybius_key(filename):
+    """Загружает квадрат Полибия из файла"""
+    polybius = {}
+    with open(filename, 'r', encoding='utf-8') as f:
+        for line in f:
+            parts = line.strip().split()
+            if len(parts) == 2:
+                code, letter = parts
+                if letter == 'пробел':
+                    polybius[' '] = code
+                else:
+                    polybius[letter] = code
+    return polybius
+
+def load_file_names(filename):
+    """Загружает имена файлов из файла"""
+    names = {}
+    with open(filename, 'r', encoding='utf-8') as f:
+        for line in f:
+            if '=' in line:
+                key, value = line.strip().split('=')
+                names[key] = value
+    return names
 
 def save_file(name, text):
     """Сохраняет текст в файл"""
@@ -23,46 +44,65 @@ def read_file(name):
         with open(name, 'r', encoding='utf-8') as f:
             return f.read()
     except:
-        print(f' Ошибка чтения {name}')
+        print(f'Ошибка чтения {name}')
         exit()
 
-def encrypt(text):
+def encrypt(text, polybius):
     """Заменяет буквы на пары цифр по квадрату Полибия"""
     res = ''
     for c in text.upper():
-        res += config.POLYBIUS_SQUARE.get(c, c)
+        res += polybius.get(c, c)
     return res
 
-def decrypt(text):
+def decrypt(text, reverse_polybius):
     """Преобразует пары цифр обратно в буквы"""
     res = ''
     i = 0
     while i < len(text):
         if i+1 < len(text) and text[i].isdigit() and text[i+1].isdigit():
             code = text[i:i+2]
-            res += REVERSE.get(code, code)
+            res += reverse_polybius.get(code, code)
             i += 2
         else:
             res += text[i]
             i += 1
     return res
 
+names = load_file_names('file_names.txt')
+POLYBIUS = load_polybius_key('polybius_key.txt')
+REVERSE = {v: k for k, v in POLYBIUS.items()}
 
-text = read_file(config.INPUT_FILE)
-print(f'Исходный текст: {len(text)} символов')
+INPUT_FILE = names['INPUT_FILE']
+ENCRYPTED_FILE = names['ENCRYPTED_FILE']
+DECRYPTED_FILE = names['DECRYPTED_FILE']
+KEY_FILE = names['KEY_FILE']
 
-enc = encrypt(text)
-print(f'Зашифровано: {len(enc)} символов')
+def save_key_display(polybius, filename):
+    """Сохраняет ключ в файл"""
+    key_text = ''
+    for letter, code in polybius.items():
+        key_text += f'{code} {letter}\n'
+    save_file(filename, key_text)
 
-dec = decrypt(enc)
-print(f'Расшифровано: {len(dec)} символов')
+def main():
+    """Основная функция"""
+    text = read_file(INPUT_FILE)
+    print(f'Исходный текст: {len(text)} символов')
 
-if dec == text.upper():
-    print('Всё ок')
-else:
-    print(' Ошибка')
+    enc = encrypt(text, POLYBIUS)
+    print(f'Зашифровано: {len(enc)} символов')
 
-save_file(config.ENCRYPTED_FILE, enc)
-save_file(config.DECRYPTED_FILE, dec)
+    dec = decrypt(enc, REVERSE)
+    print(f'Расшифровано: {len(dec)} символов')
 
-save_file(config.KEY_FILE, config.KEY_DISPLAY)
+    if dec == text.upper():
+        print('Всё ок')
+    else:
+        print('Ошибка')
+
+    save_file(ENCRYPTED_FILE, enc)
+    save_file(DECRYPTED_FILE, dec)
+    save_key_display(POLYBIUS, KEY_FILE)
+
+if __name__ == '__main__':
+    main()
