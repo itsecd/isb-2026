@@ -12,6 +12,15 @@ ENCRYPTED_FILE = 'encrypted_polybius.txt'
 DECRYPTED_FILE = 'decrypted_polybius.txt'
 KEY_FILE = 'key_polybius.txt'
 
+KEY_DISPLAY = '''КВАДРАТ ПОЛИБИЯ 6x6
+   1 2 3 4 5 6
+1  А Б В Г Д Е
+2  Ж З И Й К Л
+3  М Н О П Р С
+4  Т У Ф Х Ц Ч
+5  Ш Щ Ъ Ы Ь Э
+6  Ю Я   (пробел)'''
+
 
 
 ENCRYPTED_TEXT = """КwЧ5Д>ЫХЧ1ЪЕt Й2>ХИЬЧЙ ФХ 1 ХБЧБХЫПЫХЪЕЩЕtФЙХБЕ2rtЫИИ ХrЕЯЩЕ1ФУЙХДЫХЙЕ17БЕХ8ЛЛЫБЙ
