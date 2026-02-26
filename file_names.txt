@@ -1,0 +1,7 @@
+INPUT_FILE=input.txt
+ENCRYPTED_FILE=encrypted_polybius.txt
+DECRYPTED_FILE=decrypted_polybius.txt
+KEY_FILE=key_polybius.txt
+DECRYPTED_RESULT_FILE=02_decrypted.txt
+KEY_FOUND_FILE=02_key_found.txt
+FREQUENCY_FILE=02_frequency_analysis.txt
