@@ -1,15 +1,3 @@
-# Сгенерированные файлы (результаты работы программ)
-encrypted.txt
-decrypted_text.txt
-key.txt
-found_key.txt
-
-# Исходные тексты
-input_text.txt
-input.txt
-cod3.txt
-cod.txt
-
 # Системные файлы macOS
 .DS_Store
 .AppleDouble
