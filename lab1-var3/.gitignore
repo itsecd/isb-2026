@@ -1,0 +1,16 @@
+# Системные файлы macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Spotlight-V100/
+.Trashes/
+
+# Редактор VSCode
+.vscode/
+
+# Файлы с настройками окружения
+.env
+.venv
+env/
+venv/
+ENV/
