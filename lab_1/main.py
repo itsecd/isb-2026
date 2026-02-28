@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+"""Program entry point"""
+
 import functions
 
 
