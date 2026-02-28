@@ -1,6 +1,3 @@
-import pandas as pd
-
-
 def read_text(filename: str) -> str:
     """
     Чтение текста из файла.
@@ -30,17 +27,18 @@ def write_text(filename: str, text: str) -> None:
 
 def read_key(filename: str) -> tuple[str, str]:
     """
-    Чтение ключа из key1.txt через pandas.
+    Чтение ключа из key1.txt.
     """
     try:
-        df = pd.read_csv(filename, header=None)
+        with open(filename, "r", encoding="utf-8") as f:
+            lines = f.readlines()
 
-        if len(df) < 2:
+        if len(lines) < 2:
             print("В файле ключа должно быть две строки")
             exit(1)
 
-        alphabet = df.iloc[0, 0].strip()
-        reversed_alphabet = df.iloc[1, 0].strip()
+        alphabet = lines[0].strip()
+        reversed_alphabet = lines[1].strip()
 
         if len(alphabet) != len(reversed_alphabet):
             print("Строки ключа разной длины")
