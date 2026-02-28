@@ -1,3 +1,12 @@
+import argparse
+
+def parse_arguments():
+    """Настраивает парсер и возвращает аргументы командной строки."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file_a", help="Путь к тексту")
+    parser.add_argument("file_b", help="Путь к ключу")
+    parser.add_argument("file_c", help="Путь к результату")
+    return parser.parse_args()
 
 def load_file(path:str)-> str:
     with open(path, "r", encoding="utf-8") as f:
@@ -8,8 +17,7 @@ def save_file(path:str, text:str):
     with open(path, "w", encoding="utf-8") as f:
         f.write(text)
     
-    
-    
+
 def clear_key(key:str, alfovit: str):
     clean_key = []
     
@@ -56,5 +64,8 @@ def vigener_cipher(text: str, key: str, alfovit: str, mode:bool) -> str:
 
 
 def main():
+    args = parse_arguments()
+    
+    
     alfovit = sorted("йцукенгшщзхъфывапролджэячсмитьбюёЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM")
     return 0
