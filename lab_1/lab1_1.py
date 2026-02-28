@@ -1,4 +1,15 @@
 
+def load_file(path:str)-> str:
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read()
+    return text
+
+def save_file(path:str, text:str):
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+    
+    
+    
 def clear_key(key:str, alfovit: str):
     clean_key = []
     
