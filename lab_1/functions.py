@@ -1,4 +1,4 @@
-def vifenere_encrypt(plaint_text, key):
+def vigenere_encrypt(plain_text, key):
     """Vigenere cipher"""
     encrypted_text= []
     key_length = len(key)
@@ -23,3 +23,12 @@ def write_to_files(original_text, encrypted_text, key):
     with open('encryption_key.txt', 'w', encoding='utf-8') as file:
         file.write(f"Ключ шифрования: {key}\n")
         file.write(f"Длина ключа: {len(key)}\n")
+
+def main():
+    plain_text = ""
+    plain_text = ' '.join(plain_text.split())
+    key = create_key()
+
+    encrypted_text = vigenere_encrypt(plain_text, key)
+
+    write_to_files(plain_text, encrypted_text, key)
