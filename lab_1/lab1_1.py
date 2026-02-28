@@ -6,6 +6,7 @@ def parse_arguments():
     parser.add_argument("file_a", help="Путь к тексту")
     parser.add_argument("file_b", help="Путь к ключу")
     parser.add_argument("file_c", help="Путь к результату")
+    parser.add_argument("mode", help="Выбор шифровки(1) или дешифровки(0)")
     return parser.parse_args()
 
 def load_file(path:str)-> str:
@@ -66,6 +67,18 @@ def vigener_cipher(text: str, key: str, alfovit: str, mode:bool) -> str:
 def main():
     args = parse_arguments()
     
+    text = load_file(args.file_a)
+    key = load_file(args.file_b)
     
     alfovit = sorted("йцукенгшщзхъфывапролджэячсмитьбюёЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM")
+    
+    if(args.mode == "1"):
+        mode = True
+    else:
+        mode = False
+        
+    result = vigener_cipher(text, key, alfovit, mode)
+    save_file(args.file_c, result)
+    
+    
     return 0
