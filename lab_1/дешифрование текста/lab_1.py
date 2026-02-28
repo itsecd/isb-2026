@@ -6,7 +6,7 @@ from typing import Dict, Tuple
 
 
 def read_cipher_text(filepath: str | Path, keep_newlines: bool = False) -> str:
-    """Считывает шифртекст из файла."""
+    """Считывает шифр-текст из файла."""
     path = Path(filepath)
     text = path.read_text(encoding="utf-8")
     if not keep_newlines:
@@ -20,7 +20,7 @@ def frequency_analysis(text: str, top_n: int | None = 10) -> Tuple[Counter, str]
     items = freq.most_common() if top_n is None else freq.most_common(top_n)
 
     lines = []
-    lines.append("Частота символов:")
+    lines.append("Количество символов в тексте:")
     lines.append("-" * 30)
     for ch, count in items:
         lines.append(f"{repr(ch)}: {count}")
@@ -35,8 +35,9 @@ def write_frequency_report(
     include_total: bool = True,
     sort_by: str = "count_desc",
 ) -> None:
-    """Сохраняет таблицу частот символов в файл."""
+    """Сохраняет таблицу частот символов в файл (в долях от общей длины текста)."""
     path = Path(filepath)
+    total = sum(freq.values())
 
     if sort_by == "count_desc":
         rows = freq.most_common()
@@ -46,14 +47,16 @@ def write_frequency_report(
         raise ValueError("sort_by must be 'count_desc' or 'symbol_asc'")
 
     lines = []
-    lines.append("Частотный анализ (символ -> количество)")
+    lines.append("Частотный анализ (символ -> доля)")
     lines.append("=" * 45)
+
     for ch, count in rows:
-        lines.append(f"{repr(ch)}\t{count}")
+        fraction = count / total if total else 0
+        lines.append(f"{repr(ch)}\t{fraction:.6f}")
 
     if include_total:
         lines.append("-" * 45)
-        lines.append(f"TOTAL_LEN\t{sum(freq.values())}")
+        lines.append(f"TOTAL_LEN\t{total}")
         lines.append(f"UNIQUE_CHARS\t{len(freq)}")
 
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
