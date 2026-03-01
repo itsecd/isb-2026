@@ -1,4 +1,4 @@
-def encrypt(text, alphabet, cipher):
+def encrypt_aka_decrypt(text, alphabet, cipher):
     """Шифрует текст, заменяя буквы по ключу."""
     result = ""
     for char in text.upper():
@@ -18,9 +18,22 @@ if __name__ == "__main__":
         alphabet = lines[0].strip() 
         cipher = lines[1].strip()    
 
-    encrypted = encrypt(original, alphabet, cipher)
+    encrypted = encrypt_aka_decrypt(original, alphabet, cipher)
 
     with open("encrypted.txt", "w", encoding="utf-8") as f:
         f.write(encrypted)
 
     print("Создан файл encrypted.txt")
+
+    decrypted = encrypt_aka_decrypt(encrypted, cipher, alphabet)
+
+    print("\n" + "="*50)
+    print("ПРОВЕРКА РАСШИФРОВКИ:")
+    print("="*50)
+    print("Исходный текст:     " +  original)
+    print("Расшифрованный текст: " +  decrypted)
+    
+    if original.upper() == decrypted:
+        print("\n Алгоритм работает корректно!")
+    else:
+        print("\n Ошибка: расшифрованный текст не совпадает с исходным!")
