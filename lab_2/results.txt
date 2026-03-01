@@ -1,0 +1,14 @@
+Последовательность C:
+frequency_bitwise_test(bits) = 0.5958830905651779
+identical_consecutive_bits_test(bits) = 0.5779293102278323
+longest_sequence_test(bits) = 0.969610194285105
+
+Последовательность C++:
+frequency_bitwise_test(bits) = 0.8596837951986662
+identical_consecutive_bits_test(bits) = 0.15638888651764193
+longest_sequence_test(bits) = 0.9926329693628625
+
+Последовательность Java:
+frequency_bitwise_test(bits) = 0.7236736098317631
+identical_consecutive_bits_test(bits) = 0.2934250460371556
+longest_sequence_test(bits) = 0.9817213963723282
