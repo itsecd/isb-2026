@@ -1,0 +1,73 @@
+
+# Python cache
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+
+# Virtual environment
+
+venv/
+env/
+.venv/
+
+
+# IDE / Editor files
+
+.vscode/
+.idea/
+*.swp
+*.swo
+
+
+# System files
+
+.DS_Store
+Thumbs.db
+
+
+# Logs
+
+*.log
+
+
+# Temporary files
+
+*.tmp
+*.temp
+
+
+# Compiled files
+
+*.so
+*.pyd
+*.dll
+
+
+# Distribution / build
+
+build/
+dist/
+*.egg-info/
+
+
+# Coverage
+
+.coverage
+htmlcov/
+
+
+# Jupyter
+
+.ipynb_checkpoints/
+
+# Secrets / local configs
+
+.env
+.env.*
+
+
+# encrypted.txt
+# decrypted.txt
+# freq.txt
