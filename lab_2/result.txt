@@ -1,0 +1,14 @@
+Generator c++:
+Test1: success
+Test2: success
+Test3: success
+
+Generator java:
+Test1: success
+Test2: success
+Test3: success
+
+Generator python:
+Test1: success
+Test2: success
+Test3: success
