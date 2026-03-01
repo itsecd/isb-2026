@@ -20,6 +20,8 @@ def counter(text: str)-> dict:
     """
     counter = {}
     for char in text:
+        if char == "\n": 
+            continue
         if char in counter:
             counter[char] += 1
         else:
@@ -27,6 +29,24 @@ def counter(text: str)-> dict:
     
     return counter
 
+def frequency(counter: dict, text: str) -> dict:
+    """
+    подсчет частоты встречи символа в тексте
+    """
+    len_text = len(text)
+    frequency = {}
+    for char in counter:
+          frequency[char] = counter[char]/len_text
+    return frequency
+    
 
 def main():
+    path = "cod23.txt"
+    text = load_file(path)
+    count = counter(text)
+    freq = frequency(count, text)
+    print(freq)
     return 0    
+
+if __name__ == "__main__":
+    main()
