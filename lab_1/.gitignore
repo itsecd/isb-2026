@@ -1,5 +1,5 @@
-__pycache__
-encrypted_text.txt  
-encryption_key.txt
-original_text.txt
-venv
+*/__pycache__/
+*/encrypted_text.txt  
+*/encryption_key.txt
+*/original_text.txt
+*/venv
