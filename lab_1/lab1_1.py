@@ -84,7 +84,7 @@ def main() -> None:
     text = load_file(args.file_a)
     key = load_file(args.file_b)
     
-    alfovit = sorted("йцукенгшщзхъфывапролджэячсмитьбюёЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM")
+    alfovit = sorted("ёйцукенгшщзхъфывапролджэячсмитьбюЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ")
     
     if(args.mode == "1"):
         mode = True
