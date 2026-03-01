@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Configuration and constants"""
 
-INPUT_FILE: str = "cod14.txt"
-FREQ_FILE: str = "freq.txt"
-KEY_FILE: str = "key.txt"
-DECRYPTED_FILE: str = "decrypted.txt"
+INPUT_FILE: str = "txt_files/cod14.txt"
+FREQ_FILE: str = "txt_files/freq.txt"
+KEY_FILE: str = "txt_files/key.txt"
+DECRYPTED_FILE: str = "txt_files/decrypted.txt"
 
 RUS_FREQ_REF = {
     ' ': 0.128675, 'О': 0.096456, 'И': 0.075312, 'Е': 0.072292,
