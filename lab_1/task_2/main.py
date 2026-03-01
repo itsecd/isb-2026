@@ -1,4 +1,21 @@
-from conf import INPUT
+from collections import Counter
+from conf import INPUT, OUTPUT_FREQUENCY
+
+
+def getFrequency(text: str) -> str:
+    """
+    Give frequency
+    """
+    if not text:
+        raise ValueError("[ERROR] => text is no valid")
+
+    textLength = len(text)
+    simDict = Counter(text)
+
+    freq = {char: count / textLength for char, count in simDict.items()}
+
+    return str(dict(sorted(freq.items(), key=lambda item: item[1], reverse=True)))
+
 
 def writeToFile(filePath: str, data: str) -> None:
     """
@@ -33,10 +50,13 @@ def main() -> None:
     Main function
     """
     inputFile = INPUT
-    
+    outputFrequencyFile = OUTPUT_FREQUENCY
+
     encodeData = readFromFile(inputFile)
 
     print(f"[RUN] => encode data:\n{encodeData}")
+
+    writeToFile(outputFrequencyFile, getFrequency(encodeData))
 
     print("[RUN] => success completed!")
 
