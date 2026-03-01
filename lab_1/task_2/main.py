@@ -1,5 +1,18 @@
+import ast
 from collections import Counter
-from conf import INPUT, OUTPUT_FREQUENCY
+from conf import INPUT, OUTPUT, KEY, OUTPUT_FREQUENCY
+
+
+def decode(key: str, text: str) -> str:
+    """
+    Decode
+    """
+    if not key or not text:
+        raise ValueError("[ERROR] => text or key are no valid")
+
+    keyDict = ast.literal_eval(key)
+    decodeData = "".join(keyDict.get(char, char) for char in text)
+    return decodeData
 
 
 def getFrequency(text: str) -> str:
@@ -50,13 +63,21 @@ def main() -> None:
     Main function
     """
     inputFile = INPUT
+    outputFile = OUTPUT
     outputFrequencyFile = OUTPUT_FREQUENCY
-
+    keyFile = KEY
+    
     encodeData = readFromFile(inputFile)
-
     print(f"[RUN] => encode data:\n{encodeData}")
 
     writeToFile(outputFrequencyFile, getFrequency(encodeData))
+
+    key = readFromFile(keyFile)
+    print(f"[RUN] => key: \n{key}")
+
+    decodeData = decode(key, encodeData)
+
+    writeToFile(outputFile, decodeData)
 
     print("[RUN] => success completed!")
 
