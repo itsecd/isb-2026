@@ -70,7 +70,7 @@ def unencoded_text(encoded: str, key: str) -> str:
     return unencoded_text
 
 
-def write_text(text, path) -> None:
+def write_text(text:str, path:str) -> None:
     "сохранение файлов"
     with open(path, "w", encoding="utf-8") as file:
         file.write(text)
