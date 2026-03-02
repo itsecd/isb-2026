@@ -84,3 +84,18 @@ def decrypt_polybius(encrypted_text, encrypt_map):
         print(f"Следующие координаты не найдены в ключе: {sorted(unknown_pairs)}")
     
     return ''.join(decrypted_text)
+
+def save_to_file(filename, content):
+    """Сохраняет содержимое в файл."""
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+def print_key_preview(filename):
+    """Выводит содержимое key.txt для наглядности."""
+    print("\nИспользуемый ключ шифрования (key.txt):")
+    with open(filename, 'r', encoding='utf-8') as f:
+        print(f.read())
+
+if not os.path.exists('key.txt'):
+    print("\nФайл key.txt не найден!")
+    exit(1)
