@@ -1,7 +1,10 @@
 import re
 import sys
+import os
 
-ALPHABET = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ '
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from constants import ALPHABET, ENCODING
 
 def preprocess(text):
     """Удаляет всё, кроме русских букв и пробела, переводит в верхний регистр."""
@@ -16,13 +19,13 @@ def create_maps(key):
     dec_map = dict(zip(key, ALPHABET))
     return enc_map, dec_map
 
-def encrypt(text, enc_map):
-    """Заменяет каждый символ текста по словарю enc_map."""
-    return ''.join(enc_map.get(ch, ch) for ch in text)
-
-def decrypt(text, dec_map):
-    """Заменяет каждый символ текста по словарю dec_map."""
-    return ''.join(dec_map.get(ch, ch) for ch in text)
+def substitute(text, mapping):
+    """
+    Универсальная функция замены символов.
+    Применяет к тексту словарь mapping: если символ есть в словаре,
+    заменяет его соответствующим значением, иначе оставляет без изменений.
+    """
+    return ''.join(mapping.get(ch, ch) for ch in text)
 
 def main():
     print("=" * 50)
@@ -49,7 +52,7 @@ def main():
     output_file = input("Имя выходного файла: ").strip()
 
     try:
-        with open(input_file, 'r', encoding='utf-8') as f:
+        with open(input_file, 'r', encoding=ENCODING) as f:
             text = f.read()
     except FileNotFoundError:
         print(f"Файл '{input_file}' не найден.")
@@ -63,12 +66,14 @@ def main():
         if prep == 'y':
             text = preprocess(text)
             print("Текст очищен.")
-        result = encrypt(text, enc_map)
+        mapping = enc_map
     else:
-        result = decrypt(text, dec_map)
+        mapping = dec_map
+
+    result = substitute(text, mapping)
 
     try:
-        with open(output_file, 'w', encoding='utf-8') as f:
+        with open(output_file, 'w', encoding=ENCODING) as f:
             f.write(result)
         print(f"Готово! Результат записан в '{output_file}'.")
     except Exception as e:
