@@ -1,0 +1,4 @@
+pip             25.2
+python-dateutil 2.9.0.post0
+six             1.17.0
+tzdata          2025.3
