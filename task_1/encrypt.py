@@ -99,3 +99,47 @@ def print_key_preview(filename):
 if not os.path.exists('key.txt'):
     print("\nФайл key.txt не найден!")
     exit(1)
+
+print("\nЧтение ключа из key.txt.")
+encrypt_map, alphabet = read_key_txt('key.txt')
+
+if encrypt_map is None:
+    print("Ошибка при чтении key.txt. Проверьте формат файла.")
+    exit(1)
+
+print(f"Ключ успешно загружен!")
+print(f"Найдено символов в ключе: {len(encrypt_map)}")
+print(f"Алфавит из ключа: {alphabet}")
+
+print("Создание key.json на основе key.txt.")
+save_key_json('key.json', encrypt_map)
+
+print_key_preview('key.txt')
+
+original_text = """КРИПТОГРАФИЯ ЭТО НАУКА О МЕТОДАХ ОБЕСПЕЧЕНИЯ КОНФИДЕНЦИАЛЬНОСТИ И АУТЕНТИЧНОСТИ ИНФОРМАЦИИ ИСТОРИЯ КРИПТОГРАФИИ НАСЧИТЫВАЕТ НЕСКОЛЬКО ТЫСЯЧЕЛЕТИЙ ОДНИМ ИЗ ПЕРВЫХ ИЗВЕСТНЫХ ПРИМЕРОВ ЯВЛЯЕТСЯ ЕГИПЕТСКИЙ ИЕРОГЛИФИЧЕСКИЙ ТЕКСТ ДАТИРУЕМЫЙ ОКОЛО ТЫСЯЧИ ДЕВЯТИСОТОГО ГОДА ДО НАШЕЙ ЭРЫ В ДРЕВНЕЙ ГРЕЦИИ ПРИМЕНЯЛСЯ ШИФР СКИТАЛА ИСПОЛЬЗОВАВШИЙ ЦИЛИНДР ОПРЕДЕЛЕННОГО ДИАМЕТРА ДЛЯ ШИФРОВАНИЯ ТЕКСТА ИЗВЕСТНЫЙ РИМСКИЙ ПОЛКОВОДЕЦ ЮЛИЙ ЦЕЗАРЬ ИСПОЛЬЗОВАЛ ШИФР ПРОСТОЙ ПОДСТАНОВКИ КОТОРЫЙ ТЕПЕРЬ НАЗЫВАЕТСЯ ШИФРОМ ЦЕЗАРЯ В ЭПОХУ ВОЗРОЖДЕНИЯ ПОЯВИЛИСЬ БОЛЕЕ СЛОЖНЫЕ МЕТОДЫ ШИФРОВАНИЯ В ДВАДЦАТОМ ВЕКЕ РАЗВИТИЕ ЭЛЕКТРОННЫХ ВЫЧИСЛИТЕЛЬНЫХ МАШИН ПРИВЕЛО К ПОЯВЛЕНИЮ НОВЫХ КРИПТОГРАФИЧЕСКИХ АЛГОРИТМОВ И СОВРЕМЕННЫХ МЕТОДОВ ЗАЩИТЫ ИНФОРМАЦИИ"""
+
+original_text = original_text.upper()
+
+print("Исходный текст (original.txt):")
+print(original_text)
+print(f"Длина исходного текста: {len(original_text)} символов\n")
+
+encrypted_text = encrypt_polybius(original_text, encrypt_map)
+
+decrypted_text = decrypt_polybius(encrypted_text, encrypt_map)
+
+save_to_file('original.txt', original_text)
+save_to_file('encrypted.txt', encrypted_text)
+
+print("Зашифрованный текст (encrypted.txt):")
+print(encrypted_text)
+print(f"\nВсего пар координат: {len(encrypted_text.split())}\n")
+
+print("Расшифрованный текст (проверка):")
+print(decrypted_text)
+print(f"Всего символов: {len(decrypted_text)}\n")
+
+if original_text == decrypted_text:
+    print("Шифрование работает корректно.")
+else:
+    print("Расшифрованный текст не совпадает с оригиналом.")
