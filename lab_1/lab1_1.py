@@ -1,4 +1,6 @@
 import argparse
+from alphabet import ALPHABET
+
 
 def parse_arguments():
     """
@@ -27,40 +29,40 @@ def save_file(path:str, text:str)-> None:
         f.write(text)
     
 
-def clear_key(key:str, alfovit: str) -> list:
+def clear_key(key:str, ALPHABET: str) -> list:
     """
     очистка ключа от ненужных символов
     """
     clean_key = []
     
     for letter in key:
-        if letter in alfovit:
+        if letter in ALPHABET:
             clean_key.append(letter)
     
     return clean_key
 
-def vigener_cipher(text: str, key: str, alfovit: str, mode:bool) -> str:
+def vigener_cipher(text: str, key: str, ALPHABET: str, mode:bool) -> str:
     """
     в зависимости от mode либо шифрует, либо дешифрует текст
     """
     result = ""
-    key = clear_key(key, alfovit)
+    key = clear_key(key, ALPHABET)
     
-    letters = {letter: ind for ind, letter in enumerate(alfovit)}
-    indexs = {ind: letter for ind, letter in enumerate(alfovit)}
+    letters = {letter: ind for ind, letter in enumerate(ALPHABET)}
+    indexs = {ind: letter for ind, letter in enumerate(ALPHABET)}
     
     key_ind = 0
     key_len = len(key)
-    #(ind + key_ind) % len)alfovit
+    
     for char in text:
         if char in letters:
             char_ind = letters[char]
             key_char = key[key_ind]
             shift = letters[key_char]
             if(mode):
-                cipher_ind = (char_ind + shift) % len(alfovit)
+                cipher_ind = (char_ind + shift) % len(ALPHABET)
             else:
-                cipher_ind = (char_ind - shift) % len(alfovit)
+                cipher_ind = (char_ind - shift) % len(ALPHABET)
                 
             result += indexs[cipher_ind]  
                 
@@ -84,14 +86,14 @@ def main() -> None:
     text = load_file(args.file_a)
     key = load_file(args.file_b)
     
-    alfovit = sorted("ёйцукенгшщзхъфывапролджэячсмитьбюЁЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ")
+    
     
     if(args.mode == "1"):
         mode = True
     else:
         mode = False
         
-    result = vigener_cipher(text, key, alfovit, mode)
+    result = vigener_cipher(text, key, ALPHABET, mode)
     save_file(args.file_c, result)
     
 

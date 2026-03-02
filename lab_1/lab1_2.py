@@ -63,7 +63,7 @@ def frequency(counter: dict, text: str) -> dict:
     frequency = {}
     for char in counter:
           frequency[char] = counter[char]/len_text
-    return frequency
+    return dict(sorted(frequency.items(), key=lambda item: item[1], reverse=True))
 
 def decode(text:str, key:dict)->str:
     """
@@ -88,7 +88,7 @@ def main():
     save_file("result3.txt", result)
     
 
-    
+
     
     
     
