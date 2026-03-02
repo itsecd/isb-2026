@@ -1,13 +1,25 @@
 import json
 import os
+import sys
 
-SIZE = 6  # так как 36 ячеек
+from config import SIZE
+
 
 def read_key_txt(filename):
-    """Читает квадрат Полибия из текстового файла и создает маппинг для JSON."""
+    """
+    Читает квадрат Полибия из текстового файла и создает маппинг для JSON.
+    
+    Args:
+        filename (str): Путь к файлу с ключом
+        
+    Returns:
+        tuple: (encrypt_map, alphabet)
+        
+    Raises:
+        FileNotFoundError: Если файл не найден
+    """
     if not os.path.exists(filename):
-        print(f"Ошибка: файл {filename} не найден!")
-        return None, None
+        raise FileNotFoundError(f"Ошибка: файл {filename} не найден!")
     
     with open(filename, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -43,10 +55,34 @@ def read_key_txt(filename):
     
     return encrypt_map, alphabet
 
+
+def read_original_text(filename):
+    """
+    Читает исходный текст из файла.
+    
+    Args:
+        filename (str): Путь к файлу с исходным текстом
+        
+    Returns:
+        str: Прочитанный текст в верхнем регистре
+        
+    Raises:
+        FileNotFoundError: Если файл не найден
+    """
+    if not os.path.exists(filename):
+        raise FileNotFoundError(f"Ошибка: файл {filename} не найден!")
+    
+    with open(filename, 'r', encoding='utf-8') as f:
+        text = f.read()
+    
+    return text.upper()
+
+
 def save_key_json(filename, encrypt_map):
     """Сохраняет маппинг в JSON формате."""
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(encrypt_map, f, ensure_ascii=False, indent=2)
+
 
 def encrypt_polybius(text, encrypt_map):
     """Шифрует текст, заменяя символы на координаты."""
@@ -64,6 +100,7 @@ def encrypt_polybius(text, encrypt_map):
         print(f"Предупреждение: следующие символы не найдены в ключе: {sorted(unknown_chars)}")
     
     return ' '.join(encrypted_pairs)
+
 
 def decrypt_polybius(encrypted_text, encrypt_map):
     """Дешифрует текст из координат обратно в буквы."""
@@ -85,10 +122,12 @@ def decrypt_polybius(encrypted_text, encrypt_map):
     
     return ''.join(decrypted_text)
 
+
 def save_to_file(filename, content):
     """Сохраняет содержимое в файл."""
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(content)
+
 
 def print_key_preview(filename):
     """Выводит содержимое key.txt для наглядности."""
@@ -96,50 +135,59 @@ def print_key_preview(filename):
     with open(filename, 'r', encoding='utf-8') as f:
         print(f.read())
 
-if not os.path.exists('key.txt'):
-    print("\nФайл key.txt не найден!")
-    exit(1)
 
-print("\nЧтение ключа из key.txt.")
-encrypt_map, alphabet = read_key_txt('key.txt')
+def main():
+    """Основная функция программы."""
+    try:
+        print("\nЧтение ключа из key.txt.")
+        encrypt_map, alphabet = read_key_txt('key.txt')
+        
+        if encrypt_map is None:
+            print("Ошибка при чтении key.txt. Проверьте формат файла.")
+            sys.exit(1)
+        
+        print(f"Ключ успешно загружен!")
+        print(f"Найдено символов в ключе: {len(encrypt_map)}")
+        print(f"Алфавит из ключа: {alphabet}")
+        
+        print("Создание key.json на основе key.txt.")
+        save_key_json('key.json', encrypt_map)
+        
+        print_key_preview('key.txt')
+        
+        print("\nЧтение исходного текста из original.txt")
+        original_text = read_original_text('original.txt')
+        
+        print("Исходный текст (original.txt):")
+        print(original_text)
+        print(f"Длина исходного текста: {len(original_text)} символов\n")
+        
+        encrypted_text = encrypt_polybius(original_text, encrypt_map)
+        
+        decrypted_text = decrypt_polybius(encrypted_text, encrypt_map)
+        
+        save_to_file('encrypted.txt', encrypted_text)
+        
+        print("Зашифрованный текст (encrypted.txt):")
+        print(encrypted_text)
+        print(f"\nВсего пар координат: {len(encrypted_text.split())}\n")
+        
+        print("Расшифрованный текст (проверка):")
+        print(decrypted_text)
+        print(f"Всего символов: {len(decrypted_text)}\n")
+        
+        if original_text == decrypted_text:
+            print("Шифрование работает корректно.")
+        else:
+            print("Расшифрованный текст не совпадает с оригиналом.")
+            
+    except FileNotFoundError as e:
+        print(f"\nОшибка: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\nНепредвиденная ошибка: {e}")
+        sys.exit(1)
 
-if encrypt_map is None:
-    print("Ошибка при чтении key.txt. Проверьте формат файла.")
-    exit(1)
 
-print(f"Ключ успешно загружен!")
-print(f"Найдено символов в ключе: {len(encrypt_map)}")
-print(f"Алфавит из ключа: {alphabet}")
-
-print("Создание key.json на основе key.txt.")
-save_key_json('key.json', encrypt_map)
-
-print_key_preview('key.txt')
-
-original_text = """КРИПТОГРАФИЯ ЭТО НАУКА О МЕТОДАХ ОБЕСПЕЧЕНИЯ КОНФИДЕНЦИАЛЬНОСТИ И АУТЕНТИЧНОСТИ ИНФОРМАЦИИ ИСТОРИЯ КРИПТОГРАФИИ НАСЧИТЫВАЕТ НЕСКОЛЬКО ТЫСЯЧЕЛЕТИЙ ОДНИМ ИЗ ПЕРВЫХ ИЗВЕСТНЫХ ПРИМЕРОВ ЯВЛЯЕТСЯ ЕГИПЕТСКИЙ ИЕРОГЛИФИЧЕСКИЙ ТЕКСТ ДАТИРУЕМЫЙ ОКОЛО ТЫСЯЧИ ДЕВЯТИСОТОГО ГОДА ДО НАШЕЙ ЭРЫ В ДРЕВНЕЙ ГРЕЦИИ ПРИМЕНЯЛСЯ ШИФР СКИТАЛА ИСПОЛЬЗОВАВШИЙ ЦИЛИНДР ОПРЕДЕЛЕННОГО ДИАМЕТРА ДЛЯ ШИФРОВАНИЯ ТЕКСТА ИЗВЕСТНЫЙ РИМСКИЙ ПОЛКОВОДЕЦ ЮЛИЙ ЦЕЗАРЬ ИСПОЛЬЗОВАЛ ШИФР ПРОСТОЙ ПОДСТАНОВКИ КОТОРЫЙ ТЕПЕРЬ НАЗЫВАЕТСЯ ШИФРОМ ЦЕЗАРЯ В ЭПОХУ ВОЗРОЖДЕНИЯ ПОЯВИЛИСЬ БОЛЕЕ СЛОЖНЫЕ МЕТОДЫ ШИФРОВАНИЯ В ДВАДЦАТОМ ВЕКЕ РАЗВИТИЕ ЭЛЕКТРОННЫХ ВЫЧИСЛИТЕЛЬНЫХ МАШИН ПРИВЕЛО К ПОЯВЛЕНИЮ НОВЫХ КРИПТОГРАФИЧЕСКИХ АЛГОРИТМОВ И СОВРЕМЕННЫХ МЕТОДОВ ЗАЩИТЫ ИНФОРМАЦИИ"""
-
-original_text = original_text.upper()
-
-print("Исходный текст (original.txt):")
-print(original_text)
-print(f"Длина исходного текста: {len(original_text)} символов\n")
-
-encrypted_text = encrypt_polybius(original_text, encrypt_map)
-
-decrypted_text = decrypt_polybius(encrypted_text, encrypt_map)
-
-save_to_file('original.txt', original_text)
-save_to_file('encrypted.txt', encrypted_text)
-
-print("Зашифрованный текст (encrypted.txt):")
-print(encrypted_text)
-print(f"\nВсего пар координат: {len(encrypted_text.split())}\n")
-
-print("Расшифрованный текст (проверка):")
-print(decrypted_text)
-print(f"Всего символов: {len(decrypted_text)}\n")
-
-if original_text == decrypted_text:
-    print("Шифрование работает корректно.")
-else:
-    print("Расшифрованный текст не совпадает с оригиналом.")
+if __name__ == "__main__":
+    main()
