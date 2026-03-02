@@ -3,26 +3,25 @@ def compute_letter_frequencies(text: str) -> None:
     Подсчет частоты символов и запись в файл 'freq_output.txt' без 
     спецсимволов.
     """
-    valid_chars = [
-        "Z", "9", "E", "n", "I", "A", "C", "F", "!", "W", "h", "P", "U",
-        "V", "x", "O", "K", "S", "-", "M", "=", "B", "J", "t", "L", " ",
-        "$", "3", "R", "G", "Q", "8", ">", "Y", "d"
-    ]
-
-    freq_dict = {ch: 0 for ch in valid_chars}
+    freq_dict = {}
     total_chars = 0
 
     for ch in text:
-        if ch in freq_dict:
+        if ch.isprintable():
+            if ch not in freq_dict:
+                freq_dict[ch] = 0
             freq_dict[ch] += 1
             total_chars += 1
 
-    sorted_freq = sorted(freq_dict.items(), key=lambda x: x[1], reverse=True)
+    sorted_freq = sorted(
+        freq_dict.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
 
     with open("freq_output.txt", "w", encoding="utf-8") as f:
         for ch, count in sorted_freq:
-            if count > 0:
-                f.write(f"{ch} {count / total_chars:.10f}\n")
+            f.write(f"{ch} {count / total_chars:.10f}\n")
 
 
 def read_key_file(file_path: str) -> dict:
