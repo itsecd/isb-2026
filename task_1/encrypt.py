@@ -1,3 +1,4 @@
+import json
 import os
 
 SIZE = 6  # так как 36 ячеек
@@ -41,3 +42,8 @@ def read_key_txt(filename):
                     alphabet += char
     
     return encrypt_map, alphabet
+
+def save_key_json(filename, encrypt_map):
+    """Сохраняет маппинг в JSON формате."""
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(encrypt_map, f, ensure_ascii=False, indent=2)
