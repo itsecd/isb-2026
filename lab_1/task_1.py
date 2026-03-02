@@ -88,7 +88,33 @@ def main():
 
     encrypted_text = caesar_cipher(original_text, int(args.key_value), mode='encrypt')
 
+    try:
+        with open(args.encrypt_text_path, 'w', encoding='utf-8') as f:
+            f.write(encrypted_text)
+    except IOError:
+        print(f"Error writing to a file {args.encrypt_text_path} ")
+        sys.exit(1)
 
+    try:
+        with open(args.key_path, 'w', encoding='utf-8') as f:
+            f.write(str(args.key_value))
+    except IOError:
+        print(f"Error writing to a file {args.key_path} ")
+        sys.exit(1)
+
+    decrypted_text = caesar_cipher(encrypted_text, int(args.key_value), mode='decrypt')
+
+    if original_text == decrypted_text:
+        print("Исходный текст успешно зашифрован и дешифрован")
+
+    else:
+        print("Дешифрованный текст не совпадает с исходным текстом")
+        try:
+            with open(args.decrypt_text_path, 'w', encoding='utf-8') as f:
+                f.write(decrypted_text)
+        except IOError:
+            print(f"Error writing to a file {args.decrypt_text_path} ")
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
