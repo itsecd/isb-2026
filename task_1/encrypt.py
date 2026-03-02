@@ -47,3 +47,20 @@ def save_key_json(filename, encrypt_map):
     """Сохраняет маппинг в JSON формате."""
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(encrypt_map, f, ensure_ascii=False, indent=2)
+
+def encrypt_polybius(text, encrypt_map):
+    """Шифрует текст, заменяя символы на координаты."""
+    encrypted_pairs = []
+    unknown_chars = set()
+    
+    for char in text:
+        if char in encrypt_map:
+            encrypted_pairs.append(encrypt_map[char])
+        else:
+            unknown_chars.add(char)
+            encrypted_pairs.append('??')
+    
+    if unknown_chars:
+        print(f"Предупреждение: следующие символы не найдены в ключе: {sorted(unknown_chars)}")
+    
+    return ' '.join(encrypted_pairs)
