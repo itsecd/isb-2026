@@ -34,21 +34,34 @@ def save_decrypted_text(filename: str, text: str) -> None:
     print(f"\nРасшифрованный текст сохранён в файл: {filename}")
 
 
+def save_frequencies_to_file(frequencies: dict[str, float], filename: str = "frequencies.txt") -> None:
+    """
+    Сохранение частот символов в файл.
+    
+    Args:
+        frequencies: словарь с частотами символов
+        filename: имя файла для сохранения
+    """
+    lines = ["Частоты символов в зашифрованном тексте:\n"]
+    lines.append("-" * 35)
+    lines.append(f"{'Символ':<10} | {'Частота':<12}")
+    lines.append("-" * 35)
+    
+    for ch, freq in sorted(frequencies.items(), key=lambda x: x[1], reverse=True):
+        display_char = ch if ch.isprintable() else f"\\x{ord(ch):02x}"
+        lines.append(f"  {display_char:<8} | {freq:.6f}")
+    
+    lines.append("-" * 35)
+    write_file(filename, "\n".join(lines))
+    
+
 def main():
 
     cipher_text = read_file("cod5.txt")
     print(f"Длина текста: {len(cipher_text)} символов")
 
-    # Вычисление частот символов
     freq = calc_frequency(cipher_text)
-
-    print("-" * 30)
-    print(f"{'Символ':<8} | {'Частота':<10}")
-    print("-" * 30)
-    for ch, f in sorted(freq.items(), key=lambda x: x[1], reverse=True):
-        display_char = ch if ch.isprintable() else f"\\x{ord(ch):02x}"
-        print(f"  {display_char:<6} | {f:.6f}")
-    print("-" * 30)
+    save_frequencies_to_file(freq, "frequencies.txt")
 
     plain_text = ''.join(key.get(ch, ch) for ch in cipher_text)
     
