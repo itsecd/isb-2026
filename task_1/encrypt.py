@@ -64,3 +64,23 @@ def encrypt_polybius(text, encrypt_map):
         print(f"Предупреждение: следующие символы не найдены в ключе: {sorted(unknown_chars)}")
     
     return ' '.join(encrypted_pairs)
+
+def decrypt_polybius(encrypted_text, encrypt_map):
+    """Дешифрует текст из координат обратно в буквы."""
+    decrypt_map = {v: k for k, v in encrypt_map.items()}
+    
+    pairs = encrypted_text.split(' ')
+    decrypted_text = []
+    unknown_pairs = set()
+    
+    for pair in pairs:
+        if pair in decrypt_map:
+            decrypted_text.append(decrypt_map[pair])
+        else:
+            unknown_pairs.add(pair)
+            decrypted_text.append('?')
+    
+    if unknown_pairs:
+        print(f"Следующие координаты не найдены в ключе: {sorted(unknown_pairs)}")
+    
+    return ''.join(decrypted_text)
