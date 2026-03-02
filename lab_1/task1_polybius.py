@@ -1,13 +1,25 @@
 import re
 
 class PolybiusSquare:
+    """Класс для шифрования и дешифрования текста с использованием квадрата Полибия.
+    
+    Квадрат Полибия размером 6x6 содержит русский алфавит, пробел, цифры и знаки препинания.
+    Каждый символ заменяется двузначным числом: номер строки и номер столбца.
+    """
+    
     def __init__(self):
+        """Инициализация квадрата Полибия с русским алфавитом и дополнительными символами."""
         # Русский алфавит + пробел + цифры + знаки препинания (36 ячеек)
         self.alphabet = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя 0123456789.,!?-:;'
         self.size = 6
         self.square = self._create_square()
         
     def _create_square(self):
+        """Создание двумерного массива 6x6 для квадрата Полибия.
+        
+        Returns:
+            list: Двумерный список размером 6x6, содержащий символы алфавита.
+        """
         square = []
         for i in range(self.size):
             row = []
@@ -18,6 +30,7 @@ class PolybiusSquare:
         return square
     
     def print_square(self):
+        """Вывод квадрата Полибия в консоль в виде таблицы."""
         print("\nКвадрат Полибия:")
         print("   " + " ".join([f"{j+1:2}" for j in range(self.size)]))
         for i in range(self.size):
@@ -25,6 +38,15 @@ class PolybiusSquare:
             print(" ".join(row))
     
     def encrypt(self, text):
+        """Шифрование текста с помощью квадрата Полибия.
+        
+        Args:
+            text (str): Исходный текст для шифрования.
+            
+        Returns:
+            str: Зашифрованный текст в виде последовательности двузначных чисел,
+                 разделенных пробелами.
+        """
         text = text.lower()
         # Создаем ключ: буква -> код
         key = {}
@@ -39,6 +61,14 @@ class PolybiusSquare:
         return ' '.join(result)
     
     def decrypt(self, encrypted_text):
+        """Дешифрование текста, зашифрованного квадратом Полибия.
+        
+        Args:
+            encrypted_text (str): Зашифрованный текст (последовательность чисел).
+            
+        Returns:
+            str: Расшифрованный текст.
+        """
         # Создаем ключ: код -> буква
         key = {}
         for i in range(self.size):
@@ -54,6 +84,11 @@ class PolybiusSquare:
         return ''.join(result)
     
     def save_key(self, filename):
+        """Сохранение ключа шифрования в файл.
+        
+        Args:
+            filename (str): Имя файла для сохранения ключа.
+        """
         with open(filename, 'w', encoding='utf-8') as f:
             f.write("КЛЮЧ ШИФРОВАНИЯ (буква -> код):\n")
             f.write("-"*30 + "\n")
@@ -63,6 +98,11 @@ class PolybiusSquare:
                         f.write(f"'{self.square[i][j]}' -> {i+1}{j+1}\n")
 
 def run():
+    """Запуск задания 1: шифрование текста квадратом Полибия.
+    
+    Функция загружает текст из файла text_for_task1.txt, шифрует его,
+    сохраняет результаты и выводит на экран.
+    """
     print("\n" + "="*80)
     print("ЗАДАНИЕ 1: Шифрование квадратом Полибия")
     print("="*80)
@@ -72,6 +112,9 @@ def run():
         with open('text_for_task1.txt', 'r', encoding='utf-8') as f:
             original = f.read()
         print(f"Текст загружен из text_for_task1.txt (длина: {len(original)} симв.)")
+    except FileNotFoundError:
+        print("Ошибка: файл text_for_task1.txt не найден")
+        return
     except Exception as e:
         print(f"Ошибка при загрузке файла: {e}")
         return
@@ -86,13 +129,19 @@ def run():
     print(encrypted[:300] + "..." if len(encrypted) > 300 else encrypted)
     
     # Сохраняем
-    with open('task1_encrypted.txt', 'w', encoding='utf-8') as f:
-        f.write(encrypted)
-    print("\n✓ Сохранено в task1_encrypted.txt")
+    try:
+        with open('task1_encrypted.txt', 'w', encoding='utf-8') as f:
+            f.write(encrypted)
+        print("\n✓ Сохранено в task1_encrypted.txt")
+    except Exception as e:
+        print(f"Ошибка при сохранении: {e}")
     
     # Ключ
-    poly.save_key('task1_key.txt')
-    print("✓ Ключ сохранен в task1_key.txt")
+    try:
+        poly.save_key('task1_key.txt')
+        print("✓ Ключ сохранен в task1_key.txt")
+    except Exception as e:
+        print(f"Ошибка при сохранении ключа: {e}")
     
     # Дешифруем
     decrypted = poly.decrypt(encrypted)

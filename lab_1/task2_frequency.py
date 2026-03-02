@@ -1,8 +1,17 @@
+"""Модуль для частотного анализа и дешифровки моноалфавитной замены."""
+
 from collections import Counter
 from datetime import datetime
 
 class FrequencyAnalyzer:
+    """Класс для частотного анализа текста и интерактивной дешифровки.
+    
+    Позволяет сравнивать частоты символов в зашифрованном тексте
+    с эталонными частотами русского языка и вручную подбирать замены.
+    """
+    
     def __init__(self):
+        """Инициализация с эталонными частотами русского языка и цветами для вывода."""
         # Точные частоты русского языка
         self.russian = {
             ' ': 0.128675, 'о': 0.096456, 'и': 0.075312, 'е': 0.072292,
@@ -15,12 +24,20 @@ class FrequencyAnalyzer:
             'ц': 0.005034, 'ш': 0.004229, 'щ': 0.003625, 'э': 0.002416,
             'ъ': 0.000000
         }
-        # Цвета
+        # Цвета для выделения замененных символов
         self.GREEN = '\033[92m'
         self.BOLD = '\033[1m'
         self.END = '\033[0m'
     
     def get_freq(self, text):
+        """Вычисление частот символов в тексте.
+        
+        Args:
+            text (str): Исходный текст.
+            
+        Returns:
+            tuple: (словарь частот, счетчик символов, общее количество символов)
+        """
         # Чистим от переносов строк
         clean = text.lower().replace('\n', '').replace('\r', '')
         total = len(clean)
@@ -31,6 +48,13 @@ class FrequencyAnalyzer:
         return dict(sorted(freq.items(), key=lambda x: x[1], reverse=True)), counter, total
     
     def print_freq(self, enc_freq, enc_counter, total):
+        """Вывод таблицы сравнения частот символов.
+        
+        Args:
+            enc_freq (dict): Частоты символов в зашифрованном тексте.
+            enc_counter (Counter): Счетчик символов.
+            total (int): Общее количество символов.
+        """
         print("\n" + "="*100)
         print("ЧАСТОТЫ СИМВОЛОВ")
         print("="*100)
@@ -63,6 +87,15 @@ class FrequencyAnalyzer:
             print(f" {i+1:2} |     {e_str:6}     |    {e_perc:6.2f}    |  {e_cnt:3}   |    {r_str:6}    |   {r_perc:6.2f}")
     
     def decrypt(self, text, subs):
+        """Применение замен к тексту.
+        
+        Args:
+            text (str): Исходный зашифрованный текст.
+            subs (dict): Словарь замен {зашифрованный_символ: исходный_символ}.
+            
+        Returns:
+            tuple: (текст с цветным выделением, обычный текст)
+        """
         colored, plain = [], []
         for ch in text:
             if ch in '\n\r':
@@ -80,25 +113,44 @@ class FrequencyAnalyzer:
         return ''.join(colored), ''.join(plain)
     
     def save(self, text, subs, variant):
+        """Сохранение результатов дешифровки в файлы.
+        
+        Args:
+            text (str): Зашифрованный текст.
+            subs (dict): Словарь замен.
+            variant (str): Номер варианта.
+        """
         _, plain = self.decrypt(text, subs)
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         
         # Текст
         txt_file = f"task2_decoded_var{variant}_{ts}.txt"
-        with open(txt_file, 'w', encoding='utf-8') as f:
-            f.write(plain)
-        print(f"\n✓ Результат: {txt_file}")
+        try:
+            with open(txt_file, 'w', encoding='utf-8') as f:
+                f.write(plain)
+            print(f"\n✓ Результат: {txt_file}")
+        except Exception as e:
+            print(f"Ошибка при сохранении результата: {e}")
         
         # Ключ
         key_file = f"task2_key_var{variant}_{ts}.txt"
-        with open(key_file, 'w', encoding='utf-8') as f:
-            f.write("ЗАМЕНЫ:\n")
-            for k, v in sorted(subs.items()):
-                vv = '_' if v == ' ' else v
-                f.write(f"'{k}' -> '{vv}'\n")
-        print(f"✓ Ключ: {key_file}")
+        try:
+            with open(key_file, 'w', encoding='utf-8') as f:
+                f.write("ЗАМЕНЫ:\n")
+                for k, v in sorted(subs.items()):
+                    vv = '_' if v == ' ' else v
+                    f.write(f"'{k}' -> '{vv}'\n")
+            print(f"✓ Ключ: {key_file}")
+        except Exception as e:
+            print(f"Ошибка при сохранении ключа: {e}")
     
     def interactive(self, text, variant):
+        """Интерактивный режим подбора замен.
+        
+        Args:
+            text (str): Зашифрованный текст.
+            variant (str): Номер варианта.
+        """
         subs = {}
         history = []
         freq, cnt, total = self.get_freq(text)
@@ -151,8 +203,17 @@ class FrequencyAnalyzer:
                         print(f"Добавлено: '{frm}' -> '{'_' if to==' ' else to}'")
                     else:
                         print("Ошибка: нужен один символ")
+            elif cmd == 'show':
+                continue
+            else:
+                print("Неизвестная команда")
 
 def run():
+    """Запуск задания 2: частотный анализ для 11 варианта.
+    
+    Функция загружает текст из файла code11.txt и запускает
+    интерактивный режим подбора замен.
+    """
     print("\n" + "="*80)
     print("ЗАДАНИЕ 2: Частотный анализ (вариант 11)")
     print("="*80)
@@ -161,13 +222,19 @@ def run():
         with open('code11.txt', 'r', encoding='utf-8') as f:
             text = f.read()
         print("Загружен code11.txt")
+    except FileNotFoundError:
+        print("Файл code11.txt не найден")
+        return
     except Exception as e:
         print(f"Ошибка при загрузке файла: {e}")
         return
     
-    with open('task2_encrypted_var11.txt', 'w', encoding='utf-8') as f:
-        f.write(text)
-    print("Сохранено в task2_encrypted_var11.txt")
+    try:
+        with open('task2_encrypted_var11.txt', 'w', encoding='utf-8') as f:
+            f.write(text)
+        print("Сохранено в task2_encrypted_var11.txt")
+    except Exception as e:
+        print(f"Ошибка при сохранении: {e}")
     
     print("\nТЕКСТ:")
     print("-"*50)
