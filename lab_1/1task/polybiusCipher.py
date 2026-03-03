@@ -1,4 +1,3 @@
-# polybiusCipher.py
 import json
 import os
 import sys
@@ -62,6 +61,31 @@ def saveKeyToJson(fileName, encryptDict):
         json.dump(encryptDict, f, ensure_ascii=False, indent=2)
 
 
+def encryptText(text, encryptDict):
+    result = []
+    
+    for char in text:
+        result.append(encryptDict[char])
+    
+    return ' '.join(result)
+
+
+def decryptText(encryptedText, encryptDict):
+    decryptDict = {v: k for k, v in encryptDict.items()}
+    pairs = encryptedText.split(' ')
+    result = []
+    
+    for pair in pairs:
+        result.append(decryptDict[pair])
+    
+    return ''.join(result)
+
+
+def saveToFile(fileName, content):
+    with open(fileName, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+
 def showKeyContent(fileName):
     print("\nСодержимое key.txt:")
     with open(fileName, 'r', encoding='utf-8') as f:
@@ -90,6 +114,24 @@ def main():
         print("Исходный текст:")
         print(originalText)
         print(f"Длина: {len(originalText)} символов\n")
+        
+        encryptedText = encryptText(originalText, encryptDict)
+        decryptedText = decryptText(encryptedText, encryptDict)
+        
+        saveToFile('encrypted.txt', encryptedText)
+        
+        print("Зашифрованный текст (encrypted.txt):")
+        print(encryptedText)
+        print(f"\nПар координат: {len(encryptedText.split())}\n")
+        
+        print("Расшифрованный текст:")
+        print(decryptedText)
+        print(f"Символов: {len(decryptedText)}\n")
+        
+        if originalText == decryptedText:
+            print("Шифрование работает корректно")
+        else:
+            print("Ошибка: расшифровка не совпадает с оригиналом")
             
     except FileNotFoundError as e:
         print(f"\nОшибка: {e}")
