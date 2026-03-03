@@ -36,7 +36,7 @@ def main():
         with open('lab1/data/task1_source.txt', 'r', encoding='utf-8') as f:
             source_text = f.read()
     except FileNotFoundError:
-        print("Создайте файл ./data/task1_source.txt с текстом (не менее 500 символов)!")
+        print("Создайте файл lab1/data/task1_source.txt с текстом (не менее 500 символов)!")
         return
 
     # Шифрование
