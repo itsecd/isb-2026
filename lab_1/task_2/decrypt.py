@@ -27,6 +27,13 @@ def save_key(decryption_key: dict) -> None:
         for char in sorted(decryption_key.keys()):
             file.write(f"{char} | {decryption_key[char]}\n")
 
+def get_sorted_frequencies(text: str) -> list:
+    """Calculates chars"""
+    clean_text: str = text.replace("\n", "").replace("\r", "")
+    char_counts: collections.Counter = collections.Counter(clean_text)
+    total_chars: int = len(clean_text)
+
+    return sorted(char_counts.items(), key=lambda x: x[1], reverse=True)
 
 def main() -> None:
     """Main execution function for frequency analysis decryption."""
@@ -37,13 +44,10 @@ def main() -> None:
     with open(settings.INPUT_FILE, "r", encoding="utf-8") as file:
         ciphertext: str = file.read()
 
-    clean_text: str = ciphertext.replace("\n", "").replace("\r", "")
-    char_counts: collections.Counter = collections.Counter(clean_text)
-    total_chars: int = len(clean_text)
+    
+    sorted_cipher_chars: list = get_sorted_frequencies(ciphertext)
 
-    sorted_cipher_chars: list = sorted(
-        char_counts.items(), key=lambda x: x[1], reverse=True
-    )
+    total_chars: int = sum(count for char, count in sorted_cipher_chars)
 
     with open(settings.FREQ_FILE, "w", encoding="utf-8") as file:
         for char, count in sorted_cipher_chars:
