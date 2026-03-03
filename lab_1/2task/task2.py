@@ -1,7 +1,6 @@
 import json
 import os
 import argparse
-from collections import Counter
 
 import constants
 
@@ -85,16 +84,6 @@ def make_key(encrypted_freq, sample_freq):
     return key
 
 
-def decode_text(text, key):
-    result = ""
-    for char in text:
-        if char in key:
-            result += key[char]
-        else:
-            result += char
-    return result
-
-
 def main():
     args = get_args()
     
@@ -112,19 +101,6 @@ def main():
         print("Делаю первый ключ...")
         key1 = make_key(enc_freq, constants.REFERENCE_FREQUENCIES)
         write_file(key1, args.key1, json_file=True)
-    
-    if not os.path.exists(args.output1):
-        dec1 = decode_text(encrypted, key1)
-        write_file(dec1, args.output1)
-        print("Первая расшифровка готова")
-    
-    key2 = read_file(args.key2, json_file=True)
-    if key2 is not None:
-        dec2 = decode_text(encrypted, key2)
-        write_file(dec2, args.output2)
-        print("Финальная расшифровка готова")
-    else:
-        print("Нет второго ключа, отредактируй первый и сохрани как key_2.json")
 
 
 if __name__ == "__main__":
