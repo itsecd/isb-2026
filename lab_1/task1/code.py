@@ -1,49 +1,44 @@
 import argparse
 
-def read_file(file_path: str) -> str:
+def read_file(path: str) -> str:
     """
-    Reading file if it possible
+    Read file content.
     """
     try:
-        with open(file_path, "r", encoding="utf-8") as rfile:
-            return rfile.read()
-    except FileNotFoundError as e:
+        with open(path, "r", encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError:
         raise
 
-def write_file(file_path: str, text: str) -> str:
+
+def write_file(path: str, text: str) -> None:
     """
-    Writing file if it possible
+    Write text to file.
     """
     try:
-        with open(file_path, "w", encoding="utf-8") as wfile:
-            return wfile.write(text)
-    except FileNotFoundError as e:
+        if path:
+            with open(path, "w", encoding="utf-8") as file:
+                file.write(text)
+    except FileNotFoundError:
         raise
+
+
 
 def parse_args() -> argparse.Namespace:
     """
-    Parse parameters from console
+    Parse parameters from console.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--read_file",
-                        "-rf",
-                        type=str,
-                        help="Path to text that should be crypted")
-    parser.add_argument("--write_file",
-                        "-wf",
-                        type=str,
-                        help="Path where encrypted text will be saved")
-    parser.add_argument("--key_file",
-                        "-kf",
-                        type=str,
-                        help="Path where key is located")
+    parser.add_argument("-i", "--input", required=True)
+    parser.add_argument("-o", "--output", required=True)
+    parser.add_argument("-k", "--key", required=True)
     return parser.parse_args()
 
-def create_substitution_table(key: str, is_reversed:bool = False) -> set:
+
+def build_substitution_table(key: str, alphabet: str, is_reversed:bool = False) -> set:
     """
-    Create substitution table between alphabets
+    Build substitution table between alphabets
     """
-    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     table = {}
     if is_reversed == True:
         for i in range(len(alphabet)):
@@ -53,6 +48,7 @@ def create_substitution_table(key: str, is_reversed:bool = False) -> set:
             table[key[i]] = alphabet[i]
 
     return table
+
 
 def encrypting_text(text: str, table: set) -> str:
     """
@@ -71,14 +67,15 @@ def encrypting_text(text: str, table: set) -> str:
 def main() -> None:
     args = parse_args()
     try:
-        text = read_file(args.read_file)
-        key = read_file(args.key_file)
+        text = read_file(args.input)
+        key = read_file(args.key)
+        alphabet = read_file("en_alphabet.txt")
 
-        encryption_table = create_substitution_table(key)
-        decryption_table = create_substitution_table(key, True)
+        encryption_table = build_substitution_table(key, alphabet)
+        decryption_table = build_substitution_table(key, alphabet, True)
         encrypted_text = encrypting_text(text, encryption_table)
         # decrypted_text = encrypting_text(encrypted_text, decryption_table) #optionally
-        write_file(args.write_file, encrypted_text)
+        write_file(args.output, encrypted_text)
     except Exception as e:
         print(f"Произошла ошибка: {e}")
 
