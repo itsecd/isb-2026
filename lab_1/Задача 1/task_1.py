@@ -1,4 +1,5 @@
 import argparse
+from constants_task_1 import original_text_path, key_path, encrypt_text_path, decrypt_text_path
 import sys
 
 def caesar_cipher(text, shift, mode='encrypt'):
@@ -47,8 +48,7 @@ def parse_args() -> argparse.Namespace:
 
     p.add_argument("-o",
                    "--original_text_path",
-                   default="C:\\Users\\Адель\\Desktop\\ОИБ\\Лабораторная работа 1\\"
-                           "isb-2026\\lab_1\\original_text_task_1.txt",
+                   default=original_text_path,
                    help="Путь к оригинальному тексту")
 
     p.add_argument("-k",
@@ -58,20 +58,17 @@ def parse_args() -> argparse.Namespace:
 
     p.add_argument("-kp",
                    "--key_path",
-                   default="C:\\Users\\Адель\\Desktop\\ОИБ\\Лабораторная работа 1\\"
-                           "isb-2026\\lab_1\\key_task_1.txt",
+                   default=key_path,
                    help="Путь для сохранения значения ключа")
 
     p.add_argument("-e",
                    "--encrypt_text_path",
-                   default="C:\\Users\\Адель\\Desktop\\ОИБ\\Лабораторная работа 1\\"
-                           "isb-2026\\lab_1\\encrypted_text_task_1.txt",
+                   default=encrypt_text_path,
                    help="Путь для сохранения зашифрованного текста")
 
     p.add_argument("-d",
                    "--decrypt_text_path",
-                   default="C:\\Users\\Адель\\Desktop\\ОИБ\\Лабораторная работа 1\\"
-                           "isb-2026\\lab_1\\decrypted_text_task_1.txt",
+                   default=decrypt_text_path,
                    help="Путь для сохранения дешифрованного текста")
 
     return p.parse_args()
