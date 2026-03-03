@@ -1,4 +1,4 @@
-import os
+import config
 
 def load_polybius_square(filename):
     """Загружаем квадрат Полибия из файла 5x5 (пробел оставил перенес на несуществующую 6 строку)"""
@@ -69,24 +69,17 @@ def save_text(filename, text):
 
 def main():
     try:
-        key_file = 'key.txt'
-        square = load_polybius_square(key_file)
-        
-        input_file = 'original_text.txt'
-        
-        plaintext = load_plaintext(input_file)
+        square = load_polybius_square(config.KEY_FILE_TASK1)
+        plaintext = load_plaintext(config.INPUT_FILE_TASK1)
         
         processed_text = process_text(plaintext)
-      
         encrypted = encrypt_polybius(processed_text, square)
         decrypted = decrypt_polybius(encrypted, square)
-        # оставил сохранение расшифрованного текста
-        decrypted_check = decrypt_polybius(encrypted, square)
         
-        save_text('encrypted_text.txt', encrypted)
-        save_text('original_text_processed.txt', processed_text)
-        save_text('decrypted_text.txt', decrypted)
-        
+        save_text(config.ENCRYPTED_OUTPUT_TASK1, encrypted)
+        save_text(config.PROCESSED_OUTPUT_TASK1, processed_text)
+        save_text(config.DECRYPTED_OUTPUT_TASK1, decrypted)
+    
     except Exception as e:
         print(f"Ошибка: {e}")
 
