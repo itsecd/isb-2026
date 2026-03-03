@@ -1,0 +1,5 @@
+KEY_FILE_TASK1 = 'key.txt'
+INPUT_FILE_TASK1 = 'original_text.txt'
+ENCRYPTED_OUTPUT_TASK1 = 'encrypted_text.txt'
+PROCESSED_OUTPUT_TASK1 = 'original_text_processed.txt'
+DECRYPTED_OUTPUT_TASK1 = 'decrypted_text.txt'
