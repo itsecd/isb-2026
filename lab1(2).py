@@ -1,13 +1,22 @@
-cipher_text = """Y8S-tA-!AYQSYxS3dAGYSRJ-=A-SUYItLJ-K-ARxOR$JQRALOZYI-JtAJYA$QJFAGYQO$8YxLJ$OFSYQJFA8$=QJx-=A8ORAI$E$S-RA!L8LnACUU$KJ-xS3$ALOZYI-Jt3AGYtYZLBJAYGJ-t-!-
-IYxLJFAILhYJWAGIYZILttA-AQ-QJ$tAnJYAYQYh$SSYALKJWLOFSYAxACGYdWAhYOFEdA8LSS3d
-GIYZILtt-IYxLS-
-$AxAQxYBAYn$I$8FAGY!xYOR$JAQY!8LxLJFAGI-OYM$S-RA-AQ-QJ$t3AKYJYI3$ALxJYtLJ-!-IWBJAIWJ-SS3$A!L8Ln-AYh$QG$nxLRAW8YhQJxYA-AQKYIYQJFAx3GYOS$S-RAYG$IL>-=
-QAIL!x-J-$tAJ$dSYOYZ-=AJLK-dAKLKA-QKWQQJx$SS3=A-SJ$OO$KJA-AtLE-SSY$AYhWn$S-$A-SUYItLJ-KLAQJLSYxJQRA$9$AhYO$$AxLMSY=
-CJ-ASLGILxO$S-RAYJKI3xLBJASYx3$AZYI-!YSJ3AxALSLO-
-!$A8LSS3dAGI$8QKL!LJ$OFSY=ALSLO-J-K$A-ALxJYtLJ-!L>--
-AGIY>$QQYx
-xLMSYAYJt$J-JFAnJYA-SUYItLJ-KLAS$AJYOFKYAQGYQYhQJxW$JAIL!x-J-BAJ$dSYOYZ-=ASYA-AUYIt-IW$JASYx3$AGY8dY83AKAI$E$S-BAQY>-
-LOFS3dACKYSYt-n$QK-dA-ACKYOYZ-n$QKdAGIYhO$tA8$OLRAt-IAhYO$$A-ACUU$KJ-xS3t"""
+def read_cipher_from_file(filename):
+    try:
+        with open(filename, 'r', encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"Ошибка: Файл '{filename}' не найден.")
+        return None
+    except Exception as e:
+        print(f"Ошибка при чтении файла: {e}")
+        return None
+
+input_filename = "cipher_text.txt"  
+
+cipher_text = read_cipher_from_file(input_filename)
+
+if cipher_text is None:
+    print("Не удалось прочитать файл. Программа завершена.")
+    exit()
+
 chars = list(cipher_text)
 total = len(chars)
 
@@ -17,7 +26,6 @@ for c in chars:
 
 sorted_freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)
 
-
 print("ЧАСТОТНЫЙ АНАЛИЗ ЗАШИФРОВАННОГО ТЕКСТА")
 print(f"Всего символов: {total}")
 print("\nСимвол | Кол-во | Частота")
@@ -25,6 +33,16 @@ print("-" * 30)
 for c, count in sorted_freq:
     print(f"{c:6} | {count:6} | {count/total:.4f}")
 print()
+
+with open('frequency_analysis.txt', 'w', encoding='utf-8') as f:
+    f.write("ЧАСТОТНЫЙ АНАЛИЗ ЗАШИФРОВАННОГО ТЕКСТА\n")
+    f.write(f"Всего символов: {total}\n")
+    f.write("\nСимвол | Кол-во | Частота\n")
+    f.write("-" * 30 + "\n")
+    for c, count in sorted_freq:
+        f.write(f"{c:6} | {count:6} | {count/total:.4f}\n")
+
+print("Частотный анализ сохранён в файл 'frequency_analysis.txt'")
 
 cipher = cipher_text
 
@@ -60,17 +78,20 @@ text = text.replace('>', 'Ц')
 text = text.replace('B', 'Ю')
 text = text.replace('9', 'Щ')
 
+
 with open('decrypted_text.txt', 'w', encoding='utf-8') as f:
     f.write(text)
+
 
 key_mapping = {
     'A': ' ', 'Y': 'О', 't': 'М', '-': 'И', 'S': 'Н', 'J': 'Т', 'E': 'Ш',
     '$': 'Е', 'F': 'Ь', 'U': 'Ф', 'I': 'Р', 'L': 'А', 'C': 'Э', 'Q': 'С',
     'O': 'Л', 'x': 'В', 'M': 'Ж', 'n': 'Ч', '8': 'Д', '!': 'З', 'G': 'П',
     'W': 'У', 'd': 'Х', 'Z': 'Г', '=': 'Й', '3': 'Ы', 'h': 'Б', 'R': 'Я',
-    '>': 'Ц', 'B': 'Ю', '9': 'Щ', 'K':'K'
+    '>': 'Ц', 'B': 'Ю', '9': 'Щ'
 }
 
+# Сохранение ключа шифрования
 with open('cipher_key.txt', 'w', encoding='utf-8') as f:
     f.write("КЛЮЧ ШИФРОВАНИЯ\n")
     f.write("Символ шифротекста -> Буква открытого текста\n")
@@ -80,7 +101,4 @@ with open('cipher_key.txt', 'w', encoding='utf-8') as f:
         f.write(f"'{cipher_char}' -> '{plain_char}'\n")
 
 print("Дешифровка завершена. Файлы сохранены:")
-print("decrypted_text.txt")
-print("cipher_key.txt")
-
 print(text)

@@ -1,3 +1,24 @@
+def read_text_from_file(filename):
+    try:
+        with open(filename, 'r', encoding='utf-8') as file:
+            return file.read()
+    except FileNotFoundError:
+        print(f"Ошибка: Файл '{filename}' не найден.")
+        return None
+    except Exception as e:
+        print(f"Ошибка при чтении файла: {e}")
+        return None
+
+def save_to_file(text, filename):
+    try:
+        with open(filename, 'w', encoding='utf-8') as file:
+            file.write(text)
+        print(f"✓ Текст сохранён в файл: {filename}")
+        return True
+    except Exception as e:
+        print(f"✗ Ошибка при сохранении файла {filename}: {e}")
+        return False
+    
 def generate_key(text, key):
     key = list(key)
     if len(text) == len(key):
@@ -67,17 +88,8 @@ def decrypt(encrypted_text, key):
     return ''.join(decrypted_text)
 
 def main():
-    original_text = """
-Раннее утро в небольшом городке всегда особенное — воздух ещё свеж и прохладен, 
-а первые лучи солнца мягко золотят крыши домов. Улицы почти пусты: лишь изредка мелькнёт фигура
- спешащего на работу человека или пробежит заигравшийся пёс. В парках слышно пение ранних птиц — 
- звонкие трели соловьёв переплетаются с размеренным стуком дятла.
-
-Возле пекарни уже чувствуется аппетитный аромат свежевыпеченного хлеба, а у цветочного киоска 
-раскладывают первые букеты: нежные тюльпаны, гордые нарциссы и скромные подснежники. Где‑то вдалеке 
-гудит мусоровоз, но этот звук не нарушает общей умиротворяющей атмосферы — он лишь подчёркивает начало 
-нового дня, полного возможностей и маленьких радостей. Горожане постепенно просыпаются, и жизнь набирает обороты."""
-
+    filename = "original_text.txt"  
+    original_text = read_text_from_file(filename)
     key = "КРИПТОГРАФИЯ"
     
     print("Исходный текст:")
@@ -90,6 +102,8 @@ def main():
 
     print("ЗАШИФРОВАННЫЙ ТЕКСТ:")
     print(encrypted)
+    
+    save_to_file(encrypted, "encrypted_text.txt")
     
     decrypted = decrypt(encrypted, key)
     print("ДЕШИФРОВАННЫЙ ТЕКСТ:")
