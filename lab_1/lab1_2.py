@@ -1,3 +1,7 @@
+from paths import PATH_TO_TEXT
+from paths import PATH_TO_KEY
+from paths import PATH_TO_RESULT
+
 def load_file(path:str)-> str:
     """
     чтение текста из файла
@@ -81,11 +85,11 @@ def decode(text:str, key:dict)->str:
     
 
 def main():
-    text = load_file("cod23.txt")
-    key = load_key("key2.txt")
+    text = load_file(PATH_TO_TEXT)
+    key = load_key(PATH_TO_KEY)
     
     result = decode(text, key)
-    save_file("result3.txt", result)
+    save_file(PATH_TO_RESULT, result)
     
 
 
