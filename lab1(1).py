@@ -1,3 +1,9 @@
+from const import (
+    LOWER_ALPHABET, UPPER_ALPHABET, ALPHABET_LENGTH,
+    INPUT_FILENAME, ENCRYPTED_FILENAME, KEY
+
+)
+
 def read_text_from_file(filename):
     try:
         with open(filename, 'r', encoding='utf-8') as file:
@@ -29,24 +35,19 @@ def generate_key(text, key):
     return ''.join(key)
 
 def get_pos(char):
-    lower = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
-    upper = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
-    
-    if char in lower:
-        return lower.index(char)
-    elif char in upper:
-        return upper.index(char)
+    if char in LOWER_ALPHABET:
+        return LOWER_ALPHABET.index(char)
+    elif char in UPPER_ALPHABET:
+        return UPPER_ALPHABET.index(char)
     else:
         return -1
 
 def get_char_by_pos(pos, is_upper):
-    lower = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
-    upper = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
-    
     if is_upper:
-        return upper[pos % 33]
+        return UPPER_ALPHABET[pos % ALPHABET_LENGTH]
     else:
-        return lower[pos % 33]
+        return LOWER_ALPHABET[pos % ALPHABET_LENGTH]
+
 
 def encrypt(text, key):
     encrypted_text = []
@@ -88,24 +89,22 @@ def decrypt(encrypted_text, key):
     return ''.join(decrypted_text)
 
 def main():
-    filename = "original_text.txt"  
-    original_text = read_text_from_file(filename)
-    key = "КРИПТОГРАФИЯ"
+    original_text = read_text_from_file(INPUT_FILENAME)
     
     print("Исходный текст:")
     print(original_text)
     print(f"\nДлина текста: {len(original_text)} символов")
-    print(f"Ключевое слово: {key}")
-    print(f"Длина ключа: {len(key)} символов")
+    print(f"Ключевое слово: {KEY}")
+    print(f"Длина ключа: {len(KEY)} символов")
     
-    encrypted = encrypt(original_text, key)
+    encrypted = encrypt(original_text, KEY)
 
     print("ЗАШИФРОВАННЫЙ ТЕКСТ:")
     print(encrypted)
     
-    save_to_file(encrypted, "encrypted_text.txt")
-    
-    decrypted = decrypt(encrypted, key)
+    save_to_file(encrypted,ENCRYPTED_FILENAME)
+
+    decrypted = decrypt(encrypted, KEY)
     print("ДЕШИФРОВАННЫЙ ТЕКСТ:")
     print(decrypted)
     
@@ -115,17 +114,5 @@ def main():
     else:
         print("Дешифрованный текст отличается от исходного.")
             
-    print("ДЕМОНСТРАЦИЯ РАБОТЫ:")
-    test_text = "Привет, мир!"
-    test_key = "Ключ"
-    print(f"Тестовый текст: '{test_text}'")
-    print(f"Ключ: '{test_key}'")
-    
-    test_encrypted = encrypt(test_text, test_key)
-    test_decrypted = decrypt(test_encrypted, test_key)
-    
-    print(f"Зашифровано: '{test_encrypted}'")
-    print(f"Расшифровано: '{test_decrypted}'")
-    
 if __name__ == "__main__":
     main()

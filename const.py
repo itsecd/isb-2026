@@ -1,0 +1,15 @@
+LOWER_ALPHABET = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
+UPPER_ALPHABET = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
+ALPHABET_LENGTH = 33
+
+INPUT_FILENAME = "original_text.txt"
+ENCRYPTED_FILENAME = "encrypted_text.txt"
+
+KEY = "КРИПТОГРАФИЯ"
+
+INPUT_CIPHER_FILE = "cipher_text.txt"
+INPUT_KEY_FILE = "cipher_key.txt"
+
+OUTPUT_FREQUENCY_ANALYSIS = "frequency_analysis.txt"
+OUTPUT_DECRYPTED_TEXT = "decrypted_text.txt"
+OUTPUT_DECRYPTED_ANALYSIS = "decrypted_analysis.txt"
