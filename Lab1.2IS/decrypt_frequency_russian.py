@@ -1,5 +1,4 @@
-import os
-
+import config
 def load_text(filename):
     """Загружает текст из файла"""
     with open(filename, 'r', encoding='utf-8') as f:
@@ -13,8 +12,8 @@ def load_key(filename):
             line = line.strip()
             if '->' in line:
                 parts = line.split('->')
-                cipher_char = parts[0].strip()
-                text_char = parts[1].strip()
+                cipher_char = parts[0].strip().strip("'")
+                text_char = parts[1].strip().strip("'")
                 key[cipher_char] = text_char
     return key
 
@@ -56,15 +55,12 @@ def save_text(filename, text):
         f.write(text)
 
 def main():
-    ciphertext = load_text('cod1.txt')
-    
-    key = load_key('key.txt')
+    ciphertext = load_text(config.CIPHER_FILE_TASK2)
+    key = load_key(config.KEY_FILE_TASK2)
     
     analyze_frequency(ciphertext)
-    
     decrypted = decrypt_text(ciphertext, key)
-    
-    save_text('decoded_text.txt', decrypted)
+    save_text(config.DECODED_OUTPUT_TASK2, decrypted)
 
 if __name__ == "__main__":
     main()
