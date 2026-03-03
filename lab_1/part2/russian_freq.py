@@ -34,4 +34,10 @@ RUSSIAN_FREQUENCY = {
     "Щ": 0.003625,
     "Э": 0.002416,
     "Ъ": 0.000000,
+
 }
+
+CIPHER_FILE = "cipher.txt"
+KEY_FILE = "key.txt"
+DECODED_FILE = "decoded.txt"
+FREQUENCY_FILE= "frequency.txt"
