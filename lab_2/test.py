@@ -1,4 +1,5 @@
 import math
+import numpy as np
 from scipy.special import gammaincc
 
 def read_from_file(filename : str) -> str:
@@ -102,6 +103,29 @@ def len_one_test(filename : str) -> None:
 
     return p_value
 
+def spectral_test(filename : str) -> float:
+    """
+    Спектральный тест
+    """
+    bit_str = read_from_file(filename)
+    n = len(bit_str)
+    x = np.array([2 * int(b) - 1 for b in bit_str])
+
+    s = np.fft.fft(x)
+
+    module = np.abs(s)[:n//2]
+
+    t = np.sqrt(np.log(1/0.05) * n)
+
+    n0 = 0.95*n/2
+    n1 = np.sum(module < t)
+
+    d = (n1 - n0) / (np.sqrt(n * 0.95 * 0.05 / 4))
+
+    p_value = math.erfc(np.abs(d) / np.sqrt(2))
+    
+    return p_value
+
 def main() -> None:
     filename_1 = "output_cpp.txt"
     filename_2 = "output_py.txt"
@@ -112,15 +136,18 @@ def main() -> None:
     print(f"Частотный: {frequency_test(filename_1)}\n")
     print(f"Битовый: {bit_test(filename_1)}\n")
     print(f"Тест на длину единиц: {len_one_test(filename_1)}\n\n")
+    print(f"Спектральный: {spectral_test(filename_1)}\n")
 
     print("ГПСЧ Python:\n")
     print(f"Частотный: {frequency_test(filename_2)}\n")
     print(f"Битовый: {bit_test(filename_2)}\n")
     print(f"Тест на длину единиц: {len_one_test(filename_2)}\n\n")
+    print(f"Спектральный: {spectral_test(filename_2)}\n")
 
     print("ГПСЧ Java:\n")
     print(f"Частотный: {frequency_test(filename_3)}\n")
     print(f"Битовый: {bit_test(filename_3)}\n")
     print(f"Тест на длину единиц: {len_one_test(filename_3)}\n\n")
+    print(f"Спектральный: {spectral_test(filename_3)}\n")
 if __name__ == "__main__":
     main()
