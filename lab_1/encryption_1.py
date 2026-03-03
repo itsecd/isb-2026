@@ -1,17 +1,33 @@
-alphabet = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ "
-square_size = 6
+
+""" Реализация шифрования и дешифрования произвольного текста методом квадрата Полибия. """
+
+from constants import (
+    ALPHABET,
+    SQUARE_SIZE,
+    KEY_TEXT_FRST,
+    CLEAN_TEXT_FRST,
+    TEXT_FRST,
+    RESULT_FRST_DECRY,
+    RESULT_FRST_ENCRY,
+)
 
 
 def build_square_table(alphabet, square_size):
+
+    """ Построение квадрата Полибия по используемому алфавиту с разделением по длине строки. """
+
     square_table = []
 
-    for i in range(0, len(alphabet), square_size):
-        square_table.append(alphabet[i:i + square_size])
+    for i in range(0, len(ALPHABET), SQUARE_SIZE):
+        square_table.append(ALPHABET[i:i + SQUARE_SIZE])
 
     return square_table
 
 
 def encrypt(text, square_table):
+
+    """ Шифрование текста с заменой каждой буквы на ее соотвествующие координаты в квадрате Полибия. """
+
     result = ""
 
     for letter in text:
@@ -24,6 +40,9 @@ def encrypt(text, square_table):
 
 
 def decrypt(cipher_text, square_table):
+
+    """ Дешифрование исходного текста по координатам из квадрата Полибия. """
+
     result = ""
 
     numbers = cipher_text.split()
@@ -37,46 +56,64 @@ def decrypt(cipher_text, square_table):
 
 
 def read_file(filename):
+
+    """ Чтение содержимого файла. """
+
     with open(filename, "r", encoding="utf-8") as file:
         return file.read()
 
 
 def write_file(filename, text):
+
+    """ Запись переданного текста в файл. """
+
     with open(filename, "w", encoding="utf-8") as file:
         file.write(text)
 
 
 def save_key(square, filename):
+
+    """ Сохранение ключа замены в файл. """
+
     with open(filename, "w", encoding="utf-8") as file:
         for row in square:
             file.write(row + "\n")
 
 
 def clean_text(text, alphabet):
+
+    """ Проверка исходного текста на содержание в нем символов/букв, не содержащихся в заданном алфавите. """
+
     result = ""
 
     for char in text.upper():
-        if char in alphabet:
+        if char in ALPHABET:
             result += char
 
     return result
 
 
 def main():
-    square = build_square_table(alphabet, square_size)
 
-    text = read_file("text_1.txt")
-    text = clean_text(text, alphabet)
+    """ Главная функция. """
 
-    write_file("check_cleanText.txt", text)
+    square = build_square_table(ALPHABET, SQUARE_SIZE)
+
+    text = read_file(TEXT_FRST)
+
+    text = clean_text(text, ALPHABET)
+
+    write_file(CLEAN_TEXT_FRST, text)
 
     cipher = encrypt(text, square)
-    write_file("result_1.txt", cipher)
+
+    write_file(RESULT_FRST_ENCRY, cipher)
 
     decrypted = decrypt(cipher, square)
-    write_file("Result_decText1.txt", decrypted)
 
-    save_key(square, "key_text1.txt")
+    write_file(RESULT_FRST_DECRY, decrypted)
+
+    save_key(square, KEY_TEXT_FRST)
 
     print("Зашифрование и дешифрование текста выполнено.")
 

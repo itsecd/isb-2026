@@ -1,37 +1,52 @@
-alphabet = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ "
 
+""" Реализация дешифрования данного текста методом частотного анализа. """
 
-russian_frequency_order = [
-    " ", "О", "И", "Е", "А", "Н", "Т", "С", "Р",
-    "В", "М", "Л", "Д", "Я", "К", "П", "З", "Ы",
-    "Ь", "У", "Ч", "Ж", "Г", "Х", "Ф", "Й",
-    "Ю", "Б", "Ц", "Ш", "Щ", "Э", "Ъ"
-]
+from constants import (
+    RUSSIAN_FREQUENCY_ORDER,
+    COD_FILE,
+    FREQ_TABLE_FILE,
+    KEY_FILE,
+    RESULT_FILE
+)
 
 
 def read_file(filename):
+
+    """ Чтение содержимого файла. """
+
     with open(filename, "r", encoding="utf-8") as file:
         return file.read()
 
 
 def write_file(filename, text):
+
+    """ Запись переданного текста в файл. """
+
     with open(filename, "w", encoding="utf-8") as file:
         file.write(text)
 
 
 def count_frequency(text):
-    freq = {}
+
+    """ Вычисление относительной частоты символом в данном тексте. """
+
+    counts = {}
+    total = len(text)
 
     for char in text:
-        if char in freq:
-            freq[char] += 1
-        else:
-            freq[char] = 1
+        counts[char] = counts.get(char, 0) + 1
 
-    return freq
+    frequency = {}
+    for char, count in counts.items():
+        frequency[char] = count / total
+
+    return frequency
 
 
 def sort_symbols(freq):
+
+    """ Сортировка используемых символов по убыванию их частоты. """
+
     symbols = list(freq.keys())
 
     for i in range(len(symbols)):
@@ -43,6 +58,9 @@ def sort_symbols(freq):
 
 
 def save_frequency(freq, filename):
+
+    """ Сохранение таблицы частот символов в файл. """
+
     total = 0
     for value in freq.values():
         total += value
@@ -56,6 +74,9 @@ def save_frequency(freq, filename):
 
 
 def decoding(text, key):
+
+    """ Расшифровка текста с использованием ключа замены. """
+
     result = ""
 
     for char in text:
@@ -68,22 +89,31 @@ def decoding(text, key):
 
 
 def save_key(key, filename):
+
+    """ Сохранение ключа замены в файл. """
+
     with open(filename, "w", encoding="utf-8") as file:
         for symbol in key:
             file.write(symbol + " -> " + key[symbol] + "\n")
 
 
 def build_key(sorted_symbols):
+
+    """ Формирование ключа замены на основе частот символов. """
+
     key = {}
 
     for i in range(len(sorted_symbols)):
-        if i < len(russian_frequency_order):
-            key[sorted_symbols[i]] = russian_frequency_order[i]
+        if i < len(RUSSIAN_FREQUENCY_ORDER):
+            key[sorted_symbols[i]] = RUSSIAN_FREQUENCY_ORDER[i]
 
     return key
 
 
 def load_key(filename):
+
+    """ Загрузка ключа замены из файла. """
+
     key = {}
 
     try:
@@ -101,27 +131,30 @@ def load_key(filename):
 
 
 def main():
-    text = read_file("cod5.txt")
+
+    """ Главная функция. """
+
+    text = read_file(COD_FILE)
 
     text = text.replace("G", " ")
 
     freq = count_frequency(text)
 
-    save_frequency(freq, "TableFrequency_TextEncry.txt")
+    save_frequency(freq, FREQ_TABLE_FILE)
 
-    key = load_key("Key_Text2.txt")
+    key = load_key(KEY_FILE)
 
     if key is None:
         sorted_symbols = sort_symbols(freq)
         key = build_key(sorted_symbols)
-        save_key(key, "Key_Text2.txt")
+        save_key(key, KEY_FILE)
         print("Новый ключ создан.")
     else:
         print("Ключ загружен из файла.")
 
     decoded = decoding(text, key)
 
-    write_file("ResultDecod_Text2.txt", decoded)
+    write_file(RESULT_FILE, decoded)
 
     print("Дешифрование выполнено.")
 
