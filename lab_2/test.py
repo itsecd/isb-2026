@@ -1,6 +1,11 @@
 import math
 from scipy.special import gammaincc
 
+from paths import PATH_TO_PY
+from paths import PATH_TO_CPP
+from paths import PATH_TO_JAVA
+from paths import PATH_TO_CONCLUSION
+
 def load_file(path:str)-> str:
     """
     чтение текста из файла
@@ -9,6 +14,11 @@ def load_file(path:str)-> str:
         text = f.read()
     return text
 
+
+def save_to_file(lang:str , test1:float,test2:float, test3:float, path:str )->None:
+    with open(path, "a", encoding="utf-8") as f:
+        line = f"{lang} \n Частотный побитовый тест: {test1} \n Тест на одинаковые подряд идущие биты: {test2} \n Тест на самую длинную последовательность единиц в блоке: {test3} \n\n"
+        f.write(line)
 
 def bit_frequency_test(text:str) -> float:
     p = 0
@@ -81,10 +91,33 @@ def longest_sequence_of_ones_in_a_block_test(text:str)-> float:
     p = gammaincc(1.5 , x/2)
     
     return p
-        
+
+
+    
+
+
 
 def main() -> None:
-    return 0
-
+    java_subsequence = load_file(PATH_TO_JAVA)
+    java_test1 = bit_frequency_test(java_subsequence)
+    java_test2 = test_for_identical_consecutive_bits(java_subsequence)
+    java_test3 = longest_sequence_of_ones_in_a_block_test(java_subsequence)
+    save_to_file("Java", java_test1, java_test2, java_test3, PATH_TO_CONCLUSION)
+    
+    
+    
+    py_subsequence = load_file(PATH_TO_PY)
+    py_test1 = bit_frequency_test(py_subsequence)
+    py_test2 = test_for_identical_consecutive_bits(py_subsequence)
+    py_test3 = longest_sequence_of_ones_in_a_block_test(py_subsequence)
+    save_to_file("Python", py_test1, py_test2, py_test3, PATH_TO_CONCLUSION)
+    
+    cpp_subsequence = load_file(PATH_TO_CPP)
+    cpp_test1 = bit_frequency_test(cpp_subsequence)
+    cpp_test2 = test_for_identical_consecutive_bits(cpp_subsequence)
+    cpp_test3 = longest_sequence_of_ones_in_a_block_test(cpp_subsequence)
+    save_to_file("CPP", cpp_test1, cpp_test2, cpp_test3, PATH_TO_CONCLUSION)
+    
+    
 if __name__ == "__main__":
     main()
