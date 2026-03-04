@@ -50,9 +50,6 @@ def build_key_by_frequency(text_freq: dict, ref_freq: dict) -> dict:
         del ref_chars[idx]
         del ref_vals[idx]
 
-    for ch in text_freq:
-        if ch not in mapping:
-            mapping[ch] = ch
     return mapping
 
 
@@ -112,4 +109,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
