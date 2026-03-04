@@ -1,4 +1,4 @@
-from conf import INPUT, OUTPUT, KEY, ALPHABET, SECKRET_KEY
+from conf import INPUT, OUTPUT, KEY, ALPHABET
 
 
 def readFromFile(filePath: str) -> str:
@@ -77,8 +77,7 @@ def main() -> None:
     outputFile = OUTPUT
     keyFile = KEY
 
-    key = "".join([char.upper() for char in SECKRET_KEY if char.upper() in ALPHABET])
-
+    key = readFromFile(keyFile)
     data = readFromFile(inputFile)
 
     filterData = "".join([char.upper() for char in data if char.upper() in ALPHABET])
@@ -87,7 +86,7 @@ def main() -> None:
     decryptedData = decode(encryptedData, key)
 
     if filterData != decryptedData:
-        print("[ERROR] => the original text is`t equal to the decrypted text")
+        print("[ERROR] => the original text is`t equal to the decodeData text")
         return
 
     writeToFile(outputFile, encryptedData)
