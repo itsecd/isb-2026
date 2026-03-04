@@ -4,6 +4,7 @@ from scipy.special import gammaincc
 
 
 def frequency_bitwise_test(bits: str) -> float:
+    """Частотный побитовый тест"""
     char_map = {"1": 1, "0": -1}
     sum_n = 0
     for c in bits:
@@ -13,6 +14,7 @@ def frequency_bitwise_test(bits: str) -> float:
 
 
 def identical_consecutive_bits_test(bits: str) -> float:
+    """Тест на одинаковые подряд идущие биты"""
     n = len(bits)
     z = bits.count("1") / n
 
@@ -28,6 +30,7 @@ def identical_consecutive_bits_test(bits: str) -> float:
 
 
 def longest_sequence_test(bits: str, m: int = 8) -> float:
+    """Тест на максимальную последовательность единиц в блоке"""
     v1, v2, v3, v4 = 0, 0, 0, 0
     for i in range(len(bits) // m):
         block = bits[m * i:m * (i + 1)]
@@ -52,15 +55,16 @@ def longest_sequence_test(bits: str, m: int = 8) -> float:
             v1 += 1
     pi1, pi2, pi3, pi4 = 0.2148, 0.3672, 0.2305, 0.1875
     x_2 = 0
-    x_2 += ((v1 - 16 * pi1) ** 2) / 16 * pi1
-    x_2 += ((v2 - 16 * pi2) ** 2) / 16 * pi2
-    x_2 += ((v3 - 16 * pi3) ** 2) / 16 * pi3
-    x_2 += ((v4 - 16 * pi4) ** 2) / 16 * pi4
+    x_2 += ((v1 - 16 * pi1) ** 2) / (16 * pi1)
+    x_2 += ((v2 - 16 * pi2) ** 2) / (16 * pi2)
+    x_2 += ((v3 - 16 * pi3) ** 2) / (16 * pi3)
+    x_2 += ((v4 - 16 * pi4) ** 2) / (16 * pi4)
 
     return float(gammaincc(3 / 2, x_2 / 2))
 
 
 def analyse(bits: str) -> None:
+    """Анализ битовой строки с помощью тестов NIST"""
     print(f"{frequency_bitwise_test(bits) = }")  # классная фишка Python :)
     print(f"{identical_consecutive_bits_test(bits) = }")
     print(f"{longest_sequence_test(bits) = }")
