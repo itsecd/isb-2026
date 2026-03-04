@@ -1,5 +1,9 @@
 import os
 from collections import Counter
+from const import (
+    INPUT_FILE, FREQ_FILE, AUTO_KEY_FILE,
+    AUTO_DEC_FILE, USER_KEY_FILE, USER_DEC_FILE
+)
 
 try:
     from frequency import REFERENCE_FREQUENCIES
@@ -63,16 +67,19 @@ def decrypt(text: str, mapping: dict) -> str:
             result.append(mapping.get(normalize_letter(ch), ch))
     return ''.join(result)
 
+def write_key_to_file(key: dict,filename:str) -> None:
+    with open(filename, 'w', encoding='utf-8') as f:
+        for sym, let in key.items():
+            f.write(f"{repr(sym)} = {let}\n")
+
+
+def write_decrypted_to_file(text: str, filename: str) -> None:
+    with open(filename, 'w', encoding='utf-8') as f:
+        f.write(text)
 
 def main():
-    input_file = "cod16.txt"
-    freq_file = "frequency_in_text.txt"
-    auto_key_file = "key.txt"
-    auto_dec_file = "decrypted.txt"
-    user_key_file = "key_2.txt"
-    user_dec_file = "decrypted_2.txt"
 
-    with open(input_file, encoding='utf-8') as f:
+    with open(INPUT_FILE, encoding='utf-8') as f:
         cipher_full = f.read()
 
     cipher_clean = cipher_full.replace('\n', '').replace('\r', '')
@@ -83,31 +90,26 @@ def main():
     norm_text = ''.join(normalize_letter(c) for c in cipher_clean)
     freq = count_frequencies(norm_text)
 
-    with open(freq_file, 'w', encoding='utf-8') as f:
+    with open(FREQ_FILE, 'w', encoding='utf-8') as f:
         for ch, fq in sorted(freq.items(), key=lambda x: x[1], reverse=True):
             f.write(f"{repr(ch)}-{fq:.6f}\n")
 
     auto_key = build_key_by_frequency(freq, REFERENCE_FREQUENCIES)
-
-    with open(auto_key_file, 'w', encoding='utf-8') as f:
-        for sym, let in auto_key.items():
-            f.write(f"{repr(sym)} = {let}\n")
+    write_key_to_file(auto_key,AUTO_KEY_FILE)
 
     dec_auto = decrypt(cipher_full, auto_key)
-    with open(auto_dec_file, 'w', encoding='utf-8') as f:
-        f.write(dec_auto)
+    write_decrypted_to_file(dec_auto,AUTO_DEC_FILE)
 
-    if os.path.exists(user_key_file):
+    if os.path.exists(USER_KEY_FILE):
         try:
-            user_key = read_key_file(user_key_file)
+            user_key = read_key_file(USER_KEY_FILE)
             if user_key:
                 dec_user = decrypt(cipher_full, user_key)
-                with open(user_dec_file, 'w', encoding='utf-8') as f:
+                with open(USER_DEC_FILE, 'w', encoding='utf-8') as f:
                     f.write(dec_user)
         except Exception as e:
-            print(f"Error processing {user_key_file}: {e}")
+            print(f"Error processing {USER_DEC_FILE}: {e}")
 
 
 if __name__ == "__main__":
-
     main()
