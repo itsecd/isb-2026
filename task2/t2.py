@@ -68,12 +68,14 @@ def decrypt(text: str, mapping: dict) -> str:
     return ''.join(result)
 
 def write_key_to_file(key: dict,filename:str) -> None:
+    """write key into file"""
     with open(filename, 'w', encoding='utf-8') as f:
         for sym, let in key.items():
             f.write(f"{repr(sym)} = {let}\n")
 
 
 def write_decrypted_to_file(text: str, filename: str) -> None:
+    """write decrypted text into file"""
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(text)
 
@@ -113,3 +115,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
