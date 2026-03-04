@@ -6,6 +6,7 @@ import constants
 
 
 def get_args():
+    """Парсит аргументы командной строки."""
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", default="cod5.txt")
     parser.add_argument("-k1", "--key1", default="key_1.json")
@@ -17,6 +18,7 @@ def get_args():
 
 
 def read_file(filename, json_file=False):
+    """Читает файл и возвращает содержимое. Для JSON возвращает словарь."""
     try:
         f = open(filename, "r", encoding="utf-8")
         if json_file:
@@ -33,6 +35,7 @@ def read_file(filename, json_file=False):
 
 
 def write_file(data, filename, json_file=False):
+    """Записывает данные в файл. Для JSON сохраняет словарь."""
     f = open(filename, "w", encoding="utf-8")
     if json_file:
         json.dump(data, f, ensure_ascii=False, indent=4)
@@ -43,6 +46,7 @@ def write_file(data, filename, json_file=False):
 
 
 def count_freq(text):
+    """Считает частоту символов в тексте и возвращает отсортированный словарь."""
     freq = {}
     total = len(text)
     if total == 0:
@@ -66,6 +70,7 @@ def count_freq(text):
 
 
 def make_key(encrypted_freq, sample_freq):
+    """Создает ключ дешифровки на основе частотного анализа."""
     key = {}
     enc_list = []
     samp_list = []
@@ -84,17 +89,8 @@ def make_key(encrypted_freq, sample_freq):
     return key
 
 
-def decode_text(text, key):
-    result = ""
-    for char in text:
-        if char in key:
-            result += key[char]
-        else:
-            result += char
-    return result
-
-
 def main():
+    """Основная функция: частотный анализ и создание ключа."""
     args = get_args()
     
     encrypted = read_file(args.input)
@@ -111,19 +107,6 @@ def main():
         print("Делаю первый ключ...")
         key1 = make_key(enc_freq, constants.REFERENCE_FREQUENCIES)
         write_file(key1, args.key1, json_file=True)
-    
-    if not os.path.exists(args.output1):
-        dec1 = decode_text(encrypted, key1)
-        write_file(dec1, args.output1)
-        print("Первая расшифровка готова")
-    
-    key2 = read_file(args.key2, json_file=True)
-    if key2 is not None:
-        dec2 = decode_text(encrypted, key2)
-        write_file(dec2, args.output2)
-        print("Финальная расшифровка готова")
-    else:
-        print("Нет второго ключа, отредактируй первый и сохрани как key_2.json")
 
 
 if __name__ == "__main__":
