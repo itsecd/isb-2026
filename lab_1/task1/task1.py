@@ -49,6 +49,9 @@ def load_original_text(filename='original.txt'):
         text = f.read()
     return text
 
+def write_file(text, file_name):
+    with open(file_name, 'w', encoding='utf-8') as f:
+        f.write(text)
 
 def main():
     original_text = load_original_text()
@@ -60,11 +63,8 @@ def main():
     
     decrypted_text = cipher.decrypt(encrypted_text)
     
-    with open('encrypted.txt', 'w', encoding='utf-8') as f:
-        f.write(encrypted_text)
-    
-    with open('decrypted.txt', 'w', encoding='utf-8') as f:
-        f.write(decrypted_text)
+    write_file(encrypted_text, 'encrypted.txt')
+    write_file(decrypted_text, 'decrypted.txt')
 
 if __name__ == "__main__":
     main()
