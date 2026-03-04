@@ -1,4 +1,6 @@
 import ru_freq
+from collections import Counter
+import config 
 
 
 def load_text(filename):
@@ -24,13 +26,11 @@ def analyze_frequency(text):
     text_plain = text.replace('\n', '')
     total = len(text_plain)
 
-    freq = {}
-    for char in text_plain:
-        freq[char] = freq.get(char, 0) + 1
+    freq = Counter(text_plain)
 
     items = sorted(freq.items(), key=lambda x: x[1], reverse=True)
 
-    with open('freq.txt', 'w', encoding='utf-8') as f:
+    with open(config.FREQ_FILE, 'w', encoding='utf-8') as f:
         for char, count in items:
             freq_value = count / total
             f.write(f"{char} = {freq_value:.5f}\n")
@@ -40,7 +40,7 @@ def analyze_frequency(text):
 
 def build_key(text_freq):
     """
-    Создает ключ 
+    Создает ключ
     """
     text_chars = [char for char, _ in text_freq]
 
@@ -74,19 +74,18 @@ def save_key(key, filename):
 
 
 def main():
-
-    cipher_text = load_text('input.txt')
+    cipher_text = load_text(config.INPUT_FILE)
 
     text_freq = analyze_frequency(cipher_text)
-    print("Частоты сохранены в freq.txt")
+    print(f"Частоты сохранены в {config.FREQ_FILE}")
 
     key = build_key(text_freq)
-    save_key(key, 'key.txt')
-    print("Ключ сохранен в key.txt")
+    save_key(key, config.KEY_FILE)
+    print(f"Ключ сохранен в {config.KEY_FILE}")
 
     decrypted = decrypt(cipher_text, key)
-    save_text('decrypted_text.txt', decrypted)
-    print("Первичная дефишровка текста сохранена в decrypted_text.txt")
+    save_text(config.DECRYPTED_TEXT_FILE, decrypted)
+    print(f"Первичная дешифровка текста сохранена в {config.DECRYPTED_TEXT_FILE}")
 
 
 if __name__ == "__main__":
