@@ -1,0 +1,6 @@
+INPUT_FILE = "input.txt"
+ENCRYPTED_FILE = "encrypted.txt"
+DECRYPTED_CHECK_FILE = "decrypted_check.txt"
+FREQ_FILE = "freq.txt"
+KEY_FILE = "key.txt"
+DECRYPTED_TEXT_FILE = "decrypted_text.txt"
