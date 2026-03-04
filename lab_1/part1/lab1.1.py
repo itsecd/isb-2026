@@ -36,7 +36,7 @@ def generate_key(text: str, key: str) -> str:
 
 
 def encrypt(text: str, key: str) -> str:
-    """Шифрует текст с использованием шифра Виженера"""
+    """Шифрует текст"""
     key_extended = generate_key(text, key)
     result = ""
 
