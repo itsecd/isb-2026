@@ -6,6 +6,7 @@ from config import TableSize
 
 
 def loadKeyFromFile(fileName):
+    """Загружает ключ из файла и создает словарь соответствия символов координатам."""
     if not os.path.exists(fileName):
         raise FileNotFoundError(f"Файл {fileName} не найден")
     
@@ -47,6 +48,7 @@ def loadKeyFromFile(fileName):
 
 
 def readOriginalText(fileName):
+    """Читает исходный текст из файла и возвращает его в верхнем регистре."""
     if not os.path.exists(fileName):
         raise FileNotFoundError(f"Файл {fileName} не найден")
     
@@ -57,11 +59,13 @@ def readOriginalText(fileName):
 
 
 def saveKeyToJson(fileName, encryptDict):
+    """Сохраняет ключ в JSON файл."""
     with open(fileName, 'w', encoding='utf-8') as f:
         json.dump(encryptDict, f, ensure_ascii=False, indent=2)
 
 
 def encryptText(text, encryptDict):
+    """Шифрует текст, заменяя каждый символ на координаты из ключа."""
     result = []
     
     for char in text:
@@ -71,6 +75,7 @@ def encryptText(text, encryptDict):
 
 
 def decryptText(encryptedText, encryptDict):
+    """Расшифровывает текст, заменяя координаты обратно на символы."""
     decryptDict = {v: k for k, v in encryptDict.items()}
     pairs = encryptedText.split(' ')
     result = []
@@ -82,17 +87,20 @@ def decryptText(encryptedText, encryptDict):
 
 
 def saveToFile(fileName, content):
+    """Сохраняет содержимое в файл."""
     with open(fileName, 'w', encoding='utf-8') as f:
         f.write(content)
 
 
 def showKeyContent(fileName):
+    """Выводит содержимое файла с ключом на экран."""
     print("\nСодержимое key.txt:")
     with open(fileName, 'r', encoding='utf-8') as f:
         print(f.read())
 
 
 def main():
+    """Основная функция программы: загрузка ключа, шифрование, дешифрование и проверка."""
     try:
         print("\nЗагрузка ключа из key.txt...")
         encryptDict, alphabet = loadKeyFromFile('key.txt')
