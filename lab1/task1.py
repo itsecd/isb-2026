@@ -1,8 +1,11 @@
 import random
 import os
+from typing import Optional
 
 class SubstitutionCipher:
-    def __init__(self, key=None):
+    """Класс для шифрования и дешифрования текста методом простой подстановки."""
+    def __init__(self, key: Optional[str] = None) -> None:
+        """Инициализация шифра подстановки."""
         self.alphabet = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ "
         if key:
             self.key = key
@@ -12,18 +15,21 @@ class SubstitutionCipher:
             random.shuffle(key_list)
             self.key = "".join(key_list)
 
-    def encrypt(self, text):
+    def encrypt(self, text: str) -> str:
+        """Шифрует открытый текст."""
         text = text.upper().replace('Ё', 'Е')
         # Оставляем только символы нашего алфавита
         text = ''.join(c for c in text if c in self.alphabet)
         mapping = str.maketrans(self.alphabet, self.key)
         return text.translate(mapping)
 
-    def decrypt(self, text):
+    def decrypt(self, text: str) -> str:
+        """Дешифрует зашифрованный текст."""
         mapping = str.maketrans(self.key, self.alphabet)
         return text.translate(mapping)
 
-def main():
+def main() -> None:
+    """ Основная функция для вызова методов"""
     cipher = SubstitutionCipher()
 
     # Сохраняем сгенерированный ключ
