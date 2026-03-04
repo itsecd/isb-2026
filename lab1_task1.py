@@ -1,39 +1,94 @@
+"""
+Лабораторная работа 1, задание 1: Омофонический шифр
+Программа шифрует текст из файла с использованием омофонической замены
+"""
+
 print("Лабораторная1,задание 1: омофонический шифр")
 
-with open('lab1_task1.txt', 'r', encoding='utf-8') as file:
-    text = file.read()
+# Путь до папки staff_task1
+staff_path = "staff_task1/"
 
-original = list(text)
 
-table = {
-    "а": ['101','202','303',0], "б": ['111','212','313',0], "в": ['121','222','323',0],
-    "г": ['131','232','333',0], "д": ['141','242','343',0], "е": ['151','252','353',0],
-    "ё": ['161','262','363',0], "ж": ['171','272','373',0], "з": ['181','282','383',0],
-    "и": ['191','292','393',0], "й": ['102','204','306',0], "к": ['112','214','316',0],
-    "л": ['122','224','326',0], "м": ['132','234','336',0], "н": ['142','244','346',0],
-    "о": ['152','254','356',0], "п": ['162','264','366',0], "р": ['172','274','376',0],
-    "с": ['182','284','386',0], "т": ['192','294','396',0], "у": ['103','206','309',0],
-    "ф": ['113','216','319',0], "х": ['123','226','329',0], "ц": ['133','236','339',0],
-    "ч": ['143','246','349',0], "ш": ['153','256','359',0], "щ": ['163','266','369',0],
-    "ъ": ['173','276','379',0], "ы": ['183','286','389',0], "ь": ['193','296','399',0],
-    "э": ['104','208','312',0], "ю": ['114','218','322',0], "я": ['124','228','332',0]
-}
+def load_text_file(filename: str) -> str:
+    """
+    Загружает текстовый файл и возвращает его содержимое.
 
-def encryption():
-    global code
-    for i in original:
-        lower_i = i.lower()
-        if lower_i in table:
-            index = table[lower_i][3]
-            code += table[lower_i][index]
-            table[lower_i][3] = (index + 1) % 3
+    Args:
+        filename (str): Имя файла для загрузки
+
+    Returns:
+        str: Содержимое файла
+    """
+    with open(staff_path + filename, 'r', encoding='utf-8') as file:
+        return file.read()
+
+
+def load_cipher_table(filename: str) -> dict:
+    """
+    Загружает таблицу шифрования из файла.
+
+    Args:
+        filename (str): Имя файла с таблицей шифрования
+
+    Returns:
+        dict: Словарь с таблицей шифрования
+    """
+    with open(staff_path + filename, 'r', encoding='utf-8') as table_file:
+        table_str = table_file.read()
+        return eval(table_str)
+
+
+def save_encrypted_text(filename: str, encrypted_text: str) -> None:
+    """
+    Сохраняет зашифрованный текст в файл.
+
+    Args:
+        filename (str): Имя файла для сохранения
+        encrypted_text (str): Зашифрованный текст
+    """
+    with open(staff_path + filename, 'w', encoding='utf-8') as output_file:
+        output_file.write(encrypted_text)
+
+
+def encrypt_text(original_text: str, cipher_table: dict) -> str:
+    """
+    Шифрует текст с использованием омофонической таблицы.
+    Args:
+        original_text (str): Исходный текст для шифрования
+        cipher_table (dict): Таблица омофонической замены
+
+    Returns:
+        str: Зашифрованный текст
+    """
+    code = ""
+    for char in original_text:
+        lower_char = char.lower()
+        if lower_char in cipher_table:
+            index = cipher_table[lower_char][3]
+            code += cipher_table[lower_char][index]
+            cipher_table[lower_char][3] = (index + 1) % 3
         else:
-            code += i
+            code += char
+    return code
 
-code = ""
-encryption()
 
-with open('lab1_task1.5.txt', 'w', encoding='utf-8') as output_file:
-    output_file.write(code)
+def main():
+    """Основная функция программы."""
+    # Загрузка исходного текста
+    text = load_text_file('lab1_task1.txt')
+    original = list(text)
 
-print("\n=== Зашифрованное сообщение сохранено в файл 'lab1_task1.5.txt' ===")
+    # Загрузка таблицы шифрования
+    table = load_cipher_table('task1_key.txt')
+
+    # Шифрование текста
+    code = encrypt_text(original, table)
+
+    # Сохранение результата
+    save_encrypted_text('lab1_task1.5.txt', code)
+
+    print("\n=== Зашифрованное сообщение сохранено в файл 'lab1_task1.5.txt' в папке staff_task1 ===")
+
+
+if __name__ == "__main__":
+    main()
