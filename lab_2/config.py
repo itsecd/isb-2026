@@ -1,0 +1,1 @@
+FILE_PATH = "lab_2/result_py.txt"
