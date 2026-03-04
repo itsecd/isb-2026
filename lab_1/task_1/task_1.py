@@ -1,4 +1,31 @@
 import math
+import argparse
+
+
+def parse_args():
+    """Обработка аргументов командной строки для шифрования"""
+    parser = argparse.ArgumentParser(
+        description="Шифрование текста методом постолбцовой транспозиции"
+    )
+    parser.add_argument(
+        "-i",
+        "--input",
+        default="input.txt",
+        help="Файл с исходным текстом",
+    )
+    parser.add_argument(
+        "-k",
+        "--key",
+        default="key.txt",
+        help="Файл с ключом перестановки",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="encrypted.txt",
+        help="Файл для зашифрованного текста",
+    )
+    return parser.parse_args()
 
 
 def read_file(filename):
@@ -45,11 +72,18 @@ def encrypt(text, key):
     return encrypted_text
 
 
-if __name__ == "__main__":
-    text = read_file("input.txt")
-    key = read_file("key.txt").strip()
+def main():
+    """Основная функция программы"""
+    args = parse_args()
+
+    text = read_file(args.input)
+    key = read_file(args.key).strip()
 
     encrypted = encrypt(text, key)
-    write_file("encrypted.txt", encrypted)
+    write_file(args.output, encrypted)
 
     print("Шифрование завершено")
+
+
+if __name__ == "__main__":
+    main()
