@@ -3,20 +3,39 @@
 и анализа частотности символов через командную строку.
 
 Этот модуль читает зашифрованный текст из файла, применяет к нему
-подстановку символов согласно заданному ключу, сохраняет расшифрованный
-текст и выполняет частотный анализ символов исходного текста.
+подстановку символов согласно ключу из внешнего JSON-файла, сохраняет
+расшифрованный текст и выполняет частотный анализ символов исходного текста.
 """
 
 import argparse
 import sys
+import json
+import os
 
-# Ключ подстановки символов (формат: {зашифрованный_символ: расшифрованный_символ})
-SUBSTITUTION_KEY = {"Y": " ", "Ё": "о", "К":"е", "Я":"и", "s": "л", "Й":"т",
-                "U":"н", "Д":"к", "i":"ь", "ю":"р", "7":"п", "Q":"с",
-                "И":"в", "R":"а", "г":"б", "@":"з", "Ж":"я", "О":"ш",
-                "Т":"ж", "F":"э", "J":"й", "G":"ч", "Р":"ю", "1":"ы",
-                "у":"ъ", "%":"д", "3":"м", "=":"г", "Z":"ц", "Х":"х", "N":"ф", "П":"щ", "<":"у"
-}
+
+def load_substitution_key(key_file_path: str = "substitution_key.json") -> dict:
+    """
+    Загружает ключ подстановки из JSON-файла.
+
+    Args:
+        key_file_path: Путь к файлу с ключом подстановки.
+
+    Returns:
+        Словарь с ключом подстановки {зашифрованный_символ: расшифрованный_символ}.
+
+    Raises:
+        FileNotFoundError: Если файл с ключом не найден.
+        JSONDecodeError: Если файл содержит некорректный JSON.
+    """
+    try:
+        with open(key_file_path, "r", encoding="utf-8") as file:
+            key = json.load(file)
+        print(f"Ключ подстановки загружен из файла: {key_file_path}")
+        return key
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Файл с ключом подстановки '{key_file_path}' не найден.")
+    except json.JSONDecodeError as error:
+        raise json.JSONDecodeError(f"Ошибка в формате JSON файла '{key_file_path}': {error}", error.doc, error.pos)
 
 
 def parse_command_line_arguments() -> argparse.Namespace:
@@ -48,22 +67,29 @@ def parse_command_line_arguments() -> argparse.Namespace:
         help="Путь для сохранения частотного анализа (по умолчанию: frequency.txt)"
     )
 
+    parser.add_argument(
+        "-k", "--key",
+        default="substitution_key.json",
+        help="Путь к файлу с ключом подстановки (по умолчанию: substitution_key.json)"
+    )
+
     return parser.parse_args()
 
 
-def apply_substitution(encrypted_text: str) -> str:
+def apply_substitution(encrypted_text: str, substitution_key: dict) -> str:
     """
     Применяет подстановку символов к зашифрованному тексту согласно ключу.
 
     Args:
         encrypted_text: Зашифрованный текст для дешифрования.
+        substitution_key: Словарь с ключом подстановки.
 
     Returns:
         Расшифрованный текст.
     """
     decrypted_text = encrypted_text
 
-    for encrypted_char, decrypted_char in SUBSTITUTION_KEY.items():
+    for encrypted_char, decrypted_char in substitution_key.items():
         decrypted_text = decrypted_text.replace(encrypted_char, decrypted_char)
 
     return decrypted_text
@@ -168,12 +194,15 @@ def main() -> None:
     try:
         command_args = parse_command_line_arguments()
 
+        substitution_key = load_substitution_key(command_args.key)
+        print(f"Загружено символов в ключе: {len(substitution_key)}")
+
         print(f"\nЧтение зашифрованного текста из файла: {command_args.input}")
         encrypted_text = read_text_file(command_args.input)
         print(f"Прочитано символов: {len(encrypted_text)}")
 
         print("Применение подстановки символов...")
-        decrypted_text = apply_substitution(encrypted_text)
+        decrypted_text = apply_substitution(encrypted_text, substitution_key)
 
         print("\nРАСШИФРОВАННЫЙ ТЕКСТ:")
         print("-" * 50)
@@ -188,9 +217,8 @@ def main() -> None:
 
         print("\nОбработка завершена успешно!")
 
-    except FileNotFoundError as error:
+    except (FileNotFoundError, json.JSONDecodeError) as error:
         print(f"\nОшибка: {error}")
-        print("Убедитесь, что файл существует и путь указан правильно.")
         sys.exit(1)
 
     except IOError as error:
