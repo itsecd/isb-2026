@@ -1,5 +1,6 @@
 import argparse
 import re
+from constants import DECODED_PATH, FREQ_PATH, KEY_PATH
 
 
 def parsing() -> str:
@@ -9,17 +10,19 @@ def parsing() -> str:
     args = parser.parse_args()
     return args.file_path
 
+
 def get_text(filename_text: str) -> str:
     "считывание текста из файла"
     with open(filename_text, "r", encoding="utf-8") as file:
         text = file.read()
     return text
 
-def count_frequency(text:str) -> dict:
+
+def count_frequency(text: str) -> dict:
     """счетчик частот"""
     counter = {}
     for char in text:
-        if char == "\n": 
+        if char == "\n":
             continue
         if char in counter:
             counter[char] += 1
@@ -28,17 +31,18 @@ def count_frequency(text:str) -> dict:
     len_text = len(text)
     frequency = {}
     for char in counter:
-            frequency[char] = counter[char]/len_text
+        frequency[char] = counter[char] / len_text
     frequency = dict(sorted(frequency.items(), key=lambda x: x[1], reverse=True))
     return frequency
 
-def write_text(text:str, path:str) -> None:
+
+def write_text(text: str, path: str) -> None:
     "сохранение файлов"
     with open(path, "w", encoding="utf-8") as file:
         file.write(text)
 
 
-def dict_to_string(dictionary:dict) -> str:
+def dict_to_string(dictionary: dict) -> str:
     """перевод словаря в строку"""
     text = ""
     for char in dictionary:
@@ -47,7 +51,8 @@ def dict_to_string(dictionary:dict) -> str:
         text += line
     return text
 
-def unencode_text(encoded_text:str, key:str) -> str:
+
+def decoding_text(encoded_text: str, key: str) -> str:
     """расшифровка текста"""
     mapped_key = {}
     lines = key.split("\n")
@@ -58,15 +63,14 @@ def unencode_text(encoded_text:str, key:str) -> str:
             value = match.group(2)
             value_key = match.group(1)
             mapped_key[value_key] = value
-    unencoded_text = ""
+    decoded_text = ""
     for char in encoded_text:
         if char in mapped_key:
-            unencoded_text += mapped_key[char]
+            decoded_text += mapped_key[char]
         else:
-            unencoded_text += char
-    return unencoded_text
+            decoded_text += char
+    return decoded_text
 
-    
 
 def main():
     try:
@@ -74,10 +78,10 @@ def main():
         encoded_text = get_text(filename_text)
         frequency = count_frequency(encoded_text)
         frequency = dict_to_string(frequency)
-        write_text(frequency, "frequency.txt")
-        key = get_text("key.txt")
-        unencoded_text = unencode_text(encoded_text, key)
-        write_text(unencoded_text, "unencoded.txt")
+        write_text(frequency, FREQ_PATH)
+        key = get_text(KEY_PATH)
+        decoded_text = decoding_text(encoded_text, key)
+        write_text(decoded_text, DECODED_PATH)
     except Exception as ex:
         print("Ошибка: ", ex)
 

@@ -1,4 +1,5 @@
 import argparse
+from constants import ALPHABET, DECODED_PATH, ENCODED_PATH
 
 
 def parsing() -> tuple[str, str]:
@@ -10,67 +11,58 @@ def parsing() -> tuple[str, str]:
     return args.file_path, args.key_path
 
 
-def get_text(filename_text: str) -> str:
+def get_text(filename: str) -> str:
     "считывание текста из файла"
-    with open(filename_text, "r", encoding="utf-8") as file:
+    with open(filename, "r", encoding="utf-8") as file:
         text = file.read()
     return text
 
 
-def get_key(filename_key: str) -> str:
-    "считывание ключа шифрования из файла"
-    with open(filename_key, "r", encoding="utf-8") as file:
-        key = file.read()
-    return key
-
-
 def encoded_text(text: str, key: str) -> str:
     "кодирование текста"
-    alphabet = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
     coded_text = ""
     table = []
     key_len = len(key)
-    for i in range(len(alphabet)):
-        table.append(alphabet[i:] + alphabet[:i])
+    for i in range(len(ALPHABET)):
+        table.append(ALPHABET[i:] + ALPHABET[:i])
     for i in range(len(text)):
-        if text[i] not in alphabet:
+        if text[i] not in ALPHABET:
             coded_text += text[i]
             continue
         key_idx = i % key_len
-        for j in range(len(alphabet)):
-            if key[key_idx] == alphabet[j]:
+        for j in range(len(ALPHABET)):
+            if key[key_idx] == ALPHABET[j]:
                 idx_width = j
-        for n in range(len(alphabet)):
-            if text[i] == alphabet[n]:
+        for n in range(len(ALPHABET)):
+            if text[i] == ALPHABET[n]:
                 idx_height = n
         coded_text += table[idx_width][idx_height]
     return coded_text
 
 
-def unencoded_text(encoded: str, key: str) -> str:
+def decoding_text(encoded: str, key: str) -> str:
     "декодирование текста"
-    alphabet = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
-    unencoded_text = ""
+    decoded_text = ""
     table = []
     key_len = len(key)
     idx_width = 0
-    for i in range(len(alphabet)):
-        table.append(alphabet[i:] + alphabet[:i])
+    for i in range(len(ALPHABET)):
+        table.append(ALPHABET[i:] + ALPHABET[:i])
     for i in range(len(encoded)):
-        if encoded[i] not in alphabet:
-            unencoded_text += encoded[i]
+        if encoded[i] not in ALPHABET:
+            decoded_text += encoded[i]
             continue
         key_idx = i % key_len
-        for j in range(len(alphabet)):
-            if key[key_idx] == alphabet[j]:
+        for j in range(len(ALPHABET)):
+            if key[key_idx] == ALPHABET[j]:
                 idx_width = j
-        for n in range(len(alphabet)):
+        for n in range(len(ALPHABET)):
             if table[idx_width][n] == encoded[i]:
-                unencoded_text += alphabet[n]
-    return unencoded_text
+                decoded_text += ALPHABET[n]
+    return decoded_text
 
 
-def write_text(text:str, path:str) -> None:
+def write_text(text: str, path: str) -> None:
     "сохранение файлов"
     with open(path, "w", encoding="utf-8") as file:
         file.write(text)
@@ -79,12 +71,12 @@ def write_text(text:str, path:str) -> None:
 def main():
     try:
         filename_text, filename_key = parsing()
-        key = get_key(filename_key)
+        key = get_text(filename_key)
         text = get_text(filename_text)
         encoded = encoded_text(text, key)
-        write_text(encoded, "EncodedText.txt")
-        unencoded = unencoded_text(encoded, key)
-        write_text(unencoded, "UnencodedText.txt")
+        write_text(encoded, ENCODED_PATH)
+        decoded = decoding_text(encoded, key)
+        write_text(decoded, DECODED_PATH)
     except Exception as ex:
         print("Ошибка: ", ex)
 
