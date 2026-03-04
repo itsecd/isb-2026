@@ -93,7 +93,7 @@ if __name__ == "__main__":
             if modified:
                 cipher = modified
                 save_key_to_file(alphabet, cipher)
-                print("✅ Ключ обновлён!")
+                print(" Ключ обновлён!")
             break
         elif choice == "2":
             print("Используем текущий ключ")
