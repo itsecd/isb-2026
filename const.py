@@ -1,0 +1,6 @@
+INPUT_FILE = "cod16.txt"
+FREQ_FILE = "frequency_in_text.txt"
+AUTO_KEY_FILE = "key.txt"
+AUTO_DEC_FILE = "decrypted.txt"
+USER_KEY_FILE = "key_2.txt"
+USER_DEC_FILE = "decrypted_2.txt"
