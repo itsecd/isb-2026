@@ -1,21 +1,7 @@
+from multiprocessing import Value
 import os
 import sys
 from typing import Dict, List, Optional
-
-
-class CipherError(Exception):
-    """Ошибка шифрования."""
-    pass
-
-
-class KeyFileError(CipherError):
-    """Ошибка в файле ключа."""
-    pass
-
-
-class FileProcessingError(CipherError):
-    """Ошибка обработки файлов."""
-    pass
 
 
 def load_key_from_txt(key_file: str) -> Dict[str, str]:
@@ -29,7 +15,9 @@ def load_key_from_txt(key_file: str) -> Dict[str, str]:
         Словарь с парами исходный_символ -> заменяющий_символ.
 
     Raises:
-        KeyFileError: Если файл ключа не найден или имеет неверный формат.
+        FileNotFoundError: Если файл ключа не найден
+        IOError: Если файл ключа не прочитан
+        ValueError: Если файл ключа пуст
     """
     key_map = {}
 
@@ -37,9 +25,9 @@ def load_key_from_txt(key_file: str) -> Dict[str, str]:
         with open(key_file, 'r', encoding='utf-8') as f:
             lines = f.readlines()
     except FileNotFoundError as e:
-        raise KeyFileError(f"Файл ключа '{key_file}' не найден") from e
+        print(f"Файл ключа '{key_file}' не найден")
     except IOError as e:
-        raise KeyFileError(f"Ошибка чтения файла ключа: {e}") from e
+        print(f"Ошибка чтения файла ключа: {e}")
 
     for line_num, line in enumerate(lines, start=1):
         line = line.strip()
@@ -65,7 +53,7 @@ def load_key_from_txt(key_file: str) -> Dict[str, str]:
         key_map[original] = replacement
 
     if not key_map:
-        raise KeyFileError("Файл ключа не содержит валидных пар символов")
+        raise ValueError("Файл ключа не содержит валидных пар символов")
 
     return key_map
 
@@ -151,15 +139,14 @@ def process_file(
         mode: Режим работы ('encrypt' или 'decrypt').
 
     Raises:
-        FileProcessingError: При ошибках чтения/записи файлов.
+        FileNotFoundError: При ошибках чтения файла
+        IOError: При ошибках записи файла.
     """
     try:
         with open(input_file, 'r', encoding='utf-8') as f:
             text = f.read()
     except (FileNotFoundError, IOError) as e:
-        raise FileProcessingError(
-            f"Ошибка чтения входного файла '{input_file}': {e}"
-        ) from e
+        print(f"Ошибка чтения входного файла '{input_file}'")
 
     print(f"\nЗагружен текст из файла: {len(text)} символов")
     print(f"Первые 100 символов:\n{text[:100]}")
@@ -175,9 +162,7 @@ def process_file(
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(processed_text)
     except IOError as e:
-        raise FileProcessingError(
-            f"Ошибка записи в выходной файл '{output_file}': {e}"
-        ) from e
+            print(f"Ошибка записи в выходной файл '{output_file}'")
 
     print(f"\n{action} завершено успешно!")
     print(f"Результат сохранен в файл: {output_file}")
@@ -285,10 +270,8 @@ def main() -> None:
                 print("\nДо свидания!")
                 break
 
-        except KeyFileError as e:
-            print(f"Ошибка в файле ключа: {e}")
-        except FileProcessingError as e:
-            print(f"Ошибка обработки файла: {e}")
+        except (IOError, FileNotFoundError, ValueError) as e:
+            print(f"Ошибка: {e}")
         except KeyboardInterrupt:
             print("\n\nПрограмма прервана пользователем.")
             break

@@ -1,65 +1,11 @@
+from fileinput import fileno
 import os
 import sys
 from typing import Dict, List, Optional, Tuple
 from collections import Counter
 import string
 
-
-class CipherError(Exception):
-    """Ошибка шифрования."""
-    pass
-
-
-class KeyFileError(CipherError):
-    """Ошибка в файле ключа."""
-    pass
-
-
-class FileProcessingError(CipherError):
-    """Ошибка обработки файлов."""
-    pass
-
-RUSSIAN_FREQUENCY = {
-    ' ': 0.175,  # Пробел
-    'О': 0.090,  # О
-    'Е': 0.072,  # Е
-    'А': 0.062,  # А
-    'И': 0.062,  # И
-    'Н': 0.053,  # Н
-    'Т': 0.053,  # Т
-    'С': 0.045,  # С
-    'Р': 0.040,  # Р
-    'В': 0.038,  # В
-    'Л': 0.035,  # Л
-    'К': 0.028,  # К
-    'М': 0.026,  # М
-    'Д': 0.025,  # Д
-    'П': 0.023,  # П
-    'У': 0.021,  # У
-    'Я': 0.018,  # Я
-    'Ы': 0.016,  # Ы
-    'Ь': 0.014,  # Ь
-    'Г': 0.013,  # Г
-    'З': 0.012,  # З
-    'Б': 0.010,  # Б
-    'Ч': 0.008,  # Ч
-    'Й': 0.007,  # Й
-    'Х': 0.006,  # Х
-    'Ж': 0.005,  # Ж
-    'Ш': 0.004,  # Ш
-    'Ю': 0.003,  # Ю
-    'Ц': 0.003,  # Ц
-    'Щ': 0.002,  # Щ
-    'Э': 0.002,  # Э
-    'Ф': 0.001,  # Ф
-    'Ъ': 0.001,  # Ъ
-}
-
-RUSSIAN_FREQ_ORDER = [
-    ' ', 'О', 'Е', 'А', 'И', 'Н', 'Т', 'С', 'Р', 'В', 'Л',
-    'К', 'М', 'Д', 'П', 'У', 'Я', 'Ы', 'Ь', 'Г', 'З',
-    'Б', 'Ч', 'Й', 'Х', 'Ж', 'Ш', 'Ю', 'Ц', 'Щ', 'Э', 'Ф', 'Ъ'
-]
+import constants as c
 
 
 def save_frequency_analysis(input_file: str, output_file: str) -> None:
@@ -72,16 +18,16 @@ def save_frequency_analysis(input_file: str, output_file: str) -> None:
         output_file: Путь к файлу для сохранения результатов анализа.
 
     Raises:
-        FileProcessingError: При ошибках чтения/записи файлов.
+        FileNotFoundError, IOError, ValueError: При ошибках чтения/записи файлов.
     """
     try:
         with open(input_file, 'r', encoding='utf-8') as f:
             text = f.read()
     except (FileNotFoundError, IOError) as e:
-        raise FileProcessingError(f"Ошибка чтения файла '{input_file}': {e}") from e
+        print(f"Ошибка чтения файла '{input_file}'")
 
     if not text:
-        raise FileProcessingError("Файл пуст")
+        raise ValueError("Файл пуст")
 
     original_length = len(text)
     text_without_newlines = text.replace('\n', '').replace('\r', '')
@@ -111,26 +57,26 @@ def save_frequency_analysis(input_file: str, output_file: str) -> None:
             f.write(f"{'№':<4} {'Символ в тексте':<20} {'Частота %':<12} {'→ Русский символ':<20} {'Частота %'}\n")
             f.write("-" * 80 + "\n")
             
-            max_items = min(len(text_freq), len(RUSSIAN_FREQ_ORDER))
+            max_items = min(len(text_freq), len(c.RUSSIAN_FREQ_ORDER))
             
             for i in range(max_items):
                 text_char, text_count = text_freq[i]
                 text_percent = (text_count / total_chars) * 100
                 
-                russian_char = RUSSIAN_FREQ_ORDER[i]
-                russian_percent = RUSSIAN_FREQUENCY[russian_char] * 100
+                russian_char = c.RUSSIAN_FREQ_ORDER[i]
+                russian_percent = c.RUSSIAN_FREQUENCY[russian_char] * 100
                 
                 text_display = f"'{text_char}'" if text_char != ' ' else "' ' (ПРОБЕЛ)"
                 russian_display = russian_char if russian_char != ' ' else 'ПРОБЕЛ'
                 
                 f.write(f"{i+1:<4} {text_display:<20} {text_percent:>6.2f}%      → {russian_display:<20} {russian_percent:>6.2f}%\n")
             
-            if len(text_freq) > len(RUSSIAN_FREQ_ORDER):
+            if len(text_freq) > len(c.RUSSIAN_FREQ_ORDER):
                 f.write("\n" + "-" * 80 + "\n")
                 f.write("Дополнительные символы в тексте (меньшей частоты):\n")
                 f.write("-" * 80 + "\n")
                 
-                for i in range(len(RUSSIAN_FREQ_ORDER), len(text_freq)):
+                for i in range(len(c.RUSSIAN_FREQ_ORDER), len(text_freq)):
                     text_char, text_count = text_freq[i]
                     text_percent = (text_count / total_chars) * 100
                     text_display = f"'{text_char}'" if text_char != ' ' else "' ' (ПРОБЕЛ)"
@@ -152,14 +98,14 @@ def save_frequency_analysis(input_file: str, output_file: str) -> None:
             f.write("и при создании ключа их можно игнорировать.\n")
             
     except IOError as e:
-        raise FileProcessingError(f"Ошибка записи в файл '{output_file}': {e}") from e
+        print(f"Ошибка записи в файл '{output_file}'")
     
     print(f"\nФайл с рекомендованным ключом сохранен: {output_file}")
     print(f"Всего символов в файле (с \\n): {original_length}")
     print(f"Символов новой строки удалено из анализа: {newlines_count}")
     print(f"Символов для анализа (без \\n): {total_chars}")
     print(f"Уникальных символов: {len(counter)}")
-    print(f"\nВ файле представлено {min(len(text_freq), len(RUSSIAN_FREQ_ORDER))} рекомендованных соответствий.")
+    print(f"\nВ файле представлено {min(len(text_freq), len(c.RUSSIAN_FREQ_ORDER))} рекомендованных соответствий.")
 
 
 def interactive_key_creation(encrypted_text: str) -> Tuple[Dict[str, str], bool]:
@@ -345,7 +291,7 @@ def load_text_from_file(file_path: str) -> str:
         with open(file_path, 'r', encoding='utf-8') as f:
             return f.read()
     except (FileNotFoundError, IOError) as e:
-        raise FileProcessingError(f"Ошибка чтения файла '{file_path}': {e}") from e
+        print(f"Ошибка чтения файла '{file_path}'")
 
 
 def get_user_choice() -> str:
@@ -435,7 +381,7 @@ def main() -> None:
                 print("\nДо свидания!")
                 break
 
-        except FileProcessingError as e:
+        except  (IOError, FileNotFoundError, ValueError) as e:
             print(f"Ошибка: {e}")
         except KeyboardInterrupt:
             print("\n\nПрограмма прервана пользователем.")
