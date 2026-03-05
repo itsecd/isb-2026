@@ -1,4 +1,4 @@
-import argparse
+`import argparse
 
 def read_file(path: str) -> str:
     """
@@ -35,9 +35,9 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def build_substitution_table(key: str, alphabet: str, is_reversed:bool = False) -> set:
+def build_substitution_table(key: str, alphabet: str, is_reversed:bool = False) -> dict:
     """
-    Build substitution table between alphabets
+    Build substitution table between equal alphabets
     """
     table = {}
     if is_reversed == True:
@@ -63,6 +63,15 @@ def encrypting_text(text: str, table: set) -> str:
             result += ch
     return result
 
+def load_key(key: str):
+    key= read_file("key.txt").replace("'", "")
+    for line in key:
+        r, c = key.split()
+        table[r] = c
+    print(table)
+    return table
+
+
 
 def main() -> None:
     args = parse_args()
@@ -73,7 +82,8 @@ def main() -> None:
 
         encryption_table = build_substitution_table(key, alphabet)
         decryption_table = build_substitution_table(key, alphabet, True)
-        encrypted_text = encrypting_text(text, encryption_table)
+
+        encrypted_text = encrypting_text(text, load_key(key))
         # decrypted_text = encrypting_text(encrypted_text, decryption_table) #optionally
         write_file(args.output, encrypted_text)
     except Exception as e:

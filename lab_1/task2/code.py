@@ -136,11 +136,25 @@ def save_key(table: dict, path: str) -> None:
     if not path:
         return
 
+
     with open(path, "w", encoding="utf-8") as file:
-        for cipher_char, plain_char in sorted(
-            table.items(), key=lambda item: item[1]
-        ):
-            file.write(f"{repr(cipher_char):>4} = {repr(plain_char)}\n")
+        lines = [
+            f"{cipher_char}->{plain_char}"
+            for cipher_char, plain_char in sorted(
+                table.items(), key=lambda item: item[1]
+            )
+        ]
+        file.write("\n".join(lines))
+
+
+
+def load_key(key: str):
+    table = dict()
+    key= read_file("key.txt").split("\n")
+    for line in key:
+        r, c = line.split("->")
+        table[r] = c
+    return table
 
 
 def main() -> None:
@@ -156,6 +170,7 @@ def main() -> None:
     save_key(table_key, args.key)
 
     decrypted_text = decrypt(text, table_key)
+    # decrypted_text = decrypt(text, load_key(args.key))
     write_file(args.output, decrypted_text)
 
     print("Decrypted text:")
