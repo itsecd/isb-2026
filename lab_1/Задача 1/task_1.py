@@ -1,5 +1,6 @@
 import argparse
-from constants_task_1 import original_text_path, key_path, encrypt_text_path, decrypt_text_path
+from constants_task_1 import (ORIGINAL_TEXT_PATH, KEY_PATH, ENCRYPT_TEXT_PATH,
+                              DECRYPT_TEXT_PATH, RU_LOWER, EN_LOWER)
 import sys
 
 def caesar_cipher(text, shift, mode='encrypt'):
@@ -13,23 +14,21 @@ def caesar_cipher(text, shift, mode='encrypt'):
     if mode == 'decrypt':
         shift = -shift
 
-    ru_lower = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
-    ru_upper = ru_lower.upper()
-    en_lower = "abcdefghijklmnopqrstuvwxyz"
-    en_upper = en_lower.upper()
+    ru_upper = RU_LOWER.upper()
+    en_upper = EN_LOWER.upper()
 
     result = []
 
     for char in text:
-        if char in ru_lower:
-            index = (ru_lower.find(char) + shift) % len(ru_lower)
-            result.append(ru_lower[index])
+        if char in RU_LOWER:
+            index = (RU_LOWER.find(char) + shift) % len(RU_LOWER)
+            result.append(RU_LOWER[index])
         elif char in ru_upper:
             index = (ru_upper.find(char) + shift) % len(ru_upper)
             result.append(ru_upper[index])
-        elif char in en_lower:
-            index = (en_lower.find(char) + shift) % len(en_lower)
-            result.append(en_lower[index])
+        elif char in EN_LOWER:
+            index = (EN_LOWER.find(char) + shift) % len(EN_LOWER)
+            result.append(EN_LOWER[index])
         elif char in en_upper:
             index = (en_upper.find(char) + shift) % len(en_upper)
             result.append(en_upper[index])
@@ -48,7 +47,7 @@ def parse_args() -> argparse.Namespace:
 
     p.add_argument("-o",
                    "--original_text_path",
-                   default=original_text_path,
+                   default=ORIGINAL_TEXT_PATH,
                    help="Путь к оригинальному тексту")
 
     p.add_argument("-k",
@@ -58,17 +57,17 @@ def parse_args() -> argparse.Namespace:
 
     p.add_argument("-kp",
                    "--key_path",
-                   default=key_path,
+                   default=KEY_PATH,
                    help="Путь для сохранения значения ключа")
 
     p.add_argument("-e",
                    "--encrypt_text_path",
-                   default=encrypt_text_path,
+                   default=ENCRYPT_TEXT_PATH,
                    help="Путь для сохранения зашифрованного текста")
 
     p.add_argument("-d",
                    "--decrypt_text_path",
-                   default=decrypt_text_path,
+                   default=DECRYPT_TEXT_PATH,
                    help="Путь для сохранения дешифрованного текста")
 
     return p.parse_args()

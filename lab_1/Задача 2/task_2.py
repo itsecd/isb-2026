@@ -1,6 +1,6 @@
 import argparse
-from constants_task_2 import (standard_frequencies, encrypted_text_path, key_path,
-                       decrypted_text_path, encrypted_frequencies_path)
+from constants_task_2 import (STANDARD_FREQUENCIES, ENCRYPTED_TEXT_PATH, KEY_PATH,
+                       DECRYPTED_TEXT_PATH, ENCRYPTED_FREQUENCIES_PATH)
 import sys
 
 
@@ -14,22 +14,22 @@ def parse_args() -> argparse.Namespace:
 
     p.add_argument("-e",
                    "--encrypted_text_path",
-                   default=encrypted_text_path,
+                   default=ENCRYPTED_TEXT_PATH,
                    help="Путь к зашифрованному тексту")
 
     p.add_argument("-kp",
                    "--key_path",
-                   default=key_path,
+                   default=KEY_PATH,
                    help="Путь для сохранения значения ключа")
 
     p.add_argument("-d",
                    "--decrypted_text_path",
-                   default=decrypted_text_path,
+                   default=DECRYPTED_TEXT_PATH,
                    help="Путь для сохранения дешифрованного текста")
 
     p.add_argument("-ef",
                    "--encrypted_frequencies_path",
-                   default=encrypted_frequencies_path,
+                   default=ENCRYPTED_FREQUENCIES_PATH,
                    help="Путь для сохранения таблицы частотности")
 
     return p.parse_args()
@@ -124,7 +124,7 @@ def main():
 
     write_frequencies_in_file(args.encrypted_frequencies_path, char_frequencies)
 
-    key = dict(zip(char_frequencies.keys(), standard_frequencies.keys()))
+    key = dict(zip(char_frequencies.keys(), STANDARD_FREQUENCIES.keys()))
 
     key_keys = list(key.keys())
     char_frequencies_keys = list(char_frequencies.keys())

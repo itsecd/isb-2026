@@ -1,4 +1,4 @@
-standard_frequencies = {' ' : 0.128675, 'О' : 0.096456, 'И' : 0.075312, 'Е' : 0.072292, 'А' : 0.064841,
+STANDARD_FREQUENCIES = {' ' : 0.128675, 'О' : 0.096456, 'И' : 0.075312, 'Е' : 0.072292, 'А' : 0.064841,
                         'Н' : 0.061820, 'Т' : 0.061619, 'С' : 0.051953, 'Р' : 0.040677, 'В' : 0.039267,
                         'М' : 0.029803, 'Л' : 0.029400, 'Д' : 0.026983, 'Я' : 0.026379, 'К' : 0.025977,
                         'П' : 0.024768, 'З' : 0.015908, 'Ы' : 0.015707, 'Ь' : 0.015103, 'У' : 0.013290,
@@ -7,15 +7,10 @@ standard_frequencies = {' ' : 0.128675, 'О' : 0.096456, 'И' : 0.075312, 'Е' :
                         'Щ' : 0.003625, 'Э' : 0.002416, 'Ъ' : 0.000000
                         }
 
+ENCRYPTED_TEXT_PATH = "encrypted_text_task_2.txt"
 
-encrypted_text_path = ("C:\\Users\\Адель\\Desktop\\ОИБ\\Лабораторная работа 1\\"
-                       "isb-2026\\lab_1\\Задача 2\\encrypted_text_task_2.txt")
+KEY_PATH = "key_task_2.txt"
 
-key_path = ("C:\\Users\\Адель\\Desktop\\ОИБ\\Лабораторная работа 1\\"
-            "isb-2026\\lab_1\\Задача 2\\key_task_2.txt")
+DECRYPTED_TEXT_PATH = "decrypted_text_task_2.txt"
 
-decrypted_text_path = ("C:\\Users\\Адель\\Desktop\\ОИБ\\Лабораторная работа 1\\"
-                       "isb-2026\\lab_1\\Задача 2\\decrypted_text_task_2.txt")
-
-encrypted_frequencies_path = ("C:\\Users\\Адель\\Desktop\\ОИБ\\Лабораторная работа 1\\"
-                              "isb-2026\\lab_1\\Задача 2\\encrypted_frequencies_2.txt")
+ENCRYPTED_FREQUENCIES_PATH = "encrypted_frequencies_2.txt"
