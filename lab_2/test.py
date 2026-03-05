@@ -4,7 +4,7 @@ from scipy.special import gammaincc
 from paths import PATH_TO_PY
 from paths import PATH_TO_CPP
 from paths import PATH_TO_JAVA
-from paths import PATH_TO_CONCLUSION
+from paths import PATH_TO_DATA
 
 def load_file(path:str)-> str:
     """
@@ -102,7 +102,7 @@ def main() -> None:
     java_test1 = bit_frequency_test(java_subsequence)
     java_test2 = test_for_identical_consecutive_bits(java_subsequence)
     java_test3 = longest_sequence_of_ones_in_a_block_test(java_subsequence)
-    save_to_file("Java", java_test1, java_test2, java_test3, PATH_TO_CONCLUSION)
+    save_to_file("Java", java_test1, java_test2, java_test3, PATH_TO_DATA)
     
     
     
@@ -110,13 +110,13 @@ def main() -> None:
     py_test1 = bit_frequency_test(py_subsequence)
     py_test2 = test_for_identical_consecutive_bits(py_subsequence)
     py_test3 = longest_sequence_of_ones_in_a_block_test(py_subsequence)
-    save_to_file("Python", py_test1, py_test2, py_test3, PATH_TO_CONCLUSION)
+    save_to_file("Python", py_test1, py_test2, py_test3, PATH_TO_DATA)
     
     cpp_subsequence = load_file(PATH_TO_CPP)
     cpp_test1 = bit_frequency_test(cpp_subsequence)
     cpp_test2 = test_for_identical_consecutive_bits(cpp_subsequence)
     cpp_test3 = longest_sequence_of_ones_in_a_block_test(cpp_subsequence)
-    save_to_file("CPP", cpp_test1, cpp_test2, cpp_test3, PATH_TO_CONCLUSION)
+    save_to_file("CPP", cpp_test1, cpp_test2, cpp_test3, PATH_TO_DATA)
     
     
 if __name__ == "__main__":
