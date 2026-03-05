@@ -10,6 +10,7 @@ def read_ciphertext(filename):
 
 
 def calculate_frequencies(text):
+    """Подсчитывает частоты всех символов в тексте"""
     freqs = {}
     total = 0
     for c in text:
@@ -23,6 +24,7 @@ def calculate_frequencies(text):
 
 
 def create_mapping(sorted_freqs):
+    """Создает соответствия между частотной табличкой и символами из текста"""
     mapping = {}
     for i in range(min(len(sorted_freqs), len(RUSSIAN_FREQ))):
         cipher_char = sorted_freqs[i][0]
@@ -46,6 +48,7 @@ def decrypt_text(text, mapping):
 
 
 def show_frequencies(sorted_freqs, mapping):
+    """Вывод частот символов"""
     print("\nЧАСТОТЫ СИМВОЛОВ В ИСХОДНОМ ФАЙЛЕ:")
     print("-" * 60)
     print(" № | Символ | Частота | Текущая замена")
