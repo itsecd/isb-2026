@@ -87,10 +87,6 @@ def validate_key(key_map: Dict[str, str]) -> bool:
             "Это может привести к неоднозначности при дешифровании."
         )
 
-    for orig, repl in key_map.items():
-        if repl in key_map and key_map[repl] == orig:
-            print(f"Предупреждение: найдена циклическая замена '{orig}'<->'{repl}'")
-
     return True
 
 

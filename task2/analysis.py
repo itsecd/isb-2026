@@ -172,7 +172,7 @@ def interactive_key_creation(encrypted_text: str) -> Tuple[Dict[str, str], bool]
     Returns:
         Кортеж (созданный ключ, флаг завершения).
     """
-    current_key = {}
+    current_key = {}    
     
     print("\n" + "=" * 70)
     print("СОЗДАНИЕ КЛЮЧА")
@@ -189,14 +189,12 @@ def interactive_key_creation(encrypted_text: str) -> Tuple[Dict[str, str], bool]
         
         if current_key:
             decrypted = decrypt_text(encrypted_text, current_key)
-            display_text = decrypted.replace('\n', '¶\n')
-            print(display_text[:500])
+            print(decrypted[:500])
             if len(decrypted) > 500:
                 print("...")
         else:
             print("(ключ пуст - отображается исходный текст)")
-            display_text = encrypted_text.replace('\n', '¶\n')
-            print(display_text[:500])
+            print(encrypted_text[:500])
             if len(encrypted_text) > 500:
                 print("...")
         
