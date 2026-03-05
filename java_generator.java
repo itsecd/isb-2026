@@ -17,12 +17,6 @@ public class java_generator {
         
         String seq_str = sequence.toString();
         
-        System.out.println("JAVA ГЕНЕРАТОР ПСЕВДОСЛУЧАЙНОЙ ПОСЛЕДОВАТЕЛЬНОСТИ");
-        System.out.println("Генератор: java.util.Random (linear congruential)");
-        System.out.println("Длина: 128 бит");
-        System.out.println("Последовательность:");
-        System.out.println(seq_str);
-        
         // Создаю папку sequences, если её нет
         File directory = new File("sequences");
         if (!directory.exists()) {
