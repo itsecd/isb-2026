@@ -20,8 +20,6 @@ int main() {
 
     string seq_str = sequence.to_string();//преобразуем битовую последовательность в строку
 
-
-
     // Создаем папку sequences, если её нет
     system("mkdir -p sequences");
 

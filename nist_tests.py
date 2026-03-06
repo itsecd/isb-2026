@@ -19,8 +19,8 @@ def read_sequence_from_file(filepath):
 
 def frequency_test(sequence):
     """Выполняет частотный побитовый тест"""
-    n = len(sequence)
-    sn = 0
+    n = len(sequence)#128
+    sn = 0#считает сумму(1->+1, 0->-1)
 
     for bit in sequence:
         if bit == '1':
@@ -35,7 +35,7 @@ def frequency_test(sequence):
         'sn': sn,
         's_n': s_n,
         'p_value': p_value
-    }
+    }#возвращ словарь с результатами теста
 
 
 def runs_test(sequence):
@@ -43,16 +43,16 @@ def runs_test(sequence):
     n = len(sequence)
 
     ones = sequence.count('1')
-    pi = ones / n
+    pi = ones / n#это как кси(Е)
 
     zeros = sequence.count('0')
 
     v_n = 0
     for i in range(n - 1):
-        if sequence[i] != sequence[i + 1]:
+        if sequence[i] != sequence[i + 1]:#проверяю оличаются ли два рядом стоящих бита
             v_n = v_n + 1
 
-    condition = abs(pi - 0.5) < (2 / math.sqrt(n))
+    condition = abs(pi - 0.5) < (2 / math.sqrt(n))#проверка необходимого условия для продолжения теста
 
     if condition:
         numerator = abs(v_n - 2 * n * pi * (1 - pi))
@@ -68,25 +68,25 @@ def runs_test(sequence):
         'v_n': v_n,
         'condition': condition,
         'p_value': p_value
-    }
+    }#возвращ словарь с результатами теста
 
 
 def longest_run_test(sequence):
     """Выполняет тест на самую длинную последовательность единиц в блоке"""
     n = len(sequence)
     m = config.BLOCK_SIZE
-    num_blocks = n // m
+    num_blocks = n // m#вычисляю количество блоков
 
-    v = [0, 0, 0, 0]
-    block_max_runs = []
+    v = [0, 0, 0, 0]# массив для 4 категорий распределения
+    block_max_runs = []#список для хранения максимальных длин в каждом блоке
 
     for i in range(num_blocks):
         start = i * m
         end = (i + 1) * m
         block = sequence[start:end]
 
-        max_run = 0
-        current_run = 0
+        max_run = 0# максимальная длина для текущего блока
+        current_run = 0#текущую длину последовательности единиц
 
         for bit in block:
             if bit == '1':
@@ -98,7 +98,7 @@ def longest_run_test(sequence):
 
         block_max_runs.append(max_run)
 
-        if max_run <= 1:
+        if max_run <= 1:# проверка условий
             v[0] = v[0] + 1
         elif max_run == 2:
             v[1] = v[1] + 1
@@ -107,16 +107,16 @@ def longest_run_test(sequence):
         else:
             v[3] = v[3] + 1
 
-    chi2 = 0.0
-    chi2_terms = []
-    expected_values = []
+    chi2 = 0.0#сумма хи^2
+    chi2_terms = []#список для хранения отдельных слагаемых хи^2
+    expected_values = []#список для хранения ожидаемых значений
 
     for i in range(4):
-        expected = num_blocks * config.PI_VALUES[i]
-        expected_values.append(expected)
-        term = ((v[i] - expected) ** 2) / expected
-        chi2_terms.append(term)
-        chi2 = chi2 + term
+        expected = num_blocks * config.PI_VALUES[i]#Вычисляю ожидаемое количество: 16 * πᵢ
+        expected_values.append(expected)#Добавляю ожидаемое значение в список
+        term = ((v[i] - expected) ** 2) / expected#Вычисляю слагаемое хи^2
+        chi2_terms.append(term)#добавляю слагаемое в список
+        chi2 = chi2 + term#считаю сумму
 
     return {
         'num_blocks': num_blocks,
