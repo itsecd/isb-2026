@@ -3,6 +3,7 @@ from file_work import write_file, read_file
 
 
 def input_parse() -> argparse.Namespace:
+    """Данная функция получает аргументы из командной строки"""
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--key', '-k', help='путь к файлу с ключом (алфавитом)')
@@ -67,7 +68,7 @@ def main() -> None:
     args = input_parse()
     key_path, input_path, enc_path = args.key, args.input, args.output
     
-    text = read_file(input_path).upper()
+    text = read_file(input_path).upper().replace("Ё", "Е")
     key = read_file(key_path).upper()
     matrix = alphabet_to_matrix(key)
 
