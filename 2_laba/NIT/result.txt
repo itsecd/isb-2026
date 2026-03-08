@@ -1,0 +1,10 @@
+C++
+frequency test:               P = 1.27633 -> true
+test for consecutive bits:   P = 0.219602 -> true
+Longest Run Test:           P = 0.157299 -> true
+
+Java
+frequency test:               P = 1.88839 -> true
+test for consecutive bits:   P = 0.136054 -> true
+Longest Run Test:           P = 0.157299 -> true
+
