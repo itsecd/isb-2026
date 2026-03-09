@@ -81,8 +81,13 @@ def NIST1(bits: list[int]):
     """
     result = 0.0
 
-    result = sum(1 if b == 1 else -1 for b in bits)
-    result = result/math.sqrt(len(bits))
+    for bit in bits:
+        if bit == 1:
+            result = result + 1
+        else:
+            result = result - 1
+
+    result = abs(result)/math.sqrt(len(bits))
     
     result = math.erfc(result/math.sqrt(2))
 

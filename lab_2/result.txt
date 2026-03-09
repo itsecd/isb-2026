@@ -1,14 +1,14 @@
 Generator c++:
-Test1: P = 0.8596837951986662 => success
-Test2: P = 0.4811110870815766 => success
-Test3: P = 0.1170522283973745 => success
+Test1: P = 0.0338948535246893 => success
+Test2: P = 0.06038335367026575 => success
+Test3: P = 0.5590249171845463 => success
 
 Generator java:
-Test1: P = 1.8883882317017078 => success
-Test2: P = 0.39320937215824525 => success
-Test3: P = 0.7325453938078248 => success
+Test1: P = 0.11161176829829222 => success
+Test2: P = 0.44172958798705114 => success
+Test3: P = 0.7843046841167867 => success
 
 Generator python:
-Test1: P = 0.5958830905651779 => success
-Test2: P = 0.36243035628254483 => success
-Test3: P = 0.4962374466088685 => success
+Test1: P = 0.7236736098317631 => success
+Test2: P = 0.6032105431220571 => success
+Test3: P = 0.34815937932931146 => success
