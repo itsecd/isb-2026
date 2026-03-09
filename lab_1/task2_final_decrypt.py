@@ -1,4 +1,3 @@
-# task2_final_decrypt.py - Дешифровка варианта 25 с ручным ключом
 import json
 from collections import Counter
 
@@ -43,7 +42,7 @@ def decrypt_text(text, key):
         if char in key:
             result.append(key[char])
         else:
-            result.append(char)  # Оставляем как есть если нет в ключе
+            result.append(char)
     return ''.join(result)
 
 def analyze_frequency(text):
@@ -53,46 +52,34 @@ def analyze_frequency(text):
     return {char: count/total for char, count in freq.most_common()}
 
 def main():
-    # Читаем зашифрованный текст
     with open('cod25.txt', 'r', encoding='utf-8') as f:
         encrypted = f.read()
     total = len(encrypted)
     print(f"Зашифрованный текст: {len(encrypted)} символов\n")
     
-    # Анализируем частоты
     freq = analyze_frequency(encrypted)
     
-    # Сохраняем таблицу частот
     with open('frequency_table_task2.txt', 'w', encoding='utf-8') as f:
         f.write("ТАБЛИЦА ЧАСТОТ СИМВОЛОВ ЗАШИФРОВАННОГО ТЕКСТА\n")
-        f.write("=" * 70 + "\n")
         f.write(f"{'Символ':<12} {'Частота':<15} {'Процент':<12}\n")
-        f.write("-" * 70 + "\n")
         for char, count in freq.items():
             f.write(f"'{char}'          {count:<15.6f} {count*100:<12.2f}%\n")
-        f.write("-" * 70 + "\n")
         f.write(f"Всего уникальных символов: {len(freq)}\n")
         f.write(f"Всего символов в тексте: {total}\n")
     
-    # Дешифруем
     decrypted = decrypt_text(encrypted, DECRYPT_KEY)
     
-    # Сохраняем результаты
     with open('decrypted_task2.txt', 'w', encoding='utf-8') as f:
         f.write(decrypted)
-    print("✓ Дешифрованный текст сохранен в decrypted_task2.txt")
+    print("Дешифрованный текст сохранен в decrypted_task2.txt")
     
     with open('found_key_task2.json', 'w', encoding='utf-8') as f:
         json.dump(DECRYPT_KEY, f, ensure_ascii=False, indent=2, sort_keys=True)
-    print("✓ Ключ дешифровки сохранен в found_key_task2.json")
+    print("Ключ дешифровки сохранен в found_key_task2.json")
+    print("Таблица частот сохранена в frequency_table_task2.txt")
     
-    print("✓ Таблица частот сохранена в frequency_table_task2.txt")
-    
-    print("\n" + "=" * 70)
     print("ДЕШИФРОВАННЫЙ ТЕКСТ:")
-    print("=" * 70)
     print(decrypted)
-    print("=" * 70)
 
 if __name__ == "__main__":
     main()
