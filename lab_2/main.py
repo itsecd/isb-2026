@@ -15,7 +15,7 @@ def frequency_bits(seq: str) -> float:
     :rtype: float
     """
     s_n = (seq.count("1") - seq.count("0")) / math.sqrt(len(seq))
-    return math.erfc(s_n / math.sqrt(2))
+    return math.erfc(abs(s_n) / math.sqrt(2))
 
 
 def count_same_bits(seq: str) -> float:
