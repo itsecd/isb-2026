@@ -1,6 +1,7 @@
 import math
 import os
 import config
+from scipy.special import gammaincc
 
 
 def read_sequence_from_file(filepath):
@@ -129,15 +130,12 @@ def longest_run_test(sequence):
 
 
 def calculate_p_value_for_longest_run(chi2):
-    """Возвращает инструкцию для вычисления P-значения через онлайн калькулятор"""
+    """Вычисляет P-значение для теста на самую длинную последовательность единиц в блоке,
+    используя функцию gammaincc из SciPy."""
     x_value = chi2 / 2
-    return (
-        f"Для получения P-значения:\n"
-        f"   1. Откройте: https://www.danielsoper.com/statcalc/calculator.aspx?id=34\n"
-        f"   2. Выберите 'Lower Incomplete Gamma Function'\n"
-        f"   3. Введите: a = 1.5, x = {x_value:.6f}\n"
-        f"   4. Полученное значение должно быть >= {config.ALPHA}"
-    )
+    # В формуле: igamc(3/2, chi2/2). a = 1.5, x = chi2/2
+    p_value = gammaincc(1.5, x_value)
+    return p_value
 
 
 def save_results_to_file(results, filename):
@@ -165,10 +163,10 @@ def save_results_to_file(results, filename):
 
             file.write("2. ТЕСТ НА ОДИНАКОВЫЕ ПОДРЯД ИДУЩИЕ БИТЫ (RUNS TEST)\n")
             runs = res['runs']
-            file.write(f"   Количество единиц = {runs['ones']}\n")
-            file.write(f"   Количество нулей = {runs['zeros']}\n")
-            file.write(f"   π (доля единиц) = {runs['pi']:.6f}\n")
-            file.write(f"   Проверка условия |π - 1/2| < 2/√n: ")
+            file.write(f"Количество единиц = {runs['ones']}\n")
+            file.write(f"Количество нулей = {runs['zeros']}\n")
+            file.write(f"π (доля единиц) = {runs['pi']:.6f}\n")
+            file.write(f"Проверка условия |π - 1/2| < 2/√n: ")
             file.write(f"|{runs['pi']:.6f} - 0.5| = {abs(runs['pi'] - 0.5):.6f} < {2 / math.sqrt(len(res['sequence'])):.6f}? ")
 
             if runs['condition']:
@@ -176,42 +174,48 @@ def save_results_to_file(results, filename):
             else:
                 file.write(f"НЕТ\n")
 
-            file.write(f"   V_n (число знакоперемен) = {runs['v_n']}\n")
-            file.write(f"   P-value = {runs['p_value']:.6f}\n")
+            file.write(f"V_n (число знакоперемен) = {runs['v_n']}\n")
+            file.write(f"P-value = {runs['p_value']:.6f}\n")
 
             if runs['p_value'] >= config.ALPHA:
-                file.write(f"   РЕЗУЛЬТАТ: ПРОЙДЕН (P-value >= {config.ALPHA})\n\n")
+                file.write(f"РЕЗУЛЬТАТ: ПРОЙДЕН (P-value >= {config.ALPHA})\n\n")
             else:
-                file.write(f"   РЕЗУЛЬТАТ: НЕ ПРОЙДЕН (P-value < {config.ALPHA})\n\n")
+                file.write(f"РЕЗУЛЬТАТ: НЕ ПРОЙДЕН (P-value < {config.ALPHA})\n\n")
 
             file.write("3. ТЕСТ НА САМУЮ ДЛИННУЮ ПОСЛЕДОВАТЕЛЬНОСТЬ ЕДИНИЦ В БЛОКЕ\n")
             longest = res['longest']
-            file.write(f"   Длина блока M = {config.BLOCK_SIZE}\n")
-            file.write(f"   Количество блоков = {longest['num_blocks']}\n\n")
+            file.write(f"Длина блока M = {config.BLOCK_SIZE}\n")
+            file.write(f"Количество блоков = {longest['num_blocks']}\n\n")
 
-            file.write("   Максимальные длины единиц в каждом блоке:\n")
-            file.write(f"   {longest['block_max_runs']}\n\n")
+            file.write("Максимальные длины единиц в каждом блоке:\n")
+            file.write(f" {longest['block_max_runs']}\n\n")
 
-            file.write("   Распределение блоков по категориям:\n")
-            file.write(f"   Категория 1 (макс. длина <= 1): {longest['distribution'][0]} блоков\n")
-            file.write(f"   Категория 2 (макс. длина = 2): {longest['distribution'][1]} блоков\n")
-            file.write(f"   Категория 3 (макс. длина = 3): {longest['distribution'][2]} блоков\n")
-            file.write(f"   Категория 4 (макс. длина >= 4): {longest['distribution'][3]} блоков\n\n")
+            file.write("Распределение блоков по категориям:\n")
+            file.write(f"Категория 1 (макс. длина <= 1): {longest['distribution'][0]} блоков\n")
+            file.write(f"Категория 2 (макс. длина = 2): {longest['distribution'][1]} блоков\n")
+            file.write(f"Категория 3 (макс. длина = 3): {longest['distribution'][2]} блоков\n")
+            file.write(f"Категория 4 (макс. длина >= 4): {longest['distribution'][3]} блоков\n\n")
 
             file.write("   Ожидаемые значения:\n")
             for i in range(4):
-                file.write(f"   E{i + 1} = 16 * {config.PI_VALUES[i]} = {longest['expected'][i]:.2f}\n")
+                file.write(f"E{i + 1} = 16 * {config.PI_VALUES[i]} = {longest['expected'][i]:.2f}\n")
             file.write("\n")
 
-            file.write("   Вычисление хи-квадрат:\n")
-            file.write(f"   χ² = Σ((наблюдаемое - ожидаемое)² / ожидаемое)\n")
+            file.write("Вычисление хи-квадрат:\n")
+            file.write(f"χ² = Σ((наблюдаемое - ожидаемое)² / ожидаемое)\n")
             for i in range(4):
                 file.write(
-                    f"   Член {i + 1}: (({longest['distribution'][i]} - {longest['expected'][i]:.2f})² / {longest['expected'][i]:.2f}) = {longest['chi2_terms'][i]:.6f}\n"
+                    f"Член {i + 1}: (({longest['distribution'][i]} - {longest['expected'][i]:.2f})² / {longest['expected'][i]:.2f}) = {longest['chi2_terms'][i]:.6f}\n"
                 )
-            file.write(f"   χ² = {longest['chi2']:.6f}\n\n")
+            file.write(f"χ² = {longest['chi2']:.6f}\n\n")
 
-            file.write("   " + calculate_p_value_for_longest_run(longest['chi2']) + "\n\n")
+            # Вычисляем P-значение для третьего теста
+            p_value_longest = calculate_p_value_for_longest_run(longest['chi2'])
+            file.write(f"P-value (вычислено через SciPy) = {p_value_longest:.6f}\n")
+            if p_value_longest >= config.ALPHA:
+                file.write(f"РЕЗУЛЬТАТ: ПРОЙДЕН (P-value >= {config.ALPHA})\n\n")
+            else:
+                file.write(f"РЕЗУЛЬТАТ: НЕ ПРОЙДЕН (P-value < {config.ALPHA})\n\n")
 
 
 def main():
