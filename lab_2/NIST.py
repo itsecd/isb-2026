@@ -54,48 +54,46 @@ def runs_test(bits):
         return 0.0
 
 def longest_run_test(bits):
-    """
-    Тест на самую длинную последовательность единиц в блоке.
-    bits: бинарная последовательность
-    return: P-value теста
-    """
+    """Тест на самую длинную последовательность единиц в блоке."""
     try:
-        v = [0]*4
-        temp = 0
-        m = 0
-        k = 0
-
-        for i in bits:
-            if i == '1':
-                temp += 1
-            else:
-                m = max(m, temp)
-                temp = 0
-            k += 1
-
-            if k == 8:
-                if m <= 1:
-                    v[0] += 1
-                elif m == 2:
-                    v[1] += 1
-                elif m == 3:
-                    v[2] += 1
+        counter = [0, 0, 0, 0]
+        
+        for start in range(0, 128, 8):
+            current_block = bits[start:start+8]
+            
+            max_series = 0
+            current_series = 0
+            
+            for symbol in current_block:
+                if symbol == '1':
+                    current_series += 1
+                    if current_series > max_series:
+                        max_series = current_series
                 else:
-                    v[3] += 1
-                m = k = temp = 0
-
-        p = [0.2148, 0.3672, 0.2305, 0.1875]
-        chi_sq = 0.0
-
-        for i in range(4):
-            chi_sq += ((v[i] - 16 * p[i]) ** 2) / (16 * p[i])
-
-        p_value = gammaincc(3/2, chi_sq/2)
-        return p_value
-    except Exception as e:
-        print(f"Error in longest_run_test: {e}")
+                    current_series = 0
+            
+            if max_series <= 1:
+                counter[0] += 1
+            elif max_series == 2:
+                counter[1] += 1
+            elif max_series == 3:
+                counter[2] += 1
+            else:
+                counter[3] += 1
+        
+        theory = [0.2148, 0.3672, 0.2305, 0.1875]
+        
+        chi_value = 0
+        for k in range(4):
+            expected = 16 * theory[k]
+            chi_value += ((counter[k] - expected) ** 2) / expected
+        
+        result = gammaincc(1.5, chi_value / 2)
+        return result
+        
+    except Exception:
         return 0.0
-
+        
 def read_sequence(filename):
     """
     Читает последовательность из файла.
