@@ -1,5 +1,0 @@
-ALPHABET = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
-FREQ_PATH = "frequency.txt"
-KEY_PATH = "key.txt"
-DECODED_PATH = "DecodedText.txt"
-ENCODED_PATH = "EncodedText.txt"
