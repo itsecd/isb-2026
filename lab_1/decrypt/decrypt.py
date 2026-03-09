@@ -61,7 +61,7 @@ def show_frequencies(sorted_freqs, mapping):
 
 
 def save_result(text, mapping, filename="decrypted.txt"):
-    """Сохраняет итоговый """
+    """Сохраняет итоговый результат в файл"""
     result = decrypt_text(text, mapping)
     with open(filename, "w", encoding="utf-8") as f:
         f.write(result)
