@@ -1,10 +1,58 @@
+"""
+Модуль для шифрования и дешифрования текста шифром Виженера.
+
+Использует кириллический алфавит и ключ из внешнего файла.
+Конфигурация путей к файлам импортируется из модуля const.
+"""
 
 from typing import List
 
-ALPHABET = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ "
+from const import ALPHABET, INPUT_FILE, KEY_FILE, OUTPUT_FILE
 
 
-def vigenere(text: str, key: str) -> str:
+def load_key(filepath: str) -> str:
+    """
+    Загрузить ключ шифрования из текстового файла.
+
+    Аргументы:
+        filepath (str): Путь к файлу, содержащему ключ.
+
+    Возвращает:
+        str: Ключевая строка без ведущих/замыкающих пробелов и переносов.
+
+    Raises:
+        FileNotFoundError: Если файл с ключом не найден.
+        UnicodeDecodeError: Если файл не может быть прочитан в кодировке UTF-8.
+    """
+    with open(filepath, 'r', encoding='utf-8') as file:
+        return file.read().strip()
+
+
+def clean_key(key: str, alphabet: str) -> str:
+    """
+    Очистить ключ от символов, отсутствующих в алфавите.
+
+    Аргументы:
+        key (str): Исходная ключевая строка.
+        alphabet (str): Строка допустимых символов алфавита.
+
+    Возвращает:
+        str: Ключ, содержащий только допустимые символы в верхнем регистре.
+
+    Raises:
+        ValueError: Если после очистки ключ становится пустым.
+    """
+    cleaned: str = "".join(
+        [char.upper() for char in key if char.upper() in alphabet]
+    )
+
+    if not cleaned:
+        raise ValueError("Ключ не содержит допустимых символов!")
+
+    return cleaned
+
+
+def vigenere(text: str, key: str, alphabet: str) -> str:
     """
     Шифрует текст с использованием шифра Виженера.
 
@@ -13,11 +61,12 @@ def vigenere(text: str, key: str) -> str:
     Символы, отсутствующие в алфавите, копируются в результат без изменений
     и не сдвигают индекс ключа.
 
-    Args:
+    Аргументы:
         text (str): Исходный текст для шифрования.
         key (str): Ключ шифрования (строка).
+        alphabet (str): Строка алфавита для сдвига.
 
-    Returns:
+    Возвращает:
         str: Зашифрованный текст.
 
     Raises:
@@ -26,51 +75,55 @@ def vigenere(text: str, key: str) -> str:
     result: List[str] = []
     key_index: int = 0
 
+    # Переименовано в valid_key, чтобы не конфликтовало с именем функции clean_key
+    valid_key: str = "".join(
+        [char.upper() for char in key if char.upper() in alphabet]
+    )
 
-    clean_key: str = "".join([char.upper() for char in key if char.upper() in ALPHABET])
-
-    if not clean_key:
+    if not valid_key:
         raise ValueError("Ключ не содержит допустимых символов!")
 
     for char in text:
-        if char in ALPHABET:
-            shift: int = ALPHABET.index(clean_key[key_index % len(clean_key)])
-            idx: int = ALPHABET.index(char)
-            new_idx: int = (idx + shift) % len(ALPHABET)
-            result.append(ALPHABET[new_idx])
+        if char in alphabet:
+            shift: int = alphabet.index(valid_key[key_index % len(valid_key)])
+            idx: int = alphabet.index(char)
+            new_idx: int = (idx + shift) % len(alphabet)
+            result.append(alphabet[new_idx])
             key_index += 1
         else:
-
             result.append(char)
 
     return "".join(result)
 
 
-def vigenere_decrypt(text: str, key: str) -> str:
+def vigenere_decrypt(text: str, key: str, alphabet: str) -> str:
     """
     Дешифрует текст, зашифрованный шифром Виженера.
 
     Выполняет обратную операцию шифрованию: сдвигает символы в обратную сторону
     на величину, соответствующую символу ключа.
 
-    Args:
+    Аргументы:
         text (str): Зашифрованный текст.
         key (str): Ключ дешифрования (должен совпадать с ключом шифрования).
+        alphabet (str): Строка алфавита для сдвига.
 
-    Returns:
+    Возвращает:
         str: Расшифрованный исходный текст.
     """
     result: List[str] = []
     key_index: int = 0
 
-    clean_key: str = "".join([char.upper() for char in key if char.upper() in ALPHABET])
+    valid_key: str = "".join(
+        [char.upper() for char in key if char.upper() in alphabet]
+    )
 
     for char in text:
-        if char in ALPHABET:
-            shift: int = ALPHABET.index(clean_key[key_index % len(clean_key)])
-            idx: int = ALPHABET.index(char)
-            new_idx: int = (idx - shift) % len(ALPHABET)
-            result.append(ALPHABET[new_idx])
+        if char in alphabet:
+            shift: int = alphabet.index(valid_key[key_index % len(valid_key)])
+            idx: int = alphabet.index(char)
+            new_idx: int = (idx - shift) % len(alphabet)
+            result.append(alphabet[new_idx])
             key_index += 1
         else:
             result.append(char)
@@ -82,42 +135,32 @@ def main() -> None:
     """
     Основная функция выполнения скрипта.
 
-    Считывает исходный текст из файла 'source.txt', очищает его,
-    шифрует ключом 'ДАНИЛКОЛБАСЕНКО', проверяет целостность дешифрования
-    и записывает результаты в файлы 'crypt.txt' и 'key_task1.txt'.
+    Считывает исходный текст из файла, шифрует его ключом из файла,
+    проверяет целостность дешифрования и записывает результат.
     """
-    input_filename: str = "source.txt"
-    output_filename: str = "crypt.txt"
-    key_filename: str = "key_task1.txt"
-    key: str = "ДАНИЛКОЛБАСЕНКО"
-
     try:
-        with open(input_filename, "r", encoding="utf-8") as f:
-            source_text: str = f.read()
+        key: str = load_key(KEY_FILE)
 
-        clean_text: str = "".join(
-            [char.upper() for char in source_text if char.upper() in ALPHABET]
-        )
+        with open(INPUT_FILE, 'r', encoding='utf-8') as input_file:
+            source_text: str = input_file.read()
 
-        encrypted_text: str = vigenere(clean_text, key)
-        decrypted_check: str = vigenere_decrypt(encrypted_text, key)
+        encrypted_text: str = vigenere(source_text, key, ALPHABET)
 
+        decrypted_check: str = vigenere_decrypt(encrypted_text, key, ALPHABET)
 
-        if clean_text != decrypted_check:
+        if source_text.upper() != decrypted_check.upper():
             print("ОШИБКА: Расшифровка не совпадает с оригиналом!")
             return
 
-        with open(output_filename, "w", encoding="utf-8") as f:
-            f.write(encrypted_text)
+        with open(OUTPUT_FILE, 'w', encoding='utf-8') as output_file:
+            output_file.write(encrypted_text)
 
-        with open(key_filename, "w", encoding="utf-8") as f:
-            f.write(key)
+        print("Успешно выполнено!")
 
-        print(f"Успешно выполнено!")
-        print(f"Первые 100 символов расшифрованного текста:\n{decrypted_check[:100]}")
-
-    except FileNotFoundError:
-        print(f"Ошибка: Файл '{input_filename}' не найден.")
+    except FileNotFoundError as e:
+        print(f"Ошибка: Файл не найден — {e}")
+    except ValueError as e:
+        print(f"Ошибка ключа: {e}")
     except Exception as e:
         print(f"Произошла непредвиденная ошибка: {e}")
 
