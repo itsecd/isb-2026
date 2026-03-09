@@ -2,7 +2,7 @@ import math
 
 from scipy.special import gammaincc
 
-import const
+from const import P_VALUE, PI, FILE, OUTPUT_FILE
 
 def freq_test(seq: str) -> float:
     """frecuency test"""
@@ -13,7 +13,7 @@ def freq_test(seq: str) -> float:
 def replay_test(seq: str) -> float:
     """reply sequence test"""
     one_freq = seq.count('1')/len(seq)
-    if abs(one_freq- 0.5) < (2/math.sqrt(2)):
+    if not abs(one_freq- 0.5) < (2/math.sqrt(len(seq))):
         p_value = 0.0
     else:
         v_n = 0.0
@@ -21,8 +21,8 @@ def replay_test(seq: str) -> float:
             if seq[i] != seq[i+1]:
                 v_n+=1
         p_value =  math.erfc(abs(v_n - \
-        2*len(seq)*one_freq*(one_freq-1))\
-        / (2*math.sqrt(2*len(seq))*one_freq*(one_freq-1)))
+        2*len(seq)*one_freq*(1-one_freq))\
+        / (2*math.sqrt(2*len(seq))*one_freq*(1-one_freq)))
     return p_value
 
 def max_len_test(seq: str) -> float:
@@ -41,7 +41,7 @@ def max_len_test(seq: str) -> float:
             v[3] += 1
     x_2 = 0.0
     for i in range(0,4):
-        x_2 = math.pow((v[i] - 16*PI[i]),2) / 16*PI[i]
+        x_2 += math.pow((v[i] - 16*PI[i]), 2) / (16 * PI[i])
     p_value = gammaincc(3 / 2, x_2 / 2)
     return p_value
 
@@ -64,7 +64,38 @@ def main() -> None:
     seq_c = read_text(FILE[0])
     seq_j = read_text(FILE[1])
     seq_p = read_text(FILE[2])
-    
+    c_values = [
+        "CPP",
+        freq_test(seq_c),
+        replay_test(seq_c),
+        max_len_test(seq_c),
+    ]
+    j_values = [
+        "JAVA",
+        freq_test(seq_j),
+        replay_test(seq_j),
+        max_len_test(seq_j),
+    ]
+    p_values = [
+        "PYTHON",
+        freq_test(seq_p),
+        replay_test(seq_p),
+        max_len_test(seq_p),
+    ]
+    try:
+        with open(OUTPUT_FILE, "w") as f:
+            f.write("Lang:   |  Freq Test  |  Same Test  | Max count Test | Result \n")
+            f.write(
+                f"{c_values[0]:<8}|  {c_values[1]:.7f}  |  {c_values[2]:.7f}  | {c_values[3]:.12f} | {"PASSED" if all(x >= P_VALUE for x in c_values[1:]) else "FAILED"}\n"
+            )
+            f.write(
+                f"{j_values[0]:<8}|  {j_values[1]:.7f}  |  {j_values[2]:.7f}  | {j_values[3]:.12f} | {"PASSED" if all(x >= P_VALUE for x in j_values[1:]) else "FAILED"}\n"
+            )
+            f.write(
+                f"{p_values[0]:<8}|  {p_values[1]:.7f}  |  {p_values[2]:.7f}  | {p_values[3]:.12f} | {"PASSED" if all(x >= P_VALUE for x in p_values[1:]) else "FAILED"}\n"
+            )
+    except Exception as e:
+        print(f"Error: {e}\n")
 
 if __name__ == "__main__":
     main()

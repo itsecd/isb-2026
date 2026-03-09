@@ -1,0 +1,4 @@
+Lang:   |  Freq Test  |  Same Test  | Max count Test | Result 
+CPP     |  1.8883882  |  0.7544459  | 0.758924680876 | PASSED
+JAVA    |  0.5958831  |  0.5779293  | 0.312639611910 | PASSED
+PYTHON  |  0.7236736  |  0.8682434  | 0.006976203137 | FAILED
