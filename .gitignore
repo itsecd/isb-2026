@@ -214,3 +214,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+*.exe
+/lab_2/out
+/lab_2/.vs
+/.idea/
