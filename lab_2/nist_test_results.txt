@@ -1,0 +1,25 @@
+ОТЧЕТ О СТАТИСТИЧЕСКИХ ТЕСТАХ NIST
+ФАЙЛ: cpp_sequence.txt
+  Monobit Test                   Значение: 0.479500     [УДАЧНО]
+  Runs Test                      Значение: 0.925016     [УДАЧНО]
+  Longest Run Test               Значение: 0.599673     [УДАЧНО]
+  File Result: 3/3 tests passed
+
+ФАЙЛ: java_sequence.txt
+  Monobit Test                   Значение: 0.215925     [УДАЧНО]
+  Runs Test                      Значение: 0.360063     [УДАЧНО]
+  Longest Run Test               Значение: 0.374061     [УДАЧНО]
+  File Result: 3/3 tests passed
+
+ФАЙЛ: python_sequence.txt
+  Monobit Test                   Значение: 0.111612     [УДАЧНО]
+  Runs Test                      Значение: 0.586469     [УДАЧНО]
+  Longest Run Test               Значение: 0.043529     [УДАЧНО]
+  File Result: 3/3 tests passed
+
+ИТОГ
+Количество протестированных файлов: 3
+Количество успешных тестов: 9/9
+Показатель успеха: 100.0%
+
+Все тесты пройдены успешно - последовательности случайны

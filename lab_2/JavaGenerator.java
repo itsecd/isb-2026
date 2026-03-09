@@ -6,11 +6,11 @@ public class JavaGenerator {
         Random rand = new Random();
         FileWriter fw = new FileWriter("java_sequence.txt");
         
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 128; i++) {
             fw.write(String.valueOf(rand.nextInt(2)));
         }
         
         fw.close();
-        System.out.println("Generated java_sequence.txt (10000 bits)");
+        System.out.println("Generated java_sequence.txt");
     }
 }
