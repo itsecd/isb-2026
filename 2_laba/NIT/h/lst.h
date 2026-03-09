@@ -3,6 +3,6 @@
 
 #include <vector>
 
-double longestSequenceOneTest(const int n, const std::vector<int> &seq, const std::vector<double> &pi);
+double longestSequenceOneTest(const int n, const std::vector<int> seq, const std::vector<double> &pi);
 
 #endif

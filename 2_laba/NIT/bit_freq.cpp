@@ -2,11 +2,13 @@
 #include <vector>
 #include "h/bit_freq.h"
 
-double bitFrequencyTest(const int n, const std::vector<int> &req)
+double bitFrequencyTest(int n, const std::vector<int> &req)
 {
-  int X = 0;
-  for (auto elem : req)
-    elem == 1 ? X += 1 : X -= 1;
-  auto S = X / sqrt(n);
-  return erfc(S / sqrt(2));
+  double X = 0;
+  for (int elem : req)
+  {
+    X += (elem == 1) ? 1 : -1;
+  }
+  double S = X / std::sqrt(n);
+  return std::erfc(std::fabs(S) / std::sqrt(2.0));
 }
