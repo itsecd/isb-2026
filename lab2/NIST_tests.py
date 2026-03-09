@@ -4,6 +4,7 @@ import os
 
 
 def file_read(file: str) -> str:
+    '''Чтение файла с данными'''
     if not os.path.exists(file):
         raise FileNotFoundError(f"Файл не найден: {file}")
     with open (f"{file}", mode='r', encoding='utf-8') as f:
@@ -74,7 +75,7 @@ def check(p1: float, p2: float, p3: float) -> str:
     if p1 >= 0.01:
         res += f'Частотный побитовый анализ пройден {p1: .3f}\n'
     else:
-        res += f'Частотный побитовый анализ не пройден {p1: .3f}\n'{[]}
+        res += f'Частотный побитовый анализ не пройден {p1: .3f}\n'
     
     if p2 >= 0.01:
         res += f'Тест на одинаковые подряд идущие биты пройден {p2: .3f}\n'
@@ -92,9 +93,9 @@ def check(p1: float, p2: float, p3: float) -> str:
 def result(file: str, res1: str, res2:str, res3: str) -> None:
     '''Запись результатов в файл'''
     with open (file, mode='w', encoding='utf-8') as f:
-        f.write("ГСПЧ на C++:\n"+res1)
-        f.write("\n\nГСПЧ на Python:\n"+res2)
-        f.write("\n\nГСПЧ на java:\n"+res3)
+        f.write("ГПСЧ на C++:\n"+res1)
+        f.write("\n\nГПСЧ на Python:\n"+res2)
+        f.write("\n\nГПСЧ на java:\n"+res3)
 
 
 def main() -> None:
