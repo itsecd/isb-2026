@@ -92,6 +92,8 @@ def longest_sequence(bits):
 
         if i == '1':
             temp += 1
+            if k == 7:
+                m = max(m, temp)
         else:
             m = max(m, temp)
             temp = 0
@@ -114,7 +116,7 @@ def longest_sequence(bits):
     for i in range(0, 4):
         chi_sq += ((v[i]-16*p[i])**2)/(16*p[i])
 
-    return gammaincc(3/2, chi_sq/2)
+    return gammaincc(1.5, chi_sq/2)
 
 
 def main():
