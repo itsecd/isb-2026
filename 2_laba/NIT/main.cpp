@@ -36,4 +36,9 @@ int main()
   std::cin >> path_inp;
 
   process(path_inp, vec, path_out, "Java");
+
+  std::cout << "Enter file name 3 (e.g., ../generate/generate_c.txt): ";
+  std::cin >> path_inp;
+
+  process(path_inp, vec, path_out, "C");
 }
