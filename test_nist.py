@@ -1,5 +1,6 @@
 import math
 import os
+from scipy.special import gammaincc
 
 def read_constants():
     """Читает числа из constants.txt и возвращает список."""
@@ -46,33 +47,41 @@ class NISTTests:
         return math.erfc(numerator / denominator)
     
     def longest_run_test(self):
-        """Выполняет тест на самую длинную последовательность единиц в блоке."""
-        num_blocks = self.n // BLOCK_SIZE
-        blocks = [self.bits[i*BLOCK_SIZE:(i+1)*BLOCK_SIZE] for i in range(num_blocks)]
-        v = [0, 0, 0, 0]
-        for block in blocks:
-            max_run = 0
-            current = 0
-            for bit in block:
-                if bit == '1':
-                    current += 1
-                    max_run = max(max_run, current)
+        """
+        Тест на самую длинную последовательность единиц в блоке
+        """
+        data_parts = [self.bits[i:i+8] for i in range(0, 128, 8)]
+        len_parts = []
+        
+        for i in range(len(data_parts)):
+            max_len = 0
+            current_len = 0
+            for j in range(8):
+                if data_parts[i][j] == '1':
+                    current_len += 1
+                    max_len = max(max_len, current_len)
                 else:
-                    current = 0
-            if max_run <= 1:
-                v[0] += 1
-            elif max_run == 2:
-                v[1] += 1
-            elif max_run == 3:
-                v[2] += 1
-            else:
-                v[3] += 1
-        chi2 = 0
+                    current_len = 0
+            len_parts.append(max_len)
+        
+        len_blocks = [0, 0, 0, 0]
+        for i in len_parts:
+            if i <= 1:
+                len_blocks[0] += 1
+            if i == 2:
+                len_blocks[1] += 1
+            if i == 3:
+                len_blocks[2] += 1
+            if i >= 4:
+                len_blocks[3] += 1
+        
+        pi_list = [0.2148, 0.3672, 0.2305, 0.1875]
+        x = 0
         for i in range(4):
-            expected = num_blocks * PI[i]
-            chi2 += (v[i] - expected) ** 2 / expected
-        p = math.exp(-chi2 / 2)
-        return chi2, p
+            x += ((len_blocks[i] - 16 * pi_list[i]) ** 2) / (16 * pi_list[i])
+        
+        p = gammaincc(3/2, x/2)
+        return x, p
 
 def main():
     """Загружает последовательности из файлов, тестирует их и сохраняет результаты."""
@@ -94,16 +103,23 @@ def main():
                 p2 = tester.runs_test()
                 chi2, p3 = tester.longest_run_test()
                 results.append((name, bits, p1, p2, chi2, p3))
+                print(f"[OK] {name}")
         except FileNotFoundError:
+            print(f"[!] Файл не найден: {filename}")
             continue
     
-    with open('results/test_results.txt', 'w') as f:
+    with open('results/test_results.txt', 'w', encoding='utf-8') as f:
+        f.write("РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ NIST\n")
+        f.write("=" * 50 + "\n\n")
+        
         for name, bits, p1, p2, chi2, p3 in results:
             f.write(f"{name}\n")
             f.write(f"{bits}\n")
-            f.write(f"{p1:.6f}\n")
-            f.write(f"{p2:.6f}\n")
-            f.write(f"{chi2:.6f} {p3:.6f}\n\n")
+            f.write(f"Frequency test: {p1:.6f}\n")
+            f.write(f"Runs test: {p2:.6f}\n")
+            f.write(f"Longest run test: chi2={chi2:.6f}, P={p3:.6f}\n\n")
+    
+    print("\nГотово. Результаты сохранены в results/test_results.txt")
 
 if __name__ == "__main__":
     main()
