@@ -11,7 +11,7 @@ def read_from_file(filename : str) -> str:
     
 def frequency_test(filename : str) -> float:
     """
-    Частотный побитовый тест
+    Частотный тест
     """
     bit_str = read_from_file(filename)
     n = len(bit_str)
@@ -29,7 +29,7 @@ def frequency_test(filename : str) -> float:
 
 def bit_test(filename : str) -> float:
     """
-    Битовый тест
+    Тест на одинаково подряд идущие биты
     """
     bit_str = read_from_file(filename)
     n = len(bit_str)
@@ -39,7 +39,7 @@ def bit_test(filename : str) -> float:
     if abs(p_i - 0.5) >= (2 / math.sqrt(n)):
         return 0.0
     
-    Vn = 1
+    Vn = 0
     for i in range(n - 1):
         if (bit_str[i] != bit_str[i + 1]):
             Vn += 1;
@@ -95,7 +95,7 @@ def calc_xi_square(v : int) -> float:
     return xi_sq
 
 def len_one_test(filename : str) -> None:
-    
+    "Тест на самую длинную последовательность единиц"
     v = create_v(filename)
     xi_sq =  calc_xi_square(v)
 
@@ -134,20 +134,20 @@ def main() -> None:
     print("Тесты:\n")
     print("ГПСЧ C++:\n")
     print(f"Частотный: {frequency_test(filename_1)}\n")
-    print(f"Битовый: {bit_test(filename_1)}\n")
-    print(f"Тест на длину единиц: {len_one_test(filename_1)}\n\n")
+    print(f"На одинаково подряд идущие биты: {bit_test(filename_1)}\n")
+    print(f"Тест на длину единиц: {len_one_test(filename_1)}\n")
     print(f"Спектральный: {spectral_test(filename_1)}\n")
 
     print("ГПСЧ Python:\n")
     print(f"Частотный: {frequency_test(filename_2)}\n")
-    print(f"Битовый: {bit_test(filename_2)}\n")
-    print(f"Тест на длину единиц: {len_one_test(filename_2)}\n\n")
+    print(f"На одинаково подряд идущие биты: {bit_test(filename_2)}\n")
+    print(f"Тест на длину единиц: {len_one_test(filename_2)}\n")
     print(f"Спектральный: {spectral_test(filename_2)}\n")
 
     print("ГПСЧ Java:\n")
     print(f"Частотный: {frequency_test(filename_3)}\n")
-    print(f"Битовый: {bit_test(filename_3)}\n")
-    print(f"Тест на длину единиц: {len_one_test(filename_3)}\n\n")
+    print(f"На одинаково подряд идущие биты: {bit_test(filename_3)}\n")
+    print(f"Тест на длину единиц: {len_one_test(filename_3)}\n")
     print(f"Спектральный: {spectral_test(filename_3)}\n")
 if __name__ == "__main__":
     main()
