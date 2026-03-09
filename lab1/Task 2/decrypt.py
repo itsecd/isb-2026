@@ -155,7 +155,7 @@ def main():
     
     while True:
         print('\nПолный текст сейчас:\n')
-        print(current_text) 
+        print(current_text)
         
         print('\nТекущие замены:')
         if replacements:
