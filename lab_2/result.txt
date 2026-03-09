@@ -1,0 +1,12 @@
+
+===== seq_cpp.txt =====
+Длина последовательности: 128
+Frequency Bit Test p-value: 0.7236736098317631
+Runs Test p-value: 0.07867341483322814
+Longest Run of Ones in a Block p-value: 0.9655956672963911
+
+===== seq_java.txt =====
+Длина последовательности: 128
+Frequency Bit Test p-value: 0.021556266760016346
+Runs Test p-value: 0.5020458191619477
+Longest Run of Ones in a Block p-value: 0.8737087569214592
