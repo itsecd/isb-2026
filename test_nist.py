@@ -110,7 +110,6 @@ def main():
     
     with open('results/test_results.txt', 'w', encoding='utf-8') as f:
         f.write("РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ NIST\n")
-        f.write("=" * 50 + "\n\n")
         
         for name, bits, p1, p2, chi2, p3 in results:
             f.write(f"{name}\n")
@@ -123,3 +122,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
