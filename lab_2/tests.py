@@ -15,14 +15,21 @@ def consecutive_bits_test(bitstring: str) -> float:
     """
     Функция для теста на одинаковые подряд идущие биты
     """
-    pvalue = 0
-    xi = bitstring.count('1')/len(bitstring)
-    if (abs(xi-0.5) < (2/math.sqrt(len(bitstring)))):
-        vn = 1
-        for i in range(len(bitstring)-1):
-            if (bitstring[i]!=bitstring[i+1]):
-                vn += 1
-        pvalue = math.erfc(abs(vn-2*len(bitstring)*xi*(1-xi))/(2*math.sqrt(2*len(bitstring))*xi*(1-xi)))
+    n = len(bitstring)
+    if n == 0:
+        return 0.0
+    xi = bitstring.count('1') / n
+    if abs(xi - 0.5) >= (2 / math.sqrt(n)):
+        return 0.0
+    if xi == 0.0 or xi == 1.0:
+        return 0.0
+    vn = 1
+    for i in range(n - 1):
+        if bitstring[i] != bitstring[i+1]:
+            vn += 1 
+    numerator = abs(vn - 2*n*xi*(1 - xi))
+    denominator = 2 * math.sqrt(2*n)*xi*(1 - xi)
+    pvalue = math.erfc(numerator/denominator)
     return pvalue
 
 
@@ -30,31 +37,35 @@ def longest_sequence_test(bitstring: str) -> float:
     """
     Функция для теста на самую длинную последовательность единиц в блоке
     """
-    pvalue = 0
-    blocks = [""]*16
-    for i in range(0,8):
-        blocks[0]+=(bitstring[i])
-    for i in range(8,len(bitstring)):
-        blocks[i//8]+=(bitstring[i])
+    m = 8
+    n = len(bitstring) // m
+    blocks = [bitstring[i*m : (i+1)*m] for i in range(n)]
     v1, v2, v3, v4 = 0, 0, 0, 0
     for block in blocks:
-        lmax, lcurrent = 0, 0
-        for i in range(len(block)-1):
-            if(block[i]!=block[i+1]):
-                lmax = max(lmax, lcurrent)
-                lcurrent = 0
-            else:
+        lmax = 0
+        lcurrent = 0
+        for bit in block:
+            if bit == '1':
                 lcurrent += 1
-        if (lmax <= 1):
+                lmax = max(lmax, lcurrent)
+            else:
+                lcurrent = 0
+        if lmax <= 1:
             v1 += 1
-        elif (lmax == 2):
+        elif lmax == 2:
             v2 += 1
-        elif (lmax == 3):
+        elif lmax == 3:
             v3 += 1
         else:
             v4 += 1
-    chi = ((v1-16*0.2148)**2)/(16*0.2148) + ((v2-16*0.3672)**2)/(16*0.3672) + ((v3-16*0.2305)**2)/(16*0.2305) + ((v4-16*0.1875)**2)/(16*0.1875)
-    pvalue = gammaincc(1.5,(chi/2))
+    pi0, pi1, pi2, pi3 = 0.2148, 0.3672, 0.2305, 0.1875
+    chi = (
+        ((v1 - n * pi0)**2) / (n * pi0) +
+        ((v2 - n * pi1)**2) / (n * pi1) +
+        ((v3 - n * pi2)**2) / (n * pi2) +
+        ((v4 - n * pi3)**2) / (n * pi3)
+    )
+    pvalue = gammaincc(1.5, chi / 2)
     return pvalue
 
 
@@ -97,13 +108,13 @@ def main() -> None:
     Главная фунцкия, осуществляющая загрузку псч, проведение тестов и запись результатов
     """
     with open("python_string.txt", "r", encoding="utf-8") as fp:
-        py_string = fp.read()
+        py_string = fp.read().strip()
     write_results("Python", "results.txt", py_string, "w")
     with open("cpp_string.txt", "r", encoding="utf-8") as fc:
-        cpp_string = fc.read()
+        cpp_string = fc.read().strip()
     write_results("C++", "results.txt", cpp_string, "a")
     with open("java_string.txt", "r", encoding="utf-8") as fj:
-        java_string = fj.read()
+        java_string = fj.read().strip()
     write_results("Java", "results.txt", java_string, "a")
 
 
