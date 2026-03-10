@@ -3,5 +3,5 @@ Test Parameters: N=128, M=8
 File Analyzed: ../pserand/seq_java.txt
 ----------------------------------
 2.1 Frequency Test:      P-value = 0.376759 (PASS)
-2.2 Runs Test:           P-value = 0.135601 (PASS)
-2.3 LST: X^2 = 1.0701. P-value = 0.091471 (PASS)
+2.2 Runs Test:           P-value = 0.188673 (PASS)
+2.3 LST: X^2 = 1.0701. P-value = 0.108009 (PASS)

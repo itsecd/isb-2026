@@ -3,5 +3,5 @@ Test Parameters: N=128, M=8
 File Analyzed: ../pserand/seq_cpp.txt
 ----------------------------------
 2.1 Frequency Test:      P-value = 0.595883 (PASS)
-2.2 Runs Test:           P-value = 0.007310 (FAIL)
-2.3 LST: X^2 = 3.1792. P-value = 0.422361 (PASS)
+2.2 Runs Test:           P-value = 0.012237 (PASS)
+2.3 LST: X^2 = 3.1792. P-value = 0.371157 (PASS)

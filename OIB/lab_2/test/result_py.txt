@@ -3,5 +3,5 @@ Test Parameters: N=128, M=8
 File Analyzed: ../pserand/seq_py.txt
 ----------------------------------
 2.1 Frequency Test:      P-value = 0.215925 (PASS)
-2.2 Runs Test:           P-value = 0.891044 (PASS)
-2.3 LST: X^2 = 0.7693. P-value = 0.058310 (PASS)
+2.2 Runs Test:           P-value = 0.966552 (PASS)
+2.3 LST: X^2 = 0.7693. P-value = 0.074641 (PASS)

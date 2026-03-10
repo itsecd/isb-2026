@@ -34,7 +34,7 @@ def test_runs(seq: list[int]) -> tuple[float, str]:
     if abs(pi - 0.5) >= 2 / math.sqrt(n) or pi == 0.0 or pi == 1.0:
         return 0.0, "FAIL"
 
-    v_n = 1 + sum(1 for i in range(n - 1) if seq[i] != seq[i + 1])
+    v_n = sum(1 for i in range(n - 1) if seq[i] != seq[i + 1])
 
     denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
     p_val = math.erfc(abs(v_n - 2 * n * pi * (1 - pi)) / denominator)
@@ -81,8 +81,7 @@ def test_longest_run_of_ones(sequence: list[int]) -> tuple[float, str, float, li
             term = (V[i] - E_i) ** 2 / E_i
             chi_square_stat += term
 
-    degrees_of_freedom = 3
-    p_value = chi2.sf(degrees_of_freedom, chi_square_stat)
+    p_value = chi2.sf(1.5, chi_square_stat / 2)
     verdict = "PASS" if p_value >= 0.01 else "FAIL"
 
     return p_value, verdict, chi_square_stat
