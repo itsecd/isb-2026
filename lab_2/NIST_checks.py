@@ -125,6 +125,13 @@ def main():
     c_value_3 = longestRunOfOnesInABlockTest(c_seq)
     print(f"{c_value_3:.4f}")
 
+    java_seq = readFile("lab_2/c++_sequence.txt")
+    java_value_1 = frequencyMonobitTest(java_seq)
+    print(f"\n{java_value_1:.4f}")
+    java_value_2 = runsTest(java_seq)
+    print(f"{java_value_2:.4f}")
+    java_value_3 = longestRunOfOnesInABlockTest(java_seq)
+    print(f"{java_value_3:.4f}")
 
 
 if __name__ == "__main__":
