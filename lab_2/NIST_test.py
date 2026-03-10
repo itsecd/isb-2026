@@ -4,7 +4,10 @@ from scipy.special import gammaincc
 import csv
 
 
-def parse_arguments():
+def parse_arguments() -> argparse.Namespace:
+    """
+    Функция для парсинга аргументов командной строки.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "input_file_c", nargs="?", help="Путь к файлу для обработки c++"
@@ -18,7 +21,10 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def read_file(file_path):
+def read_file(file_path: str) -> str | None:
+    """
+    Функция для чтения данных из файла
+    """
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             return file.read()
@@ -30,7 +36,10 @@ def read_file(file_path):
         return None
 
 
-def Frequency_bitwise_test(data):
+def Frequency_bitwise_test(data: list) -> float:
+    """
+    Частотный побитовый тест
+    """
     n = len(data)
     sum = 0
     for num in data:
@@ -43,14 +52,17 @@ def Frequency_bitwise_test(data):
     return P
 
 
-def Test_consecutive_identical_bits(data):
+def Test_consecutive_identical_bits(data: list) -> float:
+    """
+    Tест на одинаковые подряд идущие биты
+    """
     n = len(data)
     ones = sum(data)
 
     percentage_units = ones / n
     if abs(percentage_units - 0.5) >= (2 / math.sqrt(n)):
         return 0.0
-    V_n = 1
+    V_n = 0
     for i in range(n - 1):
         if data[i] != data[i + 1]:
             V_n += 1
@@ -60,7 +72,11 @@ def Test_consecutive_identical_bits(data):
     return P
 
 
-def create_v(data):
+def create_v(data: str) -> dict:
+    """
+    Функция для
+
+    """
     step = 8
     v = {0: 0, 1: 0, 2: 0, 3: 0}
 
@@ -90,8 +106,10 @@ def create_v(data):
     return v
 
 
-def calculate_chi_square(v):
-
+def calculate_chi_square(v: dict) -> float:
+    """
+    Функция для вычесления хи-квадрата
+    """
     pi = [0.2148, 0.3672, 0.2305, 0.1875]
     n_blocks = 16
 
@@ -103,29 +121,42 @@ def calculate_chi_square(v):
     return chi_square
 
 
-def calculate_p_value(chi_square):
+def calculate_p_value(chi_square: float) -> float:
+    """
+    Функция для вычисления P-значение по статистике хи-квадрата
+
+    """
     a = 3 / 2
     x = chi_square / 2
     p_value = gammaincc(a, x)
     return p_value
 
 
-def check_result(p_value):
+def check_result(p_value: float) -> bool:
+    """
+    Функция для проверки результатов теста по P-значению.
+
+    """
     if p_value >= 0.01:
         return True
     else:
         return False
 
 
-def to_bit_list(text):
+def to_bit_list(text: str) -> list:
+    """
+    Функция для преобразования текстового представления битов в список целых чисел.
+    """
     if text is None:
         return []
     clean = "".join(c for c in text if c in "01")
     return [int(bit) for bit in clean]
 
 
-def write_results_to_csv(results, filename="test_results.csv"):
-
+def write_results_to_csv(results: list, filename: str = "test_results.csv") -> None:
+    """
+    Функция для записи результатоы тестов в CSV файл
+    """
     with open(filename, "w", newline="", encoding="utf-8") as csvfile:
         fieldnames = ["Язык", "Тест", "P-значение", "Результат"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -137,14 +168,16 @@ def write_results_to_csv(results, filename="test_results.csv"):
     print(f"\nРезультаты сохранены в файл: {filename}")
 
 
-def run_tests_for_language(bits, lang_name):
+def run_tests_for_language(bits: list, lang_name: str) -> list:
+    """
+    Функция для запуска всех трех тестов для одного языка.
+    """
     results = []
 
     if len(bits) == 0:
         print(f"{lang_name}: нет данных для тестирования")
         return results
 
-    # Тест 1: Частотный тест
     p1 = Frequency_bitwise_test(bits)
     passed1 = check_result(p1)
     status1 = "ПРОЙДЕН" if passed1 else "НЕ ПРОЙДЕН"
@@ -157,20 +190,18 @@ def run_tests_for_language(bits, lang_name):
         }
     )
 
-    # Тест 2: Тест на последовательности одинаковых битов
     p2 = Test_consecutive_identical_bits(bits)
     passed2 = check_result(p2)
     status2 = "ПРОЙДЕН" if passed2 else "НЕ ПРОЙДЕН"
     results.append(
         {
             "Язык": lang_name,
-            "Тест": "Тест на серии",
+            "Тест": "Тест на одинаковые подряд идущие биты",
             "P-значение": p2,
             "Результат": status2,
         }
     )
 
-    # Тест 3: Тест на самую длинную последовательность
     bits_str = "".join(str(b) for b in bits[:128])
     v = create_v(bits_str)
     chi2 = calculate_chi_square(v)
