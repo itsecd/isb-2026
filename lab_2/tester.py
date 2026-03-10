@@ -73,26 +73,28 @@ def runs_test(seq):
         float: P-значение теста (0.0 если тест не применим)
     """
     n = len(seq)
-    pi = sum(seq) / n  # доля единиц
-    tau = 2 / math.sqrt(n)
+    
+    # Вычисляем долю единиц
+    pi = sum(seq) / n
     
     # Проверяем условие применимости теста
-    if abs(pi - 0.5) >= tau:
+    if abs(pi - 0.5) >= 2 / math.sqrt(n):
         return 0.0
     
-    # Вычисляем число знакоперемен
-    v = 1
+    # Вычисляем V_N - количество знакоперемен (по документации)
+    v_n = 0
     for i in range(n-1):
         if seq[i] != seq[i+1]:
-            v += 1
+            v_n += 1
     
-    numerator = abs(v - 2 * n * pi * (1 - pi))
+    # Вычисляем P-value по формуле из документации
+    numerator = abs(v_n - 2 * n * pi * (1 - pi))
     denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
     
     # Избегаем деления на ноль
     if denominator == 0:
         return 0.0
-        
+    
     p_value = math.erfc(numerator / denominator)
     return p_value
 
