@@ -83,7 +83,7 @@ def runs_test(bits: list[int], alpha: float = 0.01) -> dict:
     # Проверка предусловия
     if abs(2 * pi - 1) >= 2 / math.sqrt(N):
         return {
-            "name": "Тест на серии",
+            "name": "Тест на одинаковые идущие подряд биты",
             "p_value": 0.0,
             "passed": False,
             "details": "Предусловие не выполнено"
@@ -98,7 +98,7 @@ def runs_test(bits: list[int], alpha: float = 0.01) -> dict:
     
     if denominator == 0:
         return {
-            "name": "Тест на серии",
+            "name": "Тест на одинаковые идущие подряд биты",
             "p_value": 0.0,
             "passed": False,
             "details": "Ошибка вычисления"
@@ -107,7 +107,7 @@ def runs_test(bits: list[int], alpha: float = 0.01) -> dict:
     p_value = math.erfc(numerator / denominator)
     
     return {
-        "name": "Тест на серии",
+        "name": "Тест на одинаковые идущие подряд биты",
         "p_value": round(p_value, 6),
         "passed": p_value >= alpha,
         "details": f"V_n={V_n}, Expected={2*N*pi*(1-pi)+1:.2f}"
