@@ -1,9 +1,15 @@
-decrypt_key = {
-    'К': 'А', 'Л': 'Б', 'М': 'В', 'Н': 'Г', 'О': 'Д',
-    'П': 'Е', 'Р': 'Ё', 'С': 'Ж', 'Т': 'З', 'У': 'И',
-    'Ф': 'Й', 'Х': 'К', 'Ц': 'Л', 'Ч': 'М', 'Ш': 'Н',
-    'Щ': 'О', 'Ъ': 'П', 'Ы': 'Р', 'Ь': 'С', 'Э': 'Т',
-    'Ю': 'У', 'Я': 'Ф', 'А': 'Х', 'Б': 'Ц', 'В': 'Ч',
-    'Г': 'Ш', 'Д': 'Щ', 'Е': 'Ъ', 'Ё': 'Ы', 'Ж': 'Ь',
-    'З': 'Э', 'И': 'Ю', 'Й': 'Я'
-}
+from Ru import ALPHABET, ALPHABET_LEN
+
+
+def generate_caesar_decrypt_key(shift=10):
+    """Генерирует словарь для расшифровки шифра Цезаря"""
+    decrypt_key = {}
+
+    for i, original_char in enumerate(ALPHABET):
+        encrypted_index = (i + shift) % ALPHABET_LEN
+        encrypted_char = ALPHABET[encrypted_index]
+        decrypt_key[encrypted_char] = original_char
+
+    return decrypt_key
+
+decrypt_key = generate_caesar_decrypt_key(shift=10)
