@@ -1,0 +1,40 @@
+
+========== Analysis C++ (cpp_result) ==========
+Test - 1: Frequency 
+Sum (S_n): -4
+Stastics (S_obs): 0.3536
+P-value: erfc(S_obs / sqrt(2)) = 0.723674
+Test - 2: Runs 
+V_n: 62
+P-value: 0.731719
+Test - 3: Longest runs
+[<=1, 2, 3, >=4]: [4, 8, 2, 2]
+Chi-square: 1.9667
+P-value: 0.579353
+PASS
+========== Analysis Python (python_result) ==========
+Test - 1: Frequency 
+Sum (S_n): 24
+Stastics (S_obs): 2.1213
+P-value: erfc(S_obs / sqrt(2)) = 0.033895
+Test - 2: Runs 
+V_n: 69
+P-value: 0.184069
+Test - 3: Longest runs
+[<=1, 2, 3, >=4]: [1, 5, 5, 5]
+Chi-square: 3.6582
+P-value: 0.300814
+PASS
+========== Analysis Java (java_result) ==========
+Test - 1: Frequency 
+Sum (S_n): -10
+Stastics (S_obs): 0.8839
+P-value: erfc(S_obs / sqrt(2)) = 0.376759
+Test - 2: Runs 
+V_n: 66
+P-value: 0.670689
+Test - 3: Longest runs
+[<=1, 2, 3, >=4]: [5, 5, 6, 0]
+Chi-square: 5.2908
+P-value: 0.151702
+PASS
