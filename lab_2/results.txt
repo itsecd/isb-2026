@@ -1,0 +1,4 @@
+Lang   | Frequency | Runs | LongestRun | Result
+CPP     | 0.595883 | 0.362430 | 0.335659 | PASSED
+JAVA    | 0.859684 | 0.112147 | 0.789027 | PASSED
+PYTHON  | 0.215925 | 0.054085 | 0.154026 | PASSED
