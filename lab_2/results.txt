@@ -1,0 +1,10 @@
+
+Файл: seq_cpp.txt
+Frequency Test: p_value = 0.859684, pass = True
+Runs Test: p_value = 0.477678, pass = True
+Longest Run Test: p_value = 0.289820, pass = True
+
+Файл: seq_java.txt
+Frequency Test: p_value = 0.595883, pass = True
+Runs Test: p_value = 0.577929, pass = True
+Longest Run Test: p_value = 0.621222, pass = True
