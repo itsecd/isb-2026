@@ -44,4 +44,24 @@ def save_frequency_report(freq, total, filename="task2_frequencies.txt"):
     content += f"{'Символ':<12} | {'Кол-во':<10} | {'Частота (%)':<12}\n"
     content += "-" * 60 + "\n"
 
-    for i, (ch, count)
+    for i, (ch, count) in enumerate(freq):
+        pct = count / total * 100
+        ch_display = "[ПРОБЕЛ]" if ch == " " else ch
+        content += f"{ch_display:<12} | {count:<10} | {pct:<12.2f}\n"
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+    return path
+
+
+def run_frequency_analysis(text, filename="task2_frequencies.txt"):
+    """
+    Главная функция: выполняет анализ, выводит в консоль и сохраняет в файл.
+    Возвращает кортеж (freq, total).
+    """
+    freq, total = analyze_frequency(text)
+    print_frequency_report(freq, total)
+    path = save_frequency_report(freq, total, filename)
+    print(f"\n✅ Частоты сохранены: {path}")
+    return freq, total
