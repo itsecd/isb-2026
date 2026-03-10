@@ -17,6 +17,7 @@ def encrypt_text(text, encrypt_key_dict):
             result += encrypt_key_dict[char]
         else:
             result += char
+    encrypt_key = create_encrypt_key(decrypt_key)
     return result
 
 
