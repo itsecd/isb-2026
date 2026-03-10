@@ -34,57 +34,79 @@ def monobit_test(sequence):
     p_value = math.erfc(s_obs / math.sqrt(2))
     return p_value
 
-# b) Тест на серии (Runs Test)
 def runs_test(sequence):
-    n = len(sequence)
-    if n == 0:
-        return 0.0
-    pi = sum(int(bit) for bit in sequence) / n
+    """ Тест на одинаковые подряд идущие биты """
+    N = len(sequence)
     
-    # Предварительная проверка (упрощенная)
-    if abs(pi - 0.5) >= (2.0 / math.sqrt(n)):
-        return 0.0 
-
-    v_obs = 1
-    for i in range(n - 1):
-        if sequence[i] != sequence[i+1]:
-            v_obs += 1
-            
-    numerator = abs(v_obs - 2 * n * pi * (1 - pi))
-    denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
+    if N == 0:
+        return 0.0
+    
+    ones_count = sum(int(bit) for bit in sequence)
+    Z = ones_count / N
+    
+    condition_check = abs(Z - 0.5)
+    threshold = 2.0 / math.sqrt(N)
+    
+    if condition_check >= threshold:
+        print("Условие однородности НЕ выполнено! Возвращаем P-value = 0")
+        return 0.0
+    
+    V_N = 0
+    for i in range(N - 1):
+        if sequence[i] != sequence[i + 1]:
+            V_N += 1
+    
+    expected_value = 2 * N * Z * (1 - Z)
+    numerator = abs(V_N - expected_value)
+    denominator = 2 * math.sqrt(2 * N) * Z * (1 - Z)
     
     if denominator == 0:
+        print("Знаменатель равен 0! Возвращаем P-value = 0")
         return 0.0
-        
-    p_value = math.erfc(numerator / denominator)
+    
+    z_score = numerator / denominator
+    p_value = math.erfc(z_score / math.sqrt(2))
+    
     return p_value
 
 # c) Тест на самую длинную последовательность единиц в блоке
 def longest_run_ones_test(sequence):
-    n = len(sequence)
-    block_size = 16
-    num_blocks = n // block_size
+    """ Тест на самую длинную последовательность единиц в блоке. """
+    n_total = len(sequence)
+    M = 8
     
-    if num_blocks == 0:
+    if n_total % M != 0:
+        # Обрезаем до кратного, если вдруг длина не идеальна
+        n_total = (n_total // M) * M
+        sequence = sequence[:n_total]
+        
+    N_blocks = n_total // M
+    
+    if N_blocks == 0:
         return 0.0
 
-    # Вероятности для M=16 (NIST SP 800-22)
+    # Теоретические вероятности для M=8 (из стандарта NIST для M=8)
+    # Сумма должна быть ровно 1.0
+    # pi_0 (<=1), pi_1 (=2), pi_2 (=3), pi_3 (>=4)
     probs = [
-        0.21484375,   # K=1
-        0.36718750,   # K=2
-        0.23046875,   # K=3
-        0.11718750,   # K=4
-        0.05468750,   # K=5
-        0.01562500    # K>=6
+        0.2148,   # P(K <= 1)
+        0.3672,   # P(K = 2)
+        0.2305,   # P(K = 3)
+        0.1875    # P(K >= 4) -> 1 - (0.2148 + 0.3672 + 0.2305)
     ]
     
-    counts = [0] * 6 
-    
-    for i in range(num_blocks):
-        block = sequence[i*block_size : (i+1)*block_size]
+    # Счетчики категорий v_0, v_1, v_2, v_3
+    counts = [0] * 4
+
+    for i in range(N_blocks):
+        block_start = i * M
+        block_end = block_start + M
+        block = sequence[block_start:block_end]
+        
         max_run = 0
         current_run = 0
         
+        # Поиск самой длинной серии единиц в блоке
         for bit in block:
             if bit == '1':
                 current_run += 1
@@ -93,25 +115,29 @@ def longest_run_ones_test(sequence):
             else:
                 current_run = 0
         
-        # Маппинг длины серии на индекс категории
-        if max_run == 0:
-            idx = 0 
-        elif max_run <= 5:
-            idx = max_run - 1
-        else:
-            idx = 5
-            
-        counts[idx] += 1
-            
+        if max_run <= 1:
+            counts[0] += 1
+        elif max_run == 2:
+            counts[1] += 1
+        elif max_run == 3:
+            counts[2] += 1
+        else: # max_run >= 4
+            counts[3] += 1
+    
+    # Расчет Хи-квадрат (стр. 12)
+    # chi_sq = sum( (v_i - N*pi_i)^2 / (N*pi_i) )
     chi_sq = 0.0
-    for i in range(6):
-        expected = num_blocks * probs[i]
-        if expected > 0:
-            chi_sq += ((counts[i] - expected) ** 2) / expected
-            
+    for i in range(4):
+        expected = N_blocks * probs[i]
+        observed = counts[i]
+        term = ((observed - expected) ** 2) / expected
+        chi_sq += term
+    df = 3
+    
     try:
-        p_value = 1.0 - stats.chi2.cdf(chi_sq, 5)
-    except Exception:
+        p_value = 1.0 - stats.chi2.cdf(chi_sq, df)
+    except Exception as e:
+        print(f"Ошибка расчета P-value: {e}")
         return 0.0
     
     return p_value
