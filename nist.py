@@ -93,7 +93,7 @@ def runs_test(bits: list[int], alpha: float = 0.01) -> dict:
     V_n = 1 + sum(1 for i in range(1, N) if bits[i] != bits[i-1])
     
     # Вычисление P-value
-    numerator = abs(V_n - 2 * N * pi * (1 - pi))
+    numerator = abs(V_n - 2 * N * pi * (1 - pi)+1)
     denominator = 2 * math.sqrt(2 * N) * pi * (1 - pi)
     
     if denominator == 0:
