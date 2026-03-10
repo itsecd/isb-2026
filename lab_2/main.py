@@ -33,7 +33,7 @@ def runs_test(seq: str) -> dict:
     if abs(tau - 0.5) >= check:
         return {"name": "Runs Test", "p_value": 0.0, "pass": False}
     
-    vn = 1 + sum(1 for i in range(n - 1) if seq[i] != seq[i + 1])
+    vn = sum(1 for i in range(n - 1) if seq[i] != seq[i + 1])
     num = abs(vn - 2 * n * tau * (1 - tau))
     den = 2 * math.sqrt(2 * n) * tau * (1 - tau)
     p = math.erfc(num / den)
@@ -57,10 +57,9 @@ def longest_run_test(seq: str) -> dict:
 
     """Выполняет тест на самую длинную серию единиц в блоке."""
 
-    n = len(seq)
     M = 8
 
-    if n < 128 or n % M != 0:
+    if len(seq) != 128:
         return {"name": "Longest Run Test", "p_value": 0.0, "pass": False}
     
     probs = [0.2148, 0.3672, 0.2305, 0.1875]
