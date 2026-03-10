@@ -117,6 +117,14 @@ def main():
     python_value_3 = longestRunOfOnesInABlockTest(python_seq)
     print(f"{python_value_3:.4f}")
 
+    c_seq = readFile("lab_2/c++_sequence.txt")
+    c_value_1 = frequencyMonobitTest(c_seq)
+    print(f"\n{c_value_1:.4f}")
+    c_value_2 = runsTest(c_seq)
+    print(f"{c_value_2:.4f}")
+    c_value_3 = longestRunOfOnesInABlockTest(c_seq)
+    print(f"{c_value_3:.4f}")
+
 
 
 if __name__ == "__main__":
