@@ -90,7 +90,7 @@ def runs_test(bits: list[int], alpha: float = 0.01) -> dict:
         }
     
     # Подсчёт числа знакоперемен (серий)
-    V_n = 1 + sum(1 for i in range(1, N) if bits[i] != bits[i-1])
+    V_n = sum(1 for i in range(1, N) if bits[i] != bits[i-1])
     
     # Вычисление P-value
     numerator = abs(V_n - 2 * N * pi * (1 - pi)+1)
