@@ -30,6 +30,27 @@ vector<int> read_from_file(const string& filename)
     return numbers;
 }
 
+void save_to_file(const string& text, const string& filename)
+{
+    fs::path file_path(filename);
+    fs::path dir = file_path.parent_path();
+
+    if (!dir.empty() && !fs::exists(dir)) {
+        fs::create_directories(dir);
+        cout << "Создана директория: " << dir << endl;
+    }
+
+    ofstream file(filename);
+    if (file.is_open()) {
+        file << text;
+        file.close();
+        cout << "Результаты сохранены в файл: " << filename << endl;
+    }
+    else {
+        cout << "Ошибка при открытии файла: " << filename << endl;
+    }
+}
+
 void print_vec(vector<int>& numbers)
 {
     for (int i = 0; i < numbers.size(); i++)
@@ -157,39 +178,47 @@ double test_3(vector<int>& numbers)
 
 }
 
-void process_file(const string& filename, const string& file_label) {
-    cout << "\n======================================" << endl;
-    cout << "Обработка файла: " << file_label << endl;
-    cout << "Читаем файл из: " << filename << endl;
+string process_file(const string& filename, const string& file_label)
+{
+    string result;
+
+    result += "\n======================================\n";
+    result += "Обработка файла: " + file_label + "\n";
+    result += "Читаем файл из: " + filename + "\n";
 
     vector<int> numbers = read_from_file(filename);
 
     if (numbers.empty()) {
-        cout << "Вектор пуст! Пропускаем файл." << endl;
-        return;
+        result += "Вектор пуст! Пропускаем файл.\n";
+        return result;
     }
 
-    cout << "Размер последовательности: " << numbers.size() << " бит" << endl;
-    cout << "Первые 50 бит: ";
-    for (int i = 0; i < min(50, (int)numbers.size()); i++) {
-        cout << numbers[i];
-    }
-    cout << (numbers.size() > 50 ? "..." : "") << endl;
+    result += "Размер последовательности: " + to_string(numbers.size()) + " бит\n";
+
+    result += "Первые 50 бит: ";
+    for (int i = 0; i < min(50, (int)numbers.size()); i++)
+        result += to_string(numbers[i]);
+
+    if (numbers.size() > 50)
+        result += "...";
+
+    result += "\n";
 
     double test1 = test_1(numbers);
     double test2 = test_2(numbers);
     double test3 = test_3(numbers);
 
-    cout << "\nРезультаты тестов:" << endl;
-    cout << "Test 1 (Частотный побитовый тест): P-value = " << test1 << endl;
-    cout << "Test 2 (Тест на одинаковые подряд идущие биты): P-value = " << test2 << endl;
-    cout << "Test 3 (Тест на максимальную длину серии в блоке): P-value = " << test3 << endl;
+    result += "\nРезультаты тестов:\n";
+    result += "Test 1: P-value = " + to_string(test1) + "\n";
+    result += "Test 2: P-value = " + to_string(test2) + "\n";
+    result += "Test 3: P-value = " + to_string(test3) + "\n";
 
-    
-    cout << "\nИнтерпретация результатов (при уровне значимости 0.01):" << endl;
-    cout << "Test 1: " << (test1 < 0.01 ? "НЕ РАНДОМНАЯ" : "рандомизированная") << endl;
-    cout << "Test 2: " << (test2 < 0.01 ? "НЕ РАНДОМНАЯ" : "рандомизированная") << endl;
-    cout << "Test 3: " << (test3 < 0.01 ? "НЕ РАНДОМНАЯ" : "рандомизированная") << endl;
+    result += "\nИнтерпретация результатов (при уровне значимости 0.01):\n";
+    result += string("Test 1: ") + (test1 < 0.01 ? "НЕ РАНДОМНАЯ\n" : "рандомизированная\n");
+    result += string("Test 2: ") + (test2 < 0.01 ? "НЕ РАНДОМНАЯ\n" : "рандомизированная\n");
+    result += string("Test 3: ") + (test3 < 0.01 ? "НЕ РАНДОМНАЯ\n" : "рандомизированная\n");
+
+    return result;
 }
 
 int main() {
@@ -198,18 +227,23 @@ int main() {
 #endif
     ios_base::sync_with_stdio(false);
 
-    string source_dir = SOURCE_DIR;  // путь к текущей папке (task2)
-    fs::path lab2_path = fs::path(source_dir).parent_path();  // 
+    string source_dir = SOURCE_DIR;
+    fs::path lab2_path = fs::path(source_dir).parent_path();
 
-    // Обрабатываем оба файла
     string filename_cpp = (lab2_path / "task2" / "sequence_c++.txt").string();
     string filename_java = (lab2_path / "task2" / "sequence_java.txt").string();
 
-    process_file(filename_cpp, "sequence_c++.txt");
-    process_file(filename_java, "sequence_java.txt");
+    string results;
 
-    cout << "\n======================================" << endl;
-    cout << "Обработка всех файлов завершена." << endl;
+    results += process_file(filename_cpp, "sequence_c++.txt");
+    results += process_file(filename_java, "sequence_java.txt");
+
+    results += "\n======================================\n";
+    results += "Обработка всех файлов завершена.\n";
+
+    string result_file = (lab2_path / "task2" / "tests_result.txt").string();
+
+    save_to_file(results, result_file);
 
     return 0;
 }
