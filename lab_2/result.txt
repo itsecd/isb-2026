@@ -1,15 +1,15 @@
 
 For Python:
-Frequency test P-value: 0.21592493894014042
-Runs test P-value: 0.8252086489499595
-Longest run test P-value: 0.1748798659293393
+Frequency test: Passed
+Runs test: Passed
+Longest run test: Passed
 
 For Java:
-Frequency test P-value: 0.7236736098317631
-Runs test P-value: 0.07498528805997988
-Longest run test P-value: 0.7325453938078248
+Frequency test: Passed
+Runs test: Passed
+Longest run test: Passed
 
 For C++:
-Frequency test P-value: 0.8596837951986662
-Runs test P-value: 0.15638888651764193
-Longest run test P-value: 0.579352853739117
+Frequency test: Passed
+Runs test: Passed
+Longest run test: Passed
