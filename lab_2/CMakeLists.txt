@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project("ISB_Lab2_generator" CXX)
+add_executable("ISB_Lab2_generator" 
+"generator_cpp.cpp")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

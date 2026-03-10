@@ -13,7 +13,7 @@ def main() ->None:
     for i in range(128):
         seq+=str(random.randint(0,1))
     
-    write_text("../sequences/seq_python.txt")
+    write_text("seq_python.txt", seq)
 
 
 if __name__ == "__main__":

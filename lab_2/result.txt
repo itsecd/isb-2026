@@ -1,0 +1,5 @@
+Language | Frequency Test        | Runs Test             | Longest Run Test     
+--------------------------------------------------------------------------------
+C++      | Freq: 0.288844 (PASS) | Runs: 0.797665 (PASS) | Long: 0.306013 (PASS)
+Java     | Freq: 0.723674 (PASS) | Runs: 0.587882 (PASS) | Long: 0.305235 (PASS)
+Python   | Freq: 0.288844 (PASS) | Runs: 0.132381 (PASS) | Long: 0.014303 (PASS)
