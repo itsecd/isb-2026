@@ -1,0 +1,18 @@
+Python results: 
+0.1116
+0.0947
+0.4038
+This sequence is random
+
+С++ results: 
+0.1116
+0.0947
+0.4038
+This sequence is random
+
+Java results: 
+0.1116
+0.0947
+0.4038
+This sequence is random
+

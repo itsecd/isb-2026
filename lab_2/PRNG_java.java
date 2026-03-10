@@ -2,7 +2,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
-public class createRandomSequence {
+public class PRNG_java {
     public static void main(String[] args) {
         int size = 128;
         int[] sequence = new int[size];

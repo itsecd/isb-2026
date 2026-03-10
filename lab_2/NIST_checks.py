@@ -108,30 +108,71 @@ def longestRunOfOnesInABlockTest(sequence: list[int]) -> float:
     return P_value
 
 
+def resultsOfChecks() -> None:
+    '''
+    Checks and outputs test results.
+    '''
+    with open("lab_2/result.txt", 'w', encoding='utf-8') as file:
+        file.write("Python results: \n")
+        python_seq = readFile("lab_2/python_sequence.txt")
+        
+        python_value_1 = frequencyMonobitTest(python_seq)
+        file.write(f"{python_value_1:.4f}\n")
+        
+        python_value_2 = runsTest(python_seq)
+        file.write(f"{python_value_2:.4f}\n")
+        
+        python_value_3 = longestRunOfOnesInABlockTest(python_seq)
+        file.write(f"{python_value_3:.4f}\n")
+        
+        if python_value_1 >= 0.01 and python_value_2 >= 0.01 and python_value_3 >= 0.01:
+            file.write("This sequence is random\n\n")
+        else:
+            file.write("This sequence is NOT random\n\n")
+
+        
+        file.write("С++ results: \n")
+        c_seq = readFile("lab_2/python_sequence.txt")
+        
+        c_value_1 = frequencyMonobitTest(c_seq)
+        file.write(f"{c_value_1:.4f}\n")
+        
+        c_value_2 = runsTest(c_seq)
+        file.write(f"{c_value_2:.4f}\n")
+        
+        c_value_3 = longestRunOfOnesInABlockTest(c_seq)
+        file.write(f"{c_value_3:.4f}\n")
+        
+        if c_value_1 >= 0.01 and c_value_2 >= 0.01 and c_value_3 >= 0.01:
+            file.write("This sequence is random\n\n")
+        else:
+            file.write("This sequence is NOT random\n\n")
+
+
+        file.write("Java results: \n")
+        java_seq = readFile("lab_2/python_sequence.txt")
+        
+        java_value_1 = frequencyMonobitTest(java_seq)
+        file.write(f"{java_value_1:.4f}\n")
+        
+        java_value_2 = runsTest(java_seq)
+        file.write(f"{java_value_2:.4f}\n")
+        
+        java_value_3 = longestRunOfOnesInABlockTest(java_seq)
+        file.write(f"{java_value_3:.4f}\n")
+        
+        if java_value_1 >= 0.01 and java_value_2 >= 0.01 and java_value_3 >= 0.01:
+            file.write("This sequence is random\n\n")
+        else:
+            file.write("This sequence is NOT random\n\n")
+
+
+
 def main():
-    python_seq = readFile("lab_2/python_sequence.txt")
-    python_value_1 = frequencyMonobitTest(python_seq)
-    print(f"{python_value_1:.4f}")
-    python_value_2 = runsTest(python_seq)
-    print(f"{python_value_2:.4f}")
-    python_value_3 = longestRunOfOnesInABlockTest(python_seq)
-    print(f"{python_value_3:.4f}")
-
-    c_seq = readFile("lab_2/c++_sequence.txt")
-    c_value_1 = frequencyMonobitTest(c_seq)
-    print(f"\n{c_value_1:.4f}")
-    c_value_2 = runsTest(c_seq)
-    print(f"{c_value_2:.4f}")
-    c_value_3 = longestRunOfOnesInABlockTest(c_seq)
-    print(f"{c_value_3:.4f}")
-
-    java_seq = readFile("lab_2/c++_sequence.txt")
-    java_value_1 = frequencyMonobitTest(java_seq)
-    print(f"\n{java_value_1:.4f}")
-    java_value_2 = runsTest(java_seq)
-    print(f"{java_value_2:.4f}")
-    java_value_3 = longestRunOfOnesInABlockTest(java_seq)
-    print(f"{java_value_3:.4f}")
+    try:
+        resultsOfChecks()
+    except Exception as e:
+        print(f"Error: {e}")
 
 
 if __name__ == "__main__":
