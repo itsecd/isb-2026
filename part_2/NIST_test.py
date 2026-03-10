@@ -95,7 +95,7 @@ def the_longest_sequence_test(gen: str) -> float:
         else:
             v[3] += 1
     xi_sqare = 0
-    for i in range(3):
+    for i in range(4):
         xi_sqare += pow((v[i] - 16 * pi[i]), 2) / (16 * pi[i])
     p = gammaincc(3 / 2, xi_sqare / 2)
     return p
