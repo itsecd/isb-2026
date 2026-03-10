@@ -1,14 +1,16 @@
 import os
-from collections import Counter
+from frequency_analysis import run_frequency_analysis
 
 
 def get_data_dir():
+    """Определяет путь к папке data относительно расположения скрипта"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
     return os.path.join(project_root, "data")
 
 
 def read_file(filename):
+    """Читает содержимое файла из папки data"""
     data_dir = get_data_dir()
     path = os.path.join(data_dir, filename)
     with open(path, "r", encoding="utf-8") as f:
@@ -16,6 +18,7 @@ def read_file(filename):
 
 
 def save(filename, content):
+    """Сохраняет содержимое в файл в папке data"""
     data_dir = get_data_dir()
     os.makedirs(data_dir, exist_ok=True)
     path = os.path.join(data_dir, filename)
@@ -24,6 +27,7 @@ def save(filename, content):
 
 
 def load_key(filename):
+    """Загружает ключ дешифровки из файла формата: <символ> -> <буква>"""
     data_dir = get_data_dir()
     path = os.path.join(data_dir, filename)
     key = {}
@@ -46,6 +50,7 @@ def load_key(filename):
 
 
 def decrypt(text, key):
+    """Расшифровывает текст с помощью ключа"""
     return "".join(key.get(c, c) for c in text)
 
 
@@ -57,38 +62,16 @@ def main():
     data_dir = get_data_dir()
     print(f"\n📂 Рабочая папка: {data_dir}")
 
+    # Чтение зашифрованного текста из файла
     encrypted = read_file("task2_encrypted.txt")
     print(f"📄 Зашифрованный текст загружен ({len(encrypted)} симв.)")
 
-    # === ШАГ 1: ЧАСТОТНЫЙ АНАЛИЗ ===
+    # === ШАГ 1: ЧАСТОТНЫЙ АНАЛИЗ (вызывается из модуля) ===
     print("\n" + "=" * 70)
     print("ШАГ 1: ЧАСТОТНЫЙ АНАЛИЗ")
     print("=" * 70)
 
-    cnt = Counter(encrypted)
-    total = sum(cnt.values())
-    freq = sorted(cnt.items(), key=lambda x: x[1], reverse=True)
-
-    print(f"\nВсего символов: {total}")
-    print(f"Уникальных символов: {len(freq)}\n")
-    print(f"{'№':<3} | {'Символ':<10} | {'Кол-во':<8} | {'%':<7}")
-    print("-" * 50)
-
-    for i, (ch, count) in enumerate(freq):
-        pct = count / total * 100
-        ch_display = "[ПРОБЕЛ]" if ch == " " else ch
-        print(f"{i + 1:<3} | {ch_display:<10} | {count:<8} | {pct:<7.1f}")
-
-    freq_content = "ЧАСТОТНЫЙ АНАЛИЗ ЗАШИФРОВАННОГО ТЕКСТА\n" + "=" * 60 + "\n\n"
-    freq_content += f"Всего символов: {total}\nУникальных символов: {len(freq)}\n\n"
-    freq_content += f"{'Символ':<12} | {'Кол-во':<10} | {'Частота (%)':<12}\n"
-    freq_content += "-" * 60 + "\n"
-    for i, (ch, count) in enumerate(freq):
-        pct = count / total * 100
-        ch_display = "[ПРОБЕЛ]" if ch == " " else ch
-        freq_content += f"{ch_display:<12} | {count:<10} | {pct:<12.2f}\n"
-    save("task2_frequencies.txt", freq_content)
-    print(f"\n✅ Частоты сохранены: {data_dir}/task2_frequencies.txt")
+    run_frequency_analysis(encrypted)
 
     # === ШАГ 2: ЗАГРУЗКА КЛЮЧА ИЗ ФАЙЛА ===
     print("\n" + "=" * 70)
