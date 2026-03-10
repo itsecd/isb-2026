@@ -43,7 +43,7 @@ def main() -> None:
     # Runs
     print("\n[2/3] Тест на одинаковые подряд идущие биты...")
     pi, vn, p_runs, condition_ok = runs_test(seq)
-    runs_pass: bool = p_runs >= args.alpha
+    runs_pass: bool = condition_ok and (p_runs >= args.alpha)
 
     runs_text: str = (
         "NIST Runs Test\n"
