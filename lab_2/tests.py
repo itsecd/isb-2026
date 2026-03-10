@@ -23,7 +23,7 @@ def consecutive_bits_test(bitstring: str) -> float:
         return 0.0
     if xi == 0.0 or xi == 1.0:
         return 0.0
-    vn = 1
+    vn = 0
     for i in range(n - 1):
         if bitstring[i] != bitstring[i+1]:
             vn += 1 
