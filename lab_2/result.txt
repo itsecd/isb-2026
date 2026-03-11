@@ -1,15 +1,16 @@
 
+
 For Python:
-Frequency test: Passed
-Runs test: Passed
-Longest run test: Passed
+Frequency test: 0.21592493894014042 (Passed)
+Runs test: 0.6893275441398365 (Passed)
+Longest run test: 0.17487986592933916 (Passed)
 
 For Java:
-Frequency test: Passed
-Runs test: Passed
-Longest run test: Passed
+Frequency test: 0.7236736098317631 (Passed)
+Runs test: 0.1088011873053299 (Passed)
+Longest run test: 0.7325453938078248 (Passed)
 
 For C++:
-Frequency test: Passed
-Runs test: Passed
-Longest run test: Passed
+Frequency test: 0.8596837951986662 (Passed)
+Runs test: 0.2147898267144255 (Passed)
+Longest run test: 0.5793528537391173 (Passed)

@@ -20,20 +20,15 @@ def frequency_test(bits: str) -> float:
 
 def runs_test(bits: str) -> float:
     """Runs Test"""
-    n = len(bits)
-    ones = bits.count('1')
-    pi = ones / n
-    if abs(pi - 0.5) > 2 / math.sqrt(n):
-        return 0.0  # тест не применим
-    
-    runs = 1
-    for i in range(1, n):
-        if bits[i] != bits[i - 1]:
-            runs += 1
-
-    numerator = 2 * ones * (n - ones) / n + 1
-    denominator = (numerator - 1) * (numerator - 2) / (n - 1)
-    p_value = math.erfc(abs(runs - numerator) / math.sqrt(2 * denominator))
+    eps = [int(bit) for bit in bits]
+    zeta = sum(eps)/len(bits)
+    if (abs(zeta - 0.5) > 2/math.sqrt(len(bits))):
+        return 0.0
+    V_n = 0
+    for i in range (len(bits)-1):
+        if eps[i] != eps[i+1]:
+            V_n +=1
+    p_value = math.erfc(abs(V_n - 2* len(bits)*zeta*(1-zeta))/(2*math.sqrt(2*len(bits))*zeta*(1-zeta)))
     return p_value
 
 
@@ -84,38 +79,30 @@ def compile_analysis(bits: str, language: str) -> (str, str):
     p_runs = runs_test(bits)
     p_long = longest_run_test(bits)
 
-    console_str = (
+    str = (
         f"\nFor {language}:\n"
-        f"Frequency test P-value: {p_freq}\n"
-        f"Runs test P-value: {p_runs}\n"
-        f"Longest run test P-value: {p_long}\n"
+        f"Frequency test: {p_freq} ({status(p_freq)})\n"
+        f"Runs test: {p_runs} ({status(p_runs)})\n"
+        f"Longest run test: {p_long} ({status(p_long)})\n"
     )
 
-    file_str = (
-        f"\nFor {language}:\n"
-        f"Frequency test: {status(p_freq)}\n"
-        f"Runs test: {status(p_runs)}\n"
-        f"Longest run test: {status(p_long)}\n"
-    )
-
-    return console_str, file_str
+    return str
 
 
 if __name__ == "__main__":
-    sequences = [("Python", "sequences/seq_python.txt"),
-                 ("Java", "sequences/seq_java.txt"),
-                 ("C++", "sequences/seq_cpp.txt")]
+    python_seq = ("Python", "sequences/seq_python.txt")
+    java_seq = ("Java", "sequences/seq_java.txt")
+    cpp_seq = ("C++", "sequences/seq_cpp.txt")
 
-    res_cons, res_txt = "", ""
+    res = "\n"
 
-    for lang, path in sequences:
-        cons, f_res = compile_analysis(read_sequence(path), lang)
-        res_cons += cons
-        res_txt  += f_res
+    res += compile_analysis(read_sequence(python_seq[1]), python_seq[0])
+    res += compile_analysis(read_sequence(java_seq[1]), java_seq[0])
+    res += compile_analysis(read_sequence(cpp_seq[1]), cpp_seq[0])
 
-    print(res_cons)
+    print(res)
 
     with open("result.txt", "w", encoding="utf-8") as f:
-        f.write(res_txt)
+        f.write(res)
 
     print("Results saved to result.txt")
