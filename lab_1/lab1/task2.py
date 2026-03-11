@@ -6,17 +6,23 @@ class DeFrequncy:
         text = ""
         with open(path_txt, 'r', encoding='utf-8') as file:
             text = file.read()
-
+        n = 0
         for i in text:
+            n += 1
             if i == '\n':
                 ci_alph[' '] = ci_alph.get(' ', 0) + 1
             else:
                 ci_alph[i] = ci_alph.get(i, 0) + 1
+
         ci_alph = dict(sorted(ci_alph.items(), key=lambda item: item[1], reverse=True))
+        new_ci_alph = []
+
+        for char, num in ci_alph.items():
+            new_ci_alph.append([char, round(num/n, 6)])
 
         freq_alph = ""
-        for i in ci_alph:
-            freq_alph += i + ' | ' + str(ci_alph[i]) + '\n'
+        for i in new_ci_alph:
+            freq_alph += i[0] + ' | ' + str(i[1]) + '\n'
 
         with open("freq_alph.txt", 'w', encoding='utf-8') as file:
             file.write(freq_alph)
@@ -36,10 +42,12 @@ class DeFrequncy:
         self.alph_key = [[],[]]
 
         j = 0
-        for i in ci_alph:
+        for i in new_ci_alph:
             self.alph_key[0] += ([alph_chance[j][0]])
-            self.alph_key[1] += ([i])
+            self.alph_key[1] += (i[0])
             j += 1
+
+        print(self.alph_key)
 
         self.de_text = ""
         for i in text:
@@ -82,37 +90,41 @@ class DeFrequncy:
             new_text += j
         self.de_text = new_text
 
-decipher = DeFrequncy("cod2.txt")
-while True:
-    print("1 - output text")
-    print("2 - output key")
-    print("3 - output words of 1-2 symbols")
-    print("4 - change symbols")
-    print("5 - save key and deciphered text")
-    print("6 - exit")
-    a = input("input number of command: ")
+def main():
+    decipher = DeFrequncy("cod2.txt")
+    while True:
+        print("1 - output text")
+        print("2 - output key")
+        print("3 - output words of 1-2 symbols")
+        print("4 - change symbols")
+        print("5 - save key and deciphered text")
+        print("6 - exit")
+        a = input("input number of command: ")
 
-    if a == '1':
-        print(decipher.de_text)
-    elif a == '2':
-        text = decipher.key_to_text()
-        print(text)
-    elif a == '3':
-        print("1 symbol: а, б, в, ж, и, к, о, с, у, я")
-        print("2 symbols: на, не, по, до, от, за, ко, \n"
-              "во, со, из, об, ад, за, он, мы, вы, ты, \n"
-              "ее, их, ой, ай, ну, ох, ах, ел, ум, ус, ел")
-    elif a == '4':
-        first = input("input first symbol: ")
-        second = input("input second symbol: ")
-        if first.isalpha() or first == ' ' and second.isalpha() or second == ' ':
-            decipher.change_symbols(first, second)
-    elif a == '5':
-        text = decipher.key_to_text()
-        with open("code2_key.txt", 'w', encoding='utf-8') as file:
-            file.write(text)
-        with open("code2_deciphered.txt", 'w', encoding='utf-8') as file:
-            file.write(decipher.de_text)
-    elif a == '6':
-        break
-    print("\n")
+        if a == '1':
+            print(decipher.de_text)
+        elif a == '2':
+            text = decipher.key_to_text()
+            print(text)
+        elif a == '3':
+            print("1 symbol: а, б, в, ж, и, к, о, с, у, я")
+            print("2 symbols: на, не, по, до, от, за, ко, \n"
+                  "во, со, из, об, ад, за, он, мы, вы, ты, \n"
+                  "ее, их, ой, ай, ну, ох, ах, ел, ум, ус, ел")
+        elif a == '4':
+            first = input("input first symbol: ")
+            second = input("input second symbol: ")
+            if first.isalpha() or first == ' ' and second.isalpha() or second == ' ':
+                decipher.change_symbols(first, second)
+        elif a == '5':
+            text = decipher.key_to_text()
+            with open("code2_key.txt", 'w', encoding='utf-8') as file:
+                file.write(text)
+            with open("code2_deciphered.txt", 'w', encoding='utf-8') as file:
+                file.write(decipher.de_text)
+        elif a == '6':
+            break
+        print("\n")
+
+if __name__ == "__main__":
+    main()
