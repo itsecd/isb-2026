@@ -5,14 +5,20 @@ from scipy.special import gammaincc
 from const import P_VALUE, BLOCK_SIZE, PI, SOURCE_FILES, OUTPUT_FILE
 
 
-def frequency_test(bits: List[int]) -> float:
+def frequency_test(seq: str) -> float:
     """
-    Частотный побитовый тест
+    Частотный побитовый тест ()
     """
-    n = len(bits)
-    x = [1 if b == 1 else -1 for b in bits]
-    sum_x = abs(sum(x))
-    s_obs = sum_x / math.sqrt(n)
+    n = len(seq)
+    
+    
+    ones = seq.count('1')
+    zeros = n - ones
+    
+    # Вычисляем сумму: (1 для '1', -1 для '0')
+    sum_x = ones - zeros  # ones*(+1) + zeros*(-1)
+    
+    s_obs = abs(sum_x) / math.sqrt(n)
     p_value = math.erfc(s_obs / math.sqrt(2))
     return p_value
 
@@ -83,39 +89,36 @@ def main() -> None:
     java_seq = read_file(SOURCE_FILES[1])
     py_seq = read_file(SOURCE_FILES[2])
 
-    cpp_bits = [int(b) for b in cpp_seq]
-    java_bits = [int(b) for b in java_seq]
-    py_bits = [int(b) for b in py_seq]
 
     cpp_values = [
         "CPP",
-        frequency_test(cpp_bits),
+        frequency_test(cpp_seq),
         count_same_bits(cpp_seq),
         max_count_in_block(cpp_seq),
     ]
     java_values = [
         "JAVA",
-        frequency_test(java_bits),
+        frequency_test(java_seq),
         count_same_bits(java_seq),
         max_count_in_block(java_seq),
     ]
     py_values = [
         "PYTHON",
-        frequency_test(py_bits),
+        frequency_test(py_seq),
         count_same_bits(py_seq),
         max_count_in_block(py_seq),
     ]
     try:
         with open(OUTPUT_FILE, "w") as f:
-            f.write("Язык:|  1 тест  |  2 тест  | 3 тест     | Итог \n")
+            f.write("Lang:|  1 test  |  2 test  | 3 test     | result \n")
             f.write(
-                f"{cpp_values[0]:<8}|  {cpp_values[1]:.7f}  |  {cpp_values[2]:.7f}  | {cpp_values[3]:.12f}| {'Отлично' if all(x >= P_VALUE for x in cpp_values[1:]) else 'Плохо'}\n"
+                f"{cpp_values[0]:<8}|  {cpp_values[1]:.7f}  |  {cpp_values[2]:.7f}  | {cpp_values[3]:.12f}| {'Good' if all(x >= P_VALUE for x in cpp_values[1:]) else 'Bad'}\n"
             )
             f.write(
-                f"{java_values[0]:<8}|  {java_values[1]:.7f}  |  {java_values[2]:.7f}  | {java_values[3]:.12f}| {'Отлично' if all(x >= P_VALUE for x in java_values[1:]) else 'Плохо'}\n"
+                f"{java_values[0]:<8}|  {java_values[1]:.7f}  |  {java_values[2]:.7f}  | {java_values[3]:.12f}| {'Good' if all(x >= P_VALUE for x in java_values[1:]) else 'Bad'}\n"
             )
             f.write(
-                f"{py_values[0]:<8}|  {py_values[1]:.7f}  |  {py_values[2]:.7f}  | {py_values[3]:.12f}| {'Отлично' if all(x >= P_VALUE for x in py_values[1:]) else 'Плохо'}\n"
+                f"{py_values[0]:<8}|  {py_values[1]:.7f}  |  {py_values[2]:.7f}  | {py_values[3]:.12f}| {'Good' if all(x >= P_VALUE for x in py_values[1:]) else 'Bad'}\n"
             )
     except Exception as e:
         print(f"Error: {e}\n")
