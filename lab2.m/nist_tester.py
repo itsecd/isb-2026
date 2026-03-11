@@ -108,10 +108,15 @@ def main():
     
     results = []
     
+    print("\n" + "=" * 70)
+    print("РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ NIST")
+    print("=" * 70)
+    
     for filename, lang in zip(files, languages):
         seq = read_sequence(filename)
         
         if seq is None:
+            print(f"\n{lang}: ОШИБКА - файл не найден или некорректен")
             results.append([lang, "ОШИБКА", "-", "-", "-"])
             continue
         
@@ -120,6 +125,7 @@ def main():
         p3 = longest_run_test(seq)
         
         if None in [p1, p2, p3]:
+            print(f"\n{lang}: ОШИБКА при вычислениях")
             results.append([lang, "ОШИБКА", "-", "-", "-"])
             continue
         
@@ -127,20 +133,25 @@ def main():
         status2 = "ПРОЙДЕН" if p2 >= 0.01 else "НЕ ПРОЙДЕН"
         status3 = "ПРОЙДЕН" if p3 >= 0.01 else "НЕ ПРОЙДЕН"
         
-        results.append([lang, status1, status2, status3])
-    
-    try:
-        with open("test_results.txt", "w") as f:
-            f.write("РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ NIST\n")
-            f.write("=" * 50 + "\n")
-            f.write(f"{'Язык':<10} {'Тест 1':<10} {'Тест 2':<10} {'Тест 3':<10}\n")
-            f.write("-" * 50 + "\n")
-            for r in results:
-                f.write(f"{r[0]:<10} {r[1]:<10} {r[2]:<10} {r[3]:<10}\n")
+        print(f"\n{lang}:")
+        print(f"  Тест 1 (частотный): p={p1:.6f} - {status1}")
+        print(f"  Тест 2 (runs): p={p2:.6f} - {status2}")
+        print(f"  Тест 3 (long run): p={p3:.6f} - {status3}")
         
-        print("Тестирование завершено. Результаты в test_results.txt")
-    except:
-        print("Ошибка при сохранении")
+        results.append([lang, f"{p1:.6f}", status1, f"{p2:.6f}", status2, f"{p3:.6f}", status3])
+
+    try:
+        with open("test_results.txt", "w", encoding='utf-8') as f:
+            f.write("РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ NIST\n")
+            f.write("=" * 80 + "\n")
+            f.write(f"{'Язык':<10} {'Freq p-value':<15} {'Freq':<10} {'Runs p-value':<15} {'Runs':<10} {'LongRun p-value':<15} {'LongRun':<10}\n")
+            f.write("-" * 80 + "\n")
+            for r in results:
+                f.write(f"{r[0]:<10} {r[1]:<15} {r[2]:<10} {r[3]:<15} {r[4]:<10} {r[5]:<15} {r[6]:<10}\n")
+        
+        print(f"\nРезультаты сохранены в test_results.txt")
+    except Exception as e:
+        print(f"Ошибка при сохранении: {e}")
 
 
 if __name__ == "__main__":
