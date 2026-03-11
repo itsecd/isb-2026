@@ -4,7 +4,10 @@
 import os
 
 class PolybiusSquare:
+    """Шифрование заменой букв на координаты в таблице 6x6."""
+    
     def __init__(self, square_file="square.txt"):
+        """Инициализация квадрата из файла или создание стандартного."""
         self.square = []
         self.pos = {}
         
@@ -20,6 +23,7 @@ class PolybiusSquare:
         self._build_position_map()
     
     def _load_from_file(self, filename):
+        """Загрузка квадрата из файла формата 'строка,столбец:символ'."""
         try:
             with open(filename, 'r', encoding='utf-8') as f:
                 for line in f:
@@ -46,6 +50,7 @@ class PolybiusSquare:
             self._create_default_square()
     
     def _create_default_square(self):
+        """Стандартный квадрат с русским алфавитом и знаками препинания."""
         self.square = [
             ['А', 'Б', 'В', 'Г', 'Д', 'Е'],
             ['Ё', 'Ж', 'З', 'И', 'Й', 'К'],
@@ -56,6 +61,7 @@ class PolybiusSquare:
         ]
     
     def _build_position_map(self):
+        """Создание словаря {символ: (строка, столбец)}."""
         self.pos = {}
         for i in range(6):
             for j in range(6):
@@ -64,6 +70,12 @@ class PolybiusSquare:
                     self.pos[letter] = (i + 1, j + 1)
     
     def encrypt(self, text):
+        """
+        Шифрование текста.
+        
+        Возвращает строку с координатами букв через пробел.
+        Пробелы сохраняются.
+        """
         result = []
         for char in text:
             upper_char = char.upper()
@@ -79,6 +91,11 @@ class PolybiusSquare:
         return ' '.join(result)
     
     def decrypt(self, encrypted_text):
+        """
+        Дешифрование текста.
+        
+        Неизвестные символы заменяются на '?'.
+        """
         parts = encrypted_text.split(' ')
         result = []
         
@@ -91,10 +108,7 @@ class PolybiusSquare:
                 
                 if 0 <= row < 6 and 0 <= col < 6:
                     letter = self.square[row][col]
-                    if letter != '.':
-                        result.append(letter)
-                    else:
-                        result.append('?')
+                    result.append(letter if letter != '.' else '?')
                 else:
                     result.append('?')
             else:
@@ -103,6 +117,7 @@ class PolybiusSquare:
         return ''.join(result)
     
     def show(self):
+        """Вывод квадрата в консоль."""
         print("\n Квадрат Полибия:")
         print("   " + "  ".join([str(i+1) for i in range(6)]))
         for i, row in enumerate(self.square):
