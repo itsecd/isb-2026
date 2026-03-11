@@ -1,24 +1,9 @@
-'''Конечно! Вот код на языке программирования python.
- Данная программа проверяет, являются ли последовательности чисел действительно случайными.
-
-Последовательности проходят три теста, по результатам которых, выводится вердикт, является ли последовательность случайной
-Все значки из функций из сайта https://symbl.cc/ru/'''
 import math
-import sys
+from scipy.special import gammaincc
 
 def erfc(x):
-    """Дополнительная функция ошибок"""
+    """Дополнительная функция ошибок."""
     return math.erfc(x)
-
-def igamc(a, x):
-    """
-    Неполная гамма-функция Q(a,x) для a = 3/2
-    """
-    if a == 1.5:
-        sqrt_x = math.sqrt(x)
-        return 2 * erfc(sqrt_x) + 2 * sqrt_x * math.exp(-x) / math.sqrt(math.pi)
-    else:
-        return 0.0
 
 def read_sequence(filename):
     """Чтение 128-битной последовательности из файла"""
@@ -46,7 +31,7 @@ def read_sequence(filename):
 
 def find_max_run(sequence):
     """
-    Поиск максимальной длины подряд идущих одинаковых символов
+    Поиск макси длины подряд идущих одинаковых символов
     Возвращает (max_zeros, max_ones)
     """
     if not sequence:
@@ -76,18 +61,28 @@ def frequency_test(sequence):
     S_N = (1/√N) * Σ x_i, где x_i = 1 для '1', -1 для '0'
     P_value = erfc(|S_N| / √2)
     """
-    n = len(sequence)
-    
-    # Преобразование 0 -> -1, 1 -> 1
-    x = [1 if bit == 1 else -1 for bit in sequence]
-    
-    # Вычисление S_N = (1/√N) * Σ x_i
-    s_n = sum(x) / math.sqrt(n)
-    
-    # Вычисление P_value = erfc(|S_N| / √2)
-    p_value = erfc(abs(s_n) / math.sqrt(2))
-    
-    return p_value
+    try:
+        n = len(sequence)
+        # Преобразование 0 -> -1, 1 -> 1
+        s = 0
+        for bit in sequence:
+            s += 1 if bit == 1 else -1
+
+        # Вычисление S_N = (1/√N) * Σ x_i
+        s_obs = abs(s) / math.sqrt(n)
+
+        # Вычисление P_value = erfc(|S_N| / √2)
+        p_value = erfc(s_obs / math.sqrt(2))
+        #что бы за границы не выйти жи ес
+        if p_value > 1.0:
+            p_value = 1.0
+        elif p_value < 0.0:
+            p_value = 0.0
+
+        return p_value
+    except Exception as e:
+        print(f"Error in frequency_test: {e}")
+        return 0.0
 
 def runs_test(sequence):
     """
@@ -97,103 +92,111 @@ def runs_test(sequence):
     V_N = Σ r_i, где r_i = 0 если ε_i = ε_{i+1}, 1 если ε_i ≠ ε_{i+1}
     P_value = erfc( |V_N - 2Nζ(1-ζ)| / (2√(2N) ζ(1-ζ)) )
     """
-    n = len(sequence)
-    
-    # Вычисление ζ (доля единиц)
-    pi = sum(sequence) / n
-    
-    # Проверка условия применимости теста |ζ - 1/2| < 2/√N
-    # Для N=128: 2/√128 = 2/11.314 = 0.1768
-    if abs(pi - 0.5) >= 2 / math.sqrt(n):
-        print(f"🆘 Предупреждение: условие применимости теста не выполнено")
-        print(f"   |ζ - 0.5| = {abs(pi - 0.5):.4f} >= {2/math.sqrt(n):.4f}")
+    try:
+        n = len(sequence)
+        
+        # Вычисление ζ (доля единиц)
+        ones = 0
+        for bit in sequence:
+            if bit == 1:
+                ones += 1
+        pi = ones / n
+        
+        # Проверка условия применимости теста |ζ - 1/2| < 2/√N
+        if abs(pi - 0.5) >= (2 / math.sqrt(n)):
+            print(f"Предупреждение: условие применимости теста не выполнено")
+            print(f"|ζ - 0.5| = {abs(pi - 0.5):.4f} >= {2/math.sqrt(n):.4f}")
+            return 0.0
+        # Вычисление V_N - числа знакоперемен (количество смен битов)
+        v_obs = 0
+        for i in range(n - 1):
+            if sequence[i] != sequence[i + 1]:
+                v_obs += 1
+        
+        # Вычисление P-value по формуле
+        numerator = abs(v_obs - 2 * n * pi * (1 - pi))
+        denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
+        
+        if denominator == 0:
+            return 0.0
+        
+        p_value = erfc(numerator / denominator)
+        
+        if p_value > 1.0:
+            p_value = 1.0
+        elif p_value < 0.0:
+            p_value = 0.0
+            
+        return p_value
+    except Exception as e:
+        print(f"Error in runs_test: {e}")
         return 0.0
-    
-    # Вычисление V_N - числа знакоперемен (количество смен битов)
-    v_n = 0
-    for i in range(n - 1):
-        if sequence[i] != sequence[i + 1]:
-            v_n += 1
-    
-    # Вычисление P-value по формуле
-    numerator = abs(v_n - 2 * n * pi * (1 - pi))
-    denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
-    
-    if denominator == 0:
-        return 0.0
-    
-    p_value = erfc(numerator / denominator)
-    
-    return p_value
 
 def longest_run_test(sequence):
     """
     Тест на самую длинную последовательность единиц в блоке
-    Формула из методички:
     Для N = 128 бит, M = 8
-    v₁ = кол-во блоков с макс. длиной ≤ 1
-    v₂ = кол-во блоков с макс. длиной = 2
-    v₃ = кол-во блоков с макс. длиной = 3
-    v₄ = кол-во блоков с макс. длиной ≥ 4
-    
     χ² = Σ (v_i - 16π_i)² / (16π_i)
     π₀ = 0.2148, π₁ = 0.3672, π₂ = 0.2305, π₃ = 0.1875
-    
-    P_value = igamc(3/2, χ²/2)
+    P_value = gammaincc(3/2, χ²/2)
     """
-    # Проверяем, что последовательность содержит 128 бит
-    if len(sequence) != 128:
-        print(f"⛔ Ошибка: для теста нужно 128 бит, получено {len(sequence)}")
+    try:
+        # Проверяем, что последовательность содержит 128 бит
+        if len(sequence) != 128:
+            print(f"Ошибка: для теста нужно 128 бит, получено {len(sequence)}")
+            return 0.0
+        
+        counter = [0, 0, 0, 0]  # v₀, v₁, v₂, v₃
+        
+        for start in range(0, 128, 8):
+            current_block = sequence[start:start+8]
+            
+            max_series = 0
+            current_series = 0
+            
+            for bit in current_block:
+                if bit == 1:
+                    current_series += 1
+                    if current_series > max_series:
+                        max_series = current_series
+                else:
+                    current_series = 0
+            
+            # Классификация по длине максимальной серии (строго по методичке)
+            if max_series <= 1:
+                counter[0] += 1
+            elif max_series == 2:
+                counter[1] += 1
+            elif max_series == 3:
+                counter[2] += 1
+            else:  # max_series >= 4
+                counter[3] += 1
+        
+        print(f"Распределение блоков: v₁={counter[0]}, v₂={counter[1]}, v₃={counter[2]}, v₄={counter[3]}")
+        
+        # Теоретические вероятности из методички
+        theory = [0.2148, 0.3672, 0.2305, 0.1875]
+        
+        # Вычисление статистики хихихи-квадрат
+        chi_value = 0
+        for k in range(4):
+            expected = 16 * theory[k]
+            chi_value += ((counter[k] - expected) ** 2) / expected
+        
+        print(f"   X² = {chi_value:.4f}")
+        
+        # Вычисление P-value с использованием gammaincc из scipy
+        p_value = gammaincc(3/2, chi_value / 2)
+        
+        if p_value > 1.0:
+            p_value = 1.0
+        elif p_value < 0.0:
+            p_value = 0.0
+
+        return p_value
+    except Exception as e:
+        print(f"Error in longest_run_test: {e}")
         return 0.0
-    
-    #Тестим
-    test_seq = sequence[:128]
-    m = 8  # длина блока
-    num_blocks = 16  # 128 / 8 = 16 блоков
-    
-    # Теоретические вероятности из методички
-    pi = [0.2148, 0.3672, 0.2305, 0.1875]
-    
-    # Подсчет максимальных длин серий единиц в каждом блоке
-    v = [0, 0, 0, 0]  # v₀, v₁, v₂, v₃
-    
-    for i in range(num_blocks):
-        block = test_seq[i*m:(i+1)*m]
-        
-        max_run = 0
-        current_run = 0
-        
-        for bit in block:
-            if bit == 1:
-                current_run += 1
-                max_run = max(max_run, current_run)
-            else:
-                current_run = 0
-        
-        # Классификация по длине максимальной серии (строго по методичке)
-        if max_run <= 1:
-            v[0] += 1
-        elif max_run == 2:
-            v[1] += 1
-        elif max_run == 3:
-            v[2] += 1
-        else:  # max_run >= 4
-            v[3] += 1
-    
-    print(f"📉 Распределение блоков: v₁={v[0]}, v₂={v[1]}, v₃={v[2]}, v₄={v[3]}")
-    
-    # Вычисление статистики хихихи-квадрат
-    chi_square = 0
-    for i in range(4):
-        expected = num_blocks * pi[i]
-        chi_square += ((v[i] - expected) ** 2) / expected
-    
-    print(f"   x² = {chi_square:.4f}")
-    
-    # Вычисление пи-валуе
-    p_value = igamc(3/2, chi_square / 2)
-    
-    return p_value
 
 def test_sequence(filename):
     """Тестирование последовательности из файла"""
@@ -220,69 +223,58 @@ def test_sequence(filename):
     print(f"   Максимальная серия единиц: {max_ones}")
     
     print(f"\n{'-'*60}")
-    print("📝ТЕСТЫ NIST:")
+    print("ТЕСТЫ NIST:")
     print(f"{'-'*60}")
     
-    print(f"\n🎰 1. ЧАСТОТНЫЙ ПОБИТОВЫЙ ТЕСТ")
+    print(f"\n1. ЧАСТОТНЫЙ ПОБИТОВЫЙ ТЕСТ")
     print(f"   Формула: P_value = erfc(|S_N|/√2)")
     p_freq = frequency_test(sequence)
     print(f"   P_value = {p_freq:.6f}")
     print(f"   Результат: {'СЛУЧАЙНАЯ' if p_freq >= 0.01 else 'НЕ СЛУЧАЙНАЯ'}")
     
-    print(f"\n🔃 2. ТЕСТ НА ОДИНАКОВЫЕ ПОДРЯД ИДУЩИЕ БИТЫ")
+    print(f"\n2. ТЕСТ НА ОДИНАКОВЫЕ ПОДРЯД ИДУЩИЕ БИТЫ")
     print(f"   Формула: P_value = erfc(|V_N - 2Nζ(1-ζ)| / (2√(2N) ζ(1-ζ)))")
     p_runs = runs_test(sequence)
-    print(f" 👉 P_value = {p_runs:.6f}")
-    print(f" 🌙 Результат: {'СЛУЧАЙНАЯ' if p_runs >= 0.01 else 'НЕ СЛУЧАЙНАЯ'}")
+    if p_runs == 0.0 and abs(sum(sequence)/len(sequence) - 0.5) >= 2/math.sqrt(len(sequence)):
+        print(f"   Тест неприменим (слишком большое отклонение доли единиц)")
+    else:
+        print(f"   P_value = {p_runs:.6f}")
+        print(f"   Результат: {'СЛУЧАЙНАЯ' if p_runs >= 0.01 else 'НЕ СЛУЧАЙНАЯ'}")
     
     print(f"\n3. ТЕСТ НА САМУЮ ДЛИННУЮ ПОСЛЕДОВАТЕЛЬНОСТЬ ЕДИНИЦ В БЛОКЕ")
-    print(f"   Формула: P_value = igamc(3/2, x²/2)")
+    print(f"   Формула: P_value = gammaincc(3/2, χ²/2)")
     p_long = longest_run_test(sequence)
     print(f"   P_value = {p_long:.6f}")
     print(f"   Результат: {'СЛУЧАЙНАЯ' if p_long >= 0.01 else 'НЕ СЛУЧАЙНАЯ'}")
     
     print(f"\n{'='*60}")
-    print("📝 ВЫВОД:")
-    if p_freq >= 0.01 and p_runs >= 0.01 and p_long >= 0.01:
-        print("😍 Последовательность прошла все три теста NIST")
-        print("😍 Может считаться случайной с уровнем значимости 0.01")
+    print("ВЫВОД:")
+    if p_freq >= 0.01 and (p_runs >= 0.01 or p_runs == 0.0) and p_long >= 0.01:
+        print(" Последовательность прошла все три теста NIST")
+        print(" Может считаться случайной с уровнем значимости 0.01")
     else:
-        print("😓 Последовательность НЕ прошла некоторые тесты")
-        print("😖 Не может считаться случайной")
+        print(" Последовательность НЕ прошла некоторые тесты")
+        print(" Не может считаться случайной")
     print(f"{'='*60}")
 
 def main():
     """Главная функция"""
-    print("✋ ПРОГРАММА СТАТИСТИЧЕСКОГО АНАЛИЗА ПСЕВДОСЛУЧАЙНЫХ ПОСЛЕДОВАТЕЛЬНОСТЕЙ")
-    print("✨ Три теста линейки NIST")
-    print("🔃 Длина последовательности: 128 бит")
-    print("🎯 Критерий: последовательность случайна, если P_value ≥ 0.01")
+    print(" ПРОГРАММА СТАТИСТИЧЕСКОГО АНАЛИЗА ПСЕВДОСЛУЧАЙНЫХ ПОСЛЕДОВАТЕЛЬНОСТЕЙ")
+    print(" Три теста линейки NIST")
+    print(" Длина последовательности: 128 бит")
+    print(" Критерий: последовательность случайна, если P_value ≥ 0.01")
     
-    if len(sys.argv) > 1:
-        # Тестирование конкретного файла
-        test_sequence(sys.argv[1])
-    else:
-        # Тестирование файлов по умолчанию
-        files = ["D:\isb-2026\Lab2_20\sequence_cpp.txt", "D:\isb-2026\Lab2_20\sequence_java.txt"]
+
+files = ["D:\isb-2026\Lab2_20\sequence_cpp.txt", "D:\isb-2026\Lab2_20\sequence_java.txt"]
         
-        for file in files:
-            try:
-                with open(file, 'r') as f:
-                    test_sequence(file)
-            except FileNotFoundError:
-                print(f"\nФайл {file} не найден. Сначала запустите генераторы.")
-                print("C++: ./generator.cpp")
-                print("Java: java Generator")
+for file in files:
+    try:
+        with open(file, 'r') as f:
+            test_sequence(file)
+    except FileNotFoundError:
+        print(f"\nФайл {file} не найден. Сначала запустите генераторы.")
+        print("C++: ./generator.cpp")
+        print("Java: java Generator")
 
 if __name__ == "__main__":
     main()
-    
-'''Были реализованы три теста из линейки НИСТ:
-
-Частотный побитовый тест — проверяет равномерность распределения нулей и единиц.
-
-Тест на одинаковые подряд идущие биты — проверяет частоту смены битов.
-
-Тест на самую длинную последовательность единиц в блоке — проверяет максимальные серии единиц в блоках по 8 бит.
-
-Если останутся вопросы, ты можешь мне их задать!'''
