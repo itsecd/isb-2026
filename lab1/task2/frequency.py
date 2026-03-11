@@ -1,6 +1,7 @@
 from collections import Counter
 
 def analyze(text):
+    """Анализ частоты символов в тексте."""
     text = text.upper()
     total = len(text)
     
@@ -12,6 +13,7 @@ def analyze(text):
     return counter, sorted_chars
 
 def make_freq_table(counter, total):
+    """Формирование таблицы частот символов."""
     lines = ["ТАБЛИЦА ЧАСТОТ", "="*70]
     lines.append(f"{'Символ':^10} | {'Код':^8} | {'Кол-во':^10} | {'%':^8}")
     lines.append("-"*70)
