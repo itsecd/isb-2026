@@ -1,6 +1,6 @@
-# utils.py
 """
-Вспомогательные функции для лабораторной работы №1
+Утилиты для лабораторной работы №1
+Содержит общие функции для работы с текстом и частотным анализом
 """
 
 RUS_ALPHABET = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ '
@@ -23,7 +23,16 @@ REFERENCE_SORTED = [char for char, _ in sorted(
     reverse=True
 )]
 
-def clean_text(text):
+def clean_text(text: str) -> str:
+    """
+    Очищает текст от лишних символов.
+    
+    Args:
+        text: Входной текст
+        
+    Returns:
+        Только буквы русского алфавита и пробелы в верхнем регистре
+    """
     text = text.upper()
     cleaned = []
     for char in text:
@@ -33,7 +42,16 @@ def clean_text(text):
             cleaned.append(' ')
     return ''.join(cleaned)
 
-def read_file(filename):
+def read_file(filename: str) -> str | None:
+    """
+    Безопасное чтение файла.
+    
+    Args:
+        filename: Путь к файлу
+        
+    Returns:
+        Содержимое файла или None если файл не найден
+    """
     try:
         with open(filename, 'r', encoding='utf-8') as f:
             return f.read()
@@ -41,11 +59,27 @@ def read_file(filename):
         print(f"Файл {filename} не найден!")
         return None
 
-def write_file(filename, content):
+def write_file(filename: str, content: str) -> None:
+    """
+    Запись содержимого в файл.
+    
+    Args:
+        filename: Путь к файлу
+        content: Содержимое для записи
+    """
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(content)
 
-def calculate_frequencies(text):
+def calculate_frequencies(text: str) -> tuple[dict, list]:
+    """
+    Подсчет частот символов в тексте.
+    
+    Args:
+        text: Входной текст
+        
+    Returns:
+        (словарь частот, список символов по убыванию частоты)
+    """
     total_chars = len(text)
     freq = {}
     
@@ -63,10 +97,18 @@ def calculate_frequencies(text):
     
     return freq, sorted_chars
 
-def print_frequencies(freq_dict, title="Таблица частот"):
+def print_frequencies(freq_dict: dict, title: str = "Таблица частот") -> None:
+    """
+    Вывод таблицы частот в консоль.
+    
+    Args:
+        freq_dict: Словарь частот
+        title: Заголовок таблицы
+    """
     print(f"\n{title}:")
-    print("-" * 40)
+    print("-" * 50)
     sorted_items = sorted(freq_dict.items(), key=lambda x: x[1], reverse=True)
-    for char, freq in sorted_items[:15]:
-        print(f"  {char if char != ' ' else 'ПРОБЕЛ'}: {freq:.6f}")
-    print("-" * 40)
+    for i, (char, freq) in enumerate(sorted_items[:15], 1):
+        display_char = 'ПРОБЕЛ' if char == ' ' else char
+        print(f"  {i:2}. {display_char:6}: {freq:.6f} ({freq*100:.2f}%)")
+    print("-" * 50)

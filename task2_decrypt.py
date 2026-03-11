@@ -1,33 +1,40 @@
-# task2_decrypt.py
 """
 Задание 2: Дешифровка текста из 17 варианта с помощью частотного анализа
-Вариант 17: файл cod17.txt
+
+Изменения:
+- Добавлены докстринги
+- Добавлены недостающие файлы (frequencies.txt, found_key.txt)
+- Текст шифра вынесен в отдельный файл
+- Убраны эмодзи
+- Исправлен вывод таблицы частот
 """
 
-from utils import (
-    RUS_ALPHABET, REFERENCE_SORTED, clean_text,
-    read_file, write_file, calculate_frequencies,
-    print_frequencies
-)
+from utils import RUS_ALPHABET, REFERENCE_SORTED, write_file, read_file
+from utils import calculate_frequencies, print_frequencies
 
-CIPHER_TEXT_17 = """I7yO1EXXQU=E<7PUNRO9yQINOI7KEXXQUPIOI=EXQKQKEQO yT- DO=JPIiEZ=71PE0U7%7OYQOPIAX7%7OPTR<JOP7U7=KXOIHT7O9AiEZ =71JXK7OII7PITXKEQ 7IPK71KKQOU=QII71XKEOPO1EXXQU=E<XKXOA7%=EUXXOXUAP EOOIPUAEIPUE<QIPEO9AP7K7XQ=K7IPUQ3O1O1iEZ=sQX7X0P17IF KQKE0T1U81UNPIOXQOY7TYK7OTEKQ3K7IPUE0U7YQ PEX- XQU=E<XKQO1EPUQXKO1O1P17RO7<Q=QyNOyQTDUOXK0I7<XKQ OEOI7U7<XKQ O1OII7<XKIOO1EPUQXJIOO1iEZ=71XKEQO1KII7TKDUQIPDOUJAPOE1o 7yK7QOP17IFQKEQOYQTEUPIOXK0I7TPEO9JQUXOPJYYK3OE9 OKEIO- OP7yE=sQUPIOO1EPII7TN971XKEQX0I=QyQTQKX7%7OPTR<J 1OII7U7<XKIOOA7%=EUXJIOOZ7=XE=sQUPIOUJAPOXK9K1XQXD1 KIO7XKJDO%JXXXOOEO1O1I=7rQIPIOQOO%QKQ=E=71XKE7O7PsF QIPU1TDQUPIOiEZ=71XKEQOII7PITXKEJED U7OQIPUNO7XK0I7UP7XOXKAPJYK1QUPIOXK0JEO1o7yKE P 1OIO7yQO1EXXQU=E<XK7%7O1EZ=71XKEJEOUTDIOI7YIPUXK71PE0EOI Q=QIPUJXK71PE0E1o7yXKIOOYJXKXKIOO9JYQ3IPU1sRUPIOIPT7YKKQ OXK7%7s=71XQ1KQOA7%=EUXK GUEOs=71XQ3O0X7YQUOIIKUNO7<QKN0XK7%7OEOPJYYK3O1P7O P17EXOPTR<7X"""
-
-def create_frequency_table(cipher_text):
-    freq_dict, sorted_chars = calculate_frequencies(cipher_text)
-    return freq_dict, sorted_chars
-
-def initial_substitution(cipher_text, freq_sorted):
-    substitution = {}
+def get_unique_symbols(text: str) -> list:
+    """
+    Возвращает множество уникальных символов в тексте.
     
-    for i, cipher_char in enumerate(freq_sorted):
-        if i < len(REFERENCE_SORTED):
-            substitution[cipher_char] = REFERENCE_SORTED[i]
-        else:
-            substitution[cipher_char] = '?'
-    
-    return substitution
+    Args:
+        text: Входной текст
+        
+    Returns:
+        Отсортированный список уникальных символов
+    """
+    return sorted(set(text))
 
-def apply_substitution(text, substitution):
+def apply_substitution(text: str, substitution: dict) -> str:
+    """
+    Применяет подстановку к тексту.
+    
+    Args:
+        text: Исходный текст
+        substitution: Словарь замен {символ: буква}
+        
+    Returns:
+        Текст с примененными заменами
+    """
     result = []
     for char in text:
         if char in substitution:
@@ -36,41 +43,28 @@ def apply_substitution(text, substitution):
             result.append(char)
     return ''.join(result)
 
-def manual_refine_substitution(text, substitution):
-    print("\n" + "="*60)
-    print("ШАГ 2: УТОЧНЕНИЕ ПОДСТАНОВКИ")
-    print("="*60)
-    print("\nТекущий текст после частотной подстановки:")
-    print("-"*60)
-    print(apply_substitution(text, substitution))
-    print("-"*60)
+def save_frequencies(freq_dict: dict, filename: str) -> None:
+    """
+    Сохраняет таблицу частот в файл.
     
-    substitution = substitution.copy()
-    
-    print("\nВводите замены в формате: символ_шифра=буква")
-    print("Например: если видите, что '7' должно быть 'О', введите 7=О")
-    print("Для завершения введите 'готово'")
-    
-    while True:
-        print("\n" + apply_substitution(text, substitution))
-        cmd = input("\nВведите замену: ").strip()
-        
-        if cmd.lower() == 'готово':
-            break
-        
-        if '=' in cmd and len(cmd) == 3:
-            cipher_char, plain_char = cmd.split('=')
-            if plain_char.upper() in RUS_ALPHABET:
-                substitution[cipher_char] = plain_char.upper()
-                print(f"Замена {cipher_char} -> {plain_char.upper()} добавлена")
-            else:
-                print("Ошибка: буква должна быть из русского алфавита")
-        else:
-            print("Ошибка: неверный формат. Используйте формат символ=буква")
-    
-    return substitution
+    Args:
+        freq_dict: Словарь частот
+        filename: Путь для сохранения
+    """
+    lines = ["ЧАСТОТЫ СИМВОЛОВ В ЗАШИФРОВАННОМ ТЕКСТЕ:"]
+    for char, freq in sorted(freq_dict.items(), key=lambda x: x[1], reverse=True):
+        char_display = 'ПРОБЕЛ' if char == ' ' else char
+        lines.append(f"{char_display}: {freq:.6f}")
+    write_file(filename, '\n'.join(lines))
 
-def save_key(key, filename):
+def save_key(key: dict, filename: str) -> None:
+    """
+    Сохраняет найденный ключ в файл.
+    
+    Args:
+        key: Словарь замен
+        filename: Путь для сохранения
+    """
     lines = ["НАЙДЕННЫЙ КЛЮЧ ШИФРОВАНИЯ:",
              "Символ шифра -> Буква русского алфавита",
              "-" * 40]
@@ -82,53 +76,108 @@ def save_key(key, filename):
     
     write_file(filename, '\n'.join(lines))
 
+def initial_substitution(freq_sorted: list) -> dict:
+    """
+    Создает начальную подстановку на основе частот.
+    
+    Args:
+        freq_sorted: Список символов по убыванию частоты
+        
+    Returns:
+        Словарь начальных замен
+    """
+    substitution = {}
+    for i, cipher_char in enumerate(freq_sorted):
+        if i < len(REFERENCE_SORTED):
+            substitution[cipher_char] = REFERENCE_SORTED[i]
+        else:
+            substitution[cipher_char] = '?'
+    return substitution
+
 def main():
-    print("="*60)
+    """Основная функция программы."""
+    print("=" * 60)
     print("ЗАДАНИЕ 2: ДЕШИФРОВКА ТЕКСТА (ВАРИАНТ 17)")
-    print("="*60)
+    print("=" * 60)
     
-    write_file("data/task2/cod17.txt", CIPHER_TEXT_17)
-    
-    cipher_text = CIPHER_TEXT_17
+    # Читаем зашифрованный текст из файла
+    cipher_text = read_file("data/task2/original.txt")
+    if cipher_text is None:
+        print("\nОшибка: файл data/task2/original.txt не найден!")
+        return
     
     print(f"\nДлина зашифрованного текста: {len(cipher_text)} символов")
     
-    freq_dict, sorted_chars = create_frequency_table(cipher_text)
+    # Показываем уникальные символы
+    symbols = get_unique_symbols(cipher_text)
+    print(f"Уникальные символы в тексте ({len(symbols)} шт.):")
+    print(' '.join(symbols[:20]) + "...")
     
+    # Считаем и сохраняем частоты
+    freq_dict, sorted_chars = calculate_frequencies(cipher_text)
     print_frequencies(freq_dict, "Частоты символов в зашифрованном тексте")
+    save_frequencies(freq_dict, "data/task2/frequencies.txt")
+    print(f"Таблица частот сохранена в data/task2/frequencies.txt")
     
-    freq_lines = ["ЧАСТОТЫ СИМВОЛОВ В ЗАШИФРОВАННОМ ТЕКСТЕ:"]
-    for char, freq in sorted(freq_dict.items(), key=lambda x: x[1], reverse=True):
-        char_display = 'ПРОБЕЛ' if char == ' ' else char
-        freq_lines.append(f"{char_display}: {freq:.6f}")
-    write_file("data/task2/frequencies.txt", '\n'.join(freq_lines))
+    # Создаем начальную подстановку
+    substitution = initial_substitution(sorted_chars)
     
-    print("\n" + "="*60)
-    print("ШАГ 1: ПЕРВОНАЧАЛЬНАЯ ПОДСТАНОВКА ПО ЧАСТОТАМ")
-    print("="*60)
-    print("Самая частая буква в шифре -> пробел")
-    print("Вторая по частоте -> О")
-    print("Третья -> И и т.д.")
+    print("\n" + "=" * 60)
+    print("ИНСТРУКЦИЯ:")
+    print("=" * 60)
+    print("1. Смотрите на текст и угадывайте слова")
+    print("2. Вводите замены в формате: символ=буква")
+    print("   Например: 7=О")
+    print("3. После каждой замены текст обновится")
+    print("4. Для завершения введите: готово")
+    print("=" * 60)
     
-    substitution = initial_substitution(cipher_text, sorted_chars)
+    while True:
+        print("\n" + "=" * 60)
+        print("ТЕКУЩИЙ ТЕКСТ:")
+        print("=" * 60)
+        print(apply_substitution(cipher_text, substitution))
+        print("=" * 60)
+        
+        if substitution:
+            print("\nТЕКУЩИЕ ЗАМЕНЫ:")
+            for k, v in list(substitution.items())[:10]:
+                print(f"  {k} -> {v if v != ' ' else 'ПРОБЕЛ'}")
+        
+        cmd = input("\nВведите замену (или 'готово'): ").strip()
+        
+        if cmd.lower() == 'готово':
+            break
+        
+        if '=' in cmd:
+            parts = cmd.split('=')
+            if len(parts) == 2:
+                cipher_char, plain_char = parts
+                cipher_char = cipher_char.strip()
+                plain_char = plain_char.strip().upper()
+                
+                if plain_char in RUS_ALPHABET:
+                    substitution[cipher_char] = plain_char
+                    print(f"Замена {cipher_char} -> {plain_char} добавлена")
+                else:
+                    print("Ошибка: буква должна быть из русского алфавита")
+            else:
+                print("Ошибка: используйте формат символ=буква")
+        else:
+            print("Ошибка: используйте формат символ=буква")
     
-    substitution = manual_refine_substitution(cipher_text, substitution)
-    
-    decrypted_text = apply_substitution(cipher_text, substitution)
-    
-    write_file("data/task2/decrypted.txt", decrypted_text)
+    # Сохраняем результаты
+    decrypted = apply_substitution(cipher_text, substitution)
+    write_file("data/task2/decrypted.txt", decrypted)
     save_key(substitution, "data/task2/found_key.txt")
     
-    print("\n" + "="*60)
-    print("РЕЗУЛЬТАТ ДЕШИФРОВКИ:")
-    print("="*60)
-    print(decrypted_text)
-    print("="*60)
-    print(f"\nРезультаты сохранены:")
-    print(f"  - Зашифрованный текст: data/task2/cod17.txt")
-    print(f"  - Таблица частот: data/task2/frequencies.txt")
-    print(f"  - Расшифрованный текст: data/task2/decrypted.txt")
-    print(f"  - Найденный ключ: data/task2/found_key.txt")
+    print("\n" + "=" * 60)
+    print("ГОТОВО!")
+    print("=" * 60)
+    print("Результаты сохранены в:")
+    print("  - data/task2/frequencies.txt")
+    print("  - data/task2/decrypted.txt")
+    print("  - data/task2/found_key.txt")
 
 if __name__ == "__main__":
     main()
