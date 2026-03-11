@@ -12,7 +12,7 @@ def frequency_test(seq):
     """Частотный побитовый тест"""
     n = len(seq)
     s = sum(1 if bit =='1' else -1 for bit in seq)
-    s_n = s / math.sqrt(n)
+    s_n = abs(s) / math.sqrt(n)
     p_value = erfc(s_n / math.sqrt(2))
     return p_value
 
@@ -25,7 +25,7 @@ def runs_test(seq):
     if abs(xi - 0.5) >= 2.0 / math.sqrt(n):
         return 0.0
     
-    v_obs = 1
+    v_obs = 0
     for i in range(n-1):
         if seq[i] != seq[i+1]:
             v_obs += 1
@@ -46,7 +46,6 @@ def longest_run_ones_test(seq):
     N = n // M
     pi = [0.2148, 0.3672, 0.2305, 0.1875]
     K = 4
-    seq = seq[:N*M]
     counts = [0] * K
     for i in range(N):
         block = seq[i*M: (i+1)*M]
@@ -69,7 +68,7 @@ def longest_run_ones_test(seq):
         expected = N *pi[i]
         if expected > 0:
             chi2 += ((counts[i] - expected)**2)/expected
-    p_value = gammainc(K/2.0, chi2/2.0)
+    p_value = gammainc(3/2.0, chi2/2.0)
     return 1.0-p_value
 
 
