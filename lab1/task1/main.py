@@ -6,6 +6,7 @@ from polybius import PolybiusSquare
 from utils import read_file, write_file, clear_screen
 
 def encrypt_task():
+    """Задача шифрования: чтение файла, шифрование и сохранение результатов."""
     clear_screen()
     print("="*50)
     print(" ШИФРОВАНИЕ КВАДРАТОМ ПОЛИБИЯ")
@@ -46,6 +47,7 @@ def encrypt_task():
     input("\nНажмите Enter...")
 
 def decrypt_task():
+    """Задача расшифровки: чтение зашифрованного файла и дешифрование."""
     clear_screen()
     print("="*50)
     print(" РАСШИФРОВКА")
@@ -72,6 +74,7 @@ def decrypt_task():
     input("\nНажмите Enter...")
 
 def main():
+    """Главное меню программы."""
     while True:
         clear_screen()
         print("="*50)
