@@ -1,21 +1,24 @@
 #include <fstream>
-#include <cstdint>
+#include <iostream>
+#include <random>
 
-int main() {
-    std::ofstream fout("C++.txt");
-    
-    uint32_t state = 12345;  // начальное значение (seed)
-    
-    for (int i = 0; i < 128; i++) {
-        // Линейный конгруэнтный генератор
-        state = (1103515245 * state + 12345) % 2147483648;
-        
-        // Берем младший бит
-        int bit = state & 1;
-        
-        fout << bit;
+using namespace std;
+
+int main()
+{
+
+    ofstream fout;
+    fout.open("Cpp.txt");
+
+    random_device eng;
+    uniform_int_distribution<int> dist(0, 1);
+
+    for (size_t i = 0; i < 128; i++)
+    {
+        fout << (dist(eng) == 0);
     }
-    
+
     fout.close();
+
     return 0;
 }
