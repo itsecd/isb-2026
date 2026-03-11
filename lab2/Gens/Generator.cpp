@@ -28,6 +28,7 @@ void write_sequences_into_file(int size) {
 
 
 int main() {
-	write_sequences_into_file(100000);
+	write_sequences_into_file(128);
 	return 0;
+
 }
