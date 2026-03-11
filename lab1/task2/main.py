@@ -4,6 +4,7 @@ from frequency import analyze, make_freq_table
 from utils import read_file, write_file, clear_screen
 
 def decrypt_task():
+    """Расшифровка текста с использованием ключа замены."""
     clear_screen()
     print("="*60)
     print("ЗАДАНИЕ 2: РАСШИФРОВКА ПО КЛЮЧУ")
@@ -60,6 +61,7 @@ def decrypt_task():
     input("\nНажмите Enter...")
 
 def main():
+    """Главное меню программы расшифровки."""
     while True:
         clear_screen()
         print("="*60)
