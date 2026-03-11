@@ -1,3 +1,59 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.log
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# C++
+*.exe
+*.out
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
+a.out
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# VS Code
+.vscode/
+*.code-workspace
+.history/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+sequences/sequence_*.txt
+results/test_results.txt
+**/*.class
+**/*.exe
+**/*.out
+
+# Логи
+*.log
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
