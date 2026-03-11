@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class Generate {
     public static void main(String[] args) {
-        int LENGTH = 100000;
+        int LENGTH = 128;
         Random rand = new Random();
         String outputPath = "../sequences/sequence_java.txt";
         
@@ -27,4 +27,5 @@ public class Generate {
             e.printStackTrace();
         }
     }
+
 }
