@@ -15,7 +15,7 @@ void createRandomSequence(int* sequence, size_t size) {
 
 
 void writeFile(int* const sequence, size_t size) {
-    std::ofstream file("D:/Projects/IB/isb-2026/lab_2/c++_sequence.txt");
+    std::ofstream file("../../lab_2/c++_sequence.txt");
     if (file.is_open()) {
         for (size_t i = 0; i < size; i++) {
             file << sequence[i];

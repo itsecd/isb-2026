@@ -1,5 +1,6 @@
 import math
 from scipy.special import gammaincc
+from CONSTS import PI_I
 
 
 def readFile(filename: str) -> list[int]:
@@ -61,7 +62,6 @@ def runsTest(sequence: list[int]) -> float:
     return P_value
 
 
-
 def longestRunOfOnesInABlockTest(sequence: list[int]) -> float:
     '''
     A test for the longest sequence of ones in a block.
@@ -96,11 +96,10 @@ def longestRunOfOnesInABlockTest(sequence: list[int]) -> float:
 
     Xi = 0
     v_i = [v_1, v_2, v_3, v_4]
-    Pi_i = [0.2148, 0.3672, 0.2305, 0.1875]
     N = len(blocks)
     for i in range(len(v_i)):
-        numerator = v_i[i] - N*Pi_i[i]
-        denominator = N*Pi_i[i]
+        numerator = v_i[i] - N*PI_I[i]
+        denominator = N*PI_I[i]
         Xi += pow(numerator, 2) / denominator
 
     P_value = gammaincc(3 / 2, Xi / 2)
@@ -132,7 +131,7 @@ def resultsOfChecks() -> None:
 
         
         file.write("С++ results: \n")
-        c_seq = readFile("lab_2/python_sequence.txt")
+        c_seq = readFile("lab_2/c++_sequence.txt")
         
         c_value_1 = frequencyMonobitTest(c_seq)
         file.write(f"{c_value_1:.4f}\n")
@@ -150,7 +149,7 @@ def resultsOfChecks() -> None:
 
 
         file.write("Java results: \n")
-        java_seq = readFile("lab_2/python_sequence.txt")
+        java_seq = readFile("lab_2/java_sequence.txt")
         
         java_value_1 = frequencyMonobitTest(java_seq)
         file.write(f"{java_value_1:.4f}\n")
@@ -165,7 +164,6 @@ def resultsOfChecks() -> None:
             file.write("This sequence is random\n\n")
         else:
             file.write("This sequence is NOT random\n\n")
-
 
 
 def main():

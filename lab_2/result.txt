@@ -1,18 +1,18 @@
 Python results: 
-0.1116
-0.0947
-0.4038
+0.8597
+0.3781
+0.1784
 This sequence is random
 
 С++ results: 
-0.1116
-0.0947
-0.4038
+0.7237
+0.8682
+0.9693
 This sequence is random
 
 Java results: 
-0.1116
-0.0947
-0.4038
+0.4795
+0.4507
+0.9088
 This sequence is random
 
