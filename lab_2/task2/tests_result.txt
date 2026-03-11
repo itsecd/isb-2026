@@ -1,7 +1,7 @@
 
 ======================================
 Обработка файла: sequence_c++.txt
-Читаем файл из: C:/Programming/University/2nd_course/Inf_sec_basics/Release/lab2\task2\sequence_c++.txt
+Читаем файл из: C:/oib/isb-2026/lab_2\task2\sequence_c++.txt
 Размер последовательности: 128 бит
 Первые 50 бит: 11110000001110100110110101110000110000011000101101...
 
@@ -17,7 +17,7 @@ Test 3: рандомизированная
 
 ======================================
 Обработка файла: sequence_java.txt
-Читаем файл из: C:/Programming/University/2nd_course/Inf_sec_basics/Release/lab2\task2\sequence_java.txt
+Читаем файл из: C:/oib/isb-2026/lab_2\task2\sequence_java.txt
 Размер последовательности: 128 бит
 Первые 50 бит: 01000000100010111111101001011000010000100110011011...
 

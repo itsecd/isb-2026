@@ -4,6 +4,7 @@
 #include <cmath>
 #include <fstream>
 #include <filesystem>
+
 using namespace std;
 namespace fs = std::filesystem;
 
@@ -95,6 +96,7 @@ int summary_V(vector<int>& numbers)
 }
 
 
+
 double test_1(vector<int>& numbers)
 {
     int N = numbers.size();
@@ -172,7 +174,12 @@ double test_3(vector<int>& numbers)
         chi2 += pow(v[i] - expected, 2) / expected;
     }
 
-    double P_value = exp(-chi2 / 2.0) * (1 + chi2 / 2.0);
+    double P_value = exp(-chi2 / 2.0);
+
+    for (int k = 1; k <= 1; k++)
+    {
+        P_value *= (1 + chi2 / (2 * k));
+    }
 
     return P_value;
 
