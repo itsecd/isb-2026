@@ -1,6 +1,8 @@
 import math
 import os
 
+from scipy.special import gammaincc
+
 
 def erfc(x):
     return math.erfc(x)
@@ -40,7 +42,7 @@ def runs_test(seq):
 def longest_run_test(seq):
     """Тест на самую длинную последовательность единиц в блоке.
     Разбивает последовательность на блоки по 8 бит и анализирует
-    максимальные длины последовательностей единиц в каждом блоке."""
+    максимальные длины последовательностей единиц в каждом блоке"""
     n = len(seq)
     m = 8
     blocks_count = n // m
@@ -70,10 +72,15 @@ def longest_run_test(seq):
     
     pi = [0.2148, 0.3672, 0.2305, 0.1875]
     
-    chi2 = sum(((v[i] - blocks_count * pi[i]) ** 2) / (blocks_count * pi[i]) for i in range(4))
+    chi2 = 0
+    for i in range(4):
+        expected = blocks_count * pi[i]
+        chi2 += ((v[i] - expected) ** 2) / expected
     
-    from math import exp
-    return exp(-chi2/2)
+    from scipy.special import gammaincc
+    p_value = gammaincc(1.5, chi2 / 2.0)
+    
+    return p_value
 
 
 def read_sequence(filename):
@@ -116,19 +123,20 @@ def main():
             results.append([lang, "ОШИБКА", "-", "-", "-"])
             continue
         
-        passed = all(p >= 0.01 for p in [p1, p2, p3])
-        status = "ПРОЙДЕН" if passed else "НЕ ПРОЙДЕН"
+        status1 = "ПРОЙДЕН" if p1 >= 0.01 else "НЕ ПРОЙДЕН"
+        status2 = "ПРОЙДЕН" if p2 >= 0.01 else "НЕ ПРОЙДЕН"
+        status3 = "ПРОЙДЕН" if p3 >= 0.01 else "НЕ ПРОЙДЕН"
         
-        results.append([lang, status, f"{p1:.6f}", f"{p2:.6f}", f"{p3:.6f}"])
+        results.append([lang, status1, status2, status3])
     
     try:
         with open("test_results.txt", "w") as f:
             f.write("РЕЗУЛЬТАТЫ ТЕСТИРОВАНИЯ NIST\n")
-            f.write("=" * 60 + "\n")
-            f.write(f"{'Язык':<10} {'Результат':<12} {'Freq':<12} {'Runs':<12} {'LongRun':<12}\n")
-            f.write("-" * 60 + "\n")
+            f.write("=" * 50 + "\n")
+            f.write(f"{'Язык':<10} {'Тест 1':<10} {'Тест 2':<10} {'Тест 3':<10}\n")
+            f.write("-" * 50 + "\n")
             for r in results:
-                f.write(f"{r[0]:<10} {r[1]:<12} {r[2]:<12} {r[3]:<12} {r[4]:<12}\n")
+                f.write(f"{r[0]:<10} {r[1]:<10} {r[2]:<10} {r[3]:<10}\n")
         
         print("Тестирование завершено. Результаты в test_results.txt")
     except:
