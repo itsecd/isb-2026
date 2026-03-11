@@ -19,27 +19,29 @@ def frequency_test(bit_string):
 
 def runs_test(bit_string):
     """
-    Тест на одинаковые подряд идущие биты
+    Тест на одинаковые подряд идущие биты 
     """
     n = len(bit_string)
-    ones_count = bit_string.count('1')
-    pi = ones_count / n
     
-    if abs(pi - 0.5) >= (2 / math.sqrt(n)):
-        return 0.0
+    ones = bit_string.count('1')
+    pi = ones / n
     
-    v_n = 1
-    for i in range(1, n):
-        if bit_string[i] != bit_string[i-1]:
-            v_n += 1
+    zeros = bit_string.count('0')
     
-    numerator = abs(v_n - 2 * n * pi * (1 - pi))
-    denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
+    v_n = 0
+    for i in range(n - 1):
+        if bit_string[i] != bit_string[i + 1]:
+            v_n = v_n + 1
     
-    if denominator == 0:
-        return 0.0
+    condition = abs(pi - 0.5) < (2 / math.sqrt(n))
     
-    p_value = math.erfc(numerator / denominator)
+    if condition:
+        numerator = abs(v_n - 2 * n * pi * (1 - pi))
+        denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
+        p_value = math.erfc(numerator / denominator)
+    else:
+        p_value = 0.0
+    
     return p_value
 
 def incomplete_gamma_lower(a, x, epsilon=1e-10, max_iter=1000):
