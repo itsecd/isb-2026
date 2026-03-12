@@ -4,7 +4,7 @@ echo "Compiling C++ generator..."
 g++ prng.cpp -o prng_cpp
 
 echo "Compiling Java generator..."
-javac Generator.java
+javac prng.java
 
 echo "Running generators..."
 
@@ -15,11 +15,11 @@ echo "Python..."
 python3 prng.py
 
 echo "Java..."
-java Generator
+java prng
 
 echo "Cleaning temporary files..."
 
 rm prng_cpp
-rm Generator.class
+rm prng.class
 
 echo "Done."

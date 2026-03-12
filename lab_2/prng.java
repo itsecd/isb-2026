@@ -1,7 +1,7 @@
 import java.io.FileWriter;
 import java.util.Random;
 
-public class Generator {
+public class prng {
     public static void main(String[] args) throws Exception {
 
         Random rand = new Random();
