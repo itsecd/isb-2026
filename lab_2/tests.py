@@ -1,21 +1,29 @@
 import math
 
-def load_bits(path):
-    with open(path, "r") as f:
-        return f.read().strip()
+from pathlib import Path
+from const import BLOCK_SIZE, FILES, OUTPUT_FILE
 
 
-def frequency_test(bits):
+def load_bits(path: str) -> str:
+    """Считывает строку битов из файла."""
+    with open(path, "r", encoding="utf-8") as file:
+        return file.read().strip()
+
+
+def frequency_test(bits: str) -> float:
+    """Выполняет частотный (monobit) тест случайности."""
     n = len(bits)
-    s = sum(1 if b == '1' else -1 for b in bits)
+
+    s = sum(1 if bit == "1" else -1 for bit in bits)
     s_obs = abs(s) / math.sqrt(n)
-    p_value = math.erfc(s_obs / math.sqrt(2))
-    return p_value
+
+    return math.erfc(s_obs / math.sqrt(2))
 
 
-def runs_test(bits):
+def runs_test(bits: str) -> float:
+    """Выполняет тест последовательностей (runs test)."""
     n = len(bits)
-    pi = bits.count('1') / n
+    pi = bits.count("1") / n
 
     if abs(pi - 0.5) >= 2 / math.sqrt(n):
         return 0.0
@@ -25,28 +33,27 @@ def runs_test(bits):
         if bits[i] != bits[i - 1]:
             v += 1
 
-    p_value = math.erfc(
-        abs(v - 2 * n * pi * (1 - pi)) /
-        (2 * math.sqrt(2 * n) * pi * (1 - pi))
-    )
+    numerator = abs(v - 2 * n * pi * (1 - pi))
+    denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
 
-    return p_value
+    return math.erfc(numerator / denominator)
 
 
-def longest_run_test(bits, block_size=128):
+def longest_run_test(bits: str, block_size: int = BLOCK_SIZE) -> float:
+    """Вычисляет среднюю длину максимальной серии единиц в блоках."""
     n = len(bits)
-    N = n // block_size
+    num_blocks = n // block_size
 
     longest_runs = []
 
-    for i in range(N):
+    for i in range(num_blocks):
         block = bits[i * block_size:(i + 1) * block_size]
 
         max_run = 0
         current_run = 0
 
-        for b in block:
-            if b == '1':
+        for bit in block:
+            if bit == "1":
                 current_run += 1
                 max_run = max(max_run, current_run)
             else:
@@ -54,40 +61,39 @@ def longest_run_test(bits, block_size=128):
 
         longest_runs.append(max_run)
 
-    average = sum(longest_runs) / len(longest_runs)
-    return average
+    return sum(longest_runs) / len(longest_runs)
 
 
-def run_tests(file, out):
-    bits = load_bits(file)
+def run_tests(file_path: str, output_path: str) -> None:
+    """Запускает тесты случайности для файла с битовой последовательностью."""
+    bits = load_bits(file_path)
 
-    freq = frequency_test(bits)
-    runs = runs_test(bits)
-    longest = longest_run_test(bits)
+    freq_result = frequency_test(bits)
+    runs_result = runs_test(bits)
+    longest_result = longest_run_test(bits)
 
     result = (
-        f"File: {file}\n"
-        f"Frequency test p-value: {freq}\n"
-        f"Runs test p-value: {runs}\n"
-        f"Longest run average: {longest}\n"
-        + "-" * 40 + "\n"
+        f"File: {file_path}\n"
+        f"Frequency test p-value: {freq_result}\n"
+        f"Runs test p-value: {runs_result}\n"
+        f"Longest run average: {longest_result}\n"
+        + "-" * 40
+        + "\n"
     )
 
     print(result)
 
-    with open(out, "a") as f:
-        f.write(result)
+    with open(output_path, "a", encoding="utf-8") as file:
+        file.write(result)
+
+
+def main() -> None:
+    """Точка входа программы."""
+    Path(OUTPUT_FILE).write_text("", encoding="utf-8")
+
+    for file_path in FILES:
+        run_tests(file_path, OUTPUT_FILE)
 
 
 if __name__ == "__main__":
-
-    files = [
-        "bits_cpp.txt",
-        "bits_python.txt",
-        "bits_java.txt"
-    ]
-
-    output_file = "test_results.txt"
-
-    for f in files:
-        run_tests(f, output_file)
+    main()
