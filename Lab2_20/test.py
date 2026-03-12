@@ -73,12 +73,6 @@ def frequency_test(sequence):
 
         # Вычисление P_value = erfc(|S_N| / √2)
         p_value = erfc(abs(s_obs) / math.sqrt(2))
-        #что бы за границы не выйти жи ес
-        if p_value > 1.0:
-            p_value = 1.0
-        elif p_value < 0.0:
-            p_value = 0.0
-
         return p_value
     except Exception as e:
         print(f"Error in frequency_test: {e}")
@@ -121,12 +115,6 @@ def runs_test(sequence):
             return 0.0
         
         p_value = erfc(numerator / denominator)
-        
-        if p_value > 1.0:
-            p_value = 1.0
-        elif p_value < 0.0:
-            p_value = 0.0
-            
         return p_value
     except Exception as e:
         print(f"Error in runs_test: {e}")
@@ -185,12 +173,6 @@ def longest_run_test(sequence):
         
         # Вычисление P-value с использованием gammaincc из scipy
         p_value = gammaincc(3/2, chi_value / 2)
-        
-        if p_value > 1.0:
-            p_value = 1.0
-        elif p_value < 0.0:
-            p_value = 0.0
-
         return p_value
     except Exception as e:
         print(f"Error in longest_run_test: {e}")
