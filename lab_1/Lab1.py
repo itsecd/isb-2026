@@ -20,24 +20,35 @@ def read_file(file_name: str) -> str:
     return text
 
 
-def vigenere_encryption(base_text: str, key: str, alphabet: str) -> str:
+def make_alphabet(alphabet_file_name: str) -> dict[str, int]:
+    with open(alphabet_file_name, "r", encoding="utf-8") as file:
+        text = file.read().lower().split(", ")
+    alphabet = {}
+    for i in range(len(text)):
+        alphabet[text[i]]=i
+    return alphabet
+
+
+def vigenere_encryption(base_text: str, key: str, alphabet: dict[str, int]) -> str:
     cipher = ""
     j = 0
     for i in range(len(base_text)):
-        if base_text[i] in alphabet:
-            cipher += alphabet[(ord(base_text[i])+ord(key[j])-2*ord("а")+2)%len(alphabet)]
+        if base_text[i] in list(alphabet.keys()):
+            m = (alphabet[base_text[i]] + alphabet[key[j]])%len(alphabet)
+            cipher += list(alphabet.keys())[m]
             j = (j+1)%len(key)
         else:
             cipher += base_text[i]
     return cipher
 
 
-def vigenere_decryption(cipher: str, key: str, alphabet: str) -> str:
+def vigenere_decryption(cipher: str, key: str, alphabet: dict[str, int]) -> str:
     text = ""
     j = 0
     for i in range(len(cipher)):
-        if cipher[i] in alphabet:
-            text += alphabet[(ord(cipher[i])-ord(key[j]))%len(alphabet)]
+        if cipher[i] in list(alphabet.keys()):
+            m = (alphabet[cipher[i]] - alphabet[key[j]])%len(alphabet)
+            text += list(alphabet.keys())[m]
             j = (j+1)%len(key)
         else:
             text += cipher[i]
@@ -46,8 +57,8 @@ def vigenere_decryption(cipher: str, key: str, alphabet: str) -> str:
 
 def main() -> None:
     try:
-        alphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
         input_file, output_cipher, key = parse_arguments()
+        alphabet = make_alphabet("alphabet.txt")
         text = read_file(input_file)
         print(text,'\n')
         cipher = vigenere_encryption(text, key, alphabet)
