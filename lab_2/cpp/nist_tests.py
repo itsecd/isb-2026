@@ -1,171 +1,155 @@
 import math
-from typing import List
+import sys
 
 
-def read_bit_sequence(file_path: str) -> List[int]:
+def read_bit_sequence(file_path: str) -> str:
     """
-    Read a bit sequence from a file.
+    Reading bit string from file
     """
     with open(file_path, "r", encoding="utf-8") as file:
         data = file.read()
-
-    bits = [int(bit) for bit in data if bit in ("0", "1")]
-    return bits
+    return "".join([bit for bit in data if bit in ("0", "1")])
 
 
-def frequency_monobit_test(bits: List[int]) -> float:
+def frequency_test(bit_string: str) -> float:
     """
-    Perform the Frequency Test.
+    Frequency monobit test
     """
-    n = len(bits)
+    n = len(bit_string)
     if n == 0:
         return 0.0
 
-    s = sum(1 if bit == 1 else -1 for bit in bits)
-    s_obs = abs(s) / math.sqrt(n)
+    sum_x = 0
+    for bit in bit_string:
+        sum_x += 1 if bit == '1' else -1
+
+    s_obs = abs(sum_x) / math.sqrt(n)
     p_value = math.erfc(s_obs / math.sqrt(2))
 
     return p_value
 
 
-def runs_test(bits: List[int]) -> float:
+def runs_test(bit_string: str) -> float:
     """
-    Perform the Runs Test (NIST SP 800-22).
+    Runs test for consecutive identical bits
     """
-    n = len(bits)
+    n = len(bit_string)
     if n == 0:
         return 0.0
 
-    pi = sum(bits) / n
+    ones = bit_string.count('1')
+    pi = ones / n
 
-    if abs(pi - 0.5) >= (2 / math.sqrt(n)):
-        return 0.0
+    v_n = 0
+    for i in range(n - 1):
+        if bit_string[i] != bit_string[i + 1]:
+            v_n += 1
 
-    runs = 1
-    for i in range(1, n):
-        if bits[i] != bits[i - 1]:
-            runs += 1
+    condition = abs(pi - 0.5) < (2 / math.sqrt(n))
 
-    numerator = abs(runs - (2 * n * pi * (1 - pi)))
-    denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
+    if condition:
+        numerator = abs(v_n - 2 * n * pi * (1 - pi))
+        denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
+        if denominator == 0:
+            return 0.0
+        p_value = math.erfc(numerator / denominator)
+    else:
+        p_value = 0.0
 
-    if denominator == 0:
-        return 0.0
-
-    p_value = math.erfc(numerator / denominator)
     return p_value
 
 
-def longest_run_of_ones_test(bits: List[int]) -> float:
+def incomplete_gamma_lower(a: float, x: float, epsilon: float = 1e-10, max_iter: int = 1000) -> float:
     """
-    Perform the Longest Run of Ones in a Block Test (NIST SP 800-22).
+     Lower incomplete gamma function using a series expansion
     """
-    n = len(bits)
-    if n < 128:
-        return 0.0  
-
-    if n < 6272:
-        M = 8
-        K = 3
-        pi_probs = [0.21484375, 0.3671875, 0.23046875, 0.1875]
-    elif n < 750000:
-        M = 128
-        K = 5
-        pi_probs = [0.1174035788, 0.242955959, 0.24936348, 0.175287612, 0.102701071, 0.112288299]
-    else:
-        M = 10000
-        K = 6
-        pi_probs = [0.0882, 0.2092, 0.2483, 0.1933, 0.1208, 0.0675, 0.0727]
-
-    num_blocks = n // M
-    frequencies = [0] * (K + 1)
-
-    for i in range(num_blocks):
-        block = bits[i * M: (i + 1) * M]
-        max_run = 0
-        current_run = 0
-
-        for bit in block:
-            if bit == 1:
-                current_run += 1
-                if current_run > max_run:
-                    max_run = current_run
-            else:
-                current_run = 0
-
-        if M == 8:
-            if max_run <= 1:
-                frequencies[0] += 1
-            elif max_run == 2:
-                frequencies[1] += 1
-            elif max_run == 3:
-                frequencies[2] += 1
-            else:
-                frequencies[3] += 1
-        elif M == 128:
-            if max_run <= 4:
-                frequencies[0] += 1
-            elif max_run == 5:
-                frequencies[1] += 1
-            elif max_run == 6:
-                frequencies[2] += 1
-            elif max_run == 7:
-                frequencies[3] += 1
-            elif max_run == 8:
-                frequencies[4] += 1
-            else:
-                frequencies[5] += 1
-        else:
-            if max_run <= 10:
-                frequencies[0] += 1
-            elif max_run == 11:
-                frequencies[1] += 1
-            elif max_run == 12:
-                frequencies[2] += 1
-            elif max_run == 13:
-                frequencies[3] += 1
-            elif max_run == 14:
-                frequencies[4] += 1
-            elif max_run == 15:
-                frequencies[5] += 1
-            else:
-                frequencies[6] += 1
-
-    chi_squared = 0.0
-    for i in range(K + 1):
-        expected = num_blocks * pi_probs[i]
-        chi_squared += ((frequencies[i] - expected) ** 2) / expected
-
-    x = chi_squared / 2.0
-    nu = K / 2.0
-
-    if nu == 1.5:
-        return math.erfc(math.sqrt(x)) + (2.0 / math.sqrt(math.pi)) * math.sqrt(x) * math.exp(-x)
-    elif nu == 2.5:
-        sqrt_x = math.sqrt(x)
-        return math.erfc(sqrt_x) + (2.0 / math.sqrt(math.pi)) * sqrt_x * math.exp(-x) + (
-                    4.0 / (3.0 * math.sqrt(math.pi))) * (x ** 1.5) * math.exp(-x)
-    elif nu == 3.0:
-        return math.exp(-x) * (1.0 + x + (x ** 2) / 2.0)
-    else:
+    if x < 0:
         return 0.0
+
+    term = 1.0 / a
+    result = term
+    n = 1
+
+    while n < max_iter:
+        term *= x / (a + n)
+        result += term
+        if term < epsilon:
+            break
+        n += 1
+
+    return (x ** a) * math.exp(-x) * result
+
+
+def longest_run_test(bit_string: str) -> float:
+    """
+    Test for the longest run of ones in a block
+    """
+    n = len(bit_string)
+    M = 8
+    N = n // M
+
+    if N < 3:
+        return 0.0
+
+    # Точные вероятности по стандарту NIST для M = 8
+    pi_probs = [0.21484375, 0.3671875, 0.23046875, 0.1875]
+    v = [0, 0, 0, 0]
+
+    for i in range(N):
+        block = bit_string[i * M: (i + 1) * M]
+
+        max_run = 0
+        current = 0
+        for bit in block:
+            if bit == '1':
+                current += 1
+                max_run = max(max_run, current)
+            else:
+                current = 0
+
+        if max_run <= 1:
+            v[0] += 1
+        elif max_run == 2:
+            v[1] += 1
+        elif max_run == 3:
+            v[2] += 1
+        else:
+            v[3] += 1
+
+    chi_square = 0
+    for i in range(4):
+        expected = N * pi_probs[i]
+        chi_square += ((v[i] - expected) ** 2) / expected
+
+    a = 1.5
+    x = chi_square / 2.0
+
+    gamma_lower = incomplete_gamma_lower(a, x)
+    gamma_full = math.gamma(a)
+    p_value = 1.0 - (gamma_lower / gamma_full)
+
+    return p_value
 
 
 def main() -> None:
     """
-    Run all NIST tests for the bit sequence from results.txt and append to result.txt.
+    Запуск тестов и запись результатов
     """
     input_file = "results.txt"
 
     try:
         bits = read_bit_sequence(input_file)
     except FileNotFoundError:
-        print(f"Ошибка: Файл {input_file} не найден.")
-        return
+        print(f"Ошибка: Файл {input_file} не найден. Проверьте путь.")
+        sys.exit(1)
 
-    freq_p = frequency_monobit_test(bits)
+    if not bits:
+        print("Ошибка: Файл пуст или не содержит битовой последовательности.")
+        sys.exit(1)
+
+    freq_p = frequency_test(bits)
     runs_p = runs_test(bits)
-    longest_run_p = longest_run_of_ones_test(bits)
+    longest_run_p = longest_run_test(bits)
 
     report = (
         "NIST Statistical Tests Results\n"

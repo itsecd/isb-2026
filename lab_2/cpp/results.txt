@@ -1,8 +1,7 @@
 01100010000101101000000110101011001110001000110110001110010011011000001001011111110011100110010011010100010110100101000100010110
 
-
 NIST Statistical Tests Results
 -----------------------------
 Frequency (Monobit) Test p-value: 0.288844
-Runs Test p-value: 0.321178
+Runs Test p-value: 0.415820
 Longest Run of Ones Test p-value: 0.364780
