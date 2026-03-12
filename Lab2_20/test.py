@@ -69,10 +69,10 @@ def frequency_test(sequence):
             s += 1 if bit == 1 else -1
 
         # Вычисление S_N = (1/√N) * Σ x_i
-        s_obs = abs(s) / math.sqrt(n)
+        s_obs = s / math.sqrt(n)
 
         # Вычисление P_value = erfc(|S_N| / √2)
-        p_value = erfc(s_obs / math.sqrt(2))
+        p_value = erfc(abs(s_obs) / math.sqrt(2))
         #что бы за границы не выйти жи ес
         if p_value > 1.0:
             p_value = 1.0
@@ -137,7 +137,6 @@ def longest_run_test(sequence):
     Тест на самую длинную последовательность единиц в блоке
     Для N = 128 бит, M = 8
     χ² = Σ (v_i - 16π_i)² / (16π_i)
-    π₀ = 0.2148, π₁ = 0.3672, π₂ = 0.2305, π₃ = 0.1875
     P_value = gammaincc(3/2, χ²/2)
     """
     try:
@@ -173,13 +172,12 @@ def longest_run_test(sequence):
                 counter[3] += 1
         
         print(f"Распределение блоков: v₁={counter[0]}, v₂={counter[1]}, v₃={counter[2]}, v₄={counter[3]}")
-        
         # Теоретические вероятности из методички
         theory = [0.2148, 0.3672, 0.2305, 0.1875]
         
         # Вычисление статистики хихихи-квадрат
         chi_value = 0
-        for k in range(4):
+        for k in range(3):
             expected = 16 * theory[k]
             chi_value += ((counter[k] - expected) ** 2) / expected
         
