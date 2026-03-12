@@ -133,7 +133,7 @@ def longest_run_test(bit_string: str) -> float:
 
 def main() -> None:
     """
-    Запуск тестов и запись результатов
+    Run all NIST tests for the bit sequence from results.txt.
     """
     input_file = "results.txt"
 
