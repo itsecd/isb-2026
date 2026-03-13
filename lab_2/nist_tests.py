@@ -16,8 +16,8 @@ def frequency_test(seq: str) -> float:
         float: P-значение теста
     """
     n = len(seq)
-    s = sum(1 if bit == '1' else -1 for bit in seq)
-    return math.erfc(abs(s) / math.sqrt(n))
+    s = (sum(1 if bit == '1' else -1 for bit in seq))/math.sqrt(n)
+    return math.erfc(abs(s) / math.sqrt(2))
 
 
 def runs_test(seq: str) -> float:
@@ -39,7 +39,7 @@ def runs_test(seq: str) -> float:
     if abs(pi - 0.5) >= 2 / math.sqrt(n):
         return 0.0
     
-    v = 1 + sum(1 for i in range(1, n) if seq[i] != seq[i-1])
+    v = sum(1 for i in range(n-1) if seq[i] != seq[i+1])
     num = abs(v - 2 * n * pi * (1 - pi))
     den = 2 * math.sqrt(2 * n) * pi * (1 - pi)
     

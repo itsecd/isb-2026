@@ -2,17 +2,17 @@ NIST Test Results
 ==================================================
 
 C++:
-  Frequency: P=0.024449
-  Runs: P=0.961793
-  LongestRun: P=0.136836
+  Frequency: P=0.111612
+  Runs: P=0.894637
+  LongestRun: P=0.140988
 
 Java:
-  Frequency: P=0.802587
-  Runs: P=0.597710
-  LongestRun: P=0.377818
+  Frequency: P=0.859684
+  Runs: P=0.481111
+  LongestRun: P=0.386224
 
-sequences/seq_c.txt:
-  Frequency: P=0.133614
-  Runs: P=0.321178
-  LongestRun: P=0.679058
+C:
+  Frequency: P=0.288844
+  Runs: P=0.415820
+  LongestRun: P=0.685446
 
