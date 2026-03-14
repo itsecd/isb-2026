@@ -15,20 +15,28 @@ def parse_arguments() -> list:
 
 
 def read_file(file_name: str) -> str:
+    """
+    Чтение файла
+    """
     with open(file_name, "r", encoding="utf-8") as file:
         text = file.read().lower()
     return text
 
 
 def save_file(file_name: str, text: str) -> None:
+    """
+    Сохранение файла
+    """
     with open(file_name, "w", encoding="utf-8") as file:
         file.write(text)
     return
 
 
 def make_alphabet(alphabet_file_name: str) -> dict[str, int]:
-    with open(alphabet_file_name, "r", encoding="utf-8") as file:
-        text = file.read().lower().split(", ")
+    """
+    Создание алфавита из строки
+    """
+    text = read_file(alphabet_file_name).lower().split(", ")
     alphabet = {}
     for i in range(len(text)):
         alphabet[text[i]]=i
@@ -36,6 +44,9 @@ def make_alphabet(alphabet_file_name: str) -> dict[str, int]:
 
 
 def vigenere_encryption(base_text: str, key: str, alphabet: dict[str, int]) -> str:
+    """
+    Шифровка текста шифром Виженера
+    """
     cipher = ""
     j = 0
     for i in range(len(base_text)):
@@ -49,6 +60,9 @@ def vigenere_encryption(base_text: str, key: str, alphabet: dict[str, int]) -> s
 
 
 def vigenere_decryption(cipher: str, key: str, alphabet: dict[str, int]) -> str:
+    """
+    Дешифровка текста
+    """
     text = ""
     j = 0
     for i in range(len(cipher)):
@@ -67,6 +81,7 @@ def main() -> None:
         alphabet = make_alphabet("alphabet.txt")
         text = read_file(input_file)
         key = read_file(key_file)
+
         print(text,'\n')
         cipher = vigenere_encryption(text, key, alphabet)
         print(cipher, '\n')
