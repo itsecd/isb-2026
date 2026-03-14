@@ -1,3 +1,9 @@
+.vs/
+vs/
+out/
+lab_2/.vs/
+lab_2/vs/
+lab_2/out/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

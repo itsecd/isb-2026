@@ -3,12 +3,28 @@
   "WorkspaceRootPath": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\working\\inform-security-base\\inform-security-base\\lab_2\\CppGenerate.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:CppGenerate.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\working\\inform-security-base\\inform-security-base\\lab_2\\seq_analyze.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:seq_analyze.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\working\\inform-security-base\\inform-security-base\\lab_2\\seq_analyze.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:seq_analyze.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\working\\inform-security-base\\inform-security-base\\lab_2\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\working\\inform-security-base\\inform-security-base\\lab_2\\CppGenerate.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:CppGenerate.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\working\\inform-security-base\\inform-security-base\\lab_2\\CppGenerate.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:CppGenerate.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\working\\inform-security-base\\inform-security-base\\lab_2\\JavaGenerated.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:JavaGenerated.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|E:\\working\\inform-security-base\\inform-security-base\\lab_2\\CMakeLists.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
@@ -58,42 +74,93 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "seq_analyze.cpp",
+              "DocumentMoniker": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\seq_analyze.cpp",
+              "RelativeDocumentMoniker": "seq_analyze.cpp",
+              "ToolTip": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\seq_analyze.cpp",
+              "RelativeToolTip": "seq_analyze.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-03-14T15:36:49.41Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "seq_analyze.h",
+              "DocumentMoniker": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\seq_analyze.h",
+              "RelativeDocumentMoniker": "seq_analyze.h",
+              "ToolTip": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\seq_analyze.h",
+              "RelativeToolTip": "seq_analyze.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-03-14T15:36:40.1Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "JavaGenerated.txt",
+              "DocumentMoniker": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\JavaGenerated.txt",
+              "RelativeDocumentMoniker": "JavaGenerated.txt",
+              "ToolTip": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\JavaGenerated.txt",
+              "RelativeToolTip": "JavaGenerated.txt",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2026-03-14T15:32:56.73Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CppGenerate.h",
+              "DocumentMoniker": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\CppGenerate.h",
+              "RelativeDocumentMoniker": "CppGenerate.h",
+              "ToolTip": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\CppGenerate.h",
+              "RelativeToolTip": "CppGenerate.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-03-14T15:32:41.789Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "CppGenerate.cpp",
               "DocumentMoniker": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\CppGenerate.cpp",
               "RelativeDocumentMoniker": "CppGenerate.cpp",
               "ToolTip": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\CppGenerate.cpp",
               "RelativeToolTip": "CppGenerate.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-03-10T18:09:35.65Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "main.cpp",
               "DocumentMoniker": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\main.cpp",
               "RelativeDocumentMoniker": "main.cpp",
               "ToolTip": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\main.cpp",
               "RelativeToolTip": "main.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAASAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-03-10T18:08:03.669Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 7,
               "Title": "\u0421\u0442\u0440\u0430\u043D\u0438\u0446\u044B \u043E\u0431\u0437\u043E\u0440\u0430 CMake",
               "DocumentMoniker": "\u0421\u0442\u0440\u0430\u043D\u0438\u0446\u044B \u043E\u0431\u0437\u043E\u0440\u0430 CMake",
               "ToolTip": "\u0421\u0442\u0440\u0430\u043D\u0438\u0446\u044B \u043E\u0431\u0437\u043E\u0440\u0430 CMake",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-03-10T18:07:15.555Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-10T18:07:15.555Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 6,
               "Title": "CMakeLists.txt",
               "DocumentMoniker": "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\CMakeLists.txt",
               "RelativeDocumentMoniker": "CMakeLists.txt",

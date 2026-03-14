@@ -7,7 +7,7 @@ project("lab2_isb" CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable("lab2_isb" "main.cpp")
+add_executable("lab2_isb" "main.cpp" "CppGenerate.h" "seq_analyze.h" "seq_analyze.cpp")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR
    CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
