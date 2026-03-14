@@ -89,7 +89,7 @@ def test_file(filename, out):
 
 def main():
 
-    with open("result.txt", "w") as out:
+    with open("result.txt", "w", encoding='utf-8') as out:
         test_file("seq_cpp.txt", out)
         test_file("seq_java.txt", out)
         test_file("seq_py.txt", out)
