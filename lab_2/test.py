@@ -2,7 +2,7 @@ import os
 import math
 import csv
 from datetime import datetime
-from scipy import stats
+from scipy.special import gammaincc
 
 def get_script_dir():
     return os.path.dirname(os.path.abspath(__file__))
@@ -24,8 +24,9 @@ def read_sequence(filename):
         print(f"Ошибка чтения файла {filename}: {e}")
         return None
 
-# a) Частотный побитовый тест
+
 def monobit_test(sequence):
+    """ Частотный побитовый тест """
     n = len(sequence)
     if n == 0:
         return 0.0
@@ -34,8 +35,9 @@ def monobit_test(sequence):
     p_value = math.erfc(s_obs / math.sqrt(2))
     return p_value
 
-# b) Тест на одинаковые подряд идущие биты
+
 def runs_test(sequence):
+    """ Тест на одинаковые подряд идущие биты """
     N = len(sequence)
     
     if N == 0:
@@ -64,35 +66,15 @@ def runs_test(sequence):
         print("Знаменатель равен 0! Возвращаем P-value = 0")
         return 0.0
     
-    z_score = numerator / denominator
-    p_value = math.erfc(z_score / math.sqrt(2))
+    p_value = math.erfc(numerator / denominator)
     
     return p_value
 
-# c) Тест на самую длинную последовательность единиц в блоке
 def longest_run_ones_test(sequence):
-    n_total = len(sequence)
-    M = 8
+    """ Тест на самую длинную последовательность единиц в блоке """
     
-    if n_total % M != 0:
-        # Обрезаем до кратного, если вдруг длина не идеальна
-        n_total = (n_total // M) * M
-        sequence = sequence[:n_total]
-        
-    N_blocks = n_total // M
-    
-    if N_blocks == 0:
-        return 0.0
-
-    # Теоретические вероятности для M=8 (из стандарта NIST для M=8)
-    # Сумма должна быть ровно 1.0
-    # pi_0 (<=1), pi_1 (=2), pi_2 (=3), pi_3 (>=4)
-    probs = [
-        0.2148,   # P(K <= 1)
-        0.3672,   # P(K = 2)
-        0.2305,   # P(K = 3)
-        0.1875    # P(K >= 4) -> 1 - (0.2148 + 0.3672 + 0.2305)
-    ]
+    M = 8 # Длина блока
+    N_blocks = 16 # Кол-во блоков (128/8=16)
     
     # Счетчики категорий v_0, v_1, v_2, v_3
     counts = [0] * 4
@@ -120,24 +102,27 @@ def longest_run_ones_test(sequence):
             counts[1] += 1
         elif max_run == 3:
             counts[2] += 1
-        else: # max_run >= 4
+        elif max_run >= 4:
             counts[3] += 1
     
-    # Расчет Хи-квадрат (стр. 12)
+    pi = [
+        0.2148,  
+        0.3672,   
+        0.2305,   
+        0.1875    
+    ]
+    # Расчет Хи-квадрат
     # chi_sq = sum( (v_i - N*pi_i)^2 / (N*pi_i) )
     chi_sq = 0.0
     for i in range(4):
-        expected = N_blocks * probs[i]
+        expected = N_blocks * pi[i]
         observed = counts[i]
-        term = ((observed - expected) ** 2) / expected
-        chi_sq += term
-    df = 3
+        chi_sq += ((observed - expected) ** 2) / expected
     
-    try:
-        p_value = 1.0 - stats.chi2.cdf(chi_sq, df)
-    except Exception as e:
-        print(f"Ошибка расчета P-value: {e}")
-        return 0.0
+    # формула для p_value = igamc * ( 3\2, (X^2\)2 )
+    a = 3 / 2
+    x = chi_sq / 2
+    p_value = gammaincc(a, x)
     
     return p_value
 
@@ -153,8 +138,7 @@ def run_single_test_set(filename, label, results_list, alpha=0.01):
             "File": filename,
             "Test": "FILE_ERROR",
             "P-Value": "N/A",
-            "Result": "FAIL",
-            "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "Result": "FAIL"
         })
         return
 
@@ -175,7 +159,6 @@ def run_single_test_set(filename, label, results_list, alpha=0.01):
                 "Test": test_name,
                 "P-Value": f"{p_val:.6f}",
                 "Result": status,
-                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
             results_list.append(result_entry)
             
@@ -188,8 +171,7 @@ def run_single_test_set(filename, label, results_list, alpha=0.01):
                 "File": filename,
                 "Test": test_name,
                 "P-Value": "ERROR",
-                "Result": "FAIL",
-                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                "Result": "FAIL"
             })
 
 def save_results_to_csv(results_list, output_filename="nist_results.csv"):
@@ -201,7 +183,7 @@ def save_results_to_csv(results_list, output_filename="nist_results.csv"):
         print("\nНет данных для сохранения в CSV.")
         return
 
-    fieldnames = ["Timestamp", "Source", "File", "Test", "P-Value", "Result"]
+    fieldnames = ["Source", "File", "Test", "P-Value", "Result"]
     
     try:
         with open(full_path, mode='w', newline='', encoding='utf-8') as csvfile:
@@ -219,8 +201,8 @@ if __name__ == "__main__":
     # Список файлов для проверки
     # Можно легко добавить новые генераторы, просто дописав строку сюда
     targets = [
-        ("sequence_cpp.txt", "C++ Generator"),
-        ("sequence_java.txt", "Java Generator")
+        ("sequence_cpp.txt", "C++"),
+        ("sequence_java.txt", "Java")
     ]
 
     for filename, label in targets:
