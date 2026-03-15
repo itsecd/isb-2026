@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 
+int read_constant(const char* NAME, const char* filepath);
 
 int generateDRV();
 std::vector<int> generateDRVec();

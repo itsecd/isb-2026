@@ -2,8 +2,25 @@ import java.util.*;
 import java.io.*;
 
 public class JavaGenerator {
-    private static final int VECTOR_SIZE = 1000;
     private static final String OUTPUT_FILE = "JavaGenerated.txt";
+
+    public static int readConstant(String constantName, String filePath) throws IOException {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith(constantName + "=")) {
+                    String[] parts = line.split("=");
+                    if (parts.length == 2) {
+                return Integer.parseInt(parts[1].trim());
+            }
+        }
+    }
+    }
+    throw new IllegalArgumentException("Constant '" + constantName + "' not found in file");
+    }
+
+    private static final int VECTOR_SIZE = readConstant("SEQUENCE_LENGTH", "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\generators\\constants.txt");
+
 
     // Генерирует один случайный бит (0 или 1)
     public static int generateRandomBit() {

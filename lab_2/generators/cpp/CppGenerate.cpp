@@ -4,9 +4,31 @@
 #include <cstdlib>
 #include <ctime> 
 #include <fstream>
-
+#include <string>
 using namespace std;
 
+
+int read_constant(const char* NAME, const char* filepath) {
+	ifstream file(filepath);
+	if (!file.is_open()) {
+		throw std::invalid_argument("Uncorrect file or path!");
+	}
+
+	string word;
+	while (file >> word) {
+		if (word == NAME) {
+			file >> word;
+			if (word != "=") {
+				file.close();
+				throw std::invalid_argument("Uncorrect constants file format!");
+			}
+			file >> word;
+			file.close();
+			return stoi(word);
+		}
+	}
+	file.close();
+}
 
 
 // Статические объекты инициализируются один раз при первом вызове функции
@@ -21,8 +43,9 @@ int generateDRV() {
 
 
 vector<int> generateDRVec() {
-	vector<int> result(128);
-	for (int i = 0; i < 128; i++) {
+	const int SEQUENCE_LENGTH = read_constant("SEQUENCE_LENGTH", "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\generators\\constants.txt");
+	vector<int> result(SEQUENCE_LENGTH);
+	for (int i = 0; i < SEQUENCE_LENGTH; i++) {
 		result[i] = generateDRV();
 	}
 	return result;
