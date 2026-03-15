@@ -1,0 +1,5 @@
+Programming language | Frequency test | Sequence identical test | Longest sequence test | Results
+
+cpp.txt | 0.7236736098317631 | 0.9911761003661306 | 0.9936235018804211 | True
+java.txt | 1.0 | 0.28884436634648486 | 0.8085758599075813 | True
+py.txt | 0.8596837951986662 | 0.07656711207676663 | 0.06646959055752752 | True
