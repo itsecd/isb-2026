@@ -1,0 +1,19 @@
+NIST Statistical Test Results
+==================================================
+Sequence: C++ Generator
+Length: 128 bits
+
+1. Frequency Test (Monobit Test)
+   P-value: 0.033895
+   Result: PASSED
+
+2. Runs Test
+   P-value: 0.155625
+   Result: PASSED
+
+3. Longest Run Test
+   P-value: 0.840062
+   Result: PASSED
+
+==================================================
+Test passed if P-value >= 0.01
