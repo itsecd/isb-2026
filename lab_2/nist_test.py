@@ -114,14 +114,14 @@ p3 = longest_run_test(seq)
 
 # результаты
 result_text = f"""
-Сгенерированная последовательность:
+Generated sequence:
 {sequence_str}
 
 Frequency Test P-value = {p1}
 Runs Test P-value = {p2}
 Longest Run Test P-value = {p3}
 
-Результаты тестов:
+Test reslts:
 
 Frequency Test: {"PASS" if p1 >= 0.01 else "FAIL"}
 Runs Test: {"PASS" if p2 >= 0.01 else "FAIL"}
