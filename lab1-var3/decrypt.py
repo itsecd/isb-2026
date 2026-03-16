@@ -18,6 +18,50 @@ def load_cipher_text():
         print(f"Ошибка при чтении файла: {e}")
         return None
 
+def frequency_analysis(text):
+    # Проведение частотного анализа текста
+    try:
+        freq = Counter(text)
+        print('ЧАСТОТНЫЙ АНАЛИЗ:')
+        print('=' * len('ЧАСТОТНЫЙ АНАЛИЗ:'))
+
+        total_chars = len(text)
+        for i, (char, count) in enumerate(freq.most_common()):
+            frequency = count / total_chars
+            print(f"{i+1:2d}. '{char}' = {frequency:.4f}")
+        
+        return freq
+    except Exception as e:
+        print(f"Ошибка при частотном анализе: {e}")
+        return None
+
+def save_frequencies_to_file(frequencies, text_length, filename='frequencies.txt'):
+    # Сохранение частотного анализа в файл
+    try:
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write('ЧАСТОТНЫЙ АНАЛИЗ ТЕКСТА\n')
+            f.write('=' * 40 + '\n')
+            f.write('Символ | Частота\n')
+            f.write('-' * 40 + '\n')
+            
+            for char, count in frequencies.most_common():
+                if char == ' ':
+                    char_display = 'ПРОБЕЛ'
+                elif char == '\n':
+                    char_display = 'ПЕРЕВОД СТРОКИ'
+                else:
+                    char_display = char
+                
+                frequency = count / text_length
+                f.write(f"{char_display:10} | {frequency:.6f}\n")
+            
+            f.write('=' * 40 + '\n')
+            f.write(f"Всего символов: {text_length}\n")
+        
+        print(f"Частотный анализ сохранен в файл {filename}")
+    except IOError as e:
+        print(f"Ошибка при сохранении файла: {e}")
+
 def get_decrypted_text(cipher, mapping):
     # Получение расшифрованного текста
     result = ''
@@ -65,17 +109,12 @@ def main():
     if cipher is None:
         return
 
-    # Частотный анализ
-    try:
-        freq = Counter(cipher)
-        print('ЧАСТОТНЫЙ АНАЛИЗ:')
-        print('=' * len('ЧАСТОТНЫЙ АНАЛИЗ:'))
+    text_length = len(cipher)
 
-        for i, (char, count) in enumerate(freq.most_common()):
-            print(f"{i+1:2d}. '{char}' = {count:4d} раз(а)")
-    except Exception as e:
-        print(f"Ошибка при частотном анализе: {e}")
-        return
+    # Частотный анализ
+    freq = frequency_analysis(cipher)
+    if freq is not None:
+        save_frequencies_to_file(freq, text_length)
 
     mapping = {}
 
