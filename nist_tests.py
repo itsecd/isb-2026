@@ -27,10 +27,10 @@ def runs_test(sequence):
     n = len(sequence)
     pi = sum(sequence) / n
     
-    if abs(pi - 0.5) > (2 / math.sqrt(n)):
+    if abs(pi - 0.5) >= (2 / math.sqrt(n)):
         return 0.0
     
-    v_n = 1
+    v_n = 0
     for i in range(n - 1):
         if sequence[i] != sequence[i + 1]:
             v_n += 1
