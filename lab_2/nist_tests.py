@@ -60,7 +60,7 @@ class NISTTests:
                 'note': 'Failed pre-test: proportion of ones out of bounds'
             }
         
-        runs = 1
+        runs = 0
         for i in range(1, n):
             if sequence[i] != sequence[i-1]:
                 runs += 1
