@@ -23,10 +23,7 @@ def runs_test(bits):
     if abs(pi - 0.5) >= 2 / math.sqrt(n):
         return 0.0
 
-    v = 1
-    for i in range(1, n):
-        if bits[i] != bits[i-1]:
-            v += 1
+    v = bits.count('01') + bits.count('10')
 
     num = abs(v - 2*n*pi*(1-pi))
     den = 2 * math.sqrt(2*n) * pi*(1-pi)
