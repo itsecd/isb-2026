@@ -1,14 +1,14 @@
 
 ======================================
 Обработка файла: sequence_c++.txt
-Читаем файл из: C:/Programming/University/2nd_course/Inf_sec_basics/Release/lab2\task2\sequence_c++.txt
+Читаем файл из: C:\Programming\University\2nd_course\Inf_sec_basics\Release\lab2\task2\sequence_c++.txt
 Размер последовательности: 128 бит
 Первые 50 бит: 11110000001110100110110101110000110000011000101101...
 
 Результаты тестов:
-Test 1: P-value = 0.595883
-Test 2: P-value = 0.577929
-Test 3: P-value = 0.809410
+Test 1: P-value = 0.5958830905651779
+Test 2: P-value = 0.5779293102278323
+Test 3: P-value = 0.6601700748690034
 
 Интерпретация результатов (при уровне значимости 0.01):
 Test 1: рандомизированная
@@ -17,14 +17,14 @@ Test 3: рандомизированная
 
 ======================================
 Обработка файла: sequence_java.txt
-Читаем файл из: C:/Programming/University/2nd_course/Inf_sec_basics/Release/lab2\task2\sequence_java.txt
+Читаем файл из: C:\Programming\University\2nd_course\Inf_sec_basics\Release\lab2\task2\sequence_java.txt
 Размер последовательности: 128 бит
 Первые 50 бит: 01000000100010111111101001011000010000100110011011...
 
 Результаты тестов:
-Test 1: P-value = 0.859684
-Test 2: P-value = 0.597710
-Test 3: P-value = 0.863807
+Test 1: P-value = 0.8596837951986662
+Test 2: P-value = 0.5977098069466218
+Test 3: P-value = 0.7325453938078248
 
 Интерпретация результатов (при уровне значимости 0.01):
 Test 1: рандомизированная
