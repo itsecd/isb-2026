@@ -8,14 +8,17 @@ def parse_args():
     return parser.parse_args()
 
 def read_file(filename: str) -> str:
+    '''Returns the content of a file as a string'''
     with open(filename, "r", encoding="utf-8") as file:
         return file.read()
 
 def write_file(filename: str, content: str) -> None:
+    '''Writes content in a file'''
     with open(filename, "w", encoding="utf-8") as file:
         file.write(content)
 
 def caesar_cipher(text: str, shift: int) -> str:
+    '''Encodes text using Caesar cipher and return encoded text as a string'''
     lower_alphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
     upper_alphabet = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
     result = []
