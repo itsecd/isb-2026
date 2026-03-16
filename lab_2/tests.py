@@ -29,6 +29,22 @@ def freq_test(sequence: str) -> float:
     return p_val
     
 
+def same_bits_test(sequence: str) -> float:
+    """Тест на одинаковые подряд идущие биты"""
+    n = len(sequence)
+    ones_ratio = sequence.count("1") / n
+
+    if abs(ones_ratio - 0.5) >= (2 / math.sqrt(n)):
+        return 0
+    
+    v_n = sum([1 if sequence[i] != sequence[i + 1] else 0 for i in range(n - 1)])
+    
+    numerator = abs(v_n - 2 * n * ones_ratio * (1 - ones_ratio))
+    denominator = 2 * math.sqrt(2 * n) * ones_ratio * (1 - ones_ratio)
+    p_val = erfc(numerator / denominator)
+
+    return p_val
+
 def main() -> None:
     folder_path = parse().folder_path
     sequences = [f"{folder_path}/{s}" for s in ["cpp_seq.txt", "java_seq.txt", "py_seq.txt"]]
@@ -36,6 +52,7 @@ def main() -> None:
     for i in sequences:
         seq = read_sequence(i)
         print(freq_test(seq))
+        print(same_bits_test(seq))
 
 
 if __name__ == "__main__":
