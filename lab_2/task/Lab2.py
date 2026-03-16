@@ -1,6 +1,10 @@
 import argparse
 import math
 
+
+import scipy
+
+
 def parse_arguments() -> list:
     """
     Парсинг аргументов из командной строки
@@ -33,14 +37,21 @@ def save_file(file_name: str, text: str) -> None:
 
 
 def bit_freq_test(nums: str) -> float:
+    """
+    Частотный побитовый тест
+    """
     s = 0
     for i in nums:
         s -= (1 - 2 * int(i))
-    arg = s/math.sqrt(2*len(nums))
-    return math.erfc(arg)
+    arg = s/math.sqrt(len(nums))
+    return math.erfc(arg/math.sqrt(2))
 
 
 def cont_bit_line_test(nums: str) -> float:
+    """
+    Тест на одинаковые подряд идущие биты
+    """
+    #Вычисление доли единиц
     n = len(nums)
     fr = 0
     for i in nums:
@@ -49,6 +60,7 @@ def cont_bit_line_test(nums: str) -> float:
     if abs(fr-0.5) >= 2/math.sqrt(n):
         return 0
 
+    # Вычисление числа знакоперемен
     vn = 0
     for i in range(n-1):
         if nums[i] != nums[i+1]:
@@ -58,6 +70,10 @@ def cont_bit_line_test(nums: str) -> float:
 
 
 def longest_line_block_test(nums: str) -> float:
+    """
+    Тест на самую длинную последовательность единиц в блоке
+    """
+    # Составление списка макс. длин последовательностей единиц в блоках
     blocks_len = 8
     max_lines = []
     max_line = 0
@@ -74,6 +90,7 @@ def longest_line_block_test(nums: str) -> float:
             cur_line = 0
             max_line = 0
 
+    # Составление статистики по разным длинам из списка
     v1 = sum(1 for i in max_lines if i < 2)
     v2 = max_lines.count(2)
     v3 = max_lines.count(3)
@@ -82,10 +99,11 @@ def longest_line_block_test(nums: str) -> float:
     vis = [v1, v2, v3, v4]
     pis = [0.2148, 0.3672, 0.2305, 0.1875]
 
+    # Вычисление Хи-квадрата
     xi = 0
     for i in range(len(vis)):
         xi += (vis[i] - 16*pis[i]) ** 2 / (16 * pis[i])
-    return
+    return scipy.special.gammainc(1.5, xi/2)
 
 
 def main() -> None:
@@ -97,6 +115,7 @@ def main() -> None:
         p2 = round(cont_bit_line_test(rand_nums), 4)
         print(p2)
         p3 = round(longest_line_block_test(rand_nums), 4)
+        print(p3)
     except Exception as exc:
         print(f"Возникла ошибка: {exc}")
 
