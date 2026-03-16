@@ -1,0 +1,16 @@
+#include <iostream>
+#include <random>
+#include <bitset>
+
+int main() {
+    std::random_device rd;
+    std::mt19937_64 gen(rd());
+    uint64_t part1 = gen();
+    uint64_t part2 = gen();
+    std::bitset<64> b1(part1);
+    std::bitset<64> b2(part2);
+    std::string result = b1.to_string() + b2.to_string();
+    std::cout << result;
+
+    return 0;
+}
