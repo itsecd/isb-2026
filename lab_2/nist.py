@@ -30,7 +30,7 @@ class NISTTests:
                 'result': 'FAIL'
             }
         
-        v_n = 1
+        v_n = 0
         for i in range(n - 1):
             if sequence[i] != sequence[i + 1]:
                 v_n += 1
