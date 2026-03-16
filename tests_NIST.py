@@ -1,5 +1,5 @@
 import math
-from scipy.special import erfc
+from scipy.special import erfc, gammaincc
 
 
 def read_sequence(filename):
@@ -54,11 +54,10 @@ def runs_test(bits):
     return p_value
 
 
-def longest_run_test_calc_chi2(bits, m=8):
+def longest_run_test(bits, m=8):
     """
     Тест на самую длинную последовательность единиц в блоке.
-
-    Возвращает χ² для последующего ручного расчета P-value.
+    Возвращает P-value, вычисленное через гамма-функцию.
     """
     n = len(bits)
     num_blocks = n // m
@@ -85,7 +84,7 @@ def longest_run_test_calc_chi2(bits, m=8):
     v4 = sum(1 for r in max_runs if r >= 4)
 
     pi = [0.2148, 0.3672, 0.2305, 0.1875]
-
+    
     expected = [16 * p for p in pi]
     observed = [v1, v2, v3, v4]
 
@@ -93,7 +92,9 @@ def longest_run_test_calc_chi2(bits, m=8):
     for i in range(4):
         chi_square += (observed[i] - expected[i]) ** 2 / expected[i]
 
-    return chi_square, observed, expected
+    p_value = gammaincc(1.5, chi_square / 2)
+    
+    return p_value, chi_square, observed, expected
 
 
 def test_sequence(filename, sequence_name):
@@ -110,31 +111,17 @@ def test_sequence(filename, sequence_name):
     p2 = runs_test(bits)
     print_result("Тест на одинаковые подряд идущие биты", p2)
 
-    chi2, observed, expected = longest_run_test_calc_chi2(bits)
-
-    print("Тест на самую длинную послед-ть единиц в блоке:")
+    p3, chi2, observed, expected = longest_run_test(bits)
+    print_result("Тест на самую длинную послед-ть единиц в блоке", p3)
+    
     print(f"  v1 (≤1): {observed[0]}")
     print(f"  v2 (=2): {observed[1]}")
     print(f"  v3 (=3): {observed[2]}")
     print(f"  v4 (≥4): {observed[3]}")
     print(f"  Ожидаемые значения: {[round(e, 2) for e in expected]}")
-    print(f"\n  χ^2 = {chi2:.6f}")
-    print("\n    Для получения P-value:")
-    print("     1. Перейдите на сайт: "
-          "https://www.danielsoper.com/statcalc/calculator.aspx?id=34")
-    print(f"     2. Введите s = 1.5 (это degrees of freedom/2)")
-    print(f"     3. Введите x = {chi2 / 2:.6f} (это χ²/2)")
-    print("     4. Введите полученное P-value в программу")
-
-    try:
-        p3 = float(input("\n  Введите P-value из калькулятора: "))
-        print_result("  Результат теста", p3)
-    except Exception:
-        print("  P-value не введён. Тест не завершён.")
-        p3 = None
+    print(f"  χ² = {chi2:.6f}")
 
     return p1, p2, p3, chi2, observed, expected
-
 
 def main():
     """Основная функция программы."""
