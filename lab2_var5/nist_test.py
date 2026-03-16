@@ -89,42 +89,51 @@ class NISTTests:
         if n == 0:
             return {"error": "Пустая последовательность"}
 
+        # Преобразуем список в строку для использования count
+        text = ''.join(str(bit) for bit in sequence)
+        
         # Доля единиц
-        ones = sum(sequence)
-        pi = ones / n
+        ksi = text.count("1") / n
 
         # Проверяем применимость теста
-        threshold = 2 / math.sqrt(n)
-        if abs(pi - 0.5) >= threshold:
+        if not (abs(ksi - 0.5) < 2 / (n ** 0.5)):
             return {
                 'test_name': 'Тест на серии',
                 'error': (
-                    f'Тест неприменим: доля единиц = {pi:.4f} '
-                    f'(требуется |pi - 0.5| < {threshold:.4f})'
+                    f'Тест неприменим: доля единиц = {ksi:.4f} '
+                    f'(требуется |ksi - 0.5| < {2 / (n ** 0.5):.4f})'
                 ),
-                'pi': pi,
-                'threshold': threshold
+                'pi': ksi,
+                'threshold': 2 / (n ** 0.5)
             }
 
-        # Подсчет серий
-        v_n = 0
-        for i in range(1, n):
-            if sequence[i] != sequence[i-1]:
-                v_n += 1
-        runs = v_n + 1
+        # Подсчет серий (переходов 01 или 10)
+        V_n = text.count("01") + text.count("10")
 
-        # Вычисление P-значения по формуле
-        numerator = abs(v_n - 2 * n * pi * (1 - pi))
-        denominator = 2 * math.sqrt(2 * n * pi * (1 - pi))
-        p_value = math.erfc(numerator / denominator)
+        # Вычисление P-значения по формуле из примера
+        num = abs(V_n - 2 * n * ksi * (1 - ksi))
+        denom = 2 * ((2 * n) ** 0.5) * ksi * (1 - ksi)
+      
+        if denom == 0:
+            return {
+                'test_name': 'Тест на серии',
+                'error': 'Деление на ноль (denom = 0)',
+                'pi': ksi,
+                'v_n': V_n
+            }
+            
+        p_value = math.erfc(num / denom)
+
+        # Количество серий 
+        runs = V_n + 1
 
         results = {
             'test_name': 'Тест на серии',
             'n': n,
-            'ones': ones,
-            'pi': pi,
+            'ones': text.count("1"),
+            'pi': ksi,
             'runs': runs,
-            'v_n': v_n,
+            'v_n': V_n,
             'p_value': p_value,
             'passed': p_value > 0.01
         }
