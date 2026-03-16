@@ -23,15 +23,15 @@ def save_to_file(lang:str , test1:float,test2:float, test3:float, path:str )->No
 def bit_frequency_test(text:str) -> float:
     p = 0
     s = 0
-    n = 128
+    n = len(text)
     for i in text:
         if i == "1":
             s += 1
-        else:
+        elif i == "0":
             s -= 1
     
-    s = abs(s) / n**0.5
-    p = math.erfc(s/2**0.5)
+    s = abs(s) / (n**0.5)
+    p = math.erfc(s/(2**0.5))
     
     return p
 
