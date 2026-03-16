@@ -39,18 +39,22 @@ def runs_test(seq: str) -> float:
     """
     Выполняет тест на одинаковые подряд идущие биты (Runs Test) 
     для оценки частоты смены битов ('0' на '1' и наоборот).
+    Расчет строго по методическим указаниям (без +1 к V_N).
     """
     n = len(seq)
     pi = seq.count('1') / n
     
+    # Проверка предварительного условия
     if abs(pi - 0.5) >= (2 / math.sqrt(n)):
         return 0.0
 
-    v_n_obs = 1 + sum(1 for i in range(n - 1) if seq[i] != seq[i+1])
+    v_n_obs = sum(1 for i in range(n - 1) if seq[i] != seq[i+1])
     
+    # Вычисляем P-value
     numerator = abs(v_n_obs - 2 * n * pi * (1 - pi))
     denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
     p_value = math.erfc(numerator / denominator)
+    
     return p_value
 
 def longest_run_ones_in_a_block_test(seq: str) -> float:
