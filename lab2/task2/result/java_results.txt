@@ -8,7 +8,7 @@ Length: 128 bits
    Result: PASSED
 
 2. Runs Test
-   P-value: 0.267349
+   P-value: 0.351483
    Result: PASSED
 
 3. Longest Run Test

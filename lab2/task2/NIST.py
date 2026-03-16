@@ -63,7 +63,7 @@ def runs_test(sequence: str) -> float:
     if abs(pi - 0.5) >= (2 / math.sqrt(n)):
         return 0.0
 
-    v = 1
+    v = 0
     for i in range(n - 1):
         if sequence[i] != sequence[i + 1]:
             v += 1
