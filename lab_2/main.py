@@ -20,7 +20,7 @@ def runs_test(bits):
     if abs(pi - 0.5) >= 2 / math.sqrt(n):
         return 0.0
     
-    v = 1
+    v = 0
     for i in range(n - 1):
         if bits[i] != bits[i + 1]:
             v += 1
