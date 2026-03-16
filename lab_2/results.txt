@@ -1,13 +1,24 @@
 
-Generated sequence:
-11110010000111100101101100100011100010001010010000101011000101000111110010000000010000010010101011111100101000010011011001100110
+C++ sequence:
 
-Frequency Test P-value = 0.1572992070502852
-Runs Test P-value = 0.857480207220993
-Longest Run Test P-value = 0.01978209175392543
+Frequency Test P-value = 0.5958830905651779
+Runs Test P-value = 0.10535956057136467
+Longest Run Test P-value = 0.4121220150540891
 
-Test reslts:
-
+Test results:
 Frequency Test: PASS
 Runs Test: PASS
 Longest Run Test: PASS
+
+
+Java sequence:
+
+Frequency Test P-value = 0.5958830905651779
+Runs Test P-value = 0.20584415789708965
+Longest Run Test P-value = 0.7890269501666896
+
+Test results:
+Frequency Test: PASS
+Runs Test: PASS
+Longest Run Test: PASS
+

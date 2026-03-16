@@ -1,74 +1,117 @@
-import random
 import math
-
-N = 128
-
-
-# генерация последовательности
+from scipy.special import gammaincc
 
 
-def generate_sequence():
-    return [random.randint(0, 1) for _ in range(N)]
+"""Модуль реализации статистических тестов NIST."""
 
 
-# 1. Частотный побитовый тест
+def load_bit_sequence(filepath: str) -> str:
+    """
+    Считать бинарную последовательность из файла.
+
+    Args:
+        filepath: Путь к файлу.
+
+    Returns:
+        Битовая строка длиной 128.
+    """
+
+    with open(filepath, "r", encoding="utf-8") as file:
+        sequence = file.read().strip()
+
+    if len(sequence) != 128:
+        raise ValueError("Последовательность должна содержать ровно 128 бит")
+
+    return sequence
 
 
-def frequency_test(seq):
+def frequency_test(filename: str) -> float:
+    """
+    Частотный побитовый тест.
 
-    x = [1 if bit == 1 else -1 for bit in seq]
+    Args:
+        filename: Файл с последовательностью.
 
-    S = sum(x)
+    Returns:
+        Значение p-value.
+    """
 
-    Sn = abs(S) / math.sqrt(N)
+    bit_sequence = load_bit_sequence(filename)
+    n = len(bit_sequence)
 
-    p_value = math.erfc(Sn / math.sqrt(2))
+    ones = bit_sequence.count("1")
+    zeros = bit_sequence.count("0")
+
+    deviation = abs(ones - zeros)
+
+    s = deviation / math.sqrt(n)
+
+    p_value = math.erfc(s / math.sqrt(2))
 
     return p_value
 
 
-# 2. Тест на одинаковые подряд идущие биты
+def runs_test(filename: str) -> float:
+    """
+    Тест на одинаковые подряд идущие биты.
 
+    Args:
+        filename: Файл с последовательностью.
 
-def runs_test(seq):
+    Returns:
+        Значение p-value.
+    """
 
-    ones = sum(seq)
+    bit_sequence = load_bit_sequence(filename)
+    n = len(bit_sequence)
 
-    zeta = ones / N
+    pi = bit_sequence.count("1") / n
 
-    if abs(zeta - 0.5) >= (2 / math.sqrt(N)):
-        return 0
+    if abs(pi - 0.5) >= (2 / math.sqrt(n)):
+        return 0.0
 
-    V = 1
+    transitions = 0
 
-    for i in range(N - 1):
-        if seq[i] != seq[i + 1]:
-            V += 1
+    for i in range(n - 1):
+        if bit_sequence[i] != bit_sequence[i + 1]:
+            transitions += 1
 
-    p_value = math.erfc(
-        abs(V - 2 * N * zeta * (1 - zeta)) / (2 * math.sqrt(2 * N) * zeta * (1 - zeta))
-    )
+    numerator = abs(transitions - 2 * n * pi * (1 - pi))
+
+    denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
+
+    p_value = math.erfc(numerator / denominator)
 
     return p_value
 
 
-# 3. Самая длинная последовательность единиц в блоке
+def longest_run_test(filename: str) -> float:
+    """
+    Тест на самую длинную последовательность единиц в блоке.
 
+    Args:
+        filename: Файл с последовательностью.
 
-def longest_run_test(seq):
+    Returns:
+        Значение p-value.
+    """
+
+    bit_sequence = load_bit_sequence(filename)
 
     M = 8
-
-    blocks = [seq[i : i + M] for i in range(0, N, M)]
+    N = 128
+    K = N // M
 
     v = [0, 0, 0, 0]
 
-    for block in blocks:
+    for i in range(0, N, M):
+        block = bit_sequence[i : i + M]
+
         max_run = 0
         run = 0
 
         for bit in block:
-            if bit == 1:
+            if bit == "1":
                 run += 1
                 max_run = max(max_run, run)
             else:
@@ -76,10 +119,13 @@ def longest_run_test(seq):
 
         if max_run <= 1:
             v[0] += 1
+
         elif max_run == 2:
             v[1] += 1
+
         elif max_run == 3:
             v[2] += 1
+
         else:
             v[3] += 1
 
@@ -88,50 +134,64 @@ def longest_run_test(seq):
     chi2 = 0
 
     for i in range(4):
-        chi2 += ((v[i] - 16 * pi[i]) ** 2) / (16 * pi[i])
+        chi2 += ((v[i] - K * pi[i]) ** 2) / (K * pi[i])
 
-    p_value = math.exp(-chi2 / 2)
+    p_value = gammaincc(3 / 2, chi2 / 2)
 
     return p_value
 
 
-# основная программа
+def run_tests(filename: str, name: str) -> str:
+    """
+    Запустить все тесты для одной последовательности.
 
+    Args:
+        filename: Файл последовательности.
+        name: Название последовательности.
 
-seq = generate_sequence()
+    Returns:
+        Текст с результатами тестов.
+    """
 
-sequence_str = "".join(map(str, seq))
+    p1 = frequency_test(filename)
+    p2 = runs_test(filename)
+    p3 = longest_run_test(filename)
 
-# сохраняем последовательность
-with open("sequence.txt", "w") as f:
-    f.write(sequence_str)
-
-
-p1 = frequency_test(seq)
-p2 = runs_test(seq)
-p3 = longest_run_test(seq)
-
-
-# результаты
-result_text = f"""
-Generated sequence:
-{sequence_str}
+    result = f"""
+{name} sequence:
 
 Frequency Test P-value = {p1}
 Runs Test P-value = {p2}
 Longest Run Test P-value = {p3}
 
-Test reslts:
-
+Test results:
 Frequency Test: {"PASS" if p1 >= 0.01 else "FAIL"}
 Runs Test: {"PASS" if p2 >= 0.01 else "FAIL"}
 Longest Run Test: {"PASS" if p3 >= 0.01 else "FAIL"}
+
 """
 
-
-# сохраняем результаты
-with open("results.txt", "w") as f:
-    f.write(result_text)
+    return result
 
 
-print(result_text)
+def main() -> None:
+    """
+    Основная функция программы.
+    """
+
+    cpp_file = "sequence_cpp.txt"
+    java_file = "sequence_java.txt"
+
+    cpp_results = run_tests(cpp_file, "C++")
+    java_results = run_tests(java_file, "Java")
+
+    print(cpp_results)
+    print(java_results)
+
+    with open("results.txt", "w", encoding="utf-8") as file:
+        file.write(cpp_results)
+        file.write(java_results)
+
+
+if __name__ == "__main__":
+    main()
