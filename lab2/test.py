@@ -30,10 +30,15 @@ def runs_test(seq):
     """Тест на подряд идущие биты: анализирует частоту смены битов"""
     n = len(seq)
     ones = sum(seq)
+    
+    if ones == 0 or ones == n:
+        return 0.0
+    
     pi = ones / n
-     # Условие применимости теста
+    # Условие применимости теста
     if abs(pi - 0.5) >= 2.0 / math.sqrt(n):
         return 0.0
+    
     # Подсчет количества знакоперемен
     runs = 1
     for i in range(n - 1):
@@ -42,11 +47,11 @@ def runs_test(seq):
     
     numerator = abs(runs - 2 * n * pi * (1 - pi))
     denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
-    
-    if denominator == 0:
+    if denominator < 1e-10:
         return 0.0
     
-    return math.erfc(numerator / denominator)
+    p_value = math.erfc(numerator / denominator)
+    return p_value
 
 def longest_run_test(seq):
     """Тест на самую длинную последовательность единиц в блоке"""
