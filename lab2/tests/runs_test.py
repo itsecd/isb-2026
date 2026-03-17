@@ -1,43 +1,22 @@
 import math
 from utils import erfc
 
-def runs_test(sequence):
-    """
-    Тест на одинаковые подряд идущие биты (Runs Test).
+def runs_test(seq: str) -> float:
+    """тест на одинаковые подряд биты"""
+    n = len(seq)
+    ones = seq.count('1')
+    ones_ratio = ones / n
     
-    """
-    n = len(sequence)
+    if abs(ones_ratio - 0.5) > (2 / math.sqrt(n)):
+        return 0.0
     
-    if n == 0:
-        return 0.0, False
+    runs = seq.count('01') + seq.count('10')
     
-
-    ones = sequence.count('1')
-    pi = ones / n
+    numerator = abs(runs - 2 * n * ones_ratio * (1 - ones_ratio))
+    denominator = 2 * math.sqrt(2 * n) * ones_ratio * (1 - ones_ratio)
     
-
-    if abs(pi - 0.5) >= (2 / math.sqrt(n)):
-        return 0.0, False
-    
-
-    runs = 1
-    for i in range(1, n):
-        if sequence[i] != sequence[i-1]:
-            runs += 1
-    
-
-    numerator = abs(runs - 2 * n * pi * (1 - pi))
-    denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
-    
-    if denominator == 0:
-        return 0.0, False
-    
-    p_value = erfc(numerator / denominator)
-    
-
-    result = p_value >= 0.01
-    
-    return p_value, result
+    p_value = math.erfc(numerator / denominator)
+    return p_value
 
 def print_runs_test(sequence, sequence_name):
     """Запускает тест и выводит результаты."""
