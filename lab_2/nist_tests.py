@@ -17,28 +17,31 @@ class NISTTests:
         return p_value
 
     @staticmethod
-def runs_test(sequence):
-    """
-    Тест на одинаковые подряд идущие биты (Runs Test).
-    """
-    n = len(sequence)
-    pi = sequence.count('1') / n
+    def runs_test(sequence):
+        """
+        Тест на одинаковые подряд идущие биты (Runs Test).
+        Исправленная версия.
+        """
+        n = len(sequence)
+        pi = sequence.count('1') / n
 
-    tau = 2 / math.sqrt(n)
-    # Предварительное условие на частоту единиц
-    if abs(pi - 0.5) >= tau:
-        return 0.0
+        tau = 2 / math.sqrt(n)
+        # Предварительное условие на частоту единиц
+        if abs(pi - 0.5) >= tau:
+            return 0.0
 
-    v_n = 1
-    for i in range(1, n):
-        if sequence[i] != sequence[i-1]:
-            v_n += 1
+        v_n = 1
+        for i in range(1, n):
+            if sequence[i] != sequence[i-1]:
+                v_n += 1
 
-    numerator = abs(v_n - 2 * n * pi * (1 - pi))
-    denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
-    p_value = math.erfc(numerator / denominator)
-    
-    return p_value
+        # ИСПРАВЛЕНО: правильная формула из методички
+        numerator = abs(v_n - 2 * n * pi * (1 - pi))
+        denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
+        p_value = math.erfc(numerator / denominator)
+        
+        return p_value
+
     @staticmethod
     def longest_run_ones_in_block_test(sequence):
         """
@@ -51,7 +54,6 @@ def runs_test(sequence):
             raise ValueError("Этот тест настроен для последовательности длиной 128 бит.")
 
         m = 8
-        k = 3  # Количество категорий (v0, v1, v2, v3)
         num_blocks = n // m
 
         # Теоретические вероятности Pi для M=8
@@ -85,20 +87,21 @@ def runs_test(sequence):
             expected = num_blocks * pi_values[i]
             chi_squared += ((v[i] - expected) ** 2) / expected
 
-        # Вычисляем P-значение с помощью неполной гамма-функции (igamc)
+        # Вычисляем P-значение с помощью неполной гамма-функции
         # gammaincc(a, x) = 1 / Gamma(a) * integral from x to inf of t^(a-1) * e^(-t) dt
-        p_value = scipy.special.gammaincc(k / 2, chi_squared / 2)
+        p_value = scipy.special.gammaincc(3 / 2, chi_squared / 2)
         return p_value
 
 
 if __name__ == "__main__":
+    # Пример использования
     # Последовательность, сгенерированная на C++ для примера
     seq_cpp = "10100110101110011100010101101101100010001101111000111010010101110100110111001100111010110100101000110110111000110101110010110001"
     # Убираем пробелы, если они есть
     seq_cpp = seq_cpp.replace(" ", "")
 
     print("Анализ последовательности (C++):")
-    print(f"Последовательность: {seq_cpp}")
+    print(f"Последовательность: {seq_cpp[:64]}...")  # Показываем первые 64 бита
 
     p_freq = NISTTests.frequency_test(seq_cpp)
     p_runs = NISTTests.runs_test(seq_cpp)
