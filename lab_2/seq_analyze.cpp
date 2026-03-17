@@ -29,8 +29,8 @@ double freq_p_value(const std::vector<int>& seq) {
 }
 
 //���� �� ������������� ��������
-int zeta(const std::vector<int>& seq) {
-	int res = 0;
+double zeta(const std::vector<int>& seq) {
+	double res = 0;
 	for (auto u : seq) {
 		res += u;
 	}
@@ -48,7 +48,7 @@ int V_N(const std::vector<int>& seq) {
 }
 
 double repeat_p_value(const std::vector<int>& seq) {
-	int zta = zeta(seq);
+	double zta = zeta(seq);
 	if (abs(zta - 1 / 2) >= 2 / sqrt(seq.size())) {
 		return 0;
 	}
