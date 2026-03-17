@@ -1,15 +1,15 @@
 File: bits_cpp.txt
-Frequency test p-value: 0.47950012218695354
-Runs test p-value: 0.8941123552527624
-Longest run average: 5.0
+Frequency test p-value: 0.5958830905651777
+Runs test p-value: 0.7045052566807751
+Longest run average: 0.14098753633110636
 ----------------------------------------
 File: bits_python.txt
-Frequency test p-value: 0.8596837951986662
-Runs test p-value: 0.7256806886581655
-Longest run average: 9.0
+Frequency test p-value: 0.47950012218695354
+Runs test p-value: 0.45070078042613604
+Longest run average: 0.4798166969631382
 ----------------------------------------
 File: bits_java.txt
-Frequency test p-value: 0.7236736098317631
-Runs test p-value: 0.47222882737986804
-Longest run average: 7.0
+Frequency test p-value: 1.0
+Runs test p-value: 0.7236736098317631
+Longest run average: 0.9145100890260512
 ----------------------------------------

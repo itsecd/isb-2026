@@ -1,5 +1,6 @@
 import math
 
+from scipy.special import gammaincc
 from pathlib import Path
 from const import BLOCK_SIZE, FILES, OUTPUT_FILE
 
@@ -21,48 +22,66 @@ def frequency_test(bits: str) -> float:
 
 
 def runs_test(bits: str) -> float:
-    """Выполняет тест последовательностей (runs test)."""
-    n = len(bits)
-    pi = bits.count("1") / n
+    """Выполняет Runs Test (тест последовательностей)."""
+    bit_list = [int(b) for b in bits]
+    avg = sum(bit_list) / len(bit_list)
 
-    if abs(pi - 0.5) >= 2 / math.sqrt(n):
+    if abs(avg - 0.5) > 2 / math.sqrt(len(bit_list)):
         return 0.0
 
-    v = 1
-    for i in range(1, n):
-        if bits[i] != bits[i - 1]:
-            v += 1
+    transitions = 0
+    for i in range(len(bit_list) - 1):
+        if bit_list[i] != bit_list[i + 1]:
+            transitions += 1
 
-    numerator = abs(v - 2 * n * pi * (1 - pi))
-    denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
+    p_val = math.erfc(
+        abs(transitions - 2 * len(bit_list) * avg * (1 - avg)) /
+        (2 * math.sqrt(2 * len(bit_list)) * avg * (1 - avg))
+    )
 
-    return math.erfc(numerator / denominator)
+    return p_val
 
 
-def longest_run_test(bits: str, block_size: int = BLOCK_SIZE) -> float:
+def longest_run_test(bits: str, block_size: int = 8) -> float:
     """Вычисляет среднюю длину максимальной серии единиц в блоках."""
     n = len(bits)
     num_blocks = n // block_size
 
-    longest_runs = []
+    counts = [0, 0, 0, 0]
 
     for i in range(num_blocks):
         block = bits[i * block_size:(i + 1) * block_size]
 
-        max_run = 0
-        current_run = 0
+        longest = 0
+        current = 0
 
         for bit in block:
             if bit == "1":
-                current_run += 1
-                max_run = max(max_run, current_run)
+                current += 1
+                longest = max(longest, current)
             else:
-                current_run = 0
+                current = 0
 
-        longest_runs.append(max_run)
+        if longest <= 1:
+            counts[0] += 1
+        elif longest == 2:
+            counts[1] += 1
+        elif longest == 3:
+            counts[2] += 1
+        else:
+            counts[3] += 1
 
-    return sum(longest_runs) / len(longest_runs)
+    probabilities = [0.2148, 0.3672, 0.2305, 0.1875]
 
+    chi_square = 0
+    for i in range(4):
+        expected = num_blocks * probabilities[i]
+        chi_square += ((counts[i] - expected) ** 2) / expected
+
+    df = 3
+    p_value = gammaincc(df / 2, chi_square / 2)
+
+    return p_value
 
 def run_tests(file_path: str, output_path: str) -> None:
     """Запускает тесты случайности для файла с битовой последовательностью."""
