@@ -1,4 +1,5 @@
 from math import sqrt, erfc
+from scipy.special import gammaincc
 import argparse
 
 def parse_args():
@@ -22,7 +23,7 @@ def frequency_test(seq: str) -> float:
             count += 1
         else:
             count -= 1
-    s = float(count) / sqrt(len(seq))
+    s = abs(count) / sqrt(len(seq))
     p = erfc(s / sqrt(2))
     return p
 
@@ -33,9 +34,9 @@ def runs_test(seq: str) -> float:
     ratio: float = count / len(seq)
     if abs(ratio - 0.5) >= 2 / sqrt(len(seq)):
         return 0.0
-    v = 0
+    v = 1
     for i in range(len(seq) - 1):
-        if seq[i] == seq[i + 1]:
+        if seq[i] != seq[i + 1]:
             v += 1
     p = erfc(abs(v - 2 * len(seq) * ratio * (1 - ratio)) / (2 * sqrt(2 * len(seq)) * ratio * (1 - ratio)))
     return p
@@ -66,10 +67,12 @@ def longest_ones_test(seq: str) -> float:
     x = 0
     for i in range(4):
         x += ((v_n[i] - 16 * pi_n[i]) ** 2) / (16 * pi_n[i])
-    return x
+    return gammaincc(1.5, x / 2)
 
 def main():
     args = parse_args()
+    #args.input = "C:\\Users\\mrsmi\\Documents\\GitHub\\isb-2026\\lab2\\cppseq.txt"
+    #args.output = "C:\\Users\\mrsmi\\Documents\\GitHub\\isb-2026\\lab2\\cppoutput.txt"
     sequences = read_file(args.input)
     output = list()
     for seq in sequences:
