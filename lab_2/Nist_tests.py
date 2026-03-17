@@ -73,14 +73,14 @@ def longest_run_test(sequence):
     Тест самой длинной последовательности единиц в блоке.
     """
 
-    blocks = []
-
-    for i in range(0, len(sequence), BLOCK_SIZE):
-        blocks.append(sequence[i:i + BLOCK_SIZE])
+    M = BLOCK_SIZE
+    N = len(sequence)
+    K = N // M
 
     v = [0, 0, 0, 0]
 
-    for block in blocks:
+    for i in range(K):
+        block = sequence[i * M:(i + 1) * M]
 
         max_run = 0
         current_run = 0
@@ -108,11 +108,10 @@ def longest_run_test(sequence):
 
     for i in range(4):
 
-        expected = 16 * PI_VALUES[i]
-
+        expected = K * PI_VALUES[i]
         chi += ((v[i] - expected) ** 2) / expected
 
-    p_value = math.exp(-chi / 2)
+    p_value = math.exp( -chi / 2)
 
     return p_value
 
