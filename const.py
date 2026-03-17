@@ -10,6 +10,8 @@ KEY = "КРИПТОГРАФИЯ"
 INPUT_CIPHER_FILE = "cipher_text.txt"
 INPUT_KEY_FILE = "cipher_key.txt"
 
-OUTPUT_FREQUENCY_ANALYSIS = "frequency_analysis.txt"
-OUTPUT_DECRYPTED_TEXT = "decrypted_text.txt"
-OUTPUT_DECRYPTED_ANALYSIS = "decrypted_analysis.txt"
+INPUT_ENCRYPTED_FILE = 'cipher_text.txt'
+OUTPUT_DECRYPTED_FILE_2 = 'decrypted_text2.txt'
+KEY_FILE = 'cipher_key.txt'
+ENCODING = 'utf-8'
+OUTPUT_DECRYPTED_ANALYSIS = 'decrypted_analysis.txt'
