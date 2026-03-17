@@ -109,3 +109,11 @@ double seq_hi_squared(const std::vector<int>& seq) {
 	
 	return hi_squared;
 }
+
+void seq_statistics(const std::vector<int>& seq, ostream& os) {
+	os << "_________________________________________\n";
+	os << "frequency analysis p_value = " << freq_p_value(seq) << '\n';
+	os << "repeating analysis p_value = " << repeat_p_value(seq) << '\n';
+	os << "hi-square of vector = " << seq_hi_squared(seq) << '\n';
+	os << "_________________________________________\n";
+}
