@@ -1,11 +1,16 @@
 sequence_*.txt
 results*.txt
 
-../lab1/
-lab1/
-*task1*
-*task2*
-*constants.py*
+../lab1/task1.py
+../lab1/task1_encryption.txt
+../lab1/task1_key.txt
+../lab1/task1_original.txt
+../lab1/task2.py
+../lab1/task2_cod1.txt
+../lab1/task2_decryption.txt
+../lab1/task2_freq.txt
+../lab1/task2_key.txt
+../lab1/constants.py
 
 *.pyc
 __pycache__/
