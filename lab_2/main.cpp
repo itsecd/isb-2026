@@ -6,10 +6,5 @@
 using namespace std;
 
 int main() {
-	// write_file("E:\\working\\inform-security-base\\inform-security-base\\lab_2\\generators\\cpp\\gen.txt",1000);
-	
-	ofstream
-
-
-	return 0;
+	//write_file("D:\\UniversityLabs\\inform-security-base\\lab_2\\generators\\cpp\\CppGen.txt",1);
 }
