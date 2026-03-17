@@ -50,6 +50,50 @@ def run_test(sequence):
     return p_value
 
 
+def long_run_test(sequence):
+    """Тест на самую длинную последовательность единиц в блоке"""
+
+    n = len(sequence)
+    m = 8
+    num_blocks = n // m
+
+    blocks = []
+    for i in range(num_blocks):
+        blocks.append(sequence[i * m : (i + 1) * m])
+
+    v = [0, 0, 0, 0]
+
+    for block in blocks:
+        max_run = 0
+        current_run = 0
+        for bit in block:
+            if bit == "1":
+                current_run += 1
+                max_run = max(max_run, current_run)
+            else:
+                current_run = 0
+
+        if max_run <= 1:
+            v[0] += 1
+        elif max_run == 2:
+            v[1] += 1
+        elif max_run == 3:
+            v[2] += 1
+        else:
+            v[3] += 1
+
+    pi = [0.2148, 0.3672, 0.2305, 0.1875]
+
+    chi_squared = 0
+    for i in range(4):
+        expected = num_blocks * pi[i]
+        chi_squared += ((v[i] - expected) ** 2) / expected
+
+    p_value = gammaincc(1.5, chi_squared / 2)
+
+    return p_value
+
+
 def main():
     """Основная функция программы"""
 
@@ -57,6 +101,7 @@ def main():
     tests = [
         ("Частотный побитовый тест", freq_test),
         ("Тест на одинаковые подряд идущие биты", run_test),
+        ("Тест на самую длинную последовательность единиц", long_run_test),
     ]
 
     with open("results.txt", "w", encoding="utf-8") as f:
