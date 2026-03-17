@@ -36,26 +36,32 @@ class NISTTests:
         """
         n = len(sequence)
         if n == 0:
-            return 0, 0, "Последовательность пуста"
-        
-        ones = sum(sequence)
-        pi = ones / n
-        
-        runs = 1
-        for i in range(1, n):
-            if sequence[i] != sequence[i-1]:
-                runs += 1
+            return 0.0, 0, {}
 
-        expected_runs = 2 * n * pi * (1 - pi)
-        variance = 2 * n * pi * (1 - pi) * (1 - 3*pi*(1-pi))
+        ones_count = sum(sequence)
+        ones_probability = ones_count / n
+
+        transitions_count = 0
+        for i in range(n - 1):
+            if sequence[i] != sequence[i + 1]:
+                transitions_count += 1
         
-        if variance <= 0:
-            return 0.0, runs, "Нулевая дисперсия"
+        numerator = abs(transitions_count - 2 * n * ones_probability * (1 - ones_probability))
+        denominator = 2 * math.sqrt(2 * n) * ones_probability * (1 - ones_probability)
         
-        runs_stat = (runs - expected_runs) / math.sqrt(variance)
-        p_value = erfc(abs(runs_stat) / math.sqrt(2))
+        if denominator == 0:
+            return 0.0, transitions_count, {"ones_prob": ones_probability}
         
-        return p_value, runs, f"Ожидаемо: {expected_runs:.2f}"
+        p_value = math.erfc(numerator / denominator)    
+
+        runs_info = {
+            "transitions": transitions_count,
+            "ones_probability": ones_probability,
+            "expected_transitions": 2 * n * ones_probability * (1 - ones_probability)
+        }
+
+        return p_value, transitions_count, runs_info 
+    
     
     def longest_run_test(self, sequence, block_size=8):
         """
@@ -101,6 +107,7 @@ class NISTTests:
             chi_square += ((observed - expected) ** 2) / expected
         
         p_value = gammaincc(3/2, chi_square/2)
+        
         
         return p_value, categories, chi_square
     
