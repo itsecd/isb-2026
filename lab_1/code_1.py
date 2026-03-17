@@ -1,20 +1,19 @@
-﻿import os
-
-os.chdir(r"C:\Users\Lenovo\Desktop\прога\четвёртый семестр\ОИБ\lab1+2\isb-2026\lab_1\part 1")
-
 from consts import (
     ALPHABET
     )
 
 def read_file(filename):
+    '''Чтение файла'''
     with open(filename, 'r', encoding='cp1251') as file:
         return file.read()
 
 def write_file(filename, data):
+    '''Запись в файл'''
     with open(filename, 'w', encoding='utf-8') as file:
         file.write(data)
 
 def create_key(filename, encode_dict, side):
+    '''Запись ключа в файл'''
     with open(filename, 'w', encoding='utf-8') as key_file:
         key_file.write(f"Алфавит: {''.join(ALPHABET)}\n")
         key_file.write(f"Размер стороны квадрата: {side}\n")
@@ -23,6 +22,7 @@ def create_key(filename, encode_dict, side):
             key_file.write(f"{row}: {encode_dict[row]}\n")
 
 def create_polybius_square(alphabet):
+    '''Создание квадрата Полибия'''
     size = len(alphabet)
     side = int(size ** 0.5)
     if side * side < size:
@@ -38,6 +38,7 @@ def create_polybius_square(alphabet):
     return encode_dict, decode_dict, side
 
 def encrypt(text, encode_dict):
+    '''Защифровка текста'''
     encrypted = ''
     for char in text:
         if char in encode_dict:
@@ -47,6 +48,7 @@ def encrypt(text, encode_dict):
     return encrypted
 
 def decrypt(encrypted_text, decode_dict):
+    '''Расшифровка текста'''
     decrypted = ''
     i = 0
     while i < len(encrypted_text):
@@ -61,6 +63,7 @@ def decrypt(encrypted_text, decode_dict):
     return decrypted
 
 def main():
+    '''Основная функция'''
 
     try:
         original_text = read_file('original_text_1.txt')
