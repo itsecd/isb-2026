@@ -65,19 +65,19 @@ class NISTTests:
             if sequence[i] != sequence[i-1]:
                 runs += 1
         
-        expected_runs = 2 * n * pi * (1 - pi)
-        variance_term = 2 * math.sqrt(2 * n) * pi * (1 - pi)
+        expected_runs = 2 * n * pi * (1 - pi) + 1
+        variance_term = (2 * n * pi * (1 - pi)) * (2 * n * pi * (1 - pi) - 1) / (n - 1)
         
-        if variance_term == 0:
+        if variance_term <= 0:
             return {
                 'test_name': 'Runs Test',
                 'statistic': 0,
                 'p_value': 0.0,
                 'passed': False,
-                'error': 'Variance term is zero (pi=0 or pi=1)'
+                'error': 'Invalid variance'
             }
         
-        s_obs = abs(runs - expected_runs) / variance_term
+        s_obs = abs(runs - expected_runs) / math.sqrt(variance_term)
         
         p_value = special.erfc(s_obs / math.sqrt(2))
         
