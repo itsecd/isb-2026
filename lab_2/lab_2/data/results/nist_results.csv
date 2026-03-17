@@ -1,0 +1,10 @@
+Source,Test,P-Value,Result
+C++,Monobit Frequency,0.215925,PASS
+C++,Runs Test,0.726422,PASS
+C++,Longest Run of Ones,0.738148,PASS
+Java,Monobit Frequency,0.595883,PASS
+Java,Runs Test,0.693993,PASS
+Java,Longest Run of Ones,0.738877,PASS
+Python,Monobit Frequency,0.859684,PASS
+Python,Runs Test,0.080382,PASS
+Python,Longest Run of Ones,0.746261,PASS
