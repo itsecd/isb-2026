@@ -6,5 +6,5 @@
 
 double freq_p_value(const std::vector<int>& seq);
 double repeat_p_value(const std::vector<int>& seq);
-double block_hi_squared(const std::vector<int>& seq);
+double seq_hi_squared(const std::vector<int>& seq);
 #endif
