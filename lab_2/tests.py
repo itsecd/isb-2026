@@ -1,5 +1,6 @@
 import math
 from typing import List, Tuple
+from scipy.special import gammaincc
 
 
 def read_sequence(filename: str) -> List[int]:
@@ -129,15 +130,12 @@ def longest_run_test(seq: List[int]) -> None:
         expected = (n // m) * pi[i]
         x_square += ((v[i] - expected) ** 2) / expected
 
-    s = (4 - 1) / 2  # параметр формы = 1.5
-    x = x_square / 2  # нижний предел
+    p_value = gammaincc(1.5, x_square / 2)
 
     print(f"\nТест на самую длинную последовательность единиц в блоке:")
     print(f"Распределение по блокам: v_1:{v[0]}, v_2:{v[1]}, v_3:{v[2]}, v_4:{v[3]}")
     print(f"χ² = {x_square:.6f}")
-    print(f"Параметр формы (s) = {s}")
-    print(f"Нижний предел (x) = {x:.6f}")
-    print(f"Калькулятор: https://www.danielsoper.com/statcalc/calculator.aspx?id=34")
+    print(f"p_value = {p_value:.6f}")
 
 
 def _find_max_run_in_block(block: List[int]) -> int:
