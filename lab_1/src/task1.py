@@ -5,12 +5,14 @@ ALPHABET = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ "
 
 
 def get_data_dir():
+    """Определяет путь к папке data относительно расположения скрипта"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
     return os.path.join(project_root, "data")
 
 
 def read_file(filename):
+    """Читает содержимое файла из папки data"""
     data_dir = get_data_dir()
     path = os.path.join(data_dir, filename)
     with open(path, "r", encoding="utf-8") as f:
@@ -18,6 +20,7 @@ def read_file(filename):
 
 
 def save(filename, content):
+    """Сохраняет содержимое в файл в папке data"""
     data_dir = get_data_dir()
     os.makedirs(data_dir, exist_ok=True)
     path = os.path.join(data_dir, filename)
@@ -32,12 +35,14 @@ def save(filename, content):
 
 
 def generate_key():
+    """Генерирует случайный ключ шифрования"""
     shuffled = list(ALPHABET)
     random.shuffle(shuffled)
     return {orig: sub for orig, sub in zip(ALPHABET, shuffled)}
 
 
 def process_text(text, key):
+    """Шифрует или расшифровывает текст"""
     result = []
     for char in text:
         char_upper = char.upper()

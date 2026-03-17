@@ -12,11 +12,18 @@ def get_data_dir():
 def analyze_frequency(text):
     """
     Подсчитывает частоту символов в тексте.
-    Возвращает отсортированный список кортежей (символ, количество) и общее число символов.
+    Возвращает отсортированный список кортежей (символ, частота_в_процентах) 
+    и общее число символов.
     """
     cnt = Counter(text)
     total = sum(cnt.values())
-    freq = sorted(cnt.items(), key=lambda x: x[1], reverse=True)
+    
+    # Вычисляем частоту в процентах для каждого символа
+    freq = [(char, (count / total) * 100) for char, count in cnt.items()]
+    
+    # Сортируем по убыванию частоты
+    freq = sorted(freq, key=lambda x: x[1], reverse=True)
+    
     return freq, total
 
 
@@ -24,13 +31,12 @@ def print_frequency_report(freq, total):
     """Выводит отчёт по частотам в консоль"""
     print(f"\nВсего символов: {total}")
     print(f"Уникальных символов: {len(freq)}\n")
-    print(f"{'№':<3} | {'Символ':<10} | {'Кол-во':<8} | {'%':<7}")
+    print(f"{'№':<3} | {'Символ':<10} | {'Частота (%)':<12}")
     print("-" * 50)
 
-    for i, (ch, count) in enumerate(freq):
-        pct = count / total * 100
+    for i, (ch, frequency) in enumerate(freq):
         ch_display = "[ПРОБЕЛ]" if ch == " " else ch
-        print(f"{i + 1:<3} | {ch_display:<10} | {count:<8} | {pct:<7.1f}")
+        print(f"{i + 1:<3} | {ch_display:<10} | {frequency:<12.2f}")
 
 
 def save_frequency_report(freq, total, filename="task2_frequencies.txt"):
@@ -41,13 +47,12 @@ def save_frequency_report(freq, total, filename="task2_frequencies.txt"):
 
     content = "ЧАСТОТНЫЙ АНАЛИЗ ЗАШИФРОВАННОГО ТЕКСТА\n" + "=" * 60 + "\n\n"
     content += f"Всего символов: {total}\nУникальных символов: {len(freq)}\n\n"
-    content += f"{'Символ':<12} | {'Кол-во':<10} | {'Частота (%)':<12}\n"
+    content += f"{'Символ':<12} | {'Частота (%)':<12}\n"
     content += "-" * 60 + "\n"
 
-    for i, (ch, count) in enumerate(freq):
-        pct = count / total * 100
+    for i, (ch, frequency) in enumerate(freq):
         ch_display = "[ПРОБЕЛ]" if ch == " " else ch
-        content += f"{ch_display:<12} | {count:<10} | {pct:<12.2f}\n"
+        content += f"{ch_display:<12} | {frequency:<12.2f}\n"
 
     with open(path, "w", encoding="utf-8") as f:
         f.write(content)
