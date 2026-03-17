@@ -17,8 +17,10 @@ def write_file(filename: str, content: str) -> None:
     with open(filename, "w", encoding="utf-8") as file:
         file.write(content)
 
-def caesar_cipher(text: str, shift: int) -> str:
-    '''Encodes text using Caesar cipher and return encoded text as a string'''
+def caesar_cipher(text: str, shift: int, reverse: bool = False) -> str:
+    '''Encodes text using Caesar cipher and return encoded text as a string. If reverse=True decodes.'''
+    if reverse:
+        shift *= -1
     lower_alphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
     upper_alphabet = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
     result = []
