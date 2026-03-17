@@ -1,20 +1,19 @@
-﻿import os
-
-os.chdir(r"C:\Users\Lenovo\Desktop\прога\четвёртый семестр\ОИБ\lab1+2\isb-2026\lab_1\part 2")
-
 from consts_2 import (
     FREQUENCY_ORDER
 )
 
 def read_file(filename):
+    '''Чтение файла'''
     with open(filename, 'r', encoding='utf-8') as file:
         return file.read()
 
 def write_file(filename, data):
+    '''Запись в файл'''
     with open(filename, 'w', encoding='utf-8') as file:
         file.write(data)
 
 def count_frequencies(text):
+    '''Подсчёт частот использования символов'''
     counts = {}
     total = len(text)
 
@@ -27,6 +26,7 @@ def count_frequencies(text):
     return freq
 
 def sort_symbs(freq):
+    '''Сортировка по убыванию частоты использования символов'''
     symbs = list(freq.keys())
     for i in range(len(symbs)):
         for j in range(i + 1, len(symbs)):
@@ -35,6 +35,7 @@ def sort_symbs(freq):
     return symbs
 
 def save_frequencies(freq, filename):
+    '''Запись частоты использования символов в файл'''
     total = 0
     for value in freq.values():
         total += value
@@ -47,6 +48,7 @@ def save_frequencies(freq, filename):
             file.write(symb + " : " + str(relative) + "\n")
 
 def in_key(filename):
+    '''Загрузка ключа из файла'''
     key = {}
 
     try:
@@ -61,6 +63,7 @@ def in_key(filename):
     return key
 
 def build_key(sorted_symbs):
+    '''Формирование ключа на основе известных и полученных частот использования символов'''
     key = {}
     for i in range(len(sorted_symbs)):
         if i < len(FREQUENCY_ORDER):
@@ -68,11 +71,13 @@ def build_key(sorted_symbs):
     return key
 
 def save_key(key, filename):
+    '''Сохранение ключа в файл'''
     with open(filename, "w", encoding="utf-8") as file:
         for symb in key:
             file.write(symb + " = " + key[symb] + "\n")
 
 def decrypt(text, key):
+    '''Расшифровка текста'''
     result = ""
     for char in text:
         if char in key:
@@ -82,6 +87,7 @@ def decrypt(text, key):
     return result
 
 def main():
+    '''Основная функция'''
     try:
         orig_text = read_file("original_text_2.txt")
         orig_text = orig_text.replace("-", " ")
