@@ -96,26 +96,24 @@ def runs_test(seq):
     # Вычисляем долю единиц
     ones = sum(seq)
     pi = ones / n
-    
     # Проверяем условие применимости теста
     if abs(pi - 0.5) >= 2.0 / math.sqrt(n):
         return 0.0
-    
     # Вычисляем количество знакоперемен
     runs = 1
     for i in range(n - 1):
         if seq[i] != seq[i + 1]:
             runs += 1
-    
-    # Вычисляем P-value по формуле
+    # Вычисляем P-value по правильной формуле из документации NIST
     numerator = abs(runs - 2 * n * pi * (1 - pi))
     denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
     
-    # Избегаем деления на ноль
     if denominator == 0:
         return 0.0
     
+    # Вычисляем P-value
     p_value = math.erfc(numerator / denominator)
+    
     return p_value
 
 
