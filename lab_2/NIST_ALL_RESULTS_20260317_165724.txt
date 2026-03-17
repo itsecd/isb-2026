@@ -1,0 +1,43 @@
+NIST SP 800-22 RESULTS FOR ALL GENERATORS
+============================================================
+
+GENERATOR: C
+Bit file: c_gen_1000.txt
+Status: OK (10000 битов)
+----------------------------------------
+Total bits: 10000, Ones: 50.0%
+monobit        : p=0.9900 [PASS]
+runs           : p=0.0883 [PASS]
+longest_run_ones: p=0.3109 [PASS]
+Passed: 3/3
+
+GENERATOR: C++
+Bit file: c++_gen_1000.txt
+Status: OK (1000 битов)
+----------------------------------------
+Total bits: 1000, Ones: 50.0%
+monobit        : p=0.9596 [PASS]
+runs           : p=0.0100 [FAIL]
+longest_run_ones: p=0.2104 [PASS]
+Passed: 2/3
+
+GENERATOR: Java
+Bit file: java_gen_1000.txt
+Status: OK (1000 битов)
+----------------------------------------
+Total bits: 1000, Ones: 50.0%
+monobit        : p=0.9596 [PASS]
+runs           : p=0.0100 [FAIL]
+longest_run_ones: p=0.2104 [PASS]
+Passed: 2/3
+
+SUMMARY TABLE:
+┌───────────────────────────┬────────┬────────┬────────┐
+│ Тест                      │  C      │ C++     │ Java   │
+├───────────────────────────┼────────┼────────┼────────┤
+│ monobit                 │ 0.9900 │ 0.9596 │ 0.9596 │
+│ runs                    │ 0.0883 │ 0.0100 │ 0.0100 │
+│ longest_run_ones        │ 0.3109 │ 0.2104 │ 0.2104 │
+└───────────────────────────┴────────┴────────┴────────┘
+
+Все тесты p > 0.01 = PASS

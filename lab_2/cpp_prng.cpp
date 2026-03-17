@@ -14,20 +14,29 @@ public:
         state = A * state + C;
         return state;
     }
+    bool next_bit() {
+        state = A * state + C;
+        return (state & 1);
+    }
 };
 
 int main(int argc, char* argv[]) {
     LCG gen;
     gen.init(12345);
     
-    int n = argc > 1 ? std::atoi(argv[1]) : 10;
-    std::ofstream out(argc > 2 ? argv[2] : "");
+    int n = argc > 1 ? std::atoi(argv[1]) : 10000;
+    std::ofstream out(argc > 2 ? argv[2] : "cpp_prng_output.txt");
     
-    if (!out.is_open()) out.open("output.txt");
-    
-    for (int i = 0; i < n; ++i) {
-        out << gen.next() << '\n';
+    if (!out.is_open()) {
+        std::cerr << "Ошибка открытия файла!" << std::endl;
+        return 1;
     }
     
+    for (int i = 0; i < n; ++i) {
+        out << gen.next_bit();
+    }
+    
+    out.close();
+    std::cout << "Сгенерировано " << n << " битов в cpp_prng_output.txt" << std::endl;
     return 0;
 }
