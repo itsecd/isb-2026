@@ -40,18 +40,22 @@ class NISTTests:
 
         ones_count = sum(sequence)
         ones_probability = ones_count / n
+    
+        # Добавлена проверка предварительного условия
+        if abs(ones_probability - 0.5) >= (2 / math.sqrt(n)):
+            return 0.0, 0, {"error": "Предварительное условие не выполнено"}
 
         transitions_count = 0
         for i in range(n - 1):
             if sequence[i] != sequence[i + 1]:
                 transitions_count += 1
-        
+    
         numerator = abs(transitions_count - 2 * n * ones_probability * (1 - ones_probability))
         denominator = 2 * math.sqrt(2 * n) * ones_probability * (1 - ones_probability)
-        
+    
         if denominator == 0:
             return 0.0, transitions_count, {"ones_prob": ones_probability}
-        
+    
         p_value = math.erfc(numerator / denominator)    
 
         runs_info = {
@@ -60,7 +64,7 @@ class NISTTests:
             "expected_transitions": 2 * n * ones_probability * (1 - ones_probability)
         }
 
-        return p_value, transitions_count, runs_info 
+        return p_value, transitions_count, runs_info
     
     
     def longest_run_test(self, sequence, block_size=8):
@@ -123,18 +127,18 @@ class NISTTests:
         
         for lang, sequence in self.sequences.items():
             # Тест 2.1
-            p_val, ones, zeros = self.frequency_test(sequence)
+            p_val_freq, ones, zeros = self.frequency_test(sequence)
             
             # Тест 2.2
-            p_val, runs, info = self.runs_test(sequence)
+            p_val_runs, runs, info = self.runs_test(sequence)
         
             # Тест 2.3
-            p_val, categories, chi2 = self.longest_run_test(sequence)
+            p_val_long, categories, chi2 = self.longest_run_test(sequence)
             
             results[lang] = {
-                'frequency': p_val,
-                'runs': p_val,
-                'longest': p_val
+                'frequency': p_val_freq,
+                'runs': p_val_runs,
+                'longest': p_val_long
             }
         
         return results
