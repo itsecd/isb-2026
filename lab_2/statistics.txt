@@ -1,0 +1,18 @@
+C++ generated vector
+_________________________________________
+frequency analysis p_value = 1
+repeating analysis p_value = 0
+hi-square of vector = 0.545618				igamc(1.5, 0.545618) = 0.77919402
+_________________________________________
+Java generated vector
+_________________________________________
+frequency analysis p_value = 1
+repeating analysis p_value = 0
+hi-square of vector = 2.4778				igamc(1.5, 2.4778) = 0.17507735
+_________________________________________
+Python generated vector
+_________________________________________
+frequency analysis p_value = 1
+repeating analysis p_value = 0
+hi-square of vector = 1.33591				igamc(1.5, 1.33591) = 0.44503745
+_________________________________________
