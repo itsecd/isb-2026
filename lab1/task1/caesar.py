@@ -41,6 +41,10 @@ def main():
         args = parse_args()
         to_cipher = read_file(args.input)
         ciphered = caesar_cipher(to_cipher, args.shift)
+        deciphered = caesar_cipher(ciphered, args.shift, reverse=True)
+        if to_cipher != deciphered:
+            raise ValueError(":c")
+        write_file("deciphered.txt", deciphered)
         write_file(args.output, ciphered)
 
 if __name__ == "__main__":
