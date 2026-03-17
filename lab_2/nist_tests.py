@@ -17,26 +17,28 @@ class NISTTests:
         return p_value
 
     @staticmethod
-    def runs_test(sequence):
-        """
-        Тест на одинаковые подряд идущие биты (Runs Test).
-        """
-        n = len(sequence)
-        pi = sequence.count('1') / n
+def runs_test(sequence):
+    """
+    Тест на одинаковые подряд идущие биты (Runs Test).
+    """
+    n = len(sequence)
+    pi = sequence.count('1') / n
 
-        tau = 2 / math.sqrt(n)
-        # Предварительное условие на частоту единиц
-        if abs(pi - 0.5) >= tau:
-            return 0.0
+    tau = 2 / math.sqrt(n)
+    # Предварительное условие на частоту единиц
+    if abs(pi - 0.5) >= tau:
+        return 0.0
 
-        v_n = 1
-        for i in range(1, n):
-            if sequence[i] != sequence[i-1]:
-                v_n += 1
+    v_n = 1
+    for i in range(1, n):
+        if sequence[i] != sequence[i-1]:
+            v_n += 1
 
-        p_value = math.erfc(abs(v_n - 2 * n * pi * (1 - pi)) / (2 * math.sqrt(2 * n) * pi * (1 - pi)))
-        return p_value
-
+    numerator = abs(v_n - 2 * n * pi * (1 - pi))
+    denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
+    p_value = math.erfc(numerator / denominator)
+    
+    return p_value
     @staticmethod
     def longest_run_ones_in_block_test(sequence):
         """
