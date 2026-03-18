@@ -8,6 +8,8 @@ from constants import (
     RESULT_FILE
 )
 
+from scipy.special import gammaincc
+
 def read_sequence(filename):
     """
     Чтение бинарной последовательности из файла.
@@ -75,12 +77,21 @@ def longest_run_test(sequence):
 
     M = BLOCK_SIZE
     N = len(sequence)
+
+    if N < M:
+        return 0.0
+
     K = N // M
 
-    v = [0, 0, 0, 0]
+    blocks = []
 
     for i in range(K):
         block = sequence[i * M:(i + 1) * M]
+        blocks.append(block)
+
+    max_runs = []
+
+    for block in blocks:
 
         max_run = 0
         current_run = 0
@@ -95,11 +106,17 @@ def longest_run_test(sequence):
             else:
                 current_run = 0
 
-        if max_run <= 1:
+        max_runs.append(max_run)
+
+    v = [0, 0, 0, 0]
+
+    for run in max_runs:
+
+        if run <= 1:
             v[0] += 1
-        elif max_run == 2:
+        elif run == 2:
             v[1] += 1
-        elif max_run == 3:
+        elif run == 3:
             v[2] += 1
         else:
             v[3] += 1
@@ -111,7 +128,7 @@ def longest_run_test(sequence):
         expected = K * PI_VALUES[i]
         chi += ((v[i] - expected) ** 2) / expected
 
-    p_value = math.exp( -chi / 2)
+    p_value = gammaincc(3/2 ,chi / 2)
 
     return p_value
 
