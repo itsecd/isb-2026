@@ -1,7 +1,6 @@
 import argparse
 import math
 from scipy.special import gammaincc
-from typing import Optional
 from values import ALPHA, LONGEST_RUN_BLOCK_SIZE, LONGEST_RUN_EXPECTED_PROBS, LONGEST_RUN_NUM_BLOCKS
 
 
@@ -17,7 +16,7 @@ def monobit_test(bits: str) -> tuple[float, bool]:
     return p_value, p_value >= ALPHA
 
 
-def runs_test(bits: str) -> tuple[Optional[float], bool]:
+def runs_test(bits: str) -> tuple[float, bool]:
     """
     Тест на одинаковые подряд идущие биты.
     Возвращает p-value (или None, если тест неприменим) и результат.
@@ -27,7 +26,7 @@ def runs_test(bits: str) -> tuple[Optional[float], bool]:
     pi = ones / n
     tau = 2.0 / math.sqrt(n)
     if abs(pi - 0.5) >= tau:
-        return None, False
+        return 0.0, False
 
     runs = 1
     for i in range(1, n):
@@ -107,7 +106,7 @@ def main():
 
         p_runs, res_runs = runs_test(bits)
         print(f"\nRuns Test:")
-        if p_runs is None:
+        if p_runs == 0.0:
             print("  Тест не применим (частота единиц слишком далека от 0.5)")
         else:
             print(f"  p-value = {p_runs:.4f}  {'ПРОЙДЕН' if res_runs else 'НЕ ПРОЙДЕН'}")
