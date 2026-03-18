@@ -1,4 +1,4 @@
-﻿'''2.1. Частотный побитовый тест.
+'''2.1. Частотный побитовый тест.
 2.2. Тест на одинаковые подряд идущие биты.
 2.3. Тест на самую длинную последовательность единиц в блоке.'''
 
@@ -10,19 +10,11 @@ from consts_lab2 import (
     PYTHON_RESULTS,
     JAVA_RESULTS
     )
-
-def read_bit_sequence(filepath):
-    """
-    Чтение битовой последовательности
-    """
-    with open(filepath, "r", encoding="utf-8") as file:
-        return file.read().strip()
     
-def frequency_test(filename):
+def frequency_test(bit_sequence):
     """
     Частотный побитовый тест
     """
-    bit_sequence = read_bit_sequence(filename)
     sequence_length = len(bit_sequence)
     
     if sequence_length == 0:
@@ -37,11 +29,10 @@ def frequency_test(filename):
     p_value = math.erfc(s_statistic / math.sqrt(2))
     return p_value
 
-def bit_test(filename):
+def bit_test(bit_sequence):
     """
     Тест на одинаковые подряд идущие биты
     """
-    bit_sequence = read_bit_sequence(filename)
     sequence_length = len(bit_sequence)
     
     ones_probability = bit_sequence.count("1") / sequence_length
@@ -60,11 +51,10 @@ def bit_test(filename):
     p_value = math.erfc(numerator / denominator)
     return p_value
 
-def count_max_runs(filename):
+def count_max_runs(bit_sequence):
     """
     Подсчитывает распределение по максимальной длине единиц
     """
-    bit_sequence = read_bit_sequence(filename)
     block_size = 8
 
     runs_distribution = {1: 0, 2: 0, 3: 0, 4: 0}
