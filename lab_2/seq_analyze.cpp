@@ -49,7 +49,7 @@ int V_N(const std::vector<int>& seq) {
 
 double repeat_p_value(const std::vector<int>& seq) {
 	double zta = zeta(seq);
-	if (abs(zta - 1 / 2) >= 2 / sqrt(seq.size())) {
+	if (abs(zta - 0.5) >= 2 / sqrt(seq.size())) {
 		return 0;
 	}
 	int Vn = V_N(seq);
