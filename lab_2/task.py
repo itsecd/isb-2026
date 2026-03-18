@@ -1,4 +1,4 @@
-from constants import BITS_C, BITS_CPP, BITS_JAVA
+from constants import BITS_C, BITS_CPP, BITS_JAVA, PI1, PI2, PI3, PI4
 from math import erfc, sqrt
 from scipy.special import gammaincc
 
@@ -10,7 +10,7 @@ def frequency_bitwise_test(bits: str) -> float:
     for c in bits:
         sum_n += char_map[c]
     sum_n /= sqrt(len(bits))
-    return erfc(sum_n / sqrt(2))
+    return erfc(abs(sum_n) / sqrt(2))
 
 
 def identical_consecutive_bits_test(bits: str) -> float:
@@ -29,16 +29,16 @@ def identical_consecutive_bits_test(bits: str) -> float:
     return erfc(x)
 
 
-def longest_sequence_test(bits: str, m: int = 8) -> float:
+def longest_sequence_test(bits: str) -> float:
     """Тест на максимальную последовательность единиц в блоке"""
     v1, v2, v3, v4 = 0, 0, 0, 0
-    for i in range(len(bits) // m):
-        block = bits[m * i:m * (i + 1)]
+    for i in range(len(bits) // 8):
+        block = bits[8 * i:8 * (i + 1)]
 
         max_l = 0
         temp = "1"
         # Далеко не лучший способ, но сойдёт
-        for _ in range(m):
+        for _ in range(8):
             if temp in block:
                 max_l += 1
             else:
@@ -53,12 +53,11 @@ def longest_sequence_test(bits: str, m: int = 8) -> float:
             v2 += 1
         else:
             v1 += 1
-    pi1, pi2, pi3, pi4 = 0.2148, 0.3672, 0.2305, 0.1875
     x_2 = 0
-    x_2 += ((v1 - 16 * pi1) ** 2) / (16 * pi1)
-    x_2 += ((v2 - 16 * pi2) ** 2) / (16 * pi2)
-    x_2 += ((v3 - 16 * pi3) ** 2) / (16 * pi3)
-    x_2 += ((v4 - 16 * pi4) ** 2) / (16 * pi4)
+    x_2 += ((v1 - 16 * PI1) ** 2) / (16 * PI1)
+    x_2 += ((v2 - 16 * PI2) ** 2) / (16 * PI2)
+    x_2 += ((v3 - 16 * PI3) ** 2) / (16 * PI3)
+    x_2 += ((v4 - 16 * PI4) ** 2) / (16 * PI4)
 
     return float(gammaincc(3 / 2, x_2 / 2))
 
