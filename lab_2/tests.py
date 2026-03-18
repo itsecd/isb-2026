@@ -28,7 +28,7 @@ def runs_test(bits: str) -> tuple[float, bool]:
     if abs(pi - 0.5) >= tau:
         return 0.0, False
 
-    runs = 1
+    runs = 0
     for i in range(1, n):
         if bits[i] != bits[i-1]:
             runs += 1
