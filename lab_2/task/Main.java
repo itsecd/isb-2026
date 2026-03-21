@@ -18,7 +18,7 @@ public class Main {
                 writer.write(String.valueOf(secureRandom.nextInt(2)));
             }
 
-            logger.info("Sequence was generated and wrote in " + file);
+            logger.info("Sequence was generated and written to " + file);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Cant open txt to write in random sequence.", e);
         }
