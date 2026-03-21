@@ -3,21 +3,24 @@ from math import erfc, sqrt
 
 
 def psi(omega: bool) -> int:
-    return int(omega)
+    if omega:
+        return 1
+    else:
+        return -1
 
 
-def psi_sum(seq: list[int]) -> float:
+def psi_sum(seq: list[bool]) -> float:
     res = 0
     for u in seq:
         res += psi(u)
-    return res/sqrt(len(seq))
+    return abs(res)/sqrt(len(seq))
 
 
-def freq_p_value(seq):
+def freq_p_value(seq: list[bool]) -> float:
     return erfc(psi_sum(seq)/sqrt(2))
 
 
-def zeta(seq: list[bool]) -> int:
+def zeta(seq: list[bool]) -> float:
     res = 0
     for x in seq:
         res += int(x)
@@ -32,12 +35,12 @@ def V_N(seq: list[bool]) -> float:
     return res
 
 
-def repeat_p_value(seq):
+def repeat_p_value(seq: list[bool]) -> float:
     zta = zeta(seq)
     if (abs(zta-0.5) >= (2/sqrt(len(seq)))):
         return 0
     Vn = V_N(seq)
-    return erfc(abs(Vn-2*len(seq)*zta*(1-zta))/(2*sqrt(2*len(seq)*zta*(1-zta))))
+    return erfc(abs(Vn-2*len(seq)*zta*(1-zta))/(2*sqrt(2*len(seq))*zta*(1-zta)))
 
 
 def analyze_block(block: list[bool]) -> int:
@@ -45,7 +48,7 @@ def analyze_block(block: list[bool]) -> int:
     i = 0
     while (i < len(block)):
         tmp = 0
-        while (i < len(block) and seq[i] == True):
+        while (i < len(block) and block[i]):
             tmp += 1
             i += 1
         if (tmp > res):
@@ -57,7 +60,7 @@ def analyze_block(block: list[bool]) -> int:
 def V(seq: list[bool]) -> list[int]:
     res_V = [0, 0, 0, 0]
     for i in range(0, len(seq), 8):
-        bl = analyze_block(seq[i:i+8]):
+        bl = analyze_block(seq[i:i+8])
         if bl <= 1:
             res_V[0] += 1
         elif bl == 2:
@@ -85,9 +88,35 @@ def max_lenght_p_value(seq: list[bool]) -> float:
     return gammainc(1.5, seq_hi_squared(seq)/2)
 
 
-def seq_statistics(seq: list[bool]) -> None:
-    print('______________________')
-    print('frequency analysis p_value = ', freq_p_value(seq))
-    print('repeating analysis p_value = ', repeat_p_value(seq))
-    print('maximum block lenght p_value = ', max_lenght_p_value(seq))
+def print_statistics(seq: list[bool], language: str) -> None:
     print('_____________________________')
+    print('language = ', language)
+    freq = freq_p_value(seq)
+    print('frequency analysis p_value = ', freq)
+    rep = repeat_p_value(seq)
+    print('repeating analysis p_value = ', rep)
+    max_len = max_lenght_p_value(seq)
+    print('maximum block lenght p_value = ', max_len)
+    if (freq >= 0.01 and rep >= 0.01 and max_len >= 0.01):
+        print('All tested PASSED, vector is random')
+    else:
+        print('One or more test NOT PASSED, vector isn\'nt random')
+    print('_____________________________')
+
+
+def write_statistics(seq: list[bool], language: str) -> None:
+    with open('statistics.txt', 'a+') as out_file:
+        out_file.write('_____________________________\n')
+        out_file.write('language = ' + language+'\n')
+        freq = freq_p_value(seq)
+        out_file.write('frequency analysis p_value = ' + str(freq)+'\n')
+        rep = repeat_p_value(seq)
+        out_file.write('repeating analysis p_value = ' + str(rep)+'\n')
+        max_len = max_lenght_p_value(seq)
+        out_file.write('maximum block lenght p_value = '+str(max_len)+'\n')
+        if (freq >= 0.01 and rep >= 0.01 and max_len >= 0.01):
+            out_file.write('All tested PASSED, vector is random\n')
+        else:
+            out_file.write(
+                'One or more test NOT PASSED, vector isn\'nt random\n')
+        out_file.write('_____________________________\n')

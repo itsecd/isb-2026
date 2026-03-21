@@ -1,6 +1,6 @@
 def read_file(path: str) -> str:
     with open(path, 'r+') as file:
-        return file.readline()
+        return file.readline()[:-1]
 
 
 def read_vector(line: str) -> list[bool]:
@@ -11,7 +11,8 @@ def read_vector(line: str) -> list[bool]:
         elif symb == '1':
             result += [True]
         else:
-            raise ValueError('Uncorrect file format!')
+            raise ValueError(
+                'Uncorrect file format! Symbol: ' + symb + 'is used!')
     return result
 
 
