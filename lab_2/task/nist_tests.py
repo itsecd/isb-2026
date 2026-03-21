@@ -78,21 +78,23 @@ def longest_run_ones_in_block_test(binary: str) -> float:
     return p_value
 
 
-def run_tests_for_sequence(sequence: str, name: str) -> None:
+def run_tests_for_sequence(sequence: str, name: str) -> str:
     """
     Run all 3 tests for sequence.
     :param sequence: binary sequences to check.
     :param name: name of sequence generator for display purpose.
     """
-    print(f"Analyze {name} sequence: {sequence}")
+    result_txt = f"Analyze {name} sequence: {sequence}\n"
 
     p1 = frequency_test(sequence)
     p2 = runs_test(sequence)
     p3 = longest_run_ones_in_block_test(sequence)
 
-    print(f"1. Frequency (Monobit) Test. P-value: {p1}  -  {'success' if p1 >= 0.01 else 'fail'}")
-    print(f"2. Runs test. P-value: {p2}  -  {'success' if p2 >= 0.01 else 'fail'}")
-    print(f"3. Test for the Longest Run of Ones in a Block. P-value: {p3}  -  {'success' if p3 >= 0.01 else 'fail'}\n")
+    result_txt += f"1. Frequency (Monobit) Test. P-value: {p1}  -  {'success' if p1 >= 0.01 else 'fail'}\n"
+    result_txt += f"2. Runs test. P-value: {p2}  -  {'success' if p2 >= 0.01 else 'fail'}\n"
+    result_txt += f"3. Test for the Longest Run of Ones in a Block. P-value: {p3}  -  {'success' if p3 >= 0.01 else 'fail'}\n"
+
+    return result_txt
 
 
 def main() -> None:
@@ -104,16 +106,32 @@ def main() -> None:
         "Java": "java_random.txt"
     }
 
+    output = "results.txt"
+    results = ""
+
     for name, file in sequences.items():
         if os.path.exists(file):
             with open(file, 'r') as f:
                 sequence = f.read().strip()
                 if len(sequence) == 128:
-                    run_tests_for_sequence(sequence, name)
+                    test_output = run_tests_for_sequence(sequence, name)
+                    print(test_output)
+                    results += test_output
                 else:
-                    print(f"Sequence must contain 128 bit.")
+                    err = f"Sequence must contain 128 bit.\n"
+                    print(err)
+                    results += err
         else:
-            print(f"File with sequence not found: {file}")
+            err = f"File with sequence not found: {file}\n"
+            print(err)
+            results += err
+
+    try:
+        with open(output, 'w') as o:
+            o.write(results)
+        print(f"Results saved at {output}")
+    except Exception as e:
+        print(f"Can't write result in file: {output}. Error: {e}")
 
 
 if __name__ == "__main__":
