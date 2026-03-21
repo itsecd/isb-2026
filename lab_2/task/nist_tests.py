@@ -1,16 +1,7 @@
-import argparse
 import math
+import os.path
 
 from scipy.special import gammaincc
-
-
-def parse_arguments() -> argparse.Namespace:
-    """
-    Adds and parses command-line arguments.
-    """
-    parser = argparse.ArgumentParser(description="Template.")
-    parser.add_argument('--Placeholder', '-p', default='Placeholder.txt', help='Placeholder')
-    return parser.parse_args()
 
 
 def frequency_test(binary: str) -> float:
@@ -87,11 +78,42 @@ def longest_run_ones_in_block_test(binary: str) -> float:
     return p_value
 
 
+def run_tests_for_sequence(sequence: str, name: str) -> None:
+    """
+    Run all 3 tests for sequence.
+    :param sequence: binary sequences to check.
+    :param name: name of sequence generator for display purpose.
+    """
+    print(f"Analyze {name} sequence: {sequence}")
+
+    p1 = frequency_test(sequence)
+    p2 = runs_test(sequence)
+    p3 = longest_run_ones_in_block_test(sequence)
+
+    print(f"1. Frequency (Monobit) Test. P-value: {p1}  -  {'success' if p1 >= 0.01 else 'fail'}")
+    print(f"2. Runs test. P-value: {p2}  -  {'success' if p2 >= 0.01 else 'fail'}")
+    print(f"3. Test for the Longest Run of Ones in a Block. P-value: {p3}  -  {'success' if p3 >= 0.01 else 'fail'}\n")
+
+
 def main() -> None:
     """
     Main function
     """
-    args = parse_arguments()
+    sequences = {
+        "CPP": "cpp_random.txt",
+        "Java": "java_random.txt"
+    }
+
+    for name, file in sequences.items():
+        if os.path.exists(file):
+            with open(file, 'r') as f:
+                sequence = f.read().strip()
+                if len(sequence) == 128:
+                    run_tests_for_sequence(sequence, name)
+                else:
+                    print(f"Sequence must contain 128 bit.")
+        else:
+            print(f"File with sequence not found: {file}")
 
 
 if __name__ == "__main__":
