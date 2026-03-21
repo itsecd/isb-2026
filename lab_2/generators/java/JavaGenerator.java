@@ -3,24 +3,35 @@ import java.io.*;
 
 public class JavaGenerator {
     private static final String OUTPUT_FILE = "JavaGenerated.txt";
+    private static final int VECTOR_SIZE; // объявление без инициализации
+
+    static {
+        int tempSize; // временная переменная
+        try {
+            tempSize = readConstant("SEQUENCE_LENGTH", "D:\\UniversityLabs\\inform-security-base\\lab_2\\generators\\constants.txt");
+        } catch (IOException e) {
+            System.err.println("Ошибка чтения константы SEQUENCE_LENGTH из файла: " + e.getMessage());
+            e.printStackTrace();
+            tempSize = 10; // значение по умолчанию
+        }
+        // Единственное присваивание final полю
+        VECTOR_SIZE = tempSize;
+    }
 
     public static int readConstant(String constantName, String filePath) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.startsWith(constantName + "=")) {
-                    String[] parts = line.split("=");
+                if (line.startsWith(constantName + " = ")) {
+                    String[] parts = line.split(" = ");
                     if (parts.length == 2) {
-                return Integer.parseInt(parts[1].trim());
+                        return Integer.parseInt(parts[1].trim());
+                    }
+                }
             }
         }
+        throw new IllegalArgumentException("Constants file not found!");
     }
-    }
-    throw new IllegalArgumentException("Constant '" + constantName + "' not found in file");
-    }
-
-    private static final int VECTOR_SIZE = readConstant("SEQUENCE_LENGTH", "E:\\working\\inform-security-base\\inform-security-base\\lab_2\\generators\\constants.txt");
-
 
     // Генерирует один случайный бит (0 или 1)
     public static int generateRandomBit() {
@@ -47,13 +58,11 @@ public class JavaGenerator {
 
     public static void main(String[] args) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(OUTPUT_FILE))) {
-            for (int i = 0; i < VECTOR_SIZE; i++) {
-                List<Integer> randomVector = generateRandomVector();
-                String formatted = formatVector(randomVector);
-                writer.write(formatted);
-                writer.newLine(); // Перенос строки
-            }
-            System.out.println("Успешно записано " + VECTOR_SIZE + " строк в файл " + OUTPUT_FILE);
+            List<Integer> randomVector = generateRandomVector();
+            String formatted = formatVector(randomVector);
+            writer.write(formatted);
+            writer.newLine(); // Перенос строки
+            System.out.println("Успешно сгенерирован и записан вектор длиной " + VECTOR_SIZE + " в файл " + OUTPUT_FILE);
         } catch (IOException e) {
             System.err.println("Ошибка при записи в файл: " + e.getMessage());
             e.printStackTrace();
