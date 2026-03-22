@@ -3,6 +3,9 @@ from math import erfc, sqrt
 
 
 def psi(omega: bool) -> int:
+    '''
+    Случайная величина как функция от координаты
+    '''
     if omega:
         return 1
     else:
@@ -10,6 +13,9 @@ def psi(omega: bool) -> int:
 
 
 def psi_sum(seq: list[bool]) -> float:
+    '''
+    Вспомогательная сумма S_N
+    '''
     res = 0
     for u in seq:
         res += psi(u)
@@ -17,10 +23,16 @@ def psi_sum(seq: list[bool]) -> float:
 
 
 def freq_p_value(seq: list[bool]) -> float:
+    '''
+    Результат частотного побитового теста
+    '''
     return erfc(psi_sum(seq)/sqrt(2))
 
 
 def zeta(seq: list[bool]) -> float:
+    '''
+    Вспомогательная сумма зета
+    '''
     res = 0
     for x in seq:
         res += int(x)
@@ -28,6 +40,9 @@ def zeta(seq: list[bool]) -> float:
 
 
 def V_N(seq: list[bool]) -> float:
+    '''
+    Вспомогательная сумма V_N
+    '''
     res = int(0)
     for i in range(len(seq)-1):
         if seq[i] != seq[i+1]:
@@ -36,6 +51,9 @@ def V_N(seq: list[bool]) -> float:
 
 
 def repeat_p_value(seq: list[bool]) -> float:
+    '''
+    Результат теста на число знакоперемен
+    '''
     zta = zeta(seq)
     if (abs(zta-0.5) >= (2/sqrt(len(seq)))):
         return 0
@@ -43,7 +61,11 @@ def repeat_p_value(seq: list[bool]) -> float:
     return erfc(abs(Vn-2*len(seq)*zta*(1-zta))/(2*sqrt(2*len(seq))*zta*(1-zta)))
 
 
+# Тест на самую длинную последовательность из единиц в блоках
 def analyze_block(block: list[bool]) -> int:
+    '''
+    Обработка одного блока
+    '''
     res = 0
     i = 0
     while (i < len(block)):
@@ -58,6 +80,9 @@ def analyze_block(block: list[bool]) -> int:
 
 
 def V(seq: list[bool]) -> list[int]:
+    '''
+    Сбор статистики по блокам
+    '''
     res_V = [0, 0, 0, 0]
     for i in range(0, len(seq), 8):
         bl = analyze_block(seq[i:i+8])
@@ -73,6 +98,9 @@ def V(seq: list[bool]) -> list[int]:
 
 
 def seq_hi_squared(seq: list[bool]) -> float:
+    '''
+    Подсчет величины Хи-квадрат
+    '''
     pi = [0.2148, 0.3672, 0.2305, 0.1875]
 
     V_vect = V(seq)
@@ -85,10 +113,16 @@ def seq_hi_squared(seq: list[bool]) -> float:
 
 
 def max_lenght_p_value(seq: list[bool]) -> float:
+    '''
+    Подсчет резульатат теста 3
+    '''
     return gammainc(1.5, seq_hi_squared(seq)/2)
 
 
 def print_statistics(seq: list[bool], language: str) -> None:
+    '''
+    Печать итоговой статистики на экран
+    '''
     print('_____________________________')
     print('language = ', language)
     freq = freq_p_value(seq)
@@ -105,6 +139,9 @@ def print_statistics(seq: list[bool], language: str) -> None:
 
 
 def write_statistics(seq: list[bool], language: str) -> None:
+    '''
+    Запись итоговой статистики в файл
+    '''
     with open('statistics.txt', 'a+') as out_file:
         out_file.write('_____________________________\n')
         out_file.write('language = ' + language+'\n')
