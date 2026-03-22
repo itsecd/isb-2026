@@ -8,16 +8,18 @@ from consts import BLOCK_SIZE, PI, DIRECTORY, PVALUE, OUTPUT
 
 def test_frequency(text: str) -> float:
     """
-    Частотный побитовый тест NIST.
-    Возвращает P-значение для переданного текста
+    Частотный побитовый тест
     """
-    text_length = len(text)
-    ones_count = text.count("1")
-    zeros_count = text_length - ones_count
-    Sn = ones_count - zeros_count
-    Sn = Sn / (text_length ** 0.5)
-
-    return math.erfc(Sn / (2 ** 0.5))
+    n = len(bit_string)
+    sum_x = 0
+    
+    for bit in bit_string:
+        sum_x += 1 if bit == '1' else -1
+    
+    s_obs = abs(sum_x) / math.sqrt(n)
+    p_value = math.erfc(s_obs / math.sqrt(2))
+    
+    return p_value
 
 
 def test_identical_bits(text: str) -> float:
