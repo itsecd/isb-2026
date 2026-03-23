@@ -140,7 +140,7 @@ def save_results(java_results: Dict, cpp_results: Dict, filename:str):
         cpp_results: Результаты анализа последоватеьности генератора C++
         filename: Имя файла для вывода
     """
-    with open(filename, 'w') as f:  
+    with open(filename, 'w', encoding='utf-8') as f:  
         f.write(f"Критерий случайности: P-значение >= {constants.THRESHOLD}")
         f.write("\nРезультаты анализа:\n")
         
