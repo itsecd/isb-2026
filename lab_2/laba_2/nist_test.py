@@ -37,7 +37,7 @@ def frequency_test(seq):
     n = len(seq)
     x = [1 if b == '1' else -1 for b in seq]
     s_n = sum(x) / math.sqrt(n)
-    p_value = math.erfc(s_n / math.sqrt(2))
+    p_value = math.erfc(abs(s_n) / math.sqrt(2))
     return p_value
 
 def runs_test(seq):
@@ -65,7 +65,7 @@ def runs_test(seq):
         if seq[i] != seq[i + 1]:
             v_n += 1
     numerator = abs(v_n - 2 * n * z * (1 - z))
-    denominator = 2 * math.sqrt(2 * n * z * (1 - z))
+    denominator = 2 * math.sqrt(2 * n) * z * (1 - z)
     p_value = math.erfc(numerator / denominator)
     return p_value
 
@@ -139,7 +139,7 @@ def analyze_file(input_filename, output_filename):
         lines = []
         lines.append(f"Анализ файла: {input_filename}")
         lines.append(f"Длина последовательности: {len(seq)}")
-        lines.append(f"Последовательность: {seq}...")
+        lines.append(f"Последовательность: {seq} ")
         lines.append("")
 
         p_freq = frequency_test(seq)
@@ -159,21 +159,21 @@ def analyze_file(input_filename, output_filename):
         for line in lines:
             print(line)
 
-        with open(output_filename, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(lines))
+        with open(output_filename, 'a', encoding='utf-8') as f:
+            f.write('\n'.join(lines) + '\n\n')
 
         print(f"Результаты сохранены в файл: {output_filename}\n")
 
     except Exception as e:
         error_msg = f"Ошибка при обработке файла {input_filename}: {e}"
         print(error_msg)
-        with open(output_filename, 'w', encoding='utf-8') as f:
+        with open(output_filename, 'a', encoding='utf-8') as f:
             f.write(error_msg)
 
 if __name__ == "__main__":
     files = [
-        ("generator_cpp.txt", "cpp_result.txt"),
-        ("generator_java.txt", "java_result.txt")
+        ("generator_cpp.txt", "results.txt"),
+        ("generator_java.txt", "results.txt")
     ]
     for in_fname, out_fname in files:
         analyze_file(in_fname, out_fname)
