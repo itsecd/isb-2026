@@ -30,13 +30,14 @@ def runs_test(seq: str):
     zeta = ones / n
 
     if abs(zeta - 0.5) >= 2.0 / math.sqrt(n):
-        return 0.0, False
+        return 0.0
 
-    v_n = sum(1 for i in range(n - 1) if seq[i] != seq[i + 1])
+    v_n = 0
+    for i in range(n - 1):
+        if seq[i] != seq[i + 1]:
+            v_n += 1
 
-    numerator = abs(v_n - 2 * n * zeta * (1 - zeta))
-    denominator = 2 * math.sqrt(2 * n * zeta * (1 - zeta))
-    p_value = math.erfc(numerator / denominator)
+    p_value = math.erfc(abs(v_n - 2 * n * zeta * (1 - zeta)) / (2 * math.sqrt(2 * n) * zeta * (1 - zeta)))
     return p_value, p_value >= 0.01
 
 
