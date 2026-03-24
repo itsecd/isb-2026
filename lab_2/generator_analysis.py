@@ -1,15 +1,15 @@
+from seq_analyze import analyze_sequence
 from filereading import read_sequence
-from seq_analyze import print_statistics, write_statistics
 
+
+file = open('statistics.txt', 'w+')
+file.close()
 
 cpp_vect = read_sequence('generators/cpp/CppGen.txt')
-print_statistics(cpp_vect, 'C++')
-write_statistics(cpp_vect, 'C++')
+analyze_sequence(cpp_vect, 'C++')
 
 java_vect = read_sequence('generators/java/JavaGenerated.txt')
-print_statistics(java_vect, 'Java')
-write_statistics(java_vect, 'Java')
+analyze_sequence(java_vect, 'Java')
 
 python_vect = read_sequence('generators/python/PyGen.txt')
-print_statistics(python_vect, 'Python')
-write_statistics(python_vect, 'Python')
+analyze_sequence(python_vect, 'Python')

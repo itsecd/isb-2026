@@ -119,17 +119,21 @@ def max_lenght_p_value(seq: list[bool]) -> float:
     return gammainc(1.5, seq_hi_squared(seq)/2)
 
 
-def print_statistics(seq: list[bool], language: str) -> None:
+def get_statistics(seq: list[bool]) -> list[float]:
+    return [freq_p_value(seq), repeat_p_value(seq), max_lenght_p_value(seq)]
+
+
+def print_statistics(datalist: list[float], language: str) -> None:
     '''
     Печать итоговой статистики на экран
     '''
     print('_____________________________')
     print('language = ', language)
-    freq = freq_p_value(seq)
+    freq = datalist[0]
     print('frequency analysis p_value = ', freq)
-    rep = repeat_p_value(seq)
+    rep = datalist[1]
     print('repeating analysis p_value = ', rep)
-    max_len = max_lenght_p_value(seq)
+    max_len = datalist[2]
     print('maximum block lenght p_value = ', max_len)
     if (freq >= 0.01 and rep >= 0.01 and max_len >= 0.01):
         print('All tested PASSED, vector is random')
@@ -138,18 +142,18 @@ def print_statistics(seq: list[bool], language: str) -> None:
     print('_____________________________')
 
 
-def write_statistics(seq: list[bool], language: str) -> None:
+def write_statistics(datalist: list[float], language: str) -> None:
     '''
     Запись итоговой статистики в файл
     '''
     with open('statistics.txt', 'a+') as out_file:
         out_file.write('_____________________________\n')
         out_file.write('language = ' + language+'\n')
-        freq = freq_p_value(seq)
+        freq = datalist[0]
         out_file.write('frequency analysis p_value = ' + str(freq)+'\n')
-        rep = repeat_p_value(seq)
+        rep = datalist[1]
         out_file.write('repeating analysis p_value = ' + str(rep)+'\n')
-        max_len = max_lenght_p_value(seq)
+        max_len = datalist[2]
         out_file.write('maximum block lenght p_value = '+str(max_len)+'\n')
         if (freq >= 0.01 and rep >= 0.01 and max_len >= 0.01):
             out_file.write('All tested PASSED, vector is random\n')
@@ -157,3 +161,9 @@ def write_statistics(seq: list[bool], language: str) -> None:
             out_file.write(
                 'One or more test NOT PASSED, vector isn\'nt random\n')
         out_file.write('_____________________________\n')
+
+
+def analyze_sequence(seq: list[bool], language: str) -> None:
+    stats = get_statistics(seq)
+    print_statistics(stats, language)
+    write_statistics(stats, language)
