@@ -1,9 +1,9 @@
 --- C++ ---
 Monobit test:      p-value = 0.376759 -> ПРОЙДЕН
-Runs test:          p-value = 0.817046 -> ПРОЙДЕН
+Runs test:          p-value = 0.642569 -> ПРОЙДЕН
 Longest run test:   p-value = 0.059156 -> ПРОЙДЕН
 
 --- Java ---
 Monobit test:      p-value = 0.859684 -> ПРОЙДЕН
-Runs test:          p-value = 0.478589 -> ПРОЙДЕН
+Runs test:          p-value = 0.156389 -> ПРОЙДЕН
 Longest run test:   p-value = 0.273912 -> ПРОЙДЕН
