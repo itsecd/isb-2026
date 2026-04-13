@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+
+# PyCharm
+.idea/
+
+# OS
+.DS_Store
+
+# результаты
+results.txt
