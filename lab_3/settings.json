@@ -1,0 +1,8 @@
+{
+  "initial_file": "src/text_to_encrypt.txt",
+  "encrypted_file": "src/encrypted_data.bin",
+  "decrypted_file": "src/decrypted_text.txt",
+  "symmetric_key": "src/symmetric_key.enc",
+  "public_key": "src/public_key.pem",
+  "secret_key": "src/private_key.pem"
+}
