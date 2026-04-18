@@ -60,6 +60,39 @@ def generate_keys(settings: dict):
     print("--Key generation has been completed successfully!")
 
 
+def encrypt_data(settings: dict):
+    """Data encryption by a hybrid system."""
+    print("\n!!STARTING DATA ENCRYPTION!!")
+
+    print("-Uploading the RSA private key...")
+    with open(settings['secret_key'], 'rb') as pem_in:
+        private_key = serialization.load_pem_private_key(pem_in.read(), password=None)
+
+    print("-Reading and decrypting the symmetric SEED key...")
+    with open(settings['symmetric_key'], 'rb') as sym_in:
+        encrypted_sym_key = sym_in.read()
+
+    sym_key = private_key.decrypt(encrypted_sym_key, get_asym_padding())
+
+    print(f"-Reading the source file {settings['initial_file']}...")
+    with open(settings['initial_file'], 'rb') as f_in:
+        plain_text = f_in.read()
+
+    padder = sym_padding.ANSIX923(128).padder()
+    padded_text = padder.update(plain_text) + padder.finalize()
+
+    print("-Data encryption using the SEED algorithm...")
+    iv = os.urandom(16)
+    cipher = Cipher(algorithms.SEED(sym_key), modes.CBC(iv))
+    encryptor = cipher.encryptor()
+    cipher_text = encryptor.update(padded_text) + encryptor.finalize()
+
+    print(f"-Saving an encrypted file in {settings['encrypted_file']}...")
+    with open(settings['encrypted_file'], 'wb') as f_out:
+        f_out.write(iv + cipher_text)
+
+    print("--The encryption has been successfully completed!")
+
 def main():
     parser = argparse.ArgumentParser(description="RSA & SEED hybrid encryption")
     group = parser.add_mutually_exclusive_group(required=True)
@@ -68,7 +101,7 @@ def main():
     group.add_argument('-dec', '--decryption', action='store_true', help='Decryption mode')
 
     parser.add_argument('-c', '--config', default='settings.json',
-                        help='Path to the configuration file (settings.json by defaul)')
+                        help='Path to the configuration file (settings.json by default)')
 
     args = parser.parse_args()
     
@@ -81,8 +114,12 @@ def main():
             encrypt_data(settings)
         elif args.decryption:
             decrypt_data(settings)
-
-
+    except FileNotFoundError as e:
+        print(f"!!!Error: File not found: {e.filename}")
+    except ValueError as e:
+        print(f"!!!Error: File damaged: {e}")
+    except Exception as e:
+        print(f"!!!Error: Unexpected error: {e}")
 
 
 if __name__ == '__main__':
