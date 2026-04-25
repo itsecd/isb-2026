@@ -215,7 +215,7 @@
 
       <div class="cards">
         <div class="card">
-          <h2>🔑 Генерация ключей</h2>
+          <h2>Генерация ключей</h2>
           <p>
             Создаёт пару RSA-ключей (2048 бит), ключ ChaCha20 (256 бит) и nonce
             (128 бит). Сохраняет всё в файлы.
@@ -226,7 +226,7 @@
         </div>
 
         <div class="card">
-          <h2>🔒 Шифрование</h2>
+          <h2>Шифрование</h2>
           <p>
             Шифрует файл initial_file.txt с помощью ChaCha20. Ключ шифруется RSA и
             сохраняется отдельно.
@@ -237,7 +237,7 @@
         </div>
 
         <div class="card">
-          <h2>🔓 Расшифрование</h2>
+          <h2>Расшифрование</h2>
           <p>
             Расшифровывает файл encrypted.bin с помощью сохранённого ключа
             ChaCha20 и nonce.
@@ -264,14 +264,14 @@
           const statusSection = document.getElementById("statusSection");
 
           const statusMap = {
-            "initial_file.txt": "📄 Исходный файл",
-            "encrypted.bin": "🔒 Зашифрованный файл",
-            "decrypted.txt": "📄 Расшифрованный файл",
-            "symmetric_key.bin": "🔑 Ключ ChaCha20",
-            "nonce.bin": "🎲 Nonce (128 бит)",
-            "encrypted_symmetric_key.bin": "📦 Зашифрованный ключ (RSA)",
-            "public_key.pem": "🌐 Публичный ключ RSA",
-            "private_key.pem": "🔐 Приватный ключ RSA",
+            "initial_file.txt": "Исходный файл",
+            "encrypted.bin": "Зашифрованный файл",
+            "decrypted.txt": "Расшифрованный файл",
+            "symmetric_key.bin": "Ключ ChaCha20",
+            "nonce.bin": "Nonce (128 бит)",
+            "encrypted_symmetric_key.bin": "Зашифрованный ключ (RSA)",
+            "public_key.pem": "Публичный ключ RSA",
+            "private_key.pem": "Приватный ключ RSA",
           };
 
           let html = "";
