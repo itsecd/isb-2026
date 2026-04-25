@@ -8,7 +8,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def run_script(mode):
     try:
-        # Важно! Запускаем в той же директории, где лежат файлы
+       
         result = subprocess.run(
             [sys.executable, os.path.join(BASE_DIR, 'main.py'), mode],
             capture_output=True, 

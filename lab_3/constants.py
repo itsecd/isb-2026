@@ -9,12 +9,12 @@ RSA_PUBLIC_EXPONENT = 65537
 # Пути к файлам
 DEFAULT_SETTINGS_FILE = "settings.json"
 
-# Стандартные пути (будут перезаписаны из settings.json)
+# Стандартные пути 
 DEFAULT_INITIAL_FILE = "initial_file.txt"
 DEFAULT_ENCRYPTED_FILE = "encrypted.bin"
 DEFAULT_DECRYPTED_FILE = "decrypted.txt"
 DEFAULT_SYMMETRIC_KEY_FILE = "symmetric_key.bin"
-DEFAULT_NONCE_FILE = "nonce.bin"          # для хранения nonce отдельно
+DEFAULT_NONCE_FILE = "nonce.bin"         
 DEFAULT_ENCRYPTED_SYMMETRIC_KEY_FILE = "encrypted_symmetric_key.bin"
 DEFAULT_PUBLIC_KEY_FILE = "public_key.pem"
 DEFAULT_PRIVATE_KEY_FILE = "private_key.pem"
