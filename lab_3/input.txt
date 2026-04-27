@@ -1,1 +1,6 @@
-hello word
+This is a sample input text for testing encryption and decryption functionality in the application.
+The program should correctly read this file, encrypt its contents using the selected symmetric algorithm,
+and then decrypt it back to the original form without any data loss. This text is intentionally extended
+to meet the requirement of at least five hundred characters and to ensure that the encryption process works
+reliably for longer inputs as well. Additionally, this sentence is added to make sure the total length
+definitely exceeds five hundred characters and satisfies all validation conditions.
