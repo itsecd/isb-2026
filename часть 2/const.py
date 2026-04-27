@@ -1,0 +1,7 @@
+ORIG_FILE = "orig.txt"
+FREQ_FILE = "freq.txt"
+KEY_FILE = "key.txt"
+DEC_FILE = "decrypted.txt"
+SPACE_SYMBOL = " "
+SPACE_REPLACEMENT = "Я"
+SIGN_BIG = ">"
