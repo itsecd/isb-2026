@@ -23,7 +23,7 @@ def generating_asymmetric_key() -> bytes:
 
 def save_asym_keys(private_key, public_key, path_private: str, path_public: str) -> None:
     """
-    Сохранение ключей для асимметричного алгоритма (например, RSA или Ed25519)
+    Сохранение ключей для асимметричного алгоритма 
     """
    
     with open(path_private, 'wb') as priv_file:
@@ -45,9 +45,7 @@ def save_asym_keys(private_key, public_key, path_private: str, path_public: str)
         )
     
 
-def encrypt_and_save_symmetric_key(symmetric_key: bytes, public_key, output_path: str) -> None:
-    encrypted_key = public_key.encrypt(symmetric_key,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
-    
+def save_symmetric_key(encrypted_key: bytes,  output_path: str) -> None:
     with open(output_path, 'wb') as f:
         f.write(encrypted_key)
 
