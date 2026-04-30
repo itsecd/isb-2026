@@ -1,9 +1,12 @@
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding as sym_padding
 
 def decrypt_text(encrypt_text: bytes, key: bytes) -> str:
     """
-    Дешифрование данных алгоритмом CAST5.
+    Дешифрование данных алгоритмом CAST5
     """
     
     iv = encrypt_text[:8]

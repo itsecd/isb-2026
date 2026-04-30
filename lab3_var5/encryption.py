@@ -8,6 +8,9 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 
 
 def encrypt_text(text:str, key:bytes)->bytes:
+    """
+    Шифровка текста 
+    """
     data = text.encode('utf-8')
     padder = sym_padding.PKCS7(64).padder()
     padded_data = padder.update(data) + padder.finalize()
@@ -18,6 +21,9 @@ def encrypt_text(text:str, key:bytes)->bytes:
     return iv + ciphertext
 
 
-def encrypt_symmetric_key(public_key)-> bytes:
+def encrypt_symmetric_key(symmetric_key,public_key)-> bytes:
+    """
+    Шифровка симметричного ключа
+    """
     encrypted_key = public_key.encrypt(symmetric_key,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
     return encrypted_key
