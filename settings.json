@@ -1,0 +1,11 @@
+{
+    "initial_file": "data/original_text.txt",
+    "encrypted_file": "data/encrypted_text.bin",
+    "decrypted_file": "data/decrypted_text.txt",
+    "symmetric_key_encrypted": "key/encrypted_symmetric_key.bin",
+    "public_key": "key/public_key.pem",
+    "private_key": "key/private_key.pem",
+    "BLOCK_SIZE_BYTES": 16,
+    "public_exponent": 65537,
+    "key_size": 2048
+}
