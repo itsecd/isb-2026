@@ -51,6 +51,30 @@ def load_settings(settings_path='settings.json'):
         sys.exit(1)
     return settings
 
+def decrypt_symmetric_key(settings):
+    """Расшифровывает симметричный ключ."""
+    private_key_pem = read_file(settings['private_key'])
+    if private_key_pem is None:
+        return None
+    
+    encrypted_key_data = read_file(settings['symmetric_key_encrypted'])
+    if encrypted_key_data is None:
+        return None
+
+    try:
+        private_key = serialization.load_pem_private_key(private_key_pem, password=None, backend=default_backend())
+        return private_key.decrypt(
+            encrypted_key_data,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+    except Exception as e:
+        print(f"Ошибка расшифровки симметричного ключа: {e}")
+        return None
+
 def generate_keys(settings):
     """Генерирует ключи и сохраняет их."""
 
@@ -97,11 +121,41 @@ def generate_keys(settings):
 
     print("Генерация ключей завершена")
 
+def encrypt_data(settings):
+    """Шифрует данные."""
+    
+    symmetric_key = decrypt_symmetric_key(settings)
+    if symmetric_key is None:
+        return
+    print(f"Симметричный ключ расшифрован")
+
+    plaintext = read_file(settings['initial_file'])
+    if plaintext is None:
+        return
+
+    iv = os.urandom(settings['BLOCK_SIZE_BYTES'])
+    
+    padder = sym_padding.PKCS7(algorithms.SEED.block_size).padder()
+    padded_data = padder.update(plaintext) + padder.finalize()
+
+    cipher = Cipher(algorithms.SEED(symmetric_key), modes.CBC(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    ciphertext = encryptor.update(padded_data) + encryptor.finalize()
+
+    final_data = iv + ciphertext
+
+    if not write_file(settings['encrypted_file'], final_data):
+        return
+        
+    print(f"Текст зашифрован и сохранен в: {settings['encrypted_file']}")
+    print("Шифрование завершено")
+
 def main():
     parser = argparse.ArgumentParser(description="Гибридная криптосистема")
     
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--gen', action='store_true', help='Генерация ключей')
+    group.add_argument('--enc', action='store_true', help='Шифрование данных')
     
     parser.add_argument('--settings', type=str, default='settings.json', help='Путь к файлу настроек JSON')
 
@@ -111,6 +165,8 @@ def main():
     match True:
         case _ if args.gen:
             generate_keys(settings)
+        case _ if args.enc:
+            encrypt_data(settings)
 
 if __name__ == '__main__':
     main()
