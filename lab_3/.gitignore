@@ -4,7 +4,3 @@ venv/
 .env/
 .vscode/
 .vs/
-*.pem
-*.enc
-*.bin
-output.txt
