@@ -3,9 +3,11 @@ import json
 import os
 
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLineEdit, QLabel, QFileDialog,
-    QRadioButton, QMessageBox
+    QApplication, QMainWindow, QWidget,
+    QVBoxLayout, QHBoxLayout, QPushButton,
+    QLineEdit, QLabel, QFileDialog,
+    QRadioButton, QMessageBox, QTabWidget,
+    QFormLayout, QTextEdit, QGroupBox
 )
 
 from crypto_service import encrypt_file, decrypt_file, generate_all_keys
@@ -25,8 +27,12 @@ class HybridCryptoSystemApp(QMainWindow):
     def load_settings(self):
         """Загрузка настроек из JSON файла."""
         if os.path.exists("settings.json"):
-            with open("settings.json", "r", encoding="utf-8") as f:
-                return json.load(f)
+            try:
+                with open("settings.json", "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"Ошибка загрузки: {e}")
+                return {}
         return {}
 
     def fill_fields_from_settings(self):
@@ -44,12 +50,53 @@ class HybridCryptoSystemApp(QMainWindow):
 
 
     def setup_ui(self):
-        self.setWindowTitle("Hybrid Crypto Tool")
-        self.setMinimumSize(580, 320)
+        self.setWindowTitle("Гибридная криптосистема")
+        self.resize(700, 400)
 
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        main_layout = QVBoxLayout(central_widget)
+        tabs = QTabWidget()
+        self.setCentralWidget(tabs)
+
+        tabs.addTab(self.build_files_tab(), "Файлы")
+        tabs.addTab(self.build_actions_tab(), "Операции")
+        tabs.addTab(self.build_keys_tab(), "Ключи")
+
+        self.status = QTextEdit()
+        self.status.setReadOnly(True)
+        self.status.setMaximumHeight(80)
+        tabs.setCornerWidget(self.status)
+
+    def build_files_tab(self):
+        w = QWidget()
+        layout = QVBoxLayout(w)
+
+        form = QFormLayout()
+
+        file_fields = [
+            ("initial_file", "Исходный файл"),
+            ("encrypted_file", "Зашифрованный файл"),
+            ("decrypted_file", "Расшифрованный файл"),
+        ]
+
+        for key, text in file_fields:
+            line = QLineEdit()
+            btn = QPushButton("...")
+
+            btn.clicked.connect(lambda _, k=key: self.open_file_dialog(k))
+
+            box = QWidget()
+            row = QHBoxLayout(box)
+            row.addWidget(line)
+            row.addWidget(btn)
+
+            form.addRow(QLabel(text), box)
+            self.input_fields[key] = line
+
+        layout.addLayout(form)
+        return w
+
+    def build_actions_tab(self):
+        w = QWidget()
+        layout = QVBoxLayout(w)
 
         self.encrypt_mode = QRadioButton("Шифрование")
         self.decrypt_mode = QRadioButton("Дешифрование")
@@ -58,60 +105,87 @@ class HybridCryptoSystemApp(QMainWindow):
         mode_layout = QHBoxLayout()
         mode_layout.addWidget(self.encrypt_mode)
         mode_layout.addWidget(self.decrypt_mode)
-        main_layout.addLayout(mode_layout)
-
-        field_definitions = [
-            ("initial_file", "Input file"),
-            ("encrypted_file", "Encrypted file"),
-            ("decrypted_file", "Decrypted file"),
-            ("public_key", "Public key"),
-            ("secret_key", "Private key"),
-            ("symmetric_key", "Symmetric key"),
-            ("nonce", "Nonce"),
-            ("encrypted_symmetric_key", "Encrypted key"),
-        ]
-
-        for key, label_text in field_definitions:
-            row_layout = QHBoxLayout()
-
-            label = QLabel(label_text)
-            label.setMinimumWidth(140)
-
-            line_edit = QLineEdit()
-            button = QPushButton("...")
-
-            button.clicked.connect(lambda _, k=key: self.open_file_dialog(k))
-
-            row_layout.addWidget(label)
-            row_layout.addWidget(line_edit)
-            row_layout.addWidget(button)
-
-            main_layout.addLayout(row_layout)
-            self.input_fields[key] = line_edit
-
-        button_layout = QHBoxLayout()
 
         run_button = QPushButton("Выполнить")
         run_button.clicked.connect(self.run_operation)
 
-        generate_button = QPushButton("Создать ключи")
-        generate_button.clicked.connect(self.generate_keys)
+        layout.addLayout(mode_layout)
+        layout.addWidget(run_button)
+        layout.addStretch()
 
-        button_layout.addWidget(run_button)
-        button_layout.addWidget(generate_button)
+        return w
 
-        main_layout.addLayout(button_layout)
+    def build_keys_tab(self):
+        w = QWidget()
+        layout = QVBoxLayout(w)
 
-        self.status_label = QLabel("Готовность")
-        main_layout.addWidget(self.status_label)
+        group = QGroupBox("Ключи")
+        form = QFormLayout()
 
+        self.input_fields["public_key"] = QLineEdit()
+        b1 = QPushButton("...")
+        b1.clicked.connect(lambda: self.open_file_dialog("public_key"))
+
+        r1 = QWidget()
+        l1 = QHBoxLayout(r1)
+        l1.addWidget(self.input_fields["public_key"])
+        l1.addWidget(b1)
+        form.addRow("Публичный ключ", r1)
+
+        self.input_fields["secret_key"] = QLineEdit()
+        b2 = QPushButton("...")
+        b2.clicked.connect(lambda: self.open_file_dialog("secret_key"))
+
+        r2 = QWidget()
+        l2 = QHBoxLayout(r2)
+        l2.addWidget(self.input_fields["secret_key"])
+        l2.addWidget(b2)
+        form.addRow("Приватный ключ", r2)
+
+        rest = [
+            ("symmetric_key", "Симметричный ключ"),
+            ("nonce", "Nonce"),
+            ("encrypted_symmetric_key", "Зашифрованный ключ"),
+        ]
+
+        for key, text in rest:
+            line = QLineEdit()
+            btn = QPushButton("...")
+
+            btn.clicked.connect(lambda _, k=key: self.open_file_dialog(k))
+
+            box = QWidget()
+            lay = QHBoxLayout(box)
+            lay.addWidget(line)
+            lay.addWidget(btn)
+
+            match key:
+                case "symmetric_key":
+                    label = "Симметричный ключ"
+                case "nonce":
+                    label = "Nonce"
+                case _:
+                    label = "Зашифрованный ключ"
+
+            form.addRow(label, box)
+            self.input_fields[key] = line
+
+        group.setLayout(form)
+
+        gen_button = QPushButton("Создать ключи")
+        gen_button.clicked.connect(self.generate_keys)
+
+        layout.addWidget(group)
+        layout.addWidget(gen_button)
+
+        return w
 
 
     def open_file_dialog(self, key):
+        """Обработка диалогового окна."""
         path, _ = QFileDialog.getOpenFileName(self, "Выберите файл")
         if path:
             self.input_fields[key].setText(path)
-
 
     def validate_input(self, required_keys, data):
         """Проверка ввода пользователя."""
@@ -125,8 +199,8 @@ class HybridCryptoSystemApp(QMainWindow):
                 with open(path, "rb"):
                     pass
             except:
-                raise FileNotFoundError(f"Файл не найден: {path}")
-
+                if not os.path.exists(path):
+                    raise FileNotFoundError(f"Файл не найден: {path}")
 
     def run_operation(self):
         """Выполнение операции шифрования или дешифрования."""
@@ -155,17 +229,14 @@ class HybridCryptoSystemApp(QMainWindow):
     def generate_keys(self):
         paths = self.collect_input_data()
 
-        required = ["public_key", "secret_key", "symmetric_key", "nonce"]
-
         try:
-            for key in required:
-                if not paths.get(key):
-                    QMessageBox.warning(
-                        self,
-                        "Предупреждение",
-                        f"Поле '{key}' пустое"
-                    )
-                    return
+            if not paths.get("public_key") or not paths.get("secret_key"):
+                QMessageBox.warning(self, "Предупреждение", "Нет путей для RSA ключей")
+                return
+
+            if not paths.get("symmetric_key"):
+                QMessageBox.warning(self, "Предупреждение", "Нет симметричного ключа")
+                return
 
             generate_all_keys(paths.get("public_key"),
                               paths.get("secret_key"),
@@ -180,11 +251,11 @@ class HybridCryptoSystemApp(QMainWindow):
 
 
     def update_status(self, message):
-        self.status_label.setText(message)
+        self.status.append(message)
         QMessageBox.information(self, "Информация", message)
 
     def show_error(self, message):
-        self.status_label.setText("Ошибка")
+        self.status.append("Ошибка: " + message)
         QMessageBox.critical(self, "Ошибка", message)
 
 
