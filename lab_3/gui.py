@@ -9,7 +9,7 @@ import random
 import threading
 import time
 import tkinter as tk
-from tkinter import filedialog, font as tkfont
+from tkinter import filedialog
 
 from decryption import decrypt
 from encryption import encrypt

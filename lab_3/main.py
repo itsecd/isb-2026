@@ -6,6 +6,7 @@ from encryption import encrypt
 from generate import generate_key
 
 def parser_t() -> argparse.Namespace:
+    """Функция для парсера командной строки"""
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-gen", "--generation", help="Запускает режим генерации ключей")
@@ -21,24 +22,27 @@ def main() -> None:
     with open("settings.json") as f:
         settings = json.load(f)
 
-    if args.generation is not None:
-        generate_key(
-            settings["symmetric_key"], settings["public_key"], settings["secret_key"]
-        )
-    elif args.encryption is not None:
-        encrypt(
-            settings["initial_file"],
-            settings["secret_key"],
-            settings["symmetric_key"],
-            settings["encrypted_file"],
-        )
-    else:
-        decrypt(
-            settings["encrypted_file"],
-            settings["secret_key"],
-            settings["symmetric_key"],
-            settings["decrypted_file"],
-        )
+    match args:
+        case _ if args.generation is not None:
+            generate_key(
+                settings["symmetric_key"],
+                settings["public_key"],
+                settings["secret_key"],
+            )
+        case _ if args.encryption is not None:
+            encrypt(
+                settings["initial_file"],
+                settings["secret_key"],
+                settings["symmetric_key"],
+                settings["encrypted_file"],
+            )
+        case _:
+            decrypt(
+                settings["encrypted_file"],
+                settings["secret_key"],
+                settings["symmetric_key"],
+                settings["decrypted_file"],
+            )
 
 
 if __name__ == "__main__":
