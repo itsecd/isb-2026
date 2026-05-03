@@ -7,7 +7,7 @@ from hybrid_crypto import generate_keys, encrypt_data, decrypt_data
 
 
 def load_settings(settings_file: str) -> dict:
-    """Загружает настройки из JSON-файла"""
+    """Читает из JSON-файла"""
     try:
         with open(settings_file, 'r', encoding='utf-8') as f:
             settings = json.load(f)
