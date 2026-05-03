@@ -10,6 +10,7 @@ def generate_rsa_keys() -> tuple[rsa.RSAPrivateKey, rsa.RSAPublicKey]:
     )
     private_key = keys
     public_key = keys.public_key()
+    print("Приватный и публичный ключ сгенерированны")
     return private_key, public_key
 
 
@@ -23,6 +24,7 @@ def encrypt_sym_key(sym_key: bytes, public_key: rsa.RSAPublicKey) -> bytes:
                                              label=None
                                          )
                                          )
+    print("Симметричный ключ успешно зашифрован при помощи публичного ключа")
     return encrypt_sym_key
 
 
@@ -36,4 +38,5 @@ def decrypt_sym_key(encrypted_sym_key: bytes, private_key: rsa.RSAPrivateKey) ->
             label=None
         )
     )
+    print("Симметричный ключ успешно дешифрованн при помощи приватного ключа")
     return sym_key

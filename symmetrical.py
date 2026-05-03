@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives.ciphers.algorithms import SEED
 
 def generate_sym_key() -> bytes:
     """Генерация симметричного ключа для SEED."""
+    print("Ключ для симметричного шифрования создан")
     return os.urandom(16)
 
 
@@ -20,6 +21,7 @@ def encryption_data(data: bytes, key: bytes) -> bytes:
 
     e_data = encryptor.update(pad_data) + encryptor.finalize()
 
+    print("Данные при помощи симметричного ключа успешно зашифрованны")
     return iv + e_data
 
 
@@ -36,4 +38,5 @@ def decryption_data(data: bytes, key: bytes) -> bytes:
     unpadder = padding.PKCS7(128).unpadder()
     unpad_d_data = unpadder.update(d_data) + unpadder.finalize()
 
+    print("Данные при помощи симметричного ключа успешно дешифрованны")
     return unpad_d_data
