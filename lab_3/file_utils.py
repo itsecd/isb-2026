@@ -1,35 +1,32 @@
 import json
 
 
-def read_file(path: str, mode: str = "rb") -> bytes:
+def load_config(path: str) -> dict:
     """
-    Читает файл.
+    Загружает конфигурацию из JSON файла.
+    """
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Файл конфигурации не найден: {path}")
+    except json.JSONDecodeError:
+        raise ValueError(f"Ошибка разбора JSON в файле: {path}")
 
-    :param path: путь
-    :param mode: режим
-    :return: содержимое файла
-    """
-    with open(path, mode) as f:
-        return f.read()
+
+def read_file(path: str, mode: str = "rb") -> bytes:
+    try:
+        with open(path, mode) as f:
+            return f.read()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Файл не найден: {path}")
+    except Exception as e:
+        raise RuntimeError(f"Ошибка чтения файла {path}: {e}")
 
 
 def write_file(path: str, data: bytes, mode: str = "wb") -> None:
-    """
-    Записывает файл.
-
-    :param path: путь
-    :param data: данные
-    """
-    with open(path, mode) as f:
-        f.write(data)
-
-
-def load_config() -> dict:
-    """
-    Загружает настройки из settings.json.
-
-    :return: dict
-    :raises Exception: если ошибка чтения
-    """
-    with open("settings.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open(path, mode) as f:
+            f.write(data)
+    except Exception as e:
+        raise RuntimeError(f"Ошибка записи файла {path}: {e}")

@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 
+
 from crypto.symmetric import (
     generate_idea_key,
     encrypt_data,
@@ -42,6 +43,11 @@ def run_gui(config: dict) -> None:
                 messagebox.showerror("Ошибка", "Неверный режим")
                 return None
 
+    def load_sym_key():
+        private_key = load_private_key(config["private_key"])
+        enc_key = read_file(config["symmetric_key"])
+        return decrypt_key(private_key, enc_key)
+
     def generate_keys():
         try:
             sym_key = get_key_from_ui()
@@ -59,14 +65,11 @@ def run_gui(config: dict) -> None:
             messagebox.showinfo("Успех", "Ключи сгенерированы")
 
         except Exception as e:
-            messagebox.showerror("Ошибка", str(e))
+            messagebox.showerror("Ошибка", f"{e}")
 
     def encrypt_file():
         try:
-            private_key = load_private_key(config["private_key"])
-
-            enc_key = read_file(config["symmetric_key"])
-            sym_key = decrypt_key(private_key, enc_key)
+            sym_key = load_sym_key()
 
             data = read_file(config["initial_file"])
             encrypted = encrypt_data(sym_key, data)
@@ -76,14 +79,11 @@ def run_gui(config: dict) -> None:
             messagebox.showinfo("Успех", "Файл зашифрован")
 
         except Exception as e:
-            messagebox.showerror("Ошибка", str(e))
+            messagebox.showerror("Ошибка", f"{e}")
 
     def decrypt_file():
         try:
-            private_key = load_private_key(config["private_key"])
-
-            enc_key = read_file(config["symmetric_key"])
-            sym_key = decrypt_key(private_key, enc_key)
+            sym_key = load_sym_key()
 
             data = read_file(config["encrypted_file"])
             decrypted = decrypt_data(sym_key, data)
@@ -93,8 +93,9 @@ def run_gui(config: dict) -> None:
             messagebox.showinfo("Успех", "Файл расшифрован")
 
         except Exception as e:
-            messagebox.showerror("Ошибка", str(e))
+            messagebox.showerror("Ошибка", f"{e}")
 
+    # GUI
     root = tk.Tk()
     root.title("Гибридная криптосистема")
     root.geometry("400x300")
