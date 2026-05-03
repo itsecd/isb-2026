@@ -4,8 +4,7 @@ from cryptography.hazmat.primitives import serialization
 import constants as const
 from file_utils import write_binary_file, read_binary_file
 
-
-# ==================== Симметричный ключ ====================
+#Симметричный ключ
 
 def save_symmetric_key_to_file(key: bytes, filepath: str):
     """Сохраняет симметричный ключ в бинарный файл"""
@@ -22,7 +21,7 @@ def load_symmetric_key_from_file(filepath: str) -> bytes:
     return key
 
 
-# ==================== Nonce ====================
+# Nonce
 
 def save_nonce_to_file(nonce: bytes, filepath: str):
     """Сохраняет nonce в бинарный файл"""
@@ -39,7 +38,7 @@ def load_nonce_from_file(filepath: str) -> bytes:
     return nonce
 
 
-# ==================== RSA ключи ====================
+# RSA ключи 
 
 def save_public_key_to_file(public_key, filepath: str):
     """Сохраняет публичный ключ RSA в PEM-файл"""
@@ -72,7 +71,7 @@ def load_private_key_from_file(filepath: str):
     return private_key
 
 
-# ==================== Зашифрованные данные ====================
+#  Зашифрованные данные 
 
 def save_encrypted_data_to_file(data: bytes, filepath: str):
     """Сохраняет зашифрованные данные (RSA-шифротекст) в файл"""

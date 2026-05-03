@@ -8,9 +8,6 @@ from key_manager import (
 )
 from file_utils import write_binary_file, read_binary_file, read_text_file
 
-
-# ==================== Высокоуровневые операции ====================
-
 def generate_keys(symmetric_key_path: str,
                   nonce_path: str,
                   encrypted_symmetric_key_path: str,
