@@ -214,3 +214,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+__pycache__/
+*.pyc
+
+.venv/
+venv/
+.vscode/
+
+lab 3/keys/*
+!lab 3/keys/.gitkeep
+
+lab 3/encrypted.bin
+lab 3/decrypted.txt
+isb-2026/
