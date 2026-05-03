@@ -2,6 +2,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import load_pem_public_key, load_pem_private_key
 import os
+import json
 
 
 def check_file(path: str) -> None:
@@ -78,3 +79,12 @@ def save_binary(path: str, data: bytes) -> None:
             f.write(data)
     except OSError as e:
         print(f"Ошибка при записи бинарного файла: {e}")
+
+
+def open_json(path: str) -> dict:
+    """Считывание конфигурации из JSON-файла."""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except OSError as e:
+        print(f"Ошибка при считывание json: {e}")
