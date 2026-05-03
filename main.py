@@ -37,12 +37,13 @@ def main() -> None:
     args = parser()
     settings = load_setting()
 
-    if args.generation:
-        run_generation(settings, args.key_size)
-    elif args.encryption:
-        run_encryption(settings)
-    else:
-        run_decryption(settings)
+    match args:
+        case _ if args.generation:
+            run_generation(settings, args.key_size)
+        case _ if args.encryption:
+            run_encryption(settings)
+        case _:
+            run_decryption(settings)
 
 
 if __name__ == "__main__":
