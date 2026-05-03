@@ -54,5 +54,5 @@ def check_files():
     return jsonify({f: os.path.exists(os.path.join(BASE_DIR, f)) for f in files})
 
 if __name__ == '__main__':
-    print("Открой в браузере: http://127.0.0.1:5000")
+    print("Открыть в браузере: http://127.0.0.1:5000")
     app.run(debug=False, host='127.0.0.1', port=5000)

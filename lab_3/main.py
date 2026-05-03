@@ -15,11 +15,16 @@ def load_settings(settings_file: str) -> dict:
         return settings
     except FileNotFoundError:
         print(f"[ОШИБКА] Файл настроек {settings_file} не найден!")
+        print("Создайте файл settings.json в формате:")
+        print(json.dumps(const.DEFAULT_SETTINGS, indent=4))
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"[ОШИБКА] Ошибка парсинга JSON в файле {settings_file}: {e}")
         sys.exit(1)
 
 
 def create_default_settings_file(settings_file: str):
-    """ Создаёт файл настроек со значениями по умолчанию """
+    """Создаёт файл настроек со значениями по умолчанию"""
     default_settings = {
         "initial_file": const.DEFAULT_INITIAL_FILE,
         "encrypted_file": const.DEFAULT_ENCRYPTED_FILE,
@@ -43,7 +48,8 @@ def main():
     group.add_argument('-gen', '--generation', action='store_true', help='Запускает режим генерации ключей')
     group.add_argument('-enc', '--encryption', action='store_true', help='Запускает режим шифрования данных')
     group.add_argument('-dec', '--decryption', action='store_true', help='Запускает режим дешифрования данных')
-    parser.add_argument('-s', '--settings', type=str, default=const.DEFAULT_SETTINGS_FILE, help=f'Путь к файлу настроек (по умолчанию: {const.DEFAULT_SETTINGS_FILE})')
+    parser.add_argument('-s', '--settings', type=str, default=const.DEFAULT_SETTINGS_FILE,
+                        help=f'Путь к файлу настроек (по умолчанию: {const.DEFAULT_SETTINGS_FILE})')
 
     args = parser.parse_args()
 
@@ -57,38 +63,48 @@ def main():
     required_keys = [
         'initial_file', 'encrypted_file', 'decrypted_file',
         'symmetric_key_file', 'nonce_file', 'encrypted_symmetric_key_file',
-        'public_key_file', 'private_key_file' ]
-    
+        'public_key_file', 'private_key_file'
+    ]
+
     for key in required_keys:
         if key not in settings:
             print(f"[ОШИБКА] В файле настроек отсутствует ключ '{key}'")
             sys.exit(1)
 
-    # Выполнение соответствующего режима
+    # Выполнение соответствующего режима с использованием match/case
+    mode = None
     if args.generation:
-        generate_keys(
-            symmetric_key_path=settings['symmetric_key_file'],
-            nonce_path=settings['nonce_file'],
-            encrypted_symmetric_key_path=settings['encrypted_symmetric_key_file'],
-            public_key_path=settings['public_key_file'],
-            private_key_path=settings['private_key_file']
-        )
+        mode = 'gen'
     elif args.encryption:
-        encrypt_data(
-            initial_file_path=settings['initial_file'],
-            encrypted_file_path=settings['encrypted_file'],
-            encrypted_symmetric_key_path=settings['encrypted_symmetric_key_file'],
-            private_key_path=settings['private_key_file'],
-            nonce_path=settings['nonce_file']
-        )
+        mode = 'enc'
     elif args.decryption:
-        decrypt_data(
-            encrypted_file_path=settings['encrypted_file'],
-            decrypted_file_path=settings['decrypted_file'],
-            encrypted_symmetric_key_path=settings['encrypted_symmetric_key_file'],
-            private_key_path=settings['private_key_file'],
-            nonce_path=settings['nonce_file']
-        )
+        mode = 'dec'
+
+    match mode:
+        case 'gen':
+            generate_keys(
+                symmetric_key_path=settings['symmetric_key_file'],
+                nonce_path=settings['nonce_file'],
+                encrypted_symmetric_key_path=settings['encrypted_symmetric_key_file'],
+                public_key_path=settings['public_key_file'],
+                private_key_path=settings['private_key_file']
+            )
+        case 'enc':
+            encrypt_data(
+                initial_file_path=settings['initial_file'],
+                encrypted_file_path=settings['encrypted_file'],
+                encrypted_symmetric_key_path=settings['encrypted_symmetric_key_file'],
+                private_key_path=settings['private_key_file'],
+                nonce_path=settings['nonce_file']
+            )
+        case 'dec':
+            decrypt_data(
+                encrypted_file_path=settings['encrypted_file'],
+                decrypted_file_path=settings['decrypted_file'],
+                encrypted_symmetric_key_path=settings['encrypted_symmetric_key_file'],
+                private_key_path=settings['private_key_file'],
+                nonce_path=settings['nonce_file']
+            )
 
 
 if __name__ == "__main__":
