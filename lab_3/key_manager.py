@@ -12,15 +12,6 @@ def save_symmetric_key_to_file(key: bytes, filepath: str):
     print(f"[OK] Симметричный ключ сохранён в {filepath}")
 
 
-def load_symmetric_key_from_file(filepath: str) -> bytes:
-    """Загружает симметричный ключ из бинарного файла"""
-    key = read_binary_file(filepath)
-    if len(key) != const.SYMMETRIC_KEY_SIZE:
-        raise ValueError(f"Неверный размер ключа: ожидается {const.SYMMETRIC_KEY_SIZE} байт")
-    print(f"[OK] Симметричный ключ загружен из {filepath}")
-    return key
-
-
 # Nonce
 
 def save_nonce_to_file(nonce: bytes, filepath: str):
@@ -53,14 +44,6 @@ def save_private_key_to_file(private_key, filepath: str):
         encryption_algorithm=serialization.NoEncryption())
     write_binary_file(filepath, pem)
     print(f"[OK] Приватный ключ RSA сохранён в {filepath}")
-
-
-def load_public_key_from_file(filepath: str):
-    """Загружает публичный ключ RSA из PEM-файла"""
-    pem_data = read_binary_file(filepath)
-    public_key = serialization.load_pem_public_key(pem_data)
-    print(f"[OK] Публичный ключ RSA загружен из {filepath}")
-    return public_key
 
 
 def load_private_key_from_file(filepath: str):

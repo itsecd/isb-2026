@@ -19,11 +19,6 @@ DEFAULT_ENCRYPTED_SYMMETRIC_KEY_FILE = "encrypted_symmetric_key.bin"
 DEFAULT_PUBLIC_KEY_FILE = "public_key.pem"
 DEFAULT_PRIVATE_KEY_FILE = "private_key.pem"
 
-# Режимы работы
-MODE_GENERATION = "generation"
-MODE_ENCRYPTION = "encryption"
-MODE_DECRYPTION = "decryption"
-
 # Словарь с настройками по умолчанию
 DEFAULT_SETTINGS = {
     "initial_file": DEFAULT_INITIAL_FILE,
