@@ -2,20 +2,28 @@ import json
 import argparse
 
 from symmetric_crypto import generate_symmetric_key, encrypt_file_aes, decrypt_file_aes
-from asymmetric_crypto import generate_rsa_key, save_private_key, save_public_key, load_private_key, encrypt_symmetric_key, decrypt_symmetric_key
+from asymmetric_crypto import generate_rsa_key, save_private_key, save_public_key, load_private_key, encrypt_symmetric_key, decrypt_symmetric_key, save_encrypted_symmetric_key
 
 def load_settings(settings_path: str) -> dict[str, str]:
     """
     Загружает настройки из JSON-файла.
     """
-    with open(settings_path, "r", encoding="utf-8") as settings_file:
-        settings = json.load(settings_file)
+    try:
+        with open(settings_path, "r", encoding="utf-8") as settings_file:
+            settings = json.load(settings_file)
 
-    return settings
+        return settings
+
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"Файл настроек не найден: {settings_path}"
+        )
 
 def generation_mode(settings: dict[str,str]) ->None:
     """
     Генерирует ключи гибридной системы.
+    :param settings: словарь с путями к файлам ключей
+    :return: None
     """
     print("Генерация симметричного ключа AES")
     symmetric_key = generate_symmetric_key()
@@ -33,10 +41,7 @@ def generation_mode(settings: dict[str,str]) ->None:
     encrypted_key = encrypt_symmetric_key(symmetric_key, public_key)
 
     print("Сохранение зашифрованного симметричного ключа")
-    with open(settings["symmetric_key"],"wb") as key_file:
-        key_file.write(encrypted_key)
-    
-    print("Генерация ключей завершена.")
+    save_encrypted_symmetric_key(encrypted_key, settings["symmetric_key"])
 
 
 def encryption_mode(settings: dict[str,str]) -> None:
@@ -88,6 +93,8 @@ def main() -> None:
     group.add_argument("--gen", "--generation", dest="generation", help="Запускает режим генерации ключей")
     group.add_argument("--enc", "--encryption", dest="encryption", help="Запускает режим шифрования")
     group.add_argument("--dec", "--decryption", dest="decryption", help="Запускает режим дешифрования")
+    parser.add_argument("--private-key", dest="private_key", help="Путь к пользовательскому закрытому RSA-ключу")
+    parser.add_argument("--symmetric-key", dest="symmetric_key", help="Путь к пользовательскому зашифрованному симметричному ключу")
 
     args = parser.parse_args()
 
@@ -99,10 +106,18 @@ def main() -> None:
         case (False, True, False):
             print("Режим шифрования начинается")
             settings = load_settings(args.encryption)
+            if args.private_key is not None:
+                settings["private_key"] = args.private_key
+            if args.symmetric_key is not None:
+                settings["symmetric_key"] = args.symmetric_key
             encryption_mode(settings)
         case (False, False, True):
             print("Режим дешифрования начинается")
             settings = load_settings(args.decryption)
+            if args.private_key is not None:
+                settings["private_key"] = args.private_key
+            if args.symmetric_key is not None:
+                settings["symmetric_key"] = args.symmetric_key
             decryption_mode(settings)
         case _:
             raise ValueError("Неизвестный режим работы программы.")
