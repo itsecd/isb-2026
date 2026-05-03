@@ -3,10 +3,14 @@ import argparse
 
 from symmetric_crypto import generate_symmetric_key, encrypt_file_aes, decrypt_file_aes
 from asymmetric_crypto import generate_rsa_key, save_private_key, save_public_key, load_private_key, encrypt_symmetric_key, decrypt_symmetric_key, save_encrypted_symmetric_key
+from file_utils import read_binary_file, write_binary_file
 
 def load_settings(settings_path: str) -> dict[str, str]:
     """
     Загружает настройки из JSON-файла.
+
+    :param settings_path: путь к файлу настроек
+    :return: словарь с настройками
     """
     try:
         with open(settings_path, "r", encoding="utf-8") as settings_file:
@@ -47,13 +51,15 @@ def generation_mode(settings: dict[str,str]) ->None:
 def encryption_mode(settings: dict[str,str]) -> None:
     """
     Шифрует файл гибридной системой.
+
+    :param settings: словарь с путями к файлам
+    :return: None
     """
     print("Загрузка закрытого ключа RSA")
     private_key = load_private_key(settings["private_key"])
 
     print("Загрузка зашифрованного симметричного ключа")
-    with open(settings["symmetric_key"], "rb") as key_file:
-        encrypted_key = key_file.read()
+    encrypted_key = read_binary_file(settings["symmetric_key"])
 
     print("Расшифрование симметричного ключа")
     symmetric_key = decrypt_symmetric_key(encrypted_key,private_key)
@@ -66,13 +72,15 @@ def encryption_mode(settings: dict[str,str]) -> None:
 def decryption_mode(settings: dict[str,str]) -> None:
     """
     Дешифрует файл гибридной системой.
+
+    :param settings: словарь с путями к файлам
+    :return: None
     """
     print("Загрузка закрытого ключа RSA")
     private_key = load_private_key(settings["private_key"])
 
     print("Загрузка зашифрованного симметричного ключа")
-    with open(settings["symmetric_key"], "rb") as key_file:
-        encrypted_key = key_file.read()
+    encrypted_key = read_binary_file(settings["symmetric_key"])
     
     print("Расшифрование симметричного ключа")
     symmetric_key = decrypt_symmetric_key(encrypted_key, private_key)

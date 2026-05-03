@@ -8,6 +8,8 @@ from file_utils import  write_binary_file, read_binary_file
 def generate_rsa_key() -> tuple[rsa.RSAPrivateKey, rsa.RSAPublicKey]:
     """
     Генерирует пару RSA-ключей.
+
+    :return: закрытый и открытый RSA-ключи
     """
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
@@ -18,6 +20,10 @@ def generate_rsa_key() -> tuple[rsa.RSAPrivateKey, rsa.RSAPublicKey]:
 def save_public_key(public_key: rsa.RSAPublicKey, public_key_path: str) -> None:
     """
     Сохраняет открытый RSA-ключ.
+
+    :param public_key: открытый RSA-ключ
+    :param public_key_path: путь для сохранения открытого ключа
+    :return: None
     """
     with open(public_key_path, "wb") as public_file:
         public_file.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,
@@ -28,6 +34,10 @@ def save_public_key(public_key: rsa.RSAPublicKey, public_key_path: str) -> None:
 def save_private_key(private_key: rsa.RSAPrivateKey, private_key_path: str) -> None:
     """
     Сохраняет закрытый RSA-ключ.
+    
+    :param private_key: закрытый RSA-ключ
+    :param private_key_path: путь для сохранения закрытого ключа
+    :return: None
     """
     with open(private_key_path, "wb") as private_file:
         private_file.write(private_key.private_bytes(
@@ -40,6 +50,9 @@ def save_private_key(private_key: rsa.RSAPrivateKey, private_key_path: str) -> N
 def load_private_key(private_key_path: str) -> rsa.RSAPrivateKey:
     """
     Загружает закрытый RSA-ключ.
+
+    :param private_key_path: путь к файлу закрытого ключа
+    :return: закрытый RSA-ключ
     """
     try:
         private_key_data = read_binary_file(private_key_path)
@@ -57,6 +70,9 @@ def load_private_key(private_key_path: str) -> rsa.RSAPrivateKey:
 def load_public_key(public_key_path: str) -> rsa.RSAPublicKey:
     """
     Загружает открытый RSA-ключ.
+
+    :param public_key_path: путь к файлу открытого ключа
+    :return: открытый RSA-ключ
     """
     with open(public_key_path, "rb") as public_file:
         public_key_data = public_file.read()
@@ -69,6 +85,10 @@ def load_public_key(public_key_path: str) -> rsa.RSAPublicKey:
 def encrypt_symmetric_key(symmetric_key: bytes, public_key: rsa.RSAPublicKey) -> bytes:
     """
     Шифрует AES-ключ открытым RSA-ключом.
+
+    :param symmetric_key: симметричный AES-ключ
+    :param public_key: открытый RSA-ключ
+    :return: зашифрованный AES-ключ
     """
     encrypt_symmetric_key = public_key.encrypt(symmetric_key,
                                                asymmetric_padding.OAEP(
@@ -83,6 +103,10 @@ def encrypt_symmetric_key(symmetric_key: bytes, public_key: rsa.RSAPublicKey) ->
 def decrypt_symmetric_key(encrypted_symmetric_key: bytes, private_key: rsa.RSAPrivateKey) -> bytes:
     """
     Расшифровывает AES-ключ закрытым RSA-ключом.
+
+    :param encrypted_symmetric_key: зашифрованный AES-ключ
+    :param private_key: закрытый RSA-ключ
+    :return: расшифрованный AES-ключ
     """
     symmetric_key = private_key.decrypt(encrypted_symmetric_key,
                                         asymmetric_padding.OAEP(

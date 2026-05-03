@@ -5,13 +5,20 @@ from file_utils import read_binary_file, write_binary_file
 
 def generate_symmetric_key() -> bytes:
     """
-    Шифрует файл алгоритмом AES-CBC.
+    Генерирует AES-ключ.
+
+    :return: AES-ключ длиной 32 байта
     """
     return os.urandom(32)
 
-def encrypt_file_aes(input_file_path: str, output_file_path: str, symmetric_key: str) -> None:
+def encrypt_file_aes(input_file_path: str, output_file_path: str, symmetric_key: bytes) -> None:
     """
     Шифрует файл алгоритмом AES-CBC.
+
+    :param input_file_path: путь к исходному файлу
+    :param output_file_path: путь для сохранения зашифрованного файла
+    :param symmetric_key: симметричный AES-ключ
+    :return: None
     """
     plaintext = read_binary_file(input_file_path)
 
@@ -31,6 +38,11 @@ def encrypt_file_aes(input_file_path: str, output_file_path: str, symmetric_key:
 def decrypt_file_aes(input_file_path: str, output_file_path: str, symmetric_key: bytes) -> None:
     """
     Дешифрует файл алгоритмом AES-CBC.
+
+    :param input_file_path: путь к зашифрованному файлу
+    :param output_file_path: путь для сохранения расшифрованного файла
+    :param symmetric_key: симметричный AES-ключ
+    :return: None
     """
     encrypted_data = read_binary_file(input_file_path)
 
