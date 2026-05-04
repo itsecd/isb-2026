@@ -5,6 +5,13 @@ from cryptography.hazmat.primitives import padding as sym_padding
 def encrypt_text(text: str, key: bytes) -> bytes:
     """
     Шифровка текста алгоритмом CAST5
+
+    принимает:
+        text: Исходный текст для шифрования 
+        key: Симметричный ключ 
+
+    возвращает:
+        bytes: Зашифрованные данные 
     """
     data = text.encode('utf-8')
     padder = sym_padding.PKCS7(64).padder()
@@ -17,9 +24,17 @@ def encrypt_text(text: str, key: bytes) -> bytes:
     ciphertext = encryptor.update(padded_data) + encryptor.finalize()
     return iv + ciphertext
 
+
 def decrypt_text(encrypt_text: bytes, key: bytes) -> str:
     """
     Дешифрование данных алгоритмом CAST5
+
+    принимает:
+        encrypt_text: Зашифрованные данные 
+        key: Симметричный ключ 
+
+    возвращает:
+        str: Расшифрованный текст
     """
     iv = encrypt_text[:8]
     ciphertext = encrypt_text[8:]

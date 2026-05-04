@@ -1,10 +1,17 @@
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 
-def encrypt_symmetric_key(symmetric_key: bytes, public_key) -> bytes:
+def encrypt_symmetric_key(symmetric_key: bytes, public_key: RSAPublicKey) -> bytes:
     """
     Шифровка симметричного ключа
+
+    принимает:
+        symmetric_key: Сгенерированный симметричный ключ 
+        public_key: Открытый ключ RSA
+
+    возвращает:
+        bytes: Зашифрованный симметричный ключ
     """
     encrypted_key = public_key.encrypt(
         symmetric_key,
@@ -19,6 +26,13 @@ def encrypt_symmetric_key(symmetric_key: bytes, public_key) -> bytes:
 def decrypt_key(encrypt_sym_key: bytes, private_key: RSAPrivateKey) -> bytes:
     """
     Дешифровка симметричного ключа 
+
+    принимает:
+        encrypt_sym_key: Зашифрованный симметричный ключ 
+        private_key: Закрытый ключ RSA
+
+    возвращает:
+        bytes: Расшифрованный симметричный ключ
     """
     dc_key = private_key.decrypt(
         encrypt_sym_key,

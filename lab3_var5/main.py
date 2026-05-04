@@ -43,26 +43,30 @@ def get_settings() -> dict:
 def main():
     config = get_settings()
 
-    if config["mode"] == "gen":
-        private_key, public_key = generate_key.generating_asymmetric_key()
-        load_and_save_data.save_asym_keys(private_key, public_key, config["private_key"], config["public_key"])
-       
-    elif config["mode"] == "enc":
-        public_key = load_and_save_data.load_public_key(config["public_key"])
-        sym_key = generate_key.generating_symmetric_key(config["key_len"] // 8)  
-        text = load_and_save_data.read_text_file(config["initial_file"])
-        encrypt_text_bytes = symmetric.encrypt_text(text, sym_key)
-        encrypt_sym_key = asymmetric.encrypt_symmetric_key(sym_key, public_key)
-        load_and_save_data.save_symmetric_key(encrypt_sym_key, config["symmetric_key"])
-        load_and_save_data.write_binary_file(encrypt_text_bytes, config["encrypted_file"])
-        
-    elif config["mode"] == "dec":
-        private_key = load_and_save_data.load_private_key(config["private_key"])
-        sym_key_encrypted = load_and_save_data.load_encrypt_symmetric_key(config["symmetric_key"])
-        sym_key = asymmetric.decrypt_key(sym_key_encrypted, private_key)
-        encrypted_text = load_and_save_data.read_binary_file(config["encrypted_file"])
-        decrypted_text = symmetric.decrypt_text(encrypted_text, sym_key)
-        load_and_save_data.write_text_file(decrypted_text, config["decrypted_file"])
+    match config["mode"]:
+        case "gen":
+            private_key, public_key = generate_key.generating_asymmetric_key()
+            load_and_save_data.save_asym_keys(private_key, public_key, config["private_key"], config["public_key"])
+           
+        case "enc":
+            public_key = load_and_save_data.load_public_key(config["public_key"])
+            sym_key = generate_key.generating_symmetric_key(config["key_len"] // 8)  
+            text = load_and_save_data.read_text_file(config["initial_file"])
+            encrypt_text_bytes = symmetric.encrypt_text(text, sym_key)
+            encrypt_sym_key = asymmetric.encrypt_symmetric_key(sym_key, public_key)
+            load_and_save_data.save_symmetric_key(encrypt_sym_key, config["symmetric_key"])
+            load_and_save_data.write_binary_file(encrypt_text_bytes, config["encrypted_file"])
+            
+        case "dec":
+            private_key = load_and_save_data.load_private_key(config["private_key"])
+            sym_key_encrypted = load_and_save_data.load_encrypt_symmetric_key(config["symmetric_key"])
+            sym_key = asymmetric.decrypt_key(sym_key_encrypted, private_key)
+            encrypted_text = load_and_save_data.read_binary_file(config["encrypted_file"])
+            decrypted_text = symmetric.decrypt_text(encrypted_text, sym_key)
+            load_and_save_data.write_text_file(decrypted_text, config["decrypted_file"])
+            
+        case _:
+            print("Ошибка: неизвестный режим работы.")
 
 if __name__ == "__main__":
     main()
