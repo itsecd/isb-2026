@@ -14,14 +14,14 @@ def parsing()-> argparse.Namespace:
     group.add_argument('-enc','--encryption',action='store_true',help="Режим шифрования данных")
     group.add_argument('-dec','--decryption',action='store_true',help="Режим дешифрования данных")
 
-    parser.add_argument("enc_key", type=str,help="Путь к зашифрованному симметричному ключу")
-    parser.add_argument("rsa_pri_key", type=str,help="Путь к закрытому ассимметричному ключу")
-    parser.add_argument("rsa_pub_key", type=str,help="Путь к открытому ассимметричному ключу")
-    parser.add_argument("enc_text", type=str,help="Путь для сохранения(доступа) к зашифрованному тексту")
-    parser.add_argument("dec_text", type=str,help="Путь к расшифрованному тексту")
-    parser.add_argument("init_text", type=str,help="Путь к шифруемому текстовому файлу")
-    parser.add_argument("len_key", type=str,help="Длина ключа")
-    parser.add_argument("config", type=str,nargs='?', default="config.json",help="Путь к файлу настроек(по умолчанию config.json)")
+    parser.add_argument("--enc_key", type=str,help="Путь к зашифрованному симметричному ключу")
+    parser.add_argument("--rsa_pri_key", type=str,help="Путь к закрытому ассимметричному ключу")
+    parser.add_argument("--rsa_pub_key", type=str,help="Путь к открытому ассимметричному ключу")
+    parser.add_argument("--enc_text", type=str,help="Путь для сохранения(доступа) к зашифрованному тексту")
+    parser.add_argument("--dec_text", type=str,help="Путь к расшифрованному тексту")
+    parser.add_argument("--init_text", type=str,help="Путь к шифруемому текстовому файлу")
+    parser.add_argument("--len_key", type=str,help="Длина ключа")
+    parser.add_argument("--config", type=str,nargs='?', default="config.json",help="Путь к файлу настроек(по умолчанию config.json)")
 
     return parser.parse_args()
 
