@@ -22,12 +22,13 @@ def parser() -> argparse.Namespace:
         "-dec", "--decryption", action="store_true", help="Запускает режим дешифрования"
     )
     parser.add_argument("-k", "--key-size", type=int, default=256)
+    parser.add_argument("-s", "--settings", default="settings.json")
     return parser.parse_args()
 
 
-def load_setting() -> dict:
+def load_setting(setting_path: str) -> dict:
     """Загружает настройки из файла settings.json."""
-    with open("settings.json") as json_file:
+    with open(setting_path) as json_file:
         json_data = json.load(json_file)
     return json_data
 
@@ -35,7 +36,8 @@ def load_setting() -> dict:
 def main() -> None:
     """Точка входа в программу."""
     args = parser()
-    settings = load_setting()
+    settings_path = args.settings
+    settings = load_setting(settings_path)
 
     match args:
         case _ if args.generation:
