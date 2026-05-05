@@ -1,6 +1,7 @@
 import sys
 import json
 import argparse
+from gen_key import *
 
 
 def load_settings(filepath: str):
@@ -9,6 +10,8 @@ def load_settings(filepath: str):
             json_data = json.load(json_file)
     except FileNotFoundError:
         raise 
+
+
 def parse_args() -> argparse.Namespace:
     """
     Parse parameters from console.
@@ -42,7 +45,17 @@ def main() -> None:
         settings = load_settings(args.settings)
 
         if args.gen is None:
-            print("GENERATE")
+            print("Generate keys...")
+            symmetric_key = generate_symmetric_key(args.key_size)
+            private_key, public_key = generate_rsa_keys()
+
+            save_symmetric_key(symmetric_key, args.sym_key_out)
+            print(f"The symmetric key is saved", )
+            save_public_key(public_key, args.pub_key_out)
+            print(f"The public key is saved", )
+            save_private_key(private_key, args.priv_key_out)
+            print(f"The private key is saved", )
+
         elif args.enc is None:
             print("ENCRYPTING")
         else: 
