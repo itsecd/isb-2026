@@ -7,17 +7,12 @@ import argparse
 def parser():
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required = True)
-    group.add_argument('-gen','--generation',help='Запускает режим генерации ключей')
-    group.add_argument('-enc','--encryption',help='Запускает режим шифрования')
-    group.add_argument('-dec','--decryption',help='Запускает режим дешифрования')
-    settings = json_parser()
+    group.add_argument('-gen','--generation',type = int, help='Запускает режим генерации ключей')
+    group.add_argument('-enc','--encryption',action='store_true',help='Запускает режим шифрования')
+    group.add_argument('-dec','--decryption',action='store_true',help='Запускает режим дешифрования')
     args = parser.parse_args()
-    if args.generation is not None:
-        return gen_logic(settings)
-    elif args.encryption is not None:
-        return enc_logic(settings)
-    else:
-        return dec_logic(settings)
+    return args
+    
 
 def json_parser() -> dict:
     try:
@@ -29,19 +24,23 @@ def json_parser() -> dict:
 
 
 def main():
-    parser()
+    action = parser()
     settings = json_parser()
-    action = str(input("Выберите действие(enc/dec/gen/exit):")).lower()
-    while(action != "exit"):
-        match action:
-            case "enc":
-               enc_logic(settings)
-            case "dec":
-                dec_logic(settings)
-            case "gen":
-                gen_logic(settings)
-        action = str(input("Выберите действие(enc/dec/gen/exit):")).lower()
-    return 0
+    match action:
+        case _ if action.encryption:
+            enc_logic(settings)
+        case _ if action.decryption:
+            dec_logic(settings)
+        case _ if action.generation is not None:
+            match action.generation:
+                case 64:
+                    gen_logic(settings, action.generation)
+                case 128:
+                    gen_logic(settings, action.generation)
+                case 192:
+                    gen_logic(settings, action.generation)
+                case _:
+                    print("Некорректная длинна ключа")
 
 if __name__ == "__main__":
     main()
