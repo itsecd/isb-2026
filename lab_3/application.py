@@ -218,6 +218,7 @@ class HybridCryptoSystemApp(QMainWindow):
             data: Словарь с данными из полей ввода.
 
         Raises:
+            ValueError: Поле с путем пустое.
             FileNotFoundError: Файл не найден.
             PermissionError: Нет доступа к файлу.
             RuntimeError: Ошибка при чтении.
@@ -229,7 +230,7 @@ class HybridCryptoSystemApp(QMainWindow):
                 raise ValueError(f"Поле '{key}' пустое")
 
             try:
-                with open(path, "rb") as f:
+                with open(path, "rb"):
                     pass
             except FileNotFoundError:
                 raise FileNotFoundError(f"Файл не найден: {path}")
