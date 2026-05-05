@@ -41,18 +41,11 @@ def enc_logic(settings: dict):
     while(action != "Да" and action != "Нет" and action != "да" and action != "нет"):
         action = str(input("Желаете сгенерировать ключи шифрования?(Да\Нет): ")).lower()
     match action:
-        case _:
-            symmetric_key, public_key, private_key = gen_logic()
         case "нет":
             action = str(input("Ключи записаны в стандартные директории?(Да\Нет): ")).lower()
             while(action != "Да" and action != "Нет" and action != "да" and action != "нет"):
                 action = str(input("Ключи записаны в стандартные директории?(Да\Нет): ")).lower()
             match action:
-                case _:
-                    symmetric_key = read_symmetric_key(settings["symmetric_key_path"])
-                    public_key, private_key = read_asymmetric_key(settings["public_key_path"], settings["private_key_path"])
-                    symmetric_key = decrypt_symmetric_key(symmetric_key, private_key)
-                    print("Ключи успешно загружены")
                 case "нет":
                     symmetric_key_path = str(input("Введите путь(имя) файла 3DES ключа: "))
                     symmetric_key = read_symmetric_key(symmetric_key_path)
@@ -61,63 +54,74 @@ def enc_logic(settings: dict):
                     public_key, private_key = read_asymmetric_key(public_key_path, private_key_path)
                     symmetric_key = decrypt_symmetric_key(symmetric_key, private_key)
                     print("Ключи успешно загружены")
-    action = str(input("Текст записаны в стандартные директории?(Да\Нет): "))
-    while(action != "Да" and action != "Нет" and action != "да" and action != "нет"):
-        action = str(input("Ключи записаны в стандартные директории?(Да\Нет): "))
-    match action:
+                case _:
+                    symmetric_key = read_symmetric_key(settings["symmetric_key_path"])
+                    public_key, private_key = read_asymmetric_key(settings["public_key_path"], settings["private_key_path"])
+                    symmetric_key = decrypt_symmetric_key(symmetric_key, private_key)
+                    print("Ключи успешно загружены")
         case _:
-            text = read_text(settings["initial_file_path"])
+            symmetric_key, public_key, private_key = gen_logic()
+    action = str(input("Текст записаны в стандартные директории?(Да\Нет): ")).lower()
+    while(action != "Да" and action != "Нет" and action != "да" and action != "нет"):
+        action = str(input("Ключи записаны в стандартные директории?(Да\Нет): ")).lower()
+    match action:
         case "нет":
             initial_file_path = str(input("Введите путь(имя) к тексту: "))
             text = read_text(initial_file_path)
+        case _:
+            text = read_text(settings["initial_file_path"])
     enc_text = encrypt_text(text, symmetric_key)
     print("Текст успешно зашифрован")
-    action = str(input("Записать хашифрованный текст в стандартные директории?(Да\Нет): "))
+    action = str(input("Записать хашифрованный текст в стандартные директории?(Да\Нет): ")).lower()
     while(action != "Да" and action != "Нет" and action != "да" and action != "нет"):
-        action = str(input("Записать хашифрованный текст в стандартные директории?: "))
-    if action == "Да" or action == "да":
-        write_text(enc_text, settings["encrypted_file_path"])
-    else:
-        enc_path = str(input("Введите путь(имя) файла для сохранения зашифрованного сообщения: "))
-        write_text(enc_text, enc_path)
+        action = str(input("Записать хашифрованный текст в стандартные директории?: ")).lower()
+    match action:
+        case "нет":
+            enc_path = str(input("Введите путь(имя) файла для сохранения зашифрованного сообщения: "))
+            write_text(enc_text, enc_path)
+        case _:
+            write_text(enc_text, settings["encrypted_file_path"])
     return enc_text, symmetric_key
     
 
 def dec_logic(settings: dict):
     """консольный интерфейс"""
     print("Мастер дешифровки текста")
-    action = str(input("Ключи записаны в стандартные директории(Да\Нет)?: "))
+    action = str(input("Ключи записаны в стандартные директории(Да\Нет)?: ")).lower()
     while(action != "Да" and action != "Нет" and action != "да" and action != "нет"):
-        action = str(input("Ключи записаны в стандартные директории(Да\Нет)?: "))
-    if action == "Да" or action == "да":
-        symmetric_key = read_symmetric_key(settings["symmetric_key_path"])
-        public_key, private_key = read_asymmetric_key(settings["public_key_path"], settings["private_key_path"])
-        symmetric_key = decrypt_symmetric_key(symmetric_key, private_key)
-        print("Ключи успешно загружены")
-    else:
-        symmetric_key_path = str(input("Введите путь(имя) файла 3DES ключа: "))
-        symmetric_key = read_symmetric_key(symmetric_key_path)
-        public_key_path = str(input("Введите путь(имя) файла для сохранения RSAPublic ключа: "))
-        private_key_path = str(input("Введите путь(имя) файла для сохранения RSAPrivate ключа: "))
-        public_key, private_key = read_asymmetric_key(public_key_path, private_key_path)
-        symmetric_key = decrypt_symmetric_key(symmetric_key, private_key)
-        print("Ключи успешно загружены")
-    action = str(input("Текст записаны в стандартные директории?(Да\Нет): "))
+        action = str(input("Ключи записаны в стандартные директории(Да\Нет)?: ")).lower()
+    match action:
+        case "нет":
+            symmetric_key_path = str(input("Введите путь(имя) файла 3DES ключа: "))
+            symmetric_key = read_symmetric_key(symmetric_key_path)
+            public_key_path = str(input("Введите путь(имя) файла для сохранения RSAPublic ключа: "))
+            private_key_path = str(input("Введите путь(имя) файла для сохранения RSAPrivate ключа: "))
+            public_key, private_key = read_asymmetric_key(public_key_path, private_key_path)
+            symmetric_key = decrypt_symmetric_key(symmetric_key, private_key)
+            print("Ключи успешно загружены")
+        case _:
+            symmetric_key = read_symmetric_key(settings["symmetric_key_path"])
+            public_key, private_key = read_asymmetric_key(settings["public_key_path"], settings["private_key_path"])
+            symmetric_key = decrypt_symmetric_key(symmetric_key, private_key)
+            print("Ключи успешно загружены")
+    action = str(input("Текст записаны в стандартные директории?(Да\Нет): ")).lower()
     while(action != "Да" and action != "Нет" and action != "да" and action != "нет"):
-        action = str(input("Ключи записаны в стандартные директории?(Да\Нет): "))
-    if action == "Да" or action == "да":
-        text = read_text(settings["encrypted_file_path"])
-    else:
-        enc_path = str(input("Введите путь(имя) к тексту: "))
-        text = read_text(enc_path)
+        action = str(input("Ключи записаны в стандартные директории?(Да\Нет): ")).lower()
+    match action:
+        case "нет":
+            enc_path = str(input("Введите путь(имя) к тексту: "))
+            text = read_text(enc_path)
+        case _:
+            text = read_text(settings["encrypted_file_path"])
     text = decrypt_text(text, symmetric_key)
     print("Текст успешно расшифрован")
-    action = str(input("Записать расшифрованный текст в стандартные директории?(Да\Нет): "))
+    action = str(input("Записать расшифрованный текст в стандартные директории?(Да\Нет): ")).lower()
     while(action != "Да" and action != "Нет" and action != "да" and action != "нет"):
-        action = str(input("Записать расшифрованный текст в стандартные директории?: "))
-    if action == "Да" or action == "да":
-        write_text(text, settings["decrypted_file_path"])
-    else:
-        enc_path = str(input("Введите путь(имя) файла для сохранения зашифрованного сообщения: "))
-        write_text(text, enc_path)
+        action = str(input("Записать расшифрованный текст в стандартные директории?: ")).lower()
+    match action:
+        case "нет":
+            enc_path = str(input("Введите путь(имя) файла для сохранения зашифрованного сообщения: "))
+            write_text(text, enc_path)
+        case _:
+            write_text(text, settings["decrypted_file_path"])
     return text, symmetric_key

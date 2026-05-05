@@ -16,7 +16,13 @@ def padding_text(text:bytes) ->bytes:
     return padded_text
 
 def encrypt_text(text:bytes, symmetric_key:bytes) -> bytes:
-    """шифрование текста помощью алгоритма 3DES"""
+    """
+    Шифрование текста помощью алгоритма 3DES
+    Входные данные:
+    text - данные для шифрования
+    symmetric_key - симметричный ключ шифрования
+    Возвращает зашифрованные данные (bytes)
+    """
     iv = os.urandom(8) 
     cipher = Cipher(algorithms.TripleDES(symmetric_key), modes.CBC(iv))
     encryptor = cipher.encryptor()
@@ -25,7 +31,13 @@ def encrypt_text(text:bytes, symmetric_key:bytes) -> bytes:
     return iv + encrypted_text
 
 def decrypt_text(encrypted_data: bytes, symmetric_key: bytes) -> str:
-    """Дешифровка и удаление паддинга"""
+    """
+    Дешифровка и удаление паддинга с помощью алгоритма 3DES
+    Входные данные:
+    encrypted_text - данные для дешифрования
+    symmetric_key - симметричный ключ шифрования
+    Возвращает расшифрованные данные (bytes)
+    """
     try:
         iv = encrypted_data[:8]
         ciphertext = encrypted_data[8:]

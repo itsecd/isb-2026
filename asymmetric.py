@@ -5,12 +5,24 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPubl
 
 
 def encrypt_symmetric_key(symmetric_key: bytes, public_key: RSAPublicKey) -> bytes:
-    """шифрование ключа с помощью RSA-OAEP"""
+    """
+    Шифрование ключа с помощью RSA-OAEP
+    Входные данные:
+    symmetric_key - данные для шифрования(в данном случае симметричный ключ)
+    public_key - открытый RSA ключ
+    Возвращает зашифрованные данные (bytes)
+    """
     encrypted_key = public_key.encrypt(symmetric_key, padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
     return encrypted_key
 
 def decrypt_symmetric_key(encrypted_key: bytes, private_key: RSAPrivateKey) -> bytes:
-    """дешифровка ключа"""
+    """
+    Дешифровка ключа с помощью RSA-OAEP
+    Входные данные:
+    encrypted_key - данные для дешифрования(в данном случае симметричный ключ)
+    private_key - закрытый RSA ключ
+    Возвращает расшифрованные данные (bytes)
+    """
     return private_key.decrypt(encrypted_key,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
 
 def get_asymmetric_key() -> bytes:
