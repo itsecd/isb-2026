@@ -25,7 +25,14 @@ class HybridCryptoSystemApp(QMainWindow):
 
 
     def load_settings(self):
-        """Загрузка настроек из JSON файла."""
+        """
+        Загрузка настроек из JSON файла.
+
+        Returns:
+            Словарь с настройками. 
+            Возвращает пустой словарь, если файл не найден 
+            или произошла ошибка чтения.
+        """
         if os.path.exists("settings.json"):
             try:
                 with open("settings.json", "r", encoding="utf-8") as f:
@@ -36,13 +43,21 @@ class HybridCryptoSystemApp(QMainWindow):
         return {}
 
     def fill_fields_from_settings(self):
-        """Заполнение полей данными с настроек"""
+        """
+        Заполнение полей данными с настроек
+        """
         for key, field in self.input_fields.items():
             if key in self.settings:
                 field.setText(self.settings[key])
 
     def collect_input_data(self):
-        """Собирание данных с интерфейса."""
+        """
+        Сбор данных с интерфейса.
+
+        Returns:
+            Словарь, где ключи - названия параметров, 
+            а значения - текст из полей ввода.
+        """
         data = {}
         for key, field in self.input_fields.items():
             data[key] = field.text().strip()
@@ -182,13 +197,31 @@ class HybridCryptoSystemApp(QMainWindow):
 
 
     def open_file_dialog(self, key):
-        """Обработка диалогового окна."""
+        """
+        Обработка диалогового окна.
+
+        Args:
+            key: Ключ поля ввода, в которое будет записан путь к файлу.
+        """
         path, _ = QFileDialog.getOpenFileName(self, "Выберите файл")
         if path:
             self.input_fields[key].setText(path)
 
     def validate_input(self, required_keys, data):
-        """Проверка ввода пользователя."""
+        """
+        Проверка ввода пользователя.
+
+        Проверяет пути в полях, существование и доступность файла
+
+        Args:
+            required_keys: Список ключей, обязательных для операции.
+            data: Словарь с данными из полей ввода.
+
+        Raises:
+            FileNotFoundError: Файл не найден.
+            PermissionError: Нет доступа к файлу.
+            RuntimeError: Ошибка при чтении.
+        """
         for key in required_keys:
             path = data.get(key)
 
@@ -196,14 +229,21 @@ class HybridCryptoSystemApp(QMainWindow):
                 raise ValueError(f"Поле '{key}' пустое")
 
             try:
-                with open(path, "rb"):
+                with open(path, "rb") as f:
                     pass
-            except:
-                if not os.path.exists(path):
-                    raise FileNotFoundError(f"Файл не найден: {path}")
+            except FileNotFoundError:
+                raise FileNotFoundError(f"Файл не найден: {path}")
+            except PermissionError:
+                raise PermissionError(f"Нет доступа к чтению файла: {path}")
+            except Exception as e:
+                raise RuntimeError(f"Критическая ошибка при чтении файла: {e}")
+
+
 
     def run_operation(self):
-        """Выполнение операции шифрования или дешифрования."""
+        """
+        Выполнение операции шифрования или дешифрования.
+        """
         data = self.collect_input_data()
 
         try:
@@ -227,6 +267,9 @@ class HybridCryptoSystemApp(QMainWindow):
             self.show_error(str(e))
 
     def generate_keys(self):
+        """
+        Сбор данных и генерация всех ключей.
+        """
         paths = self.collect_input_data()
 
         try:
@@ -251,10 +294,22 @@ class HybridCryptoSystemApp(QMainWindow):
 
 
     def update_status(self, message):
+        """
+        Отображение сообщения статуса и информационного окна.
+
+        Args:
+            message (str): Текст сообщения.
+        """
         self.status.append(message)
         QMessageBox.information(self, "Информация", message)
 
     def show_error(self, message):
+        """
+        Отображение сообщения ошибки и её окна.
+
+        Args:
+            message (str): Текст сообщения.
+        """
         self.status.append("Ошибка: " + message)
         QMessageBox.critical(self, "Ошибка", message)
 

@@ -5,6 +5,9 @@ from cryptography.hazmat.primitives import serialization, hashes
 def generate_rsa_keys():
     """
     Генерация пары RSA-ключей.
+
+    Returns:
+        Кортеж (RSAPrivateKey, RSAPublicKey).
     """
     private_key = rsa.generate_private_key(
         public_exponent=65537,
@@ -16,6 +19,13 @@ def generate_rsa_keys():
 def serialize_private_rsa_key(private_key, path):
     """
     Сериализация (сохранение) приватного RSA-ключа в файл.
+
+    Args:
+        private_key: Объект приватного ключа RSA.
+        path: Путь к файлу для записи.
+
+    Raises:
+        RuntimeError: Ошибка при сериализации ключа.
     """
     try:
         with open(path, 'wb') as f:
@@ -31,6 +41,13 @@ def serialize_private_rsa_key(private_key, path):
 def serialize_public_rsa_key(public_key, path):
     """
     Сериализация (сохранение) публичного RSA-ключа в файл.
+    
+    Args:
+        public_key: Объект публичного ключа RSA.
+        path: Путь к файлу для записи.
+
+    Raises:
+        RuntimeError: Ошибка при сериализации ключа.
     """
     try:
         with open(path, 'wb') as f:
@@ -45,6 +62,15 @@ def serialize_public_rsa_key(public_key, path):
 def deserialize_private_rsa_key(path):
     """
     Десериализация (загрузка) приватного RSA-ключа из файла.
+    
+    Args:
+        path: Путь к файлу с приватным ключом.
+
+    Returns:
+        Объект RSAPrivateKey.
+
+    Raises:
+        RuntimeError: Ошибка при десериализации.
     """
     try:
         with open(path, 'rb') as f:
@@ -56,6 +82,15 @@ def deserialize_private_rsa_key(path):
 def deserialize_public_rsa_key(path):
     """
     Десериализация (загрузка) публичного RSA-ключа из файла.
+    
+    Args:
+        path: Путь к файлу с публичным ключом.
+
+    Returns:
+        Объект RSAPublicKey.
+
+    Raises:
+        RuntimeError: Ошибка при десериализации.
     """
     try:
         with open(path, 'rb') as f:
@@ -67,6 +102,16 @@ def deserialize_public_rsa_key(path):
 def encrypt_with_rsa_key(data, public_key):
     """
     Шифрование данных с использованием публичного RSA-ключа.
+    
+    Args:
+        data: Исходные данные в байтах.
+        public_key: Объект публичного ключа RSA.
+
+    Returns:
+        Зашифрованные данные в байтах.
+
+    Raises:
+        RuntimeError: Ошибка в процессе шифрования.
     """
     try:
         return public_key.encrypt(
@@ -84,6 +129,16 @@ def encrypt_with_rsa_key(data, public_key):
 def decrypt_with_rsa_key(ciphertext, private_key):
     """
     Расшифрование данных с использованием приватного RSA-ключа.
+    
+    Args:
+        ciphertext: Зашифрованные данные в байтах.
+        private_key: Объект приватного ключа RSA.
+
+    Returns:
+        Расшифрованные данные в байтах.
+
+    Raises:
+        RuntimeError: Ошибка в процессе расшифрования.
     """
     try:
         return private_key.decrypt(

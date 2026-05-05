@@ -32,6 +32,15 @@ def generate_all_keys(
     - симметричный ключ
     - одноразовый код nonce
     - пара ключей rsa
+
+    Args:
+        public_rsa_key_path: Путь для сохранения публичного ключа RSA.
+        private_rsa_key_path: Путь для сохранения приватного ключа RSA.
+        symmetric_key_path: Путь для сохранения симметричного ключа.
+        nonce_path: Путь для сохранения одноразового кода nonce.
+
+    Raises:
+        RuntimeError: Ошибка при генерации или сериализации.
     """
     sym_key = generate_chacha20_key()
     nonce = generate_nonce()
@@ -48,6 +57,18 @@ def generate_all_keys(
 def encrypt_file(settings: dict):
     """
     Шифрование файла с использованием гибридной криптосистемы.
+
+    Args:
+        settings: Словарь с путями, содержащий:
+            - public_key: путь к публичному ключу RSA.
+            - symmetric_key: путь к симметричному ключу.
+            - encrypted_symmetric_key: путь для сохранения зашифрованного ключа.
+            - nonce: путь к файлу с одноразовым кодом.
+            - initial_file: путь к исходному файлу.
+            - encrypted_file: путь для сохранения результата.
+
+    Raises:
+        RuntimeError: Ошибка при сериализации, десериализации или шифровании.
     """
     public_key = deserialize_public_rsa_key(settings["public_key"])
 
@@ -67,6 +88,17 @@ def encrypt_file(settings: dict):
 def decrypt_file(settings: dict):
     """
     Расшифровка файла с использованием гибридной криптосистемы.
+
+    Args:
+        settings: Словарь с путями, содержащий:
+            - secret_key: путь к приватному ключу RSA.
+            - encrypted_symmetric_key: путь к зашифрованному симметричному ключу.
+            - nonce: путь к файлу с одноразовым кодом.
+            - encrypted_file: путь к зашифрованному файлу.
+            - decrypted_file: путь для сохранения расшифрованного файла.
+
+    Raises:
+        RuntimeError: Ошибка при сериализации, десериализации или расшифровке.
     """
     private_key = deserialize_private_rsa_key(settings["secret_key"])
 
