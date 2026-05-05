@@ -1,0 +1,9 @@
+{
+  "initial_file": "input.txt",
+  "encrypted_file": "encrypted.enc",
+  "decrypted_file": "decrypted.txt",
+  "symmetric_key": "sym.key",
+  "public_key": "public.pem",
+  "secret_key": "private.pem",
+  "key_size": 16
+}
