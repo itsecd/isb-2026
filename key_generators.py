@@ -5,7 +5,8 @@ import os
 def generate_sym_key(size)->bytes:
     """Генерация ключа симметричного алгоритма"""
     if size<32 or size>448 or size%8!=0:
-        raise ValueError("Incorrect size you should enter the size between")
+        print("Incorrect size!")
+        sys.exit(1)
     return os.urandom(size//8)
 
 def generate_asy_key()->tuple[RSAPrivateKey, RSAPublicKey]:
