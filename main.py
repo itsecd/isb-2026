@@ -31,15 +31,16 @@ def json_parser() -> dict:
 def main():
     parser()
     settings = json_parser()
-    action = str(input("Выберите действие(enc/dec/gen/exit):"))
+    action = str(input("Выберите действие(enc/dec/gen/exit):")).lower()
     while(action != "exit"):
-        if action == "enc":
-            enc_logic(settings)
-        elif action == "dec":
-            dec_logic(settings)
-        elif action == "gen":
-            gen_logic(settings)
-        action = str(input("Выберите действие(enc/dec/gen/exit):"))
+        match action:
+            case "enc":
+               enc_logic(settings)
+            case "dec":
+                dec_logic(settings)
+            case "gen":
+                gen_logic(settings)
+        action = str(input("Выберите действие(enc/dec/gen/exit):")).lower()
     return 0
 
 if __name__ == "__main__":
