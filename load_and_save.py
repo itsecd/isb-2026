@@ -3,7 +3,15 @@ from cryptography.hazmat.primitives.serialization import load_pem_public_key, lo
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 
 def write_symmetric_key(symmetric_key: bytes, symmetric_path:str) -> None:
-    """сериализация ссиметричного ключа в файл"""
+    """
+    Сериализация симметричного ключа в файл
+    Входные данные:
+    symmetric_key - зашифрованный симметричный ключ шифрования
+    symmetric_path - путь к сохранению ключа
+    Сохраняет ключ в файл
+    Возвращает:
+    None
+    """
     try:
         with open(symmetric_path, 'wb') as key_file:
             key_file.write(symmetric_key)
@@ -11,7 +19,17 @@ def write_symmetric_key(symmetric_key: bytes, symmetric_path:str) -> None:
         print(f"Ошибка!: {ex}")
 
 def write_asymmetric_key(public_key:RSAPublicKey, private_key:RSAPrivateKey, public_path:str, private_path:str) -> None:
-    """сериализация ассиметричных ключей в файл"""
+    """
+    Сериализация асимметричных ключей в файл
+    Входные данные:
+    public_key - открытый RSA ключ
+    private_key - закрытый RSA ключ
+    public_path - зашифрованный симметричный ключ шифрования
+    private_path - путь к сохранению ключа
+    Сохраняет ключи в файл
+    Возвращает:
+    None
+    """
     try:
         with open(public_path, 'wb') as public_out:
                 public_out.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,
@@ -24,7 +42,13 @@ def write_asymmetric_key(public_key:RSAPublicKey, private_key:RSAPrivateKey, pub
         print(f"Ошибка!: {ex}")
 
 def read_symmetric_key(symmetric_key_path:str) -> bytes:
-    """чтение ключа из файла"""
+    """
+    Чтение ключа из файла
+    Входные данные:
+    symmetric_path - путь к симметричному ключу
+    Возвращает:
+    Зашифрованный симметричный ключ шифрования (bytes)
+    """
     try:
         with open(symmetric_key_path, mode='rb') as key_file: 
             key = key_file.read()
@@ -33,7 +57,14 @@ def read_symmetric_key(symmetric_key_path:str) -> bytes:
         print(f"Ошибка!: {ex}")
 
 def read_asymmetric_key(public_key_path:str, private_key_path) -> tuple:
-    """чтение RSA ключей из файлов"""
+    """
+    Чтение RSA ключей из файлов
+    Входные данные:
+    public_key_path - путь к открытому RSA ключу
+    private_key_path - путь к закрытому RSA ключу
+    Возвращает:
+    Зашифрованный симметричный ключ шифрования (bytes)
+    """
     try:
         with open(public_key_path, 'rb') as pem_in:
             public_bytes = pem_in.read()
@@ -46,7 +77,13 @@ def read_asymmetric_key(public_key_path:str, private_key_path) -> tuple:
         print(f"Ошибка!: {ex}")
 
 def read_text(initial_file_path:str) -> bytes:
-    """чтение текста из файла"""
+    """
+    Чтение текста из файла
+    Входные данные:
+    initial_file_path - путь к файлу с текстом
+    Возвращает:
+    Текст (bytes)
+    """
     try:
         with open(initial_file_path, 'rb') as f:
             return f.read()
@@ -55,7 +92,15 @@ def read_text(initial_file_path:str) -> bytes:
         return b""
     
 def write_text(text: bytes,  enc_file_path: str) -> None:
-    """запись расшифрованного текста в файл"""
+    """
+    Запись расшифрованного текста в файл
+    Входные данные:
+    text - текстом
+    enc_file_path - путь к сохранению файла
+    Сохраняет текст
+    Возвращает:
+    None
+    """
     try:
         with open(enc_file_path, 'wb') as f:
             f.write(text)

@@ -10,6 +10,8 @@ def parser():
     group.add_argument('-gen','--generation',type = int, help='Запускает режим генерации ключей')
     group.add_argument('-enc','--encryption',action='store_true',help='Запускает режим шифрования')
     group.add_argument('-dec','--decryption',action='store_true',help='Запускает режим дешифрования')
+    parser.add_argument('input', nargs='?', help='Путь к исходному файлу')
+    parser.add_argument('output', nargs='?', help='Путь к файлу результата')
     args = parser.parse_args()
     return args
     
@@ -26,11 +28,25 @@ def json_parser() -> dict:
 def main():
     action = parser()
     settings = json_parser()
+    input_path = action.input
+    output_path = action.output
     match action:
         case _ if action.encryption:
-            enc_logic(settings)
+            match input_path:
+                case None:
+                    input_path = settings["initial_file_path"]
+            match output_path:
+                case None:
+                    output_path = settings["encrypted_file_path"]
+            enc_logic(settings, input_path, output_path)
         case _ if action.decryption:
-            dec_logic(settings)
+            match input_path:
+                case None:
+                    input_path = settings["encrypted_file_path"]
+            match output_path:
+                case None:
+                    output_path = settings["decrypted_file_path"]
+            dec_logic(settings, input_path, output_path)
         case _ if action.generation is not None:
             match action.generation:
                 case 64:

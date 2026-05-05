@@ -26,7 +26,13 @@ def decrypt_symmetric_key(encrypted_key: bytes, private_key: RSAPrivateKey) -> b
     return private_key.decrypt(encrypted_key,padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
 
 def get_asymmetric_key() -> bytes:
-    """ключ для ассиметричного алгоритма"""
+    """
+    Генерация ключа для ассиметричного алгоритма
+    Входные данные:
+    ---
+    Возвращает:
+    Кортеж RSA ключей
+    """
     keys = rsa.generate_private_key(
     public_exponent=65537,
     key_size=2048
