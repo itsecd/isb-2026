@@ -1,13 +1,17 @@
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 import os
+import sys
 
 def generate_sym_key(size)->bytes:
     """Генерация ключа симметричного алгоритма"""
-    if size<32 or size>448 or size%8!=0:
-        print("Incorrect size!")
+    try:
+        if size<32 or size>448 or size%8!=0:
+            raise ValueError("Size should be in range from 32 to 442 in increments of 8 inclusive")
+        return os.urandom(size//8)
+    except ValueError as e:
+        print(f"Error:{e}")
         sys.exit(1)
-    return os.urandom(size//8)
 
 def generate_asy_key()->tuple[RSAPrivateKey, RSAPublicKey]:
     """Генерация открытых и закрытых ключей"""
