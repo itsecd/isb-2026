@@ -1,0 +1,18 @@
+{
+    "files": {
+        "initial": "text.txt",
+        "incrypted": "incripted_text.txt",
+        "decrypted": "decripted_text.txt"
+    },
+    "symmetric_key": "session_key/session_key.pem",
+    "users": {
+        "Alice": {
+            "public_key": "public_keys/public_key_Alice.pem",
+            "private_key": "private_keys/private_key_Alice.pem"
+        },
+        "Bob": {
+            "public_key": "public_keys/public_key_Bob.pem",
+            "private_key": "private_keys/private_key_Bob.pem"
+        }
+    }
+}
