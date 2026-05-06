@@ -1,28 +1,9 @@
 import sys
-import json
 import argparse
 from gen_key import *
 from encrypt import *
 from decrypt import *
-
-
-def write_text(filepath, text):
-    try:
-        with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(text)
-        return True
-    except Exception as error:
-        print(f"Не удалось записать {filepath}: {error}\n")
-        return False
-
-
-
-def load_settings(filepath: str):
-    try:
-        with open(filepath) as json_file:
-            json_data = json.load(json_file)
-    except FileNotFoundError:
-        raise 
+from file_utils import *
 
 
 def parse_args() -> argparse.Namespace:
@@ -47,15 +28,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('-sk', '--sym-key-file', help='Path to encrypted symmetric key file used in encryption or decryption')
 
     parser.add_argument('-c', '--config', default='settings.json', help='Path to JSON configuration file with program settings')
-    args = parser.parse_args()
-
-
+    return parser.parse_args()
 
 
 def main() -> None:
     try:
         args = parse_args()
-        settings = load_settings(args.settings)
+        # settings = load_settings(args.config)
 
         if args.gen:
             print("Generate keys...")
@@ -86,7 +65,7 @@ def main() -> None:
             private_key = load_private_key(args.priv_key_file)
             symmetric_key = load_symmetric_key(args.sym_key_file, private_key)
 
-            nonce, cipher_text = read_encrypt_text(args.in_file)
+            nonce, cipher_text = load_encrypted_file(args.in_file)
             plaintext = chacha20_decrypt(cipher_text, symmetric_key, nonce)
             text = plaintext.decode('utf-8')
             os.makedirs(os.path.dirname(args.out_file), exist_ok=True)

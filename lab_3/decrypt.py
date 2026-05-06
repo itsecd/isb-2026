@@ -1,9 +1,8 @@
 import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import padding
-from encrypt import *
+from encrypt import unpack_encrypted_data
 
-def read_encrypt_text(filepath: str) -> tuple[bytes, bytes]:
+def load_encrypted_file(filepath: str) -> tuple[bytes, bytes]:
     try:
         with open(filepath, 'rb') as enc_file:
             data = enc_file.read()
@@ -11,7 +10,7 @@ def read_encrypt_text(filepath: str) -> tuple[bytes, bytes]:
     
     except Exception as error:
         print(f"Couldn't upload encrypted text  {filepath}: {error}\n")
-        return None, None
+        return (b'', b'')
 
 
 def chacha20_decrypt(ciphertext: bytes, key: bytes, nonce: bytes) -> bytes:

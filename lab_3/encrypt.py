@@ -1,9 +1,6 @@
 import os
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
-
-from gen_key import read_file
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
+from file_utils import read_file
 
 
 def generate_nonce() -> bytes:
@@ -17,7 +14,7 @@ def chacha20_encrypt(text: bytes, key: bytes, nonce: bytes) -> bytes:
         raise ValueError("Nonce must be exactly 16 bytes (128 bits)")
 
     cipher = Cipher(
-        algorithms.ChaCha20(key, text),
+        algorithms.ChaCha20(key, nonce),
         mode=None
     )
 
