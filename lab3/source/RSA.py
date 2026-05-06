@@ -7,7 +7,7 @@ from cryptography.hazmat.primitives.asymmetric.rsa import (
     RSAPublicKey,
 )
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
-
+from utils import load_config, read_bytes, write_bytes
 
 def generate_keys() -> Tuple[RSAPrivateKey, RSAPublicKey]:
     private_key = rsa.generate_private_key(

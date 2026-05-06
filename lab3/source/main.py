@@ -6,21 +6,8 @@ from CAST5 import decrypt as cast5_decrypt
 from CAST5 import encrypt as cast5_encrypt
 from RSA import decrypt as rsa_decrypt
 from RSA import load_private_key
-
-
-def load_config(path: str) -> Dict[str, Any]:
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def read_bytes(path: str) -> bytes:
-    with open(path, "rb") as f:
-        return f.read()
-
-
-def write_bytes(path: str, data: bytes) -> None:
-    with open(path, "wb") as f:
-        f.write(data)
+from utils import load_config, read_bytes, write_bytes
+from key_gen import generate_keys_pipeline
 
 
 def decrypt_sym_key(secret_key_path: str, sym_key_path: str) -> bytes:
@@ -64,11 +51,6 @@ def decrypt_file(config: Dict[str, Any]) -> None:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Hybrid crypto system")
     parser.add_argument("--config", required=True)
-    parser.add_argument(
-        "--mode",
-        required=True,
-        choices=["encrypt", "decrypt"],
-    )
     return parser.parse_args()
 
 
@@ -76,11 +58,16 @@ def main() -> None:
     args = parse_args()
     config = load_config(args.config)
 
-    if args.mode == "encrypt":
-        encrypt_file(config)
-    else:
-        decrypt_file(config)
+    print("[*] 1. Генерация ключей")
+    generate_keys_pipeline(config)
 
+    print("[*] 2. Шифрование файла")
+    encrypt_file(config)
+
+    print("[*] 3. Дешифрование файла")
+    decrypt_file(config)
+
+    print("[+] Полный цикл выполнен")
 
 if __name__ == "__main__":
     main()

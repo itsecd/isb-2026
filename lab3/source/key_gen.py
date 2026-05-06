@@ -5,12 +5,7 @@ from typing import Any, Dict
 
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
-
-
-def load_config(path: str) -> Dict[str, Any]:
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
+from utils import load_config
 
 def generate_symmetric_key(key_size_bytes: int) -> bytes:
     return os.urandom(key_size_bytes)
@@ -25,8 +20,18 @@ def generate_rsa_keys():
 
 
 def save_bytes(path: str, data: bytes) -> None:
-    with open(path, "wb") as f:
-        f.write(data)
+    try:
+        with open(path, "wb") as f:
+            f.write(data)
+
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"Invalid path for output file: {path}") from e
+
+    except PermissionError as e:
+        raise PermissionError(f"No permission to write file: {path}") from e
+
+    except OSError as e:
+        raise OSError(f"Failed to write bytes to file: {path}") from e
 
 
 def save_private_key(private_key, path: str) -> None:
@@ -61,10 +66,9 @@ def encrypt_symmetric_key(sym_key: bytes, public_key) -> bytes:
     )
 
 
-def run(config: Dict[str, Any]) -> None:
+def generate_keys_pipeline(config: Dict[str, Any]) -> None:
     print("[*] Генерация ключей")
 
-    # симметричный ключ (ВАЖНО: у тебя key_size уже в БАЙТАХ)
     sym_key = generate_symmetric_key(config["key_size"])
 
     private_key, public_key = generate_rsa_keys()
@@ -77,16 +81,3 @@ def run(config: Dict[str, Any]) -> None:
     save_bytes(config["symmetric_key"], encrypted_sym_key)
 
     print("[+] Готово")
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config", required=True)
-    args = parser.parse_args()
-
-    config = load_config(args.config)
-    run(config)
-
-
-if __name__ == "__main__":
-    main()
