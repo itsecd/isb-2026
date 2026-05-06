@@ -1,5 +1,5 @@
 import os
-from main import read_file
+from file_utils import read_file
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey, RSAPrivateKey
@@ -23,10 +23,6 @@ def save_symmetric_key(key: bytes, filepath: str) -> None:
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
     with open(filepath, 'wb') as key_file:
         key_file.write(key)
-
-
-def load_symmetric_key(filepath: str) -> bytes:
-    return read_file(filepath)
 
 
 def save_public_key(pub_key: RSAPublicKey, filepath: str) -> None:

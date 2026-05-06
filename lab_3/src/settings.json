@@ -1,0 +1,11 @@
+{
+  "key_size": 256,
+  "sym_key_out": "keys/sym_key.enc",
+  "pub_key_out": "keys/public.pem",
+  "priv_key_out": "keys/private.pem",
+  "in_file": "src/input.txt",
+  "out_file": "src/output.bin",
+  "priv_key_file": "keys/private.pem",
+  "sym_key_file": "keys/sym_key.enc",
+  "config": "src/settings.json"
+}
