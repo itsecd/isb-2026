@@ -108,10 +108,8 @@ def encrypt_mode(args):
         nonce, ciphertext = load_encrypted_file(args.in_file)
 
         plaintext = chacha20_decrypt(ciphertext, sym_key, nonce)
-
-        with open(args.out_file, 'wb') as f:
-            f.write(plaintext)
-
+        
+        write_bytes(args.out_file, plaintext)
         print("Successful encrypt")
 
     except Exception as e:
@@ -142,8 +140,7 @@ def decrypt_mode(args):
 
         plaintext = chacha20_decrypt(cipher_text, symmetric_key, nonce)
 
-        with open(args.out_file, 'wb') as f:
-            f.write(plaintext)
+        write_bytes(args.out_file, plaintext)
 
         print("Successful decrypt")
 

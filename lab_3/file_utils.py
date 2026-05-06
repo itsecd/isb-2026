@@ -43,6 +43,27 @@ def write_text(filepath: str, text: str) -> bool:
         raise RuntimeError(f"Couldn't write file: {filepath}") from e
 
 
+def write_bytes(filepath: str, data: bytes) -> None:
+    """
+    Writes binary data to file.
+
+    Args:
+        filepath (str): output file path
+        data (bytes): data to write
+
+    Returns:
+        None
+    """
+    try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+        with open(filepath, 'wb') as f:
+            f.write(data)
+
+    except Exception as e:
+        raise RuntimeError(f"Failed to write binary file: {filepath}") from e
+
+
 def load_settings(filepath: str) -> dict:
     """
     Loads JSON configuration.
