@@ -4,8 +4,15 @@ import so
 
 
 def generate_key_mode(en_sym_path: str, private_path: str) -> None:
-    """Мод для генерации и сохранения ключей
-    принимает зашифрованный симметричный ключ и приватный ключ"""
+    """
+    Генерирует новую пару RSA-ключей и симметричный ключ, сохраняя их в файлы.
+
+    Симметричный ключ шифруется открытым ключом RSA перед сохранением.
+
+    Args:
+        en_sym_path (str): Путь для сохранения зашифрованного симметричного ключа.
+        private_path (str): Путь для сохранения приватного ключа RSA.
+    """
     sym_key = symmetrical.generate_sym_key()
     private_key, public_key = asymmetrical.generate_rsa_keys()
 
@@ -17,8 +24,18 @@ def generate_key_mode(en_sym_path: str, private_path: str) -> None:
 
 
 def encrypt_data_mode(input_path: str, output_path: str, sym_path: str, private_path: str) -> None:
-    """Мод для шифрования данных при имеющихся ключах
-    путь к исходым данным, путь к файлу для выходящих файлов, симметричный ключ, приватный ключ"""
+    """
+    Шифрует файл, используя существующие ключи.
+
+    Сначала расшифровывает симметричный ключ с помощью приватного RSA-ключа, 
+    затем шифрует данные симметричным алгоритмом.
+
+    Args:
+        input_path (str): Путь к исходному файлу с данными.
+        output_path (str): Путь для сохранения зашифрованного файла.
+        sym_path (str): Путь к зашифрованному симметричному ключу.
+        private_path (str): Путь к приватному ключу RSA.
+    """
     private_key = so.open_private_key(private_path)
     enc_sym_key = so.open_binary(sym_path)
 
@@ -32,8 +49,15 @@ def encrypt_data_mode(input_path: str, output_path: str, sym_path: str, private_
 
 
 def decrypt_data_mode(input_path: str, output_path: str, sym_path: str, private_path: str) -> None:
-    """Мод для дешифрования данных
-    путь к зашифрованным данным, путь к файлу для дешифрованных файлов, симметричный ключ, приватный ключ"""
+    """
+    Расшифровывает файл, используя приватный RSA-ключ и зашифрованный симметричный ключ.
+
+    Args:
+        input_path (str): Путь к зашифрованному файлу.
+        output_path (str): Путь для сохранения расшифрованного файла.
+        sym_path (str): Путь к зашифрованному симметричному ключу.
+        private_path (str): Путь к приватному ключу RSA.
+    """
     private_key = so.open_private_key(private_path)
     enc_sym_key = so.open_binary(sym_path)
 
@@ -47,8 +71,15 @@ def decrypt_data_mode(input_path: str, output_path: str, sym_path: str, private_
 
 
 def encrypt_data_all_mode(en_sym_path: str, private_path: str, input_path: str, output_path: str) -> None:
-    """Мод для создания ключей и шифрования данных в один проход
-    зашифрованный симметричный ключ, приватный ключ, путь к исходными данными, путь к фалйу для дшифрованных файлов"""
+    """
+    Выполняет полный цикл: генерацию ключей и шифрование данных за один проход.
+
+    Args:
+        en_sym_path (str): Путь для сохранения нового зашифрованного симметричного ключа.
+        private_path (str): Путь для сохранения нового приватного ключа RSA.
+        input_path (str): Путь к исходным данным.
+        output_path (str): Путь для сохранения зашифрованных данных.
+    """
     sym_key = symmetrical.generate_sym_key()
     private_key, public_key = asymmetrical.generate_rsa_keys()
 

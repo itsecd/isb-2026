@@ -6,8 +6,15 @@ import json
 
 
 def check_file(path: str) -> None:
-    """Проверяет путь к файлу и создает необходимые директории, если они не существуют.
-    путь к файлу"""
+    """
+    Проверяет существование директории для указанного пути и создает её при необходимости.
+
+    Args:
+        path (str): Полный путь к файлу.
+
+    Raises:
+        OSError: Если не удалось создать директории.
+    """
     folder = os.path.dirname(path)
     if folder:
         try:
@@ -20,8 +27,16 @@ def check_file(path: str) -> None:
 
 
 def save_private_key(path: str, key: rsa.RSAPrivateKey) -> None:
-    """Сохраняет приватный RSA ключ в PEM-формате.
-    путь к файлу для сохранения, приватный ключ"""
+    """
+    Сохраняет приватный RSA ключ в файл в формате PEM без пароля.
+
+    Args:
+        path (str): Путь для сохранения файла.
+        key (rsa.RSAPrivateKey): Объект приватного ключа RSA.
+
+    Raises:
+        OSError: Ошибка при записи в файл.
+    """
     try:
         check_file(path)
         with open(path, 'wb') as file:
@@ -38,8 +53,16 @@ def save_private_key(path: str, key: rsa.RSAPrivateKey) -> None:
 
 
 def save_public_key(path: str, key: rsa.RSAPublicKey) -> None:
-    """Сохраняет публичный RSA ключ в PEM-формате.
-    путь к файлу для публичного ключа, публичный ключ"""
+    """
+    Сохраняет публичный RSA ключ в файл в формате PEM (SubjectPublicKeyInfo).
+
+    Args:
+        path (str): Путь для сохранения файла.
+        key (rsa.RSAPublicKey): Объект публичного ключа RSA.
+
+    Raises:
+        OSError: Ошибка при записи в файл.
+    """
     try:
         check_file(path)
         with open(path, "wb") as file:
@@ -55,8 +78,18 @@ def save_public_key(path: str, key: rsa.RSAPublicKey) -> None:
 
 
 def open_private_key(path: str) -> rsa.RSAPrivateKey:
-    """Загружает приватный RSA ключ из файла.
-    путь к приватному ключу"""
+    """
+    Загружает приватный RSA ключ из PEM-файла.
+
+    Args:
+        path (str): Путь к файлу приватного ключа.
+
+    Returns:
+        rsa.RSAPrivateKey: Объект загруженного приватного ключа.
+
+    Raises:
+        OSError: Ошибка при открытии или чтении файла.
+    """
     try:
         with open(path, "rb") as f:
             private_bytes = f.read()
@@ -69,8 +102,18 @@ def open_private_key(path: str) -> rsa.RSAPrivateKey:
 
 
 def open_public_key(path: str) -> rsa.RSAPublicKey:
-    """Загружает публичный RSA ключ из файла.
-    путь к публичному ключу"""
+    """
+    Загружает публичный RSA ключ из PEM-файла.
+
+    Args:
+        path (str): Путь к файлу публичного ключа.
+
+    Returns:
+        rsa.RSAPublicKey: Объект загруженного публичного ключа.
+
+    Raises:
+        OSError: Ошибка при открытии или чтении файла.
+    """
     try:
         with open(path, "rb") as f:
             public_bytes = f.read()
@@ -83,8 +126,18 @@ def open_public_key(path: str) -> rsa.RSAPublicKey:
 
 
 def open_binary(path: str) -> bytes:
-    """Считывает данные из бинарного файла.
-    путь к файлу"""
+    """
+    Считывает всё содержимое файла в бинарном режиме.
+
+    Args:
+        path (str): Путь к файлу.
+
+    Returns:
+        bytes: Бинарные данные из файла.
+
+    Raises:
+        OSError: Ошибка при попытке чтения файла.
+    """
     try:
         with open(path, "rb") as f:
             return f.read()
@@ -96,8 +149,16 @@ def open_binary(path: str) -> bytes:
 
 
 def save_binary(path: str, data: bytes) -> None:
-    """Записывает байты в бинарный файл.
-    путь к файлу, данные"""
+    """
+    Записывает бинарные данные в файл.
+
+    Args:
+        path (str): Путь к сохраняемому файлу.
+        data (bytes): Данные для записи.
+
+    Raises:
+        OSError: Ошибка при записи в файл.
+    """
     try:
         check_file(path)
         with open(path, "wb") as f:
@@ -110,13 +171,24 @@ def save_binary(path: str, data: bytes) -> None:
 
 
 def open_json(path: str) -> dict:
-    """Считывание конфигурации из JSON-файла.
-    путь к файлу json"""
+    """
+    Загружает данные из JSON-файла.
+
+    Args:
+        path (str): Путь к JSON-файлу.
+
+    Returns:
+        dict: Данные, преобразованные в словарь.
+
+    Raises:
+        OSError: Ошибка при открытии файла.
+        json.JSONDecodeError: Если содержимое файла не является валидным JSON.
+    """
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except OSError as e:
-        print(f"Ошибка при считывание json: {e}")
+        print(f"Ошибка при считывании json: {e}")
     except Exception as err:
         print(f"Unexpected {err=}, {type(err)=}")
         raise

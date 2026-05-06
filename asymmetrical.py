@@ -3,36 +3,63 @@ from cryptography.hazmat.primitives import hashes
 
 
 def generate_rsa_keys() -> tuple[rsa.RSAPrivateKey, rsa.RSAPublicKey]:
-    """Генерация приватного и публичного ключей RSA
-    возвращает приватный ключ и публичный ключ"""
-    keys = rsa.generate_private_key(
+    """
+    Генерирует пару ключей RSA (приватный и публичный).
+
+    Использует стандартную публичную экспоненту 65537 и размер ключа 2048 бит.
+
+    Returns:
+        tuple: Кортеж, содержащий (private_key, public_key).
+    """
+    private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048
     )
-    private_key = keys
-    public_key = keys.public_key()
-    print("Приватный и публичный ключ сгенерированны")
+    public_key = private_key.public_key()
+    print("Приватный и публичный ключи сгенерированы")
     return private_key, public_key
 
 
 def encrypt_sym_key(sym_key: bytes, public_key: rsa.RSAPublicKey) -> bytes:
-    """Шифрование симитричного ключа при помощи публичного ключа
-    принимает симметричный ключ и публичный ключ, возращает зашифрованный симметричный ключ"""
-    encrypt_sym_key = public_key.encrypt(sym_key,
-                                         padding.OAEP(
-                                             mgf=padding.MGF1(
-                                                 algorithm=hashes.SHA256()),
-                                             algorithm=hashes.SHA256(),
-                                             label=None
-                                         )
-                                         )
+    """
+    Шифрует симметричный ключ с помощью публичного ключа RSA.
+
+    Использует схему дополнения OAEP с хешированием SHA256 для обеспечения 
+    максимальной безопасности.
+
+    Args:
+        sym_key (bytes): Исходный симметричный ключ.
+        public_key (rsa.RSAPublicKey): Публичный ключ RSA получателя.
+
+    Returns:
+        bytes: Зашифрованный симметричный ключ.
+    """
+    encrypted_key = public_key.encrypt(
+        sym_key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
     print("Симметричный ключ успешно зашифрован при помощи публичного ключа")
-    return encrypt_sym_key
+    return encrypted_key
 
 
 def decrypt_sym_key(encrypted_sym_key: bytes, private_key: rsa.RSAPrivateKey) -> bytes:
-    """Дешифрование симметричного ключа при помощи приватного ключа
-    принимает зашифрованный симметричный ключ и приватный ключ, возращает расшифрованный симметричный ключ"""
+    """
+    Расшифровывает симметричный ключ с помощью приватного ключа RSA.
+
+    Args:
+        encrypted_sym_key (bytes): Зашифрованный симметричный ключ.
+        private_key (rsa.RSAPrivateKey): Приватный ключ RSA для дешифрования.
+
+    Returns:
+        bytes: Расшифрованный симметричный ключ.
+
+    Raises:
+        ValueError: Если дешифрование не удалось (например, неверный ключ).
+    """
     sym_key = private_key.decrypt(
         encrypted_sym_key,
         padding.OAEP(
@@ -41,5 +68,5 @@ def decrypt_sym_key(encrypted_sym_key: bytes, private_key: rsa.RSAPrivateKey) ->
             label=None
         )
     )
-    print("Симметричный ключ успешно дешифрованн при помощи приватного ключа")
+    print("Симметричный ключ успешно дешифрован при помощи приватного ключа")
     return sym_key
