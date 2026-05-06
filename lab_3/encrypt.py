@@ -13,6 +13,8 @@ def generate_nonce() -> bytes:
 def chacha20_encrypt(text: bytes, key: bytes, nonce: bytes) -> bytes:
     if len(key) != 32:
         raise ValueError("ChaCha20 key must be exactly 32 bytes (256 bits)")
+    if len(nonce) != 16:
+        raise ValueError("Nonce must be exactly 16 bytes (128 bits)")
 
     cipher = Cipher(
         algorithms.ChaCha20(key, text),

@@ -3,11 +3,23 @@ import json
 import argparse
 from gen_key import *
 from encrypt import *
+from decrypt import *
+
+
+def write_text(filepath, text):
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(text)
+        return True
+    except Exception as error:
+        print(f"Не удалось записать {filepath}: {error}\n")
+        return False
+
 
 
 def load_settings(filepath: str):
     try:
-        with open('settings.json') as json_file:
+        with open(filepath) as json_file:
             json_data = json.load(json_file)
     except FileNotFoundError:
         raise 
@@ -45,7 +57,7 @@ def main() -> None:
         args = parse_args()
         settings = load_settings(args.settings)
 
-        if args.gen is None:
+        if args.gen:
             print("Generate keys...")
             symmetric_key = generate_symmetric_key(args.key_size)
             private_key, public_key = generate_rsa_keys()
@@ -57,21 +69,32 @@ def main() -> None:
             save_private_key(private_key, args.priv_key_out)
             print(f"The private key is saved", )
 
-        elif args.enc is None:
+        elif args.enc:
             print("Encrypting...")
-            load_private_key(args.priv_key_file)
-            encrypted_sym_key = load_symmetric_key(args.sym_key_file)
-            
-            #sym_key = decrypt....67
+            private_key = load_private_key(args.priv_key_file)
+            sym_key = load_symmetric_key(args.sym_key_file)
+
             plaintext = read_file(args.in_file)
             nonce = generate_nonce()
-            ciphertext = chacha20_encrypt(plaintext, sym_key, nonce)
 
-            # Сохранение
-            write_encrypted_file(args.out_file, nonce, ciphertext)
+            cipher_text = chacha20_encrypt(plaintext, sym_key, nonce)
+            os.makedirs(os.path.dirname(args.out_file), exist_ok=True)
+            write_encrypted_file(args.out_file, nonce, cipher_text)
 
         else: 
             print("DECRYPTING")
+            private_key = load_private_key(args.priv_key_file)
+            symmetric_key = load_symmetric_key(args.sym_key_file, private_key)
+
+            nonce, cipher_text = read_encrypt_text(args.in_file)
+            plaintext = chacha20_decrypt(cipher_text, symmetric_key, nonce)
+            text = plaintext.decode('utf-8')
+            os.makedirs(os.path.dirname(args.out_file), exist_ok=True)
+
+            write_text(args.out_file, text)
+
+            print(f"Расшифрованный текст сохранён в {args.out_file} \n")
+            return True
     except Exception as e:
         print(f"An error occurred: {e}")
 
