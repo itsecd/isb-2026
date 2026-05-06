@@ -3,48 +3,73 @@ from file_utils import *
 from symmetric import *
 from asymmetric import *
 
+
 def parse_args() -> argparse.Namespace:
     """
-    Parse parameters from console.
+    Parses CLI arguments.
+
+    Returns:
+        argparse.Namespace: Parsed arguments.
     """
-    parser = argparse.ArgumentParser (description="Hybrid cryptosystem:")
-    
+    parser = argparse.ArgumentParser(description="Hybrid cryptosystem")
+
     parser.add_argument(
-    '-m', '--mode',
-    choices=['gen', 'enc', 'dec'],
-    required=True,
-    help=(
-        "Operation mode:\n"
-        "gen - generate RSA and symmetric keys\n"
-        "enc - encrypt input file\n"
-        "dec - decrypt input file"
+        '-m', '--mode',
+        choices=['gen', 'enc', 'dec'],
+        required=True,
+        help=(
+            "Operation mode:\n"
+            "gen - generate RSA and symmetric keys\n"
+            "enc - encrypt input file\n"
+            "dec - decrypt input file"
         )
     )
 
-    parser.add_argument('-k', '--key-size', type=int, default=256, help='Set symmetric key length in bits from 32 to 448 with step of 8')
-    parser.add_argument('-so', '--sym-key-out', default='keys/sym_key.enc', help='Output path for encrypted symmetric key file')
-    parser.add_argument('-pu', '--pub-key-out', default='keys/public.pem', help='Output path for generated RSA public key file')
-    parser.add_argument('-pr', '--priv-key-out', default='keys/private.pem', help='Output path for generated RSA private key file')
+    parser.add_argument('-k', '--key-size', type=int, default=256)
+    parser.add_argument('-so', '--sym-key-out', default='keys/sym_key.enc')
+    parser.add_argument('-pu', '--pub-key-out', default='keys/public.pem')
+    parser.add_argument('-pr', '--priv-key-out', default='keys/private.pem')
 
-    parser.add_argument('-i', '--in-file', help='Path to input file for encryption or decryption')
-    parser.add_argument('-o', '--out-file', help='Path to output file for result of encryption or decryption')
-    parser.add_argument('-pk', '--priv-key-file', help='Path to RSA private key file used for decryption process')
-    parser.add_argument('-sk', '--sym-key-file', help='Path to encrypted symmetric key file used in encryption or decryption')
+    parser.add_argument('-i', '--in-file')
+    parser.add_argument('-o', '--out-file')
+    parser.add_argument('-pk', '--priv-key-file')
+    parser.add_argument('-sk', '--sym-key-file')
 
-    parser.add_argument('-c', '--config', default='src/settings.json', help='Path to JSON configuration file with program settings')
+    parser.add_argument('-c', '--config', default='src/settings.json')
+
     return parser.parse_args()
 
 
 def merge_args_with_settings(args, settings: dict):
+    """
+    Merges CLI arguments with JSON settings (CLI has priority).
+
+    Args:
+        args (argparse.Namespace): CLI arguments.
+        settings (dict): JSON config.
+
+    Returns:
+        argparse.Namespace: Updated arguments.
+    """
     for key, value in settings.items():
-        if hasattr(args, key):
-            if getattr(args, key) is None:
-                setattr(args, key, value)
+        if hasattr(args, key) and getattr(args, key) is None:
+            setattr(args, key, value)
     return args
 
+
 def generate_mode(args):
+    """
+    Generates RSA key pair and symmetric key.
+
+    Args:
+        args (argparse.Namespace): CLI arguments.
+
+    Returns:
+        None
+    """
     try:
         print("Generate keys...")
+
         sym_key = generate_symmetric_key(args.key_size)
         private_key, public_key = generate_rsa_keys()
 
@@ -53,14 +78,26 @@ def generate_mode(args):
         save_symmetric_key(enc_sym_key, args.sym_key_out)
         save_public_key(public_key, args.pub_key_out)
         save_private_key(private_key, args.priv_key_out)
-        print("Succeseful generate keys")
+
+        print("Successful key generation")
+
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Error: {e}")
 
 
 def encrypt_mode(args):
+    """
+    Encrypts input file using ChaCha20 + RSA key handling.
+
+    Args:
+        args (argparse.Namespace): CLI arguments.
+
+    Returns:
+        None
+    """
     try:
         print("Encrypting...")
+
         private_key = load_private_key(args.priv_key_file)
 
         sym_key = decrypt_symmetric_key(
@@ -74,14 +111,26 @@ def encrypt_mode(args):
 
         with open(args.out_file, 'wb') as f:
             f.write(plaintext)
-        print("Succeseful encrypt")
+
+        print("Successful encrypt")
+
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Error: {e}")
 
 
 def decrypt_mode(args):
+    """
+    Decrypts encrypted file using ChaCha20 + RSA.
+
+    Args:
+        args (argparse.Namespace): CLI arguments.
+
+    Returns:
+        None
+    """
     try:
         print("Decrypting...")
+
         private_key = load_private_key(args.priv_key_file)
 
         symmetric_key = decrypt_symmetric_key(
@@ -97,5 +146,6 @@ def decrypt_mode(args):
             f.write(plaintext)
 
         print("Successful decrypt")
+
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"Error: {e}")
