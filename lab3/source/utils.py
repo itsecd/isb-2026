@@ -1,7 +1,29 @@
 import json
 
-def load_config(path: str) -> Dict[str, Any]:
-    """Загрузка конфига из файла"""
+
+def load_config(path: str):
+    """
+    Загружает JSON-конфигурацию из файла.
+
+    Parameters
+    ----------
+    path : str
+        Путь к JSON-файлу конфигурации.
+
+    Returns
+    -------
+    dict
+        Словарь с конфигурацией.
+
+    Raises
+    ------
+    FileNotFoundError
+        Если файл конфигурации не найден.
+    ValueError
+        Если JSON некорректен.
+    PermissionError
+        Если нет прав на чтение файла.
+    """
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -17,10 +39,33 @@ def load_config(path: str) -> Dict[str, Any]:
 
 
 def read_bytes(path: str) -> bytes:
+    """
+    Читает файл в бинарном режиме.
+
+    Parameters
+    ----------
+    path : str
+        Путь к файлу.
+
+    Returns
+    -------
+    bytes
+        Содержимое файла в байтах.
+    """
     with open(path, "rb") as f:
         return f.read()
 
 
 def write_bytes(path: str, data: bytes) -> None:
+    """
+    Записывает байты в файл.
+
+    Parameters
+    ----------
+    path : str
+        Путь к файлу.
+    data : bytes
+        Данные для записи.
+    """
     with open(path, "wb") as f:
         f.write(data)

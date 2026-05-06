@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import json
 from typing import Any, Dict
@@ -11,12 +13,43 @@ from key_gen import generate_keys_pipeline
 
 
 def decrypt_sym_key(secret_key_path: str, sym_key_path: str) -> bytes:
+    """
+    Расшифровывает симметричный ключ RSA приватным ключом.
+
+    Parameters
+    ----------
+    secret_key_path : str
+        Путь к RSA приватному ключу (PEM).
+    sym_key_path : str
+        Путь к RSA-зашифрованному симметричному ключу.
+
+    Returns
+    -------
+    bytes
+        Расшифрованный симметричный ключ.
+    """
     private_key = load_private_key(secret_key_path)
     encrypted_key = read_bytes(sym_key_path)
     return rsa_decrypt(encrypted_key, private_key)
 
 
 def encrypt_file(config: Dict[str, Any]) -> None:
+    """
+    Шифрует файл гибридной схемой (RSA + CAST5).
+
+    Parameters
+    ----------
+    config : Dict[str, Any]
+        Конфигурация:
+        - secret_key: путь к RSA приватному ключу
+        - symmetric_key: путь к RSA-зашифрованному симметричному ключу
+        - initial_file: входной файл
+        - encrypted_file: выходной файл
+
+    Returns
+    -------
+    None
+    """
     print("[*] Шифрование")
 
     sym_key = decrypt_sym_key(
@@ -33,6 +66,22 @@ def encrypt_file(config: Dict[str, Any]) -> None:
 
 
 def decrypt_file(config: Dict[str, Any]) -> None:
+    """
+    Расшифровывает файл гибридной схемой (RSA + CAST5).
+
+    Parameters
+    ----------
+    config : Dict[str, Any]
+        Конфигурация:
+        - secret_key: путь к RSA приватному ключу
+        - symmetric_key: путь к RSA-зашифрованному симметричному ключу
+        - encrypted_file: входной файл
+        - decrypted_file: выходной файл
+
+    Returns
+    -------
+    None
+    """
     print("[*] Дешифрование")
 
     sym_key = decrypt_sym_key(
@@ -49,12 +98,41 @@ def decrypt_file(config: Dict[str, Any]) -> None:
 
 
 def parse_args() -> argparse.Namespace:
+    """
+    Парсит аргументы командной строки.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    argparse.Namespace
+        Аргументы:
+        - config: путь к JSON-конфигурации
+    """
     parser = argparse.ArgumentParser(description="Hybrid crypto system")
     parser.add_argument("--config", required=True)
     return parser.parse_args()
 
 
 def main() -> None:
+    """
+    Точка входа приложения.
+
+    Выполняет полный цикл гибридной криптосистемы:
+    1. Генерация ключей (RSA + симметрический ключ)
+    2. Шифрование файла
+    3. Дешифрование файла
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+    """
     args = parse_args()
     config = load_config(args.config)
 
@@ -68,6 +146,7 @@ def main() -> None:
     decrypt_file(config)
 
     print("[+] Полный цикл выполнен")
+
 
 if __name__ == "__main__":
     main()

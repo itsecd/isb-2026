@@ -7,11 +7,33 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 from utils import load_config
 
+
 def generate_symmetric_key(key_size_bytes: int) -> bytes:
+    """
+    Генерирует симметричный ключ.
+
+    Parameters
+    ----------
+    key_size_bytes : int
+        Размер ключа в байтах.
+
+    Returns
+    -------
+    bytes
+        Случайный симметричный ключ.
+    """
     return os.urandom(key_size_bytes)
 
 
 def generate_rsa_keys():
+    """
+    Генерирует RSA пару ключей.
+
+    Returns
+    -------
+    tuple
+        (private_key, public_key)
+    """
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
@@ -20,6 +42,16 @@ def generate_rsa_keys():
 
 
 def save_bytes(path: str, data: bytes) -> None:
+    """
+    Сохраняет бинарные данные в файл.
+
+    Parameters
+    ----------
+    path : str
+        Путь к файлу.
+    data : bytes
+        Данные для записи.
+    """
     try:
         with open(path, "wb") as f:
             f.write(data)
@@ -35,6 +67,16 @@ def save_bytes(path: str, data: bytes) -> None:
 
 
 def save_private_key(private_key, path: str) -> None:
+    """
+    Сохраняет RSA приватный ключ в PEM формате.
+
+    Parameters
+    ----------
+    private_key : rsa.RSAPrivateKey
+        Приватный ключ.
+    path : str
+        Путь для сохранения.
+    """
     with open(path, "wb") as f:
         f.write(
             private_key.private_bytes(
@@ -46,6 +88,16 @@ def save_private_key(private_key, path: str) -> None:
 
 
 def save_public_key(public_key, path: str) -> None:
+    """
+    Сохраняет RSA публичный ключ в PEM формате.
+
+    Parameters
+    ----------
+    public_key : rsa.RSAPublicKey
+        Публичный ключ.
+    path : str
+        Путь для сохранения.
+    """
     with open(path, "wb") as f:
         f.write(
             public_key.public_bytes(
@@ -56,6 +108,21 @@ def save_public_key(public_key, path: str) -> None:
 
 
 def encrypt_symmetric_key(sym_key: bytes, public_key) -> bytes:
+    """
+    Шифрует симметричный ключ RSA-OAEP.
+
+    Parameters
+    ----------
+    sym_key : bytes
+        Симметричный ключ.
+    public_key : rsa.RSAPublicKey
+        Публичный RSA ключ.
+
+    Returns
+    -------
+    bytes
+        Зашифрованный симметричный ключ.
+    """
     return public_key.encrypt(
         sym_key,
         padding.OAEP(
@@ -67,6 +134,22 @@ def encrypt_symmetric_key(sym_key: bytes, public_key) -> bytes:
 
 
 def generate_keys_pipeline(config: Dict[str, Any]) -> None:
+    """
+    Полный пайплайн генерации ключей гибридной криптосистемы.
+
+    Parameters
+    ----------
+    config : Dict[str, Any]
+        Конфигурация:
+        - key_size: размер симметрического ключа (в байтах)
+        - secret_key: путь к приватному RSA ключу
+        - public_key: путь к публичному RSA ключу
+        - symmetric_key: путь к зашифрованному симметрическому ключу
+
+    Returns
+    -------
+    None
+    """
     print("[*] Генерация ключей")
 
     sym_key = generate_symmetric_key(config["key_size"])
