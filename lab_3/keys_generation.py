@@ -12,7 +12,26 @@ def load_config(path='settings.json') -> dict:
     except FileNotFoundError:
         print("Error: settings.json not found")
         return {}
-
+    except json.JSONDecodeError as e:
+        print(f"Error: invalid JSON in {path}")
+        return {}
+    except PermissionError:
+        print (f"No access to file: {path}")
+        return{}
+    except UnicodeDecodeError:
+        print(f"Error: encoding issues while reding {path}")
+        return{}
+    
+def save_key(filename: str, key: bytes):
+    try:
+        with open(filename, 'wb') as f:
+            f.write(key)
+    except PermissionError:
+        raise Exception(f"No access to file: {filename}")
+    except FileNotFoundError:
+        raise Exception(f"File not found: {filename}")
+    except Exception as e:
+        raise Exception(f"Error during file saving: {e}")
 
 def triple_des_key_generation(key_size: int, config: dict):
     triple_des_key = os.urandom(key_size) 
@@ -75,7 +94,6 @@ def encrypt_session_key(session_key: bytes, public_key):
     return encrypted_key
 
 def save_encrypted_key(path: str, encrypted_key: bytes):
-    import os
     os.makedirs(os.path.dirname(path), exist_ok=True)
 
     with open(path, 'wb') as f:
@@ -94,11 +112,3 @@ def encrypt_session_key_for_user(config: dict, username: str):
     save_path = f"encrypted_keys/{username}_session_key.enc"
     save_encrypted_key(save_path, encrypted_key)
     print(f"Session key encrypted for {username}")
-
-
-
-
-    
-
-
-value: int =0 #64, 128, 192 бит, т.е. значение в бтиах делим на 8. Задать пользовательский ввод

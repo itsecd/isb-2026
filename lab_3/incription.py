@@ -4,13 +4,13 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.padding import PKCS7
 import os
+from decription import file_saving, file_reading
 
 def session_key_decryption(config: dict, username: str):
     encrypted_key_path = f"encrypted_keys/{username}_session_key.enc"  
     private_key_path = config['users'][username]['private_key']   
 
-    with open(encrypted_key_path, 'rb') as f:
-        encrypted_key = f.read()
+    encrypted_key=file_reading(encrypted_key_path)
 
     with open(private_key_path, 'rb') as f:
         private_key = load_pem_private_key(f.read(), password=None)
@@ -39,8 +39,7 @@ def encrypt_file_3des(input_path: str, output_path: str, key: bytes):
     encryptor = cipher.encryptor()
     ciphertext = encryptor.update(padded_data) + encryptor.finalize()
 
-    with open(output_path, 'wb') as f:
-        f.write(iv + ciphertext)
+    file_saving(output_path, iv + ciphertext)
 
     print("File encrypted")
 
