@@ -4,7 +4,7 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey, RSAPriva
 from cryptography.hazmat.primitives import serialization
 
 
-def _read_file(filepath: str) -> bytes:
+def read_file(filepath: str) -> bytes:
     try:
         with open(filepath, 'rb') as f:
             return f.read()
@@ -32,7 +32,7 @@ def save_symmetric_key(key: bytes, filepath: str) -> None:
 
 
 def load_symmetric_key(filepath: str) -> bytes:
-    return _read_file(filepath)
+    return read_file(filepath)
 
 
 def save_public_key(pub_key: RSAPublicKey, filepath: str) -> None:
@@ -43,7 +43,7 @@ def save_public_key(pub_key: RSAPublicKey, filepath: str) -> None:
 
 
 def load_public_key(filepath: str) -> RSAPublicKey:
-    return serialization.load_pem_public_key(_read_file(filepath))
+    return serialization.load_pem_public_key(read_file(filepath))
 
 
 def save_private_key(priv_key: RSAPrivateKey, filepath: str) -> None:
@@ -55,4 +55,4 @@ def save_private_key(priv_key: RSAPrivateKey, filepath: str) -> None:
 
 
 def load_private_key(filepath: str) -> RSAPrivateKey:
-    return serialization.load_pem_private_key(_read_file(filepath), password=None)
+    return serialization.load_pem_private_key(read_file(filepath), password=None)

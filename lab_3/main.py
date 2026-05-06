@@ -2,6 +2,7 @@ import sys
 import json
 import argparse
 from gen_key import *
+from encrypt import *
 
 
 def load_settings(filepath: str):
@@ -57,7 +58,18 @@ def main() -> None:
             print(f"The private key is saved", )
 
         elif args.enc is None:
-            print("ENCRYPTING")
+            print("Encrypting...")
+            load_private_key(args.priv_key_file)
+            encrypted_sym_key = load_symmetric_key(args.sym_key_file)
+            
+            #sym_key = decrypt....67
+            plaintext = read_file(args.in_file)
+            nonce = generate_nonce()
+            ciphertext = chacha20_encrypt(plaintext, sym_key, nonce)
+
+            # Сохранение
+            write_encrypted_file(args.out_file, nonce, ciphertext)
+
         else: 
             print("DECRYPTING")
     except Exception as e:
