@@ -8,7 +8,8 @@ JSON_file = "path.json"
 
 
 def args_parse() -> argparse.Namespace:
-    """Парсит аргументы командной строки."""
+    """Парсит аргументы командной строки.
+    возвращает аргументы командной строки"""
     parser = argparse.ArgumentParser(
         prog="Encrypt-decrypt data", description="Encrypt-decrypt data, generate keys"
     )

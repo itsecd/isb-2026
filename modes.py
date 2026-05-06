@@ -4,7 +4,8 @@ import so
 
 
 def generate_key_mode(en_sym_path: str, private_path: str) -> None:
-    """Мод для генерации и сохранения ключей"""
+    """Мод для генерации и сохранения ключей
+    принимает зашифрованный симметричный ключ и приватный ключ"""
     sym_key = symmetrical.generate_sym_key()
     private_key, public_key = asymmetrical.generate_rsa_keys()
 
@@ -16,7 +17,8 @@ def generate_key_mode(en_sym_path: str, private_path: str) -> None:
 
 
 def encrypt_data_mode(input_path: str, output_path: str, sym_path: str, private_path: str) -> None:
-    """Мод для шифрования данных при имеющихся ключах"""
+    """Мод для шифрования данных при имеющихся ключах
+    путь к исходым данным, путь к файлу для выходящих файлов, симметричный ключ, приватный ключ"""
     private_key = so.open_private_key(private_path)
     enc_sym_key = so.open_binary(sym_path)
 
@@ -30,7 +32,8 @@ def encrypt_data_mode(input_path: str, output_path: str, sym_path: str, private_
 
 
 def decrypt_data_mode(input_path: str, output_path: str, sym_path: str, private_path: str) -> None:
-    """Мод для дешифрования данных"""
+    """Мод для дешифрования данных
+    путь к зашифрованным данным, путь к файлу для дешифрованных файлов, симметричный ключ, приватный ключ"""
     private_key = so.open_private_key(private_path)
     enc_sym_key = so.open_binary(sym_path)
 
@@ -44,7 +47,8 @@ def decrypt_data_mode(input_path: str, output_path: str, sym_path: str, private_
 
 
 def encrypt_data_all_mode(en_sym_path: str, private_path: str, input_path: str, output_path: str) -> None:
-    """Мод для создания ключей и шифрования данных в один проход"""
+    """Мод для создания ключей и шифрования данных в один проход
+    зашифрованный симметричный ключ, приватный ключ, путь к исходными данными, путь к фалйу для дшифрованных файлов"""
     sym_key = symmetrical.generate_sym_key()
     private_key, public_key = asymmetrical.generate_rsa_keys()
 

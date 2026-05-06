@@ -5,13 +5,16 @@ from cryptography.hazmat.primitives.ciphers.algorithms import SEED
 
 
 def generate_sym_key() -> bytes:
-    """Генерация симметричного ключа для SEED."""
+    """Генерация симметричного ключа для SEED.
+    возвращает симметричный ключ"""
     print("Ключ для симметричного шифрования создан")
     return os.urandom(16)
 
 
 def encryption_data(data: bytes, key: bytes) -> bytes:
-    """Шифрование данных при помощи SEED с использованием режима CBC"""
+    """Шифрование данных при помощи SEED с использованием режима CBC
+    принимает данные и ключ
+    возвращает зашифрованные данные с векторной инициализацией"""
     iv = os.urandom(16)
     cipher = Cipher(SEED(key), modes.CBC(iv))
     encryptor = cipher.encryptor()
@@ -26,7 +29,9 @@ def encryption_data(data: bytes, key: bytes) -> bytes:
 
 
 def decryption_data(data: bytes, key: bytes) -> bytes:
-    """Дешифрование данных, зашифрованных с успользованием SEED в режиме CBC"""
+    """Дешифрование данных, зашифрованных с успользованием SEED в режиме CBC
+    принимает зашифрованные данные и симметричный ключ
+    возвращает зашифрованные данные"""
     iv = data[:16]
     cipher_data = data[16:]
 

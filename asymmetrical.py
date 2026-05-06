@@ -3,7 +3,8 @@ from cryptography.hazmat.primitives import hashes
 
 
 def generate_rsa_keys() -> tuple[rsa.RSAPrivateKey, rsa.RSAPublicKey]:
-    """Генерация приватного и публичного ключей RSA"""
+    """Генерация приватного и публичного ключей RSA
+    возвращает приватный ключ и публичный ключ"""
     keys = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048
@@ -15,7 +16,8 @@ def generate_rsa_keys() -> tuple[rsa.RSAPrivateKey, rsa.RSAPublicKey]:
 
 
 def encrypt_sym_key(sym_key: bytes, public_key: rsa.RSAPublicKey) -> bytes:
-    """Шифрование симитричного ключа при помощи публичного ключа"""
+    """Шифрование симитричного ключа при помощи публичного ключа
+    принимает симметричный ключ и публичный ключ, возращает зашифрованный симметричный ключ"""
     encrypt_sym_key = public_key.encrypt(sym_key,
                                          padding.OAEP(
                                              mgf=padding.MGF1(
@@ -29,7 +31,8 @@ def encrypt_sym_key(sym_key: bytes, public_key: rsa.RSAPublicKey) -> bytes:
 
 
 def decrypt_sym_key(encrypted_sym_key: bytes, private_key: rsa.RSAPrivateKey) -> bytes:
-    """Дешифрование симметричного ключа при помощи приватного ключа"""
+    """Дешифрование симметричного ключа при помощи приватного ключа
+    принимает зашифрованный симметричный ключ и приватный ключ, возращает расшифрованный симметричный ключ"""
     sym_key = private_key.decrypt(
         encrypted_sym_key,
         padding.OAEP(
