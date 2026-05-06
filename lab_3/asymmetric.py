@@ -1,6 +1,6 @@
 import os
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey, RSAPrivateKey, padding
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey, RSAPrivateKey
 from cryptography.hazmat.primitives import hashes, serialization
 from file_utils import read_file
 
@@ -27,6 +27,18 @@ def decrypt_symmetric_key(encrypted_key_path: str, private_key) -> bytes:
     
     return sym_key
 
+def encrypt_symmetric_key(sym_key: bytes, public_key: RSAPublicKey) -> bytes:
+    if len(sym_key) == 0:
+        raise ValueError("Symmetric key cannot be empty")
+
+    return public_key.encrypt(
+        sym_key,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
 
 def save_symmetric_key(key: bytes, filepath: str) -> None:
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
