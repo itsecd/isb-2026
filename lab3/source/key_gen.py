@@ -5,66 +5,9 @@ from typing import Any, Dict
 
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
-from utils import load_config
-
-
-def generate_symmetric_key(key_size_bytes: int) -> bytes:
-    """
-    Генерирует симметричный ключ.
-
-    Parameters
-    ----------
-    key_size_bytes : int
-        Размер ключа в байтах.
-
-    Returns
-    -------
-    bytes
-        Случайный симметричный ключ.
-    """
-    return os.urandom(key_size_bytes)
-
-
-def generate_rsa_keys():
-    """
-    Генерирует RSA пару ключей.
-
-    Returns
-    -------
-    tuple
-        (private_key, public_key)
-    """
-    private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048,
-    )
-    return private_key, private_key.public_key()
-
-
-def save_bytes(path: str, data: bytes) -> None:
-    """
-    Сохраняет бинарные данные в файл.
-
-    Parameters
-    ----------
-    path : str
-        Путь к файлу.
-    data : bytes
-        Данные для записи.
-    """
-    try:
-        with open(path, "wb") as f:
-            f.write(data)
-
-    except FileNotFoundError as e:
-        raise FileNotFoundError(f"Invalid path for output file: {path}") from e
-
-    except PermissionError as e:
-        raise PermissionError(f"No permission to write file: {path}") from e
-
-    except OSError as e:
-        raise OSError(f"Failed to write bytes to file: {path}") from e
-
+from utils import load_config, write_bytes
+from RSA import generate_rsa_keys
+from CAST5 import generate_symmetric_key
 
 def save_private_key(private_key, path: str) -> None:
     """
@@ -161,6 +104,6 @@ def generate_keys_pipeline(config: Dict[str, Any]) -> None:
 
     encrypted_sym_key = encrypt_symmetric_key(sym_key, public_key)
 
-    save_bytes(config["symmetric_key"], encrypted_sym_key)
+    write_bytes(config["symmetric_key"], encrypted_sym_key)
 
     print("[+] Готово")

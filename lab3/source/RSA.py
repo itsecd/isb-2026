@@ -7,68 +7,21 @@ from cryptography.hazmat.primitives.asymmetric.rsa import (
     RSAPublicKey,
 )
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
-from utils import load_config, read_bytes, write_bytes
 
-
-def generate_keys() -> Tuple[RSAPrivateKey, RSAPublicKey]:
+def generate_rsa_keys():
     """
-    Генерирует RSA ключевую пару.
-
-    Parameters
-    ----------
-    None
+    Генерирует RSA пару ключей.
 
     Returns
     -------
-    Tuple[RSAPrivateKey, RSAPublicKey]
-        Приватный и публичный RSA ключи.
+    tuple
+        (private_key, public_key)
     """
     private_key = rsa.generate_private_key(
         public_exponent=65537,
         key_size=2048,
     )
     return private_key, private_key.public_key()
-
-
-def save_private_key(private_key: RSAPrivateKey, path: str) -> None:
-    """
-    Сохраняет RSA приватный ключ в PEM формате.
-
-    Parameters
-    ----------
-    private_key : RSAPrivateKey
-        Приватный RSA ключ.
-    path : str
-        Путь для сохранения.
-    """
-    with open(path, "wb") as f:
-        f.write(
-            private_key.private_bytes(
-                serialization.Encoding.PEM,
-                serialization.PrivateFormat.TraditionalOpenSSL,
-                serialization.NoEncryption(),
-            )
-        )
-
-
-def save_public_key(public_key: RSAPublicKey, path: str) -> None:
-    """
-    Сохраняет RSA публичный ключ в PEM формате.
-
-    Parameters
-    ----------
-    public_key : RSAPublicKey
-        Публичный RSA ключ.
-    path : str
-        Путь для сохранения.
-    """
-    with open(path, "wb") as f:
-        f.write(
-            public_key.public_bytes(
-                serialization.Encoding.PEM,
-                serialization.PublicFormat.SubjectPublicKeyInfo,
-            )
-        )
 
 
 def load_private_key(path: str) -> RSAPrivateKey:

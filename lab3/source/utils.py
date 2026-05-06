@@ -51,14 +51,33 @@ def read_bytes(path: str) -> bytes:
     -------
     bytes
         Содержимое файла в байтах.
+
+    Raises
+    ------
+    FileNotFoundError
+        Если файл не найден.
+    PermissionError
+        Если нет прав на чтение.
+    OSError
+        При других ошибках ввода-вывода.
     """
-    with open(path, "rb") as f:
-        return f.read()
+    try:
+        with open(path, "rb") as f:
+            return f.read()
+
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"File not found: {path}") from e
+
+    except PermissionError as e:
+        raise PermissionError(f"No permission to read file: {path}") from e
+
+    except OSError as e:
+        raise OSError(f"Failed to read file: {path}") from e
 
 
 def write_bytes(path: str, data: bytes) -> None:
     """
-    Записывает байты в файл.
+    Сохраняет бинарные данные в файл.
 
     Parameters
     ----------
@@ -67,5 +86,15 @@ def write_bytes(path: str, data: bytes) -> None:
     data : bytes
         Данные для записи.
     """
-    with open(path, "wb") as f:
-        f.write(data)
+    try:
+        with open(path, "wb") as f:
+            f.write(data)
+
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"Invalid path for output file: {path}") from e
+
+    except PermissionError as e:
+        raise PermissionError(f"No permission to write file: {path}") from e
+
+    except OSError as e:
+        raise OSError(f"Failed to write bytes to file: {path}") from e
