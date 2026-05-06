@@ -1,9 +1,17 @@
 import json
 import argparse
 import sys
+from enum import Enum
 
 import constants as const
 from hybrid_crypto import generate_keys, encrypt_data, decrypt_data
+
+
+class Mode(Enum):
+    """Режимы работы программы"""
+    GENERATION = 'gen'
+    ENCRYPTION = 'enc'
+    DECRYPTION = 'dec'
 
 
 def load_settings(settings_file: str) -> dict:
@@ -71,17 +79,16 @@ def main():
             print(f"[ОШИБКА] В файле настроек отсутствует ключ '{key}'")
             sys.exit(1)
 
-    # Выполнение соответствующего режима с использованием match/case
     mode = None
     if args.generation:
-        mode = 'gen'
+        mode = Mode.GENERATION
     elif args.encryption:
-        mode = 'enc'
+        mode = Mode.ENCRYPTION
     elif args.decryption:
-        mode = 'dec'
+        mode = Mode.DECRYPTION
 
     match mode:
-        case 'gen':
+        case Mode.GENERATION:
             generate_keys(
                 symmetric_key_path=settings['symmetric_key_file'],
                 nonce_path=settings['nonce_file'],
@@ -89,7 +96,7 @@ def main():
                 public_key_path=settings['public_key_file'],
                 private_key_path=settings['private_key_file']
             )
-        case 'enc':
+        case Mode.ENCRYPTION:
             encrypt_data(
                 initial_file_path=settings['initial_file'],
                 encrypted_file_path=settings['encrypted_file'],
@@ -97,7 +104,7 @@ def main():
                 private_key_path=settings['private_key_file'],
                 nonce_path=settings['nonce_file']
             )
-        case 'dec':
+        case Mode.DECRYPTION:
             decrypt_data(
                 encrypted_file_path=settings['encrypted_file'],
                 decrypted_file_path=settings['decrypted_file'],
