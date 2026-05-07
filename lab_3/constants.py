@@ -40,15 +40,15 @@ def load_settings_once(settings_file: str = DEFAULT_SETTINGS_FILE) -> dict:
     if not _SETTINGS_LOADED:
         try:
             with open(settings_file, 'r', encoding='utf-8') as f:
-                SETTINGS = json.load(f)
+                SETTINGS = json.load(f)#Читает весь файл и преобразует JSON в словарь
             _SETTINGS_LOADED = True
-        except FileNotFoundError:
+        except FileNotFoundError:#файл не найден
             SETTINGS = DEFAULT_SETTINGS.copy()
             _SETTINGS_LOADED = True
-        except json.JSONDecodeError:
+        except json.JSONDecodeError:#неправильный JSON
             SETTINGS = DEFAULT_SETTINGS.copy()
             _SETTINGS_LOADED = True
-    return SETTINGS
+    return SETTINGS#словарь с настройками
 
-# Инициализация настроек (точка входа)
+# Инициализация настроек (точка входа)При импорте модуля constants.py эта строка выполняется один раз и загружает настройки в глобальную переменную SETTINGS
 SETTINGS = load_settings_once()

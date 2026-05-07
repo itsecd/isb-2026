@@ -7,12 +7,13 @@ import constants as const
 def generate_rsa_keypair() -> tuple:
     """Генерирует пару ключей RSA (приватный, публичный)"""
     private_key = rsa.generate_private_key(public_exponent=const.RSA_PUBLIC_EXPONENT, key_size=const.RSA_KEY_SIZE)
-    public_key = private_key.public_key()
-    return private_key, public_key
+    public_key = private_key.public_key()#Из закрытого ключа извлекает открытый ключ (содержит только n и e)
+    return private_key, public_key#Возвращает оба ключа как кортеж
 
 
 def encrypt_asymmetric(data: bytes, public_key) -> bytes:
-    """Шифрование данных с помощью RSA (OAEP padding)"""
+    """Шифрование симметричного ключа(32байта) с помощью RSA (OAEP padding)
+    data - симметричный ключ, public_key Открытый ключ получателя"""
     return public_key.encrypt(data, padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
 
 

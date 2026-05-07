@@ -1,7 +1,7 @@
 import json
 import argparse
 import sys
-from enum import Enum
+from enum import Enum #для создания перечислений
 
 import constants as const
 from hybrid_crypto import generate_keys, encrypt_data, decrypt_data
@@ -18,17 +18,17 @@ def load_settings(settings_file: str) -> dict:
     """Читает из JSON-файла"""
     try:
         with open(settings_file, 'r', encoding='utf-8') as f:
-            settings = json.load(f)
+            settings = json.load(f)#Читает JSON из файла и преобразует в словарь
         print(f"[OK] Настройки загружены из {settings_file}")
         return settings
     except FileNotFoundError:
         print(f"[ОШИБКА] Файл настроек {settings_file} не найден!")
         print("Создайте файл settings.json в формате:")
-        print(json.dumps(const.DEFAULT_SETTINGS, indent=4))
+        print(json.dumps(const.DEFAULT_SETTINGS, indent=4))#Выводит пример правильного формата JSON
         sys.exit(1)
     except json.JSONDecodeError as e:
         print(f"[ОШИБКА] Ошибка парсинга JSON в файле {settings_file}: {e}")
-        sys.exit(1)
+        sys.exit(1)#Аварийно завершает программу с кодом ошибки 1
 
 
 def create_default_settings_file(settings_file: str):
@@ -59,12 +59,12 @@ def main():
     parser.add_argument('-s', '--settings', type=str, default=const.DEFAULT_SETTINGS_FILE,
                         help=f'Путь к файлу настроек (по умолчанию: {const.DEFAULT_SETTINGS_FILE})')
 
-    args = parser.parse_args()
+    args = parser.parse_args()#Разбирает аргументы командной строки и сохраняет их в объект args
 
     # Загрузка или создание файла настроек
     try:
         settings = load_settings(args.settings)
-    except FileNotFoundError:
+    except FileNotFoundError:#Если файл не найден, cоздаёт файл настроек по умолчанию
         settings = create_default_settings_file(args.settings)
 
     # Проверка наличия всех необходимых ключей в настройках
@@ -79,7 +79,7 @@ def main():
             print(f"[ОШИБКА] В файле настроек отсутствует ключ '{key}'")
             sys.exit(1)
 
-    mode = None
+    mode = None#определяет, какой режим работы программы запустить
     if args.generation:
         mode = Mode.GENERATION
     elif args.encryption:

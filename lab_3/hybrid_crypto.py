@@ -20,11 +20,11 @@ def generate_keys(symmetric_key_path: str,
         # 1. Генерация симметричного ключа и nonce
         print("1. Генерация симметричного ключа (ChaCha20, 256 бит)...")
         sym_key = generate_symmetric_key()
-        print(f"   Сгенерирован ключ: {sym_key.hex()[:32]}...")
+        print(f" Сгенерирован симметричный ключ: {sym_key.hex()[:32]}...")
 
         print("2. Генерация nonce (128 бит)...")
         nonce = generate_nonce()
-        print(f"   Сгенерирован nonce: {nonce.hex()}")
+        print(f" Сгенерирован nonce: {nonce.hex()}")
 
         # 2. Генерация RSA-ключей
         print("3. Генерация пары RSA-ключей (2048 бит)...")

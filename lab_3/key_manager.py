@@ -11,7 +11,6 @@ def save_symmetric_key_to_file(key: bytes, filepath: str):
     write_binary_file(filepath, key)
     print(f"[OK] Симметричный ключ сохранён в {filepath}")
 
-
 # Nonce
 
 def save_nonce_to_file(nonce: bytes, filepath: str):
@@ -49,10 +48,9 @@ def save_private_key_to_file(private_key, filepath: str):
 def load_private_key_from_file(filepath: str):
     """Загружает приватный ключ RSA из PEM-файла"""
     pem_data = read_binary_file(filepath)
-    private_key = serialization.load_pem_private_key(pem_data, password=None)
+    private_key = serialization.load_pem_private_key(pem_data, password=None)#не зашифрован паролем
     print(f"[OK] Приватный ключ RSA загружен из {filepath}")
     return private_key
-
 
 #  Зашифрованные данные 
 
