@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+keys/*.pem
+keys/*.enc
+data/*.bin
+data/decrypted.txt
