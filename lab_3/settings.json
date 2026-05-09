@@ -1,8 +1,16 @@
 {
-  "initial_file": "src/text_to_encrypt.txt",
-  "encrypted_file": "src/encrypted_data.bin",
-  "decrypted_file": "src/decrypted_text.txt",
-  "symmetric_key": "src/symmetric_key.enc",
-  "public_key": "src/public_key.pem",
-  "secret_key": "src/private_key.pem"
+  "files": {
+    "initial_file": "text/text_to_encrypt.txt",
+    "encrypted_file": "text/encrypted_data.bin",
+    "decrypted_file": "text/decrypted_text.txt",
+    "symmetric_key": "text/symmetric_key.enc",
+    "public_key": "text/public_key.pem",
+    "secret_key": "text/private_key.pem"
+  },
+  "crypto_params": {
+    "rsa_key_size": 2048,
+    "rsa_public_exponent": 65537,
+    "seed_key_size": 16,
+    "seed_block_size": 128
+  }
 }

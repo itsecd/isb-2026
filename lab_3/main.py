@@ -1,160 +1,142 @@
 import argparse
 import os
-import json
 
-from cryptography.hazmat.primitives.ciphers import Cipher, modes
-from cryptography.hazmat.decrepit.ciphers import algorithms as decrepit_algorithms
-from cryptography.hazmat.primitives import padding as sym_padding
-from cryptography.hazmat.primitives.asymmetric import rsa, padding as asym_padding
-from cryptography.hazmat.primitives import serialization, hashes
+from src/file_io import read_file, write_file, load_json
+from src/asym_crypto import generate_rsa_keys, encrypt_rsa, decrypt_rsa
+from src/sym_crypto import encrypt_seed, decrypt_seed
 
 
-def load_settings(config_path: str = 'settings.json') -> dict:
-    """Loads the settings from a JSON file."""
-    print(f"--Reading the configuration from {config_path}...")
-    with open(config_path, 'r', encoding='utf-8') as json_file:
-        return json.load(json_file)
-
-
-def get_asym_padding():
-    """Returns a padding object for the RSA algorithm."""
-    return asym_padding.OAEP(
-        mgf=asym_padding.MGF1(algorithm=hashes.SHA256()),
-        algorithm=hashes.SHA256(),
-        label=None
-    )
-
-
-def generate_keys(settings: dict):
-    """Hybrid system key generation."""
-    print("\n!!STARTING KEY GENERATION!!")
-
-    print("--Generating a 128-bit key for the SEED algorithm...")
-    sym_key = os.urandom(16)
-
-    print("--Generating an RSA key pair...")
-    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    public_key = private_key.public_key()
-
-    print(f"--Saving the public key in {settings['public_key']}...")
-    with open(settings['public_key'], 'wb') as pub_out:
-        pub_out.write(public_key.public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
-        ))
-
-    print(f"--Saving the private key in {settings['secret_key']}...")
-    with open(settings['secret_key'], 'wb') as priv_out:
-        priv_out.write(private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption()
-        ))
-
-    print(f"--Symmetric key encryption and storage in {settings['symmetric_key']}...")
-    encrypted_sym_key = public_key.encrypt(sym_key, get_asym_padding())
-
-    with open(settings['symmetric_key'], 'wb') as sym_out:
-        sym_out.write(encrypted_sym_key)
-
-    print("-Key generation has been completed successfully!")
-
-
-def encrypt_data(settings: dict):
-    """Data encryption by a hybrid system."""
-    print("\n!!STARTING DATA ENCRYPTION!!")
-
-    print("--Uploading the RSA private key...")
-    with open(settings['secret_key'], 'rb') as pem_in:
-        private_key = serialization.load_pem_private_key(pem_in.read(), password=None)
-
-    print("--Reading and decrypting the symmetric SEED key...")
-    with open(settings['symmetric_key'], 'rb') as sym_in:
-        encrypted_sym_key = sym_in.read()
-
-    sym_key = private_key.decrypt(encrypted_sym_key, get_asym_padding())
-
-    print(f"--Reading the source file {settings['initial_file']}...")
-    with open(settings['initial_file'], 'rb') as f_in:
-        plain_text = f_in.read()
-
-    padder = sym_padding.ANSIX923(128).padder()
-    padded_text = padder.update(plain_text) + padder.finalize()
-
-    print("--Data encryption using the SEED algorithm...")
-    iv = os.urandom(16)
-    cipher = Cipher(decrepit_algorithms.SEED(sym_key), modes.CBC(iv))
-    encryptor = cipher.encryptor()
-    cipher_text = encryptor.update(padded_text) + encryptor.finalize()
-
-    print(f"--Saving an encrypted file in {settings['encrypted_file']}...")
-    with open(settings['encrypted_file'], 'wb') as f_out:
-        f_out.write(iv + cipher_text)
-
-    print("-The encryption has been successfully completed!")
-
-
-def decrypt_data(settings: dict):
-    """Decryption of data by a hybrid system."""
-    print("\n!!STARTING DATA DECRYPTION!!")
-
-    print("--Uploading the RSA private key...")
-    with open(settings['secret_key'], 'rb') as pem_in:
-        private_key = serialization.load_pem_private_key(pem_in.read(), password=None)
-
-    print("--Reading and decrypting a symmetric SEED key...")
-    with open(settings['symmetric_key'], 'rb') as sym_in:
-        encrypted_sym_key = sym_in.read()
-
-    sym_key = private_key.decrypt(encrypted_sym_key, get_asym_padding())
-
-    print(f"--Reading an encrypted file {settings['encrypted_file']}...")
-    with open(settings['encrypted_file'], 'rb') as f_in:
-        file_content = f_in.read()
-    iv = file_content[:16]
-    cipher_text = file_content[16:]
-
-    print("--Decryption of data by the SEED algorithm...")
-    cipher = Cipher(decrepit_algorithms.SEED(sym_key), modes.CBC(iv))
-    decryptor = cipher.decryptor()
-    padded_plain_text = decryptor.update(cipher_text) + decryptor.finalize()
-    unpadder = sym_padding.ANSIX923(128).unpadder()
-    plain_text = unpadder.update(padded_plain_text) + unpadder.finalize()
-
-    print(f"--Saving the result in {settings['decrypted_file']}...")
-    with open(settings['decrypted_file'], 'wb') as f_out:
-        f_out.write(plain_text)
-
-    print("-Decryption has been completed successfully!")
-
-
-def main():
+def parse_arguments():
+    """CMD parsing."""
     parser = argparse.ArgumentParser(description="RSA & SEED hybrid encryption")
+
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-gen', '--generation', action='store_true', help='Key generation mode')
     group.add_argument('-enc', '--encryption', action='store_true', help='Encryption mode')
     group.add_argument('-dec', '--decryption', action='store_true', help='Decryption mode')
 
-    parser.add_argument('-c', '--config', default='settings.json',
-                        help='Path to the configuration file (settings.json by default)')
+    parser.add_argument('-c', '--config', default='settings.json', help='Path to the configuration file')
 
-    args = parser.parse_args()
-    
+
+    parser.add_argument('--pub', help='Path to your public key (PEM)')
+    parser.add_argument('--priv', help='Path to your private key (PEM)')
+    parser.add_argument('--sym', help='Path to your encrypted symmetric key')
+    parser.add_argument('--input', help='Path to the input file')
+    parser.add_argument('--output', help='path to the output file')
+
+    return parser.parse_args()
+
+
+def determine_mode(args) -> str:
+    """Determining the operating mode for use in a match/case."""
+    if args.generation: return 'generation'
+    if args.encryption: return 'encryption'
+    if args.decryption: return 'decryption'
+    return 'unknown'
+
+
+def main():
     try:
-        settings = load_settings(args.config)
+        args = parse_arguments()
 
-        if args.generation:
-            generate_keys(settings)
-        elif args.encryption:
-            encrypt_data(settings)
-        elif args.decryption:
-            decrypt_data(settings)
-    except FileNotFoundError as e:
-        print(f"!!!Error: File not found: {e.filename}")
+        settings = load_json(args.config)
+
+        files = settings.get('files', {})
+        params = settings.get('crypto_params', {})
+
+        pub_key_path = args.pub if args.pub else files.get('public_key')
+        priv_key_path = args.priv if args.priv else files.get('secret_key')
+        sym_key_path = args.sym if args.sym else files.get('symmetric_key')
+
+        mode = determine_mode(args)
+
+        match mode:
+            case 'generation':
+                print("\n!!STARTING KEY GENERATION!!")
+                print("--Generating a symmetric SEED key...")
+                sym_key = os.urandom(params.get('seed_key_size', 16))
+
+                print("--Generating an RSA key pair...")
+                pub_bytes, priv_bytes = generate_rsa_keys(
+                    public_exponent=params.get('rsa_public_exponent', 65537),
+                    key_size=params.get('rsa_key_size', 2048)
+                )
+
+                print(f"--Saving the public key in {pub_key_path}...")
+                write_file(pub_key_path, pub_bytes)
+
+                print(f"--Saving the private key in {priv_key_path}...")
+                write_file(priv_key_path, priv_bytes)
+
+                print(f"--Symmetric key encryption and storage in {sym_key_path}...")
+                encrypted_sym_key = encrypt_rsa(pub_bytes, sym_key)
+                write_file(sym_key_path, encrypted_sym_key)
+
+                print("-Key generation has been completed successfully!")
+
+            case 'encryption':
+                input_file = args.input if args.input else files.get('initial_file')
+                output_file = args.output if args.output else files.get('encrypted_file')
+
+                print("\n!!STARTING DATA ENCRYPTION!!")
+                print(f"--Loading the RSA private key from {priv_key_path}...")
+                priv_key_pem = read_file(priv_key_path)
+
+                print(f"--Reading and decrypting the symmetric SEED key from {sym_key_path}...")
+                enc_sym_key = read_file(sym_key_path)
+                sym_key = decrypt_rsa(priv_key_pem, enc_sym_key)
+
+                print(f"--Reading the source file {input_file}...")
+                plain_text = read_file(input_file)
+
+                print("--Data encryption using the SEED algorithm...")
+                iv, cipher_text = encrypt_seed(plain_text, sym_key, params.get('seed_block_size', 128))
+
+                print(f"--Saving encrypted file in {output_file}...")
+                write_file(output_file, iv + cipher_text)
+
+                print("-The encryption has been successfully completed!")
+
+            case 'decryption':
+                input_file = args.input if args.input else files.get('encrypted_file')
+                output_file = args.output if args.output else files.get('decrypted_file')
+
+                print("\n!!STARTING DATA DECRYPTION!!")
+                print(f"--Loading the RSA private key from {priv_key_path}...")
+                priv_key_pem = read_file(priv_key_path)
+
+                print(f"--Reading and decrypting the symmetric SEED key from {sym_key_path}...")
+                enc_sym_key = read_file(sym_key_path)
+                sym_key = decrypt_rsa(priv_key_pem, enc_sym_key)
+
+                print(f"--Reading encrypted file {input_file}...")
+                file_content = read_file(input_file)
+
+                if len(file_content) < 16:
+                    raise ValueError("The file content is too short (missing IV).")
+
+                iv = file_content[:16]
+                cipher_text = file_content[16:]
+
+                print("--Decryption of data by the SEED algorithm...")
+                plain_text = decrypt_seed(cipher_text, sym_key, iv, params.get('seed_block_size', 128))
+
+                print(f"--Saving the result in {output_file}...")
+                write_file(output_file, plain_text)
+
+                print("-Decryption has been completed successfully!")
+
+            case _:
+                print("!!!Error: Unknown operating mode.")
+
+    except IOError as e:
+        print(f"!!! Input/Output error: {e}")
     except ValueError as e:
-        print(f"!!!Error: File damaged: {e}")
+        print(f"!!! Data error: {e}")
+    except RuntimeError as e:
+        print(f"!!! Cryptographic error: {e}")
     except Exception as e:
-        print(f"!!!Error: Unexpected error: {e}")
+        print(f"!!! Unexpected error: {e}")
 
 
 if __name__ == '__main__':
