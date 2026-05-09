@@ -1,0 +1,9 @@
+{
+    "initial_file": "text.txt",
+    "encrypted_file": "encrypted_text.bin",
+    "decrypted_file": "decrypted_text.txt",
+    "symmetric_key": "camellia_key.bin",
+    "public_key": "public.pem",
+    "secret_key": "private.pem",
+    "camellia_key_size": 256
+}
