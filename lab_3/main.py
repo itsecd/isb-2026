@@ -1,9 +1,9 @@
 import argparse
 import os
 
-from src/file_io import read_file, write_file, load_json
-from src/asym_crypto import generate_rsa_keys, encrypt_rsa, decrypt_rsa
-from src/sym_crypto import encrypt_seed, decrypt_seed
+from src.file_io import read_file, write_file, load_json
+from src.asym_crypto import generate_rsa_keys, encrypt_rsa, decrypt_rsa
+from src.sym_crypto import encrypt_seed, decrypt_seed
 
 
 def parse_arguments():
