@@ -1,8 +1,5 @@
-import os
-
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding as asym_padding, rsa
-
+from asymmetric import encrypt_symmetric_key, generate_rsa_keys
+from symmetric import generate_symmetric_key
 from utils import save_private_key, save_public_key, write_bytes
 
 
@@ -12,21 +9,24 @@ def generate_key(
     path_asymmetric_private_key: str,
 ) -> None:
     """
-    Функция для генерируации симметричного ключа SEED и пары RSA ключей.
-    Симметричный ключ шифруется открытым RSA ключом и сохраняется на диск.
-    Открытый и закрытый RSA ключи сохраняются в PEM формате.
+    Генерирует симметричный ключ SEED и пару RSA ключей.
+    Симметричный ключ шифруется открытым RSA ключом.
+
+    Args:
+        path_symmetric_key: путь для сохранения зашифрованного симметричного ключа
+        path_asymmetric_public_key: путь для сохранения открытого RSA ключа
+        path_asymmetric_private_key: путь для сохранения закрытого RSA ключа
     """
     print("Генерация симметричного ключа:")
     try:
-        symmetric_key = os.urandom(16)
+        symmetric_key = generate_symmetric_key()
     except Exception as e:
         raise RuntimeError(f"Симметричный ключ не сгенерировался: {e}")
     print("Симметричный ключ сгенерирован")
 
     print("Генерация RSA ключей (открытый и закрытый):")
     try:
-        private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-        public_key = private_key.public_key()
+        private_key, public_key = generate_rsa_keys()
     except Exception as e:
         raise RuntimeError(f"RSA ключи не сгенерировались: {e}")
     print("RSA ключи сгенерированы")
@@ -40,19 +40,9 @@ def generate_key(
     print("Закрытый ключ сохранён")
 
     print("Шифрование симметричного ключа открытым RSA ключом:")
-    try:
-        symmetric_key = public_key.encrypt(
-            symmetric_key,
-            asym_padding.OAEP(
-                mgf=asym_padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None,
-            ),
-        )
-    except Exception as e:
-        raise RuntimeError(f"Симметричный ключ не зашифровался: {e}")
+    encrypted_symmetric_key = encrypt_symmetric_key(symmetric_key, public_key)
     print("Симметричный ключ зашифрован")
 
     print(f"Сохранение симметричного ключа в {path_symmetric_key}:")
-    write_bytes(path_symmetric_key, symmetric_key)
+    write_bytes(path_symmetric_key, encrypted_symmetric_key)
     print("Генерация завершена успешно")
