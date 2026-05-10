@@ -1,3 +1,4 @@
+import os
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
@@ -12,6 +13,9 @@ def generate_keys():
 
 
 def save_private_key(private_key, path: str):
+    folder = os.path.dirname(path)
+    if folder:
+        os.makedirs(folder, exist_ok=True)
     with open(path, "wb") as f:
         f.write(private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
@@ -21,6 +25,9 @@ def save_private_key(private_key, path: str):
 
 
 def save_public_key(public_key, path: str):
+    folder = os.path.dirname(path)
+    if folder:
+        os.makedirs(folder, exist_ok=True)
     with open(path, "wb") as f:
         f.write(public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
