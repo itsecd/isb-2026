@@ -1,7 +1,9 @@
 import argparse
 import json
 import os.path
+
 from key_generator import generate_keys
+
 
 def load_settings() -> dict:
     setting_file = 'settings.json'
@@ -12,7 +14,7 @@ def load_settings() -> dict:
             'decrypted_file': 'decrypted.txt',
             'symmetric_key': 'symmetric_key.bin',
             'public_key': 'public_key.pem',
-            'secret_key': 'secret_key.pem',
+            'secret_key': 'secret_key.pem'
         }
         with open(setting_file, 'w', encoding='utf-8') as json_file:
             json.dump(default_settings, json_file)
@@ -26,7 +28,7 @@ def parse_arguments() -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(description="Search candidates by phone code")
     parser.add_argument('-l', '--length', type=int, default=256,
-                        help='Длина ключа для Blowfish (от 32 до 448б кратный 8)')
+                        help='Длина ключа для Blowfish (от 32 до 448, кратный 8)')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-gen', '--generation', action='store_true', help='Запускает режим генерации ключей')
     group.add_argument('-enc', '--encryption', action='store_true', help='Запускает режим шифрования')
