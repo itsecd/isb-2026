@@ -1,6 +1,16 @@
 import json
 
 def load(path):
+    """
+    Loading settings from JSON file
+    Args:
+        path(str): Path to settings file
+    Returns:
+        dict: Dictionary with data from settings file
+    Raises:
+        FileNotFoundError: file in path not found
+        ValueError: File contains incorrect data
+    """
     try:
         with open(path, "r", encoding="utf-8") as json_file:
             return json.load(json_file)
@@ -10,6 +20,14 @@ def load(path):
         raise ValueError(f"Ошибка чтения файла: {e}")
     
 def save(path, settings):
+    """
+    Saving dictionary of settings in JSON file
+    Args:
+        path(str): Path to settings file
+        settings(dict): Dictionary with data from settings file
+    Raises:
+        OSError: Error of writing data on drive
+    """
     try:
         with open(path, "w", encoding="utf-8") as fp:
             json.dump(settings, fp, indent=4, ensure_ascii=False)

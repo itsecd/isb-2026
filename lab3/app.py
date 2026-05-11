@@ -14,7 +14,7 @@ class CryptoApp(QWidget):
         self.initUI()
 
     def initUI(self):
-        self.setWindowTitle('Hybrid Crypto System - Full Custom Mode')
+        self.setWindowTitle('Hybrid Crypto System')
         self.setMinimumWidth(600)
         layout = QVBoxLayout()
 

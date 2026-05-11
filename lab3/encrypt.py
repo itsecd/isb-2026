@@ -5,6 +5,13 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 import settings_loader
 
 def sym_key_decrypt(settings):
+    """
+    Decrypting sym key with RSA private key
+    Args:
+        settings(dict): dictionary with settings
+    Returns:
+        bytes: decrypted sym key
+    """
     with open(settings['private_key'], "rb") as f:
         private_key = serialization.load_pem_private_key(f.read(), password=None)
     with open(settings['symmetric_key'], "rb") as f:
@@ -15,6 +22,14 @@ def sym_key_decrypt(settings):
     )
 
 def sym_encrypt_source(sym_key, input_path, output_path):
+    """
+    Encrypting source file with AES,
+    adds an initialization vector to the beginning of the file
+    Args:
+        sym_key(bytes): sym key
+        input_path(str): path to source file
+        output_path(str): path to save encrypted .bin file
+    """
     with open(input_path, "rb") as f:
         data = f.read()
 
@@ -28,6 +43,13 @@ def sym_encrypt_source(sym_key, input_path, output_path):
         f.write(iv + ciphertext)
 
 def run_encryption(settings_path):
+    """
+    Runs ecnrypting cycle
+    Args:
+        settings_path: path to settings JSON file
+    Returns:
+        str: message of successful encryption
+    """
     settings = settings_loader.load(settings_path)
     sym_key = sym_key_decrypt(settings)
     sym_encrypt_source(sym_key, settings['initial_file'], settings['encrypted_file'])

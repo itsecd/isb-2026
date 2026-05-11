@@ -1,10 +1,16 @@
-import os
 from cryptography.hazmat.primitives import serialization, hashes, padding as sym_padding
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 import settings_loader
 
 def sym_key_decrypt(settings):
+    """
+    Decrypting sym key with RSA private key
+    Args:
+        settings(dict): dictionary with settings
+    Returns:
+        bytes: decrypted sym key
+    """
     with open(settings['private_key'], "rb") as f:
         private_key = serialization.load_pem_private_key(f.read(), password=None)
     with open(settings['symmetric_key'], "rb") as f:
@@ -15,6 +21,14 @@ def sym_key_decrypt(settings):
     )
 
 def sym_decrypt_encrypted_file(sym_key, input_path, output_path):
+    """
+    Decrypting .bin file with AES
+    Read initialization vector from first file bytes
+    Args:
+        sym_key(bytes): sym key
+        input_path(str): path to encrypted .bin file
+        output_path(str): path to save decrypted file
+    """
     with open(input_path, "rb") as f:
         data = f.read()
         iv, ciphertext = data[:16], data[16:]
@@ -29,6 +43,13 @@ def sym_decrypt_encrypted_file(sym_key, input_path, output_path):
         f.write(text)
 
 def run_decryption(settings_path):
+    """
+    Runs decrypting cycle
+    Args:
+        settings_path: path to settings JSON file
+    Returns:
+        str: message of successful decryption
+    """
     settings = settings_loader.load(settings_path)
     sym_key = sym_key_decrypt(settings)
     sym_decrypt_encrypted_file(sym_key, settings['encrypted_file'], settings['decrypted_file'])
