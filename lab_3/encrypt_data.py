@@ -28,7 +28,7 @@ def encrypt_with_keys(settings: dict) -> None:
     with open(settings['initial_file'], 'rb') as initial_file:
         data = initial_file.read()
 
-    padder = padding.ANSIX923(64).padder()
+    padder = padding.PKCS7(64).padder()
     padded_data = padder.update(data) + padder.finalize()
 
     iv = os.urandom(8)

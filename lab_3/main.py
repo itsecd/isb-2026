@@ -16,7 +16,8 @@ def load_settings() -> dict:
             'decrypted_file': 'decrypted.txt',
             'symmetric_key': 'symmetric_key.bin',
             'public_key': 'public_key.pem',
-            'secret_key': 'secret_key.pem'
+            'secret_key': 'secret_key.pem',
+            'symmetric_key_length': 128
         }
         with open(setting_file, 'w', encoding='utf-8') as json_file:
             json.dump(default_settings, json_file)
@@ -28,9 +29,7 @@ def parse_arguments() -> argparse.Namespace:
     """
     Adds and parses command-line arguments
     """
-    parser = argparse.ArgumentParser(description="Search candidates by phone code")
-    parser.add_argument('-l', '--length', type=int, default=256,
-                        help='Длина ключа для Blowfish (от 32 до 448, кратный 8)')
+    parser = argparse.ArgumentParser(description="Гибридная криптосистема (RSA + Blowfish)")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-gen', '--generation', action='store_true', help='Запускает режим генерации ключей')
     group.add_argument('-enc', '--encryption', action='store_true', help='Запускает режим шифрования')
@@ -46,9 +45,10 @@ def main() -> None:
         args = parse_arguments()
         settings = load_settings()
         if args.generation:
-            if not (32 <= args.length <= 448 and args.length % 8 == 0):
+            key_length = settings['symmetric_key_length']
+            if not (32 <= key_length <= 448 and key_length % 8 == 0):
                 raise ValueError("Blowfish требует ключ от 32 до 448 бит и кратный 8")
-            generate_keys(settings, args.length)
+            generate_keys(settings)
         elif args.encryption:
             encrypt_with_keys(settings)
         elif args.decryption:

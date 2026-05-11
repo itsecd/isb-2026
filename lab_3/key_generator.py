@@ -4,7 +4,9 @@ from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 
 
-def generate_keys(settings: dict, key_length: int) -> None:
+def generate_keys(settings: dict) -> None:
+    key_length = settings['symmetric_key_length']
+    
     print(f"Генерация Blowfish ключа длиной {key_length} бит")
     symmetric_key = os.urandom(key_length // 8)
 

@@ -33,10 +33,10 @@ def decrypt_with_keys(settings: dict) -> None:
     decryptor = cipher.decryptor()
     padded_data = decryptor.update(cipher_text) + decryptor.finalize()
 
-    unpadder = padding.ANSIX923(64).unpadder()
+    unpadder = padding.PKCS7(64).unpadder()
     data = unpadder.update(padded_data) + unpadder.finalize()
 
     with open(settings['decrypted_file'], 'wb') as file:
         file.write(data)
 
-    print(f"Текст был зашифрован и записан в {settings['decrypted_file']}")
+    print(f"Текст был расшифрован и записан в {settings['decrypted_file']}")
