@@ -3,6 +3,7 @@ import json
 import os.path
 
 from key_generator import generate_keys
+from encrypt_data import encrypt_with_keys
 
 
 def load_settings() -> dict:
