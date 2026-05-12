@@ -1,5 +1,4 @@
 import json
-import os
 import sys
 import threading
 import tkinter as tk
@@ -7,35 +6,46 @@ from tkinter import filedialog, messagebox, scrolledtext, ttk
 
 from decrypt import decrypt
 from encrypt import encrypt
+from file_utils import load_settings
 from generate_key import generate_key
 
 SETTINGS_FILE = "settings.json"
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_SETTINGS = {
     "symmetric_key": "symmetric_key.bin",
     "public_key": "public_key.pem",
     "secret_key": "secret_key.pem",
-    "initial_file": "input.txt",
+    "initial_file": "text.txt",
     "encrypted_file": "encrypted.bin",
-    "decrypted_file": "decrypted.txt",
+    "decrypted_file": "decrypt.txt",
 }
 
-def load_settings() -> dict:
-    if os.path.exists(SETTINGS_FILE):
-        with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return DEFAULT_SETTINGS.copy()
+def safe_load_settings() -> dict:
+    """Загрузка настроек с fallback на значения по умолчанию.
+    Если файл settings.json отсутствует или повреждён — возвращаются
+    дефолтные значения, чтобы UI всё равно запустился.
+    """
+    try:
+        return load_settings(SETTINGS_FILE)
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return DEFAULT_SETTINGS.copy()
 
 def save_settings(settings: dict) -> None:
-    with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
-        json.dump(settings, f, ensure_ascii=False, indent=2)
+    """Сохранение настроек в JSON-файл.
+    Args:
+        settings: Словарь с настройками для записи.
+    """
+    try:
+        with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
+            json.dump(settings, f, ensure_ascii=False, indent=2)
+    except OSError as e:
+        print(f"Не удалось сохранить settings.json: {e}")
 
 class HybridCryptoApp(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Гибридное шифрование RSA + Camellia")
+        self.title("Гибридное шифрование RSA + Camellia.")
         self.resizable(False, False)
-        self.settings = load_settings()
+        self.settings = safe_load_settings()
         self._build_ui()
         self._load_paths()
 
@@ -47,9 +57,9 @@ class HybridCryptoApp(tk.Tk):
         self._tab_enc = ttk.Frame(notebook)
         self._tab_dec = ttk.Frame(notebook)
 
-        notebook.add(self._tab_gen, text="  Генерация ключей  ")
-        notebook.add(self._tab_enc, text="  Шифрование  ")
-        notebook.add(self._tab_dec, text="  Дешифрование  ")
+        notebook.add(self._tab_gen, text=" Генерация ключей ")
+        notebook.add(self._tab_enc, text=" Шифрование ")
+        notebook.add(self._tab_dec, text=" Дешифрование ")
 
         self._build_gen_tab()
         self._build_enc_tab()
@@ -64,15 +74,15 @@ class HybridCryptoApp(tk.Tk):
             row=0, column=0, columnspan=3, sticky="w", **pad
         )
 
-        self._key_bits = tk.IntVar(value=128)
+        self._key_bits = tk.IntVar(value=256)
         for col, bits in enumerate((128, 192, 256)):
             ttk.Radiobutton(f, text=f"{bits} бит", variable=self._key_bits, value=bits).grid(
                 row=1, column=col, sticky="w", padx=8
             )
 
-        self._gen_sym  = self._path_row(f, "Симм. ключ (выход):",   2)
-        self._gen_pub  = self._path_row(f, "Публичный ключ (выход):", 3, save=False)
-        self._gen_priv = self._path_row(f, "Закрытый ключ (выход):", 4, save=False)
+        self._gen_sym  = self._path_row(f, "Симм. ключ (выход):",     2)
+        self._gen_pub  = self._path_row(f, "Публичный ключ (выход):", 3)
+        self._gen_priv = self._path_row(f, "Закрытый ключ (выход):",  4)
 
         ttk.Button(f, text="Сгенерировать ключи", command=self._run_generate).grid(
             row=5, column=0, columnspan=3, pady=10
@@ -80,10 +90,10 @@ class HybridCryptoApp(tk.Tk):
 
     def _build_enc_tab(self):
         f = self._tab_enc
-        self._enc_input   = self._path_row(f, "Исходный файл:",        0, open_mode=True)
-        self._enc_priv    = self._path_row(f, "Закрытый ключ:",        1, open_mode=True)
-        self._enc_sym     = self._path_row(f, "Симм. ключ (зашифр.):", 2, open_mode=True)
-        self._enc_output  = self._path_row(f, "Зашифрованный файл:",   3)
+        self._enc_input  = self._path_row(f, "Исходный файл:",        0, open_mode=True)
+        self._enc_priv   = self._path_row(f, "Закрытый ключ:",        1, open_mode=True)
+        self._enc_sym    = self._path_row(f, "Симм. ключ (зашифр.):", 2, open_mode=True)
+        self._enc_output = self._path_row(f, "Зашифрованный файл:",   3)
 
         ttk.Button(f, text="Зашифровать", command=self._run_encrypt).grid(
             row=4, column=0, columnspan=3, pady=10
@@ -91,10 +101,10 @@ class HybridCryptoApp(tk.Tk):
 
     def _build_dec_tab(self):
         f = self._tab_dec
-        self._dec_input   = self._path_row(f, "Зашифрованный файл:",    0, open_mode=True)
-        self._dec_priv    = self._path_row(f, "Закрытый ключ:",         1, open_mode=True)
-        self._dec_sym     = self._path_row(f, "Симм. ключ (зашифр.):",  2, open_mode=True)
-        self._dec_output  = self._path_row(f, "Расшифрованный файл:",   3)
+        self._dec_input  = self._path_row(f, "Зашифрованный файл:",   0, open_mode=True)
+        self._dec_priv   = self._path_row(f, "Закрытый ключ:",        1, open_mode=True)
+        self._dec_sym    = self._path_row(f, "Симм. ключ (зашифр.):", 2, open_mode=True)
+        self._dec_output = self._path_row(f, "Расшифрованный файл:",  3)
 
         ttk.Button(f, text="Расшифровать", command=self._run_decrypt).grid(
             row=4, column=0, columnspan=3, pady=10
@@ -113,7 +123,7 @@ class HybridCryptoApp(tk.Tk):
         )
 
     def _path_row(self, parent, label: str, row: int,
-                  open_mode: bool = False, save: bool = True) -> tk.StringVar:
+                  open_mode: bool = False) -> tk.StringVar:
         var = tk.StringVar()
         ttk.Label(parent, text=label).grid(row=row, column=0, sticky="w", padx=8, pady=3)
         ttk.Entry(parent, textvariable=var, width=38).grid(row=row, column=1, padx=4)
@@ -170,7 +180,7 @@ class HybridCryptoApp(tk.Tk):
         self._log.configure(state="disabled")
 
     def _run_in_thread(self, func):
-        """Redirect stdout to log widget and run func in background thread."""
+
         def worker():
             old_stdout = sys.stdout
             sys.stdout = _LogRedirect(self._log_write)
@@ -190,10 +200,15 @@ class HybridCryptoApp(tk.Tk):
         pub  = self._gen_pub.get()
         priv = self._gen_priv.get()
         if not (sym and pub and priv):
-            messagebox.showwarning("Внимание", "Укажите пути для всех трёх файлов ключей.")
+            messagebox.showwarning("Укажите пути для всех трёх файлов ключей.")
             return
         bits = self._key_bits.get()
-        self._run_in_thread(lambda: generate_key(sym, pub, priv, key_bits=bits))
+        self._run_in_thread(lambda: generate_key(
+            path_symmetric_key=sym,
+            path_public_key=pub,
+            path_secret_key=priv,
+            key_bits=bits,
+        ))
 
     def _run_encrypt(self):
         self._collect_settings()
@@ -202,9 +217,14 @@ class HybridCryptoApp(tk.Tk):
         sym  = self._enc_sym.get()
         out  = self._enc_output.get()
         if not (inp and priv and sym and out):
-            messagebox.showwarning("Внимание", "Заполните все пути для шифрования.")
+            messagebox.showwarning("Заполните все пути для шифрования.")
             return
-        self._run_in_thread(lambda: encrypt(inp, priv, sym, out))
+        self._run_in_thread(lambda: encrypt(
+            path_original_text=inp,
+            path_secret_key=priv,
+            path_symmetric_key=sym,
+            path_cipher_text=out,
+        ))
 
     def _run_decrypt(self):
         self._collect_settings()
@@ -213,12 +233,17 @@ class HybridCryptoApp(tk.Tk):
         sym  = self._dec_sym.get()
         out  = self._dec_output.get()
         if not (inp and priv and sym and out):
-            messagebox.showwarning("Внимание", "Заполните все пути для дешифрования.")
+            messagebox.showwarning("Заполните все пути для дешифрования.")
             return
-        self._run_in_thread(lambda: decrypt(inp, priv, sym, out))
+        self._run_in_thread(lambda: decrypt(
+            path_cipher_text=inp,
+            path_secret_key=priv,
+            path_symmetric_key=sym,
+            path_original_text=out,
+        ))
+
 
 class _LogRedirect:
-    """Redirects print() output to the log widget."""
     def __init__(self, write_fn):
         self._write = write_fn
 

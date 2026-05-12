@@ -11,9 +11,9 @@ def encrypt(path_original_text: str, path_secret_key: str,
 
     Args:
         path_original_text: Путь к исходному файлу, который нужно зашифровать.
-        path_secret_key:    Путь к закрытому RSA-ключу для расшифровки симметричного ключа.
+        path_secret_key: Путь к закрытому RSA-ключу для расшифровки симметричного ключа.
         path_symmetric_key: Путь к файлу зашифрованного симметричного ключа Camellia.
-        path_cipher_text:   Путь для сохранения зашифрованного файла.
+        path_cipher_text: Путь для сохранения зашифрованного файла.
     """
 
     try:

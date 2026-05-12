@@ -7,6 +7,11 @@ from decrypt import decrypt
 
 
 def parse_args() -> argparse.Namespace:
+    """Разбор аргументов командной строки.
+    Поддерживается 3 режима работы (генерация, шифрование, дешифрование) и необязательные пути
+    к ключам, которые переопределяют значения из settings.json.
+    Для режима генерации обязательно указывается длина симметричного ключа.
+    """
     parser = argparse.ArgumentParser(
         description="Гибридная система шифрования RSA + Camellia."
     )
@@ -30,10 +35,19 @@ def parse_args() -> argparse.Namespace:
                         metavar="PATH",
                         help="Путь к своему зашифрованному симметричному ключу. "
                              "Заменяет symmetric_key из settings.json.")
+    parser.add_argument("--key-bits", dest="key_bits", type=int,
+                        choices=[128, 192, 256], default=256,
+                        help="Длина симметричного ключа Camellia в битах. "
+                             "Допустимые значения: 128, 192, 256. По умолчанию 256.")
     return parser.parse_args()
 
 
 def main() -> None:
+    """Точка входа.
+    Считывает аргументы командной строки и настройки из settings.json,
+    после чего вызывает 1 из 3 режимов работы: генерацию ключей,
+    шифрование или расшифровку файла.
+    """
     args = parse_args()
     settings = load_settings("settings.json")
 
@@ -41,26 +55,28 @@ def main() -> None:
     secret_key_path    = args.secret_key    or settings["secret_key"]
     symmetric_key_path = args.symmetric_key or settings["symmetric_key"]
 
-    if args.generation:
-        generate_key(
-            symmetric_key_path,
-            public_key_path,
-            secret_key_path,
-        )
-    elif args.encryption:
-        encrypt(
-            settings["initial_file"],
-            secret_key_path,
-            symmetric_key_path,
-            settings["encrypted_file"],
-        )
-    elif args.decryption:
-        decrypt(
-            settings["encrypted_file"],
-            secret_key_path,
-            symmetric_key_path,
-            settings["decrypted_file"],
-        )
+    match args:
+        case argparse.Namespace(generation=True):
+            generate_key(
+                symmetric_key_path,
+                public_key_path,
+                secret_key_path,
+                args.key_bits,
+            )
+        case argparse.Namespace(encryption=True):
+            encrypt(
+                settings["initial_file"],
+                secret_key_path,
+                symmetric_key_path,
+                settings["encrypted_file"],
+            )
+        case argparse.Namespace(decryption=True):
+            decrypt(
+                settings["encrypted_file"],
+                secret_key_path,
+                symmetric_key_path,
+                settings["decrypted_file"],
+            )
 
 
 if __name__ == "__main__":

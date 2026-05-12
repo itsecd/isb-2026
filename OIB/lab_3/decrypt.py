@@ -7,10 +7,9 @@ def decrypt(path_cipher_text: str, path_secret_key: str,
             path_symmetric_key: str, path_original_text: str) -> None:
     """Функция расшифровки данных гибридной системой. Сначала загружается закрытый ключ,
     с его помощью извлекается симметричный ключ Camellia, и уже этим ключом расшифровывается файл.
-
     Args:
-        path_cipher_text:   Путь к зашифрованному файлу.
-        path_secret_key:    Путь к закрытому RSA-ключу для расшифровки симметричного ключа.
+        path_cipher_text: Путь к зашифрованному файлу.
+        path_secret_key: Путь к закрытому RSA-ключу для расшифровки симметричного ключа.
         path_symmetric_key: Путь к файлу зашифрованного симметричного ключа Camellia.
         path_original_text: Путь для сохранения расшифрованного файла.
     """

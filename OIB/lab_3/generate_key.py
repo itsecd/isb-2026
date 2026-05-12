@@ -1,24 +1,21 @@
 from file_utils import write_bytes
 from asymmetric import generate_rsa_keys, serialize_public_key, serialize_private_key, encrypt_with_public_key
-from symmetric import generate_symmetric_key, choose_key_size
+from symmetric import generate_symmetric_key
 
 
 def generate_key(path_symmetric_key: str, path_public_key: str, path_secret_key: str,
                  key_bits: int = None) -> None:
     """Функция генерации ключей гибридной системы.
     Сначала создаётся симметричный ключ Camellia, затем пара RSA-ключей.
-
     Args:
         path_symmetric_key: Путь для сохранения зашифрованного симметричного ключа Camellia.
-        path_public_key:    Путь для сохранения открытого RSA-ключа.
-        path_secret_key:    Путь для сохранения закрытого RSA-ключа.
-        key_bits:           Длина симметричного ключа в битах (128, 192 или 256).
+        path_public_key: Путь для сохранения открытого RSA-ключа.
+        path_secret_key: Путь для сохранения закрытого RSA-ключа.
+        key_bits: Длина симметричного ключа в битах (128, 192 или 256).
     """
 
     try:
         print("Генерация симметричного ключа Camellia.")
-        if key_bits is None:
-            key_bits = choose_key_size()
         symmetric_key = generate_symmetric_key(key_bits)
         print(f"Симметричный ключ сгенерирован ({key_bits} бит).")
     except ValueError as e:
