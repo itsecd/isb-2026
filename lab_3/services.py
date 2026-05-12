@@ -6,6 +6,11 @@ import symmetric
 import asymmetric
 
 def load_private_key(private_pem_path: str):
+    """
+        Загружает закрытый ключ RSA из файла
+        Принимает: Путь к PEM-файлу закрытого ключа
+        Возвращает: Объект закрытого ключа RSA
+    """
     try:
         with open(private_pem_path, 'rb') as pem_in:
             private_bytes = pem_in.read()
@@ -14,6 +19,11 @@ def load_private_key(private_pem_path: str):
         raise ValueError("Файл закрытого ключа имеет неверный формат или зашифрован.")
 
 def generate_keys(path_to_cyph: str, path_to_public_key: str, path_to_private_key: str):
+    """
+        Генерирует ключи IDEA и RSA, шифрует IDEA-ключ и сохраняет их в файлы
+        Принимает: Путь для сохранения зашифрованного ключа IDEA, путь для открытого ключа RSA, путь к файлу закрытого ключа RSA
+        Возвращает: ничего, сохраняет файлы
+    """
     try:
         idea_key = symmetric.generate_idea_key()
         private_key, public_key = asymmetric.generate_rsa_keypair()
@@ -47,6 +57,11 @@ def generate_keys(path_to_cyph: str, path_to_public_key: str, path_to_private_ke
         print(f"Непредвиденная ошибка при генерации ключей: {e}")
 
 def encrypt_message(path_to_message: str, private_pem: str, path_to_cyph_key: str, path_to_save: str):
+    """
+        Шифрует текстовое сообщение гибридным методом (IDEA + RSA)
+        Принимает: Путь к исходному сообщению, путь к закрытому ключу RSA, путь к зашифрованному ключу IDEA, путь для сохранения результата
+        Возвращает: сохраняет зашифрованный файл
+    """
     try:
         with open(path_to_message, 'rb') as message_file:
             text = message_file.read()
@@ -74,6 +89,11 @@ def encrypt_message(path_to_message: str, private_pem: str, path_to_cyph_key: st
         print(f"Непредвиденная ошибка при шифровании: {e}")
 
 def decrypt_text(path_to_message: str, private_pem: str, path_to_cyph_key: str, path_to_save: str):
+    """
+        Расшифровывает текстовое сообщение гибридным методом
+        Принимает: Путь к зашифрованному сообщению, путь к закрытому ключу RSA, путь к зашифрованному ключу IDEA, путь для сохранения результата
+        Возвращает: сохраняет расшифрованный файл
+    """
     try:
         with open(path_to_message, 'rb') as f:
             combined_data = f.read()

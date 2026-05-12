@@ -4,9 +4,17 @@ from cryptography.hazmat.decrepit.ciphers.algorithms import IDEA
 from cryptography.hazmat.primitives import padding
 
 def generate_idea_key() -> bytes:
+    """
+        Генирирует IDEA ключ длиной 128 байт
+    """
     return os.urandom(16)
 
 def encrypt_data_idea(text: bytes, idea_key: bytes) -> tuple[bytes, bytes]:
+    """
+        Зашифровывает данные с помощью IDEA ключа
+        Принимает: Текст для шифрования, IDEA ключ
+        Возвращает: кортеж из вектора инициализации и зашифрованный текст
+    """
     try:
         padder = padding.ANSIX923(64).padder()
         padded_text = padder.update(text) + padder.finalize()
@@ -21,6 +29,11 @@ def encrypt_data_idea(text: bytes, idea_key: bytes) -> tuple[bytes, bytes]:
         raise RuntimeError(f"Ошибка при симметричном шифровании: {e}")
 
 def decrypt_data_idea(actual_cyph_text: bytes, iv: bytes, idea_key: bytes) -> bytes:
+    """
+        Расшифровывает текст с помощью IDEA ключа
+        Принимает: зашифрованный текст,  вектор инициализации, ключ IDEA
+        Возвращает: расшифрованный текст
+    """
     try:
         cipher = Cipher(IDEA(idea_key), modes.CBC(iv))
         decryptor = cipher.decryptor()
