@@ -1,7 +1,0 @@
-SYMMETRIC_KEY_DIR = './'
-PUBLIC_KEY_DIR = './'
-SECRET_KEY_FILE = 'private.pem'
-INITIAL_FILE = 'message.txt'
-SAVE_DIR = './'
-ENCRYPTED_FILE = 'encrypted.txt'
-SYMMETRIC_KEY_FILE = 'symmetric_encrypted.bin'

@@ -1,23 +1,19 @@
 import os
 import argparse
-import settings
 from services import generate_keys, encrypt_message, decrypt_text
 import json
 
-def load_config(config_path: str) -> dict:
-    """
-    Загружает настройки путей из JSON-файла.
-    
-    config_path: Путь к файлу settings.json.
-    Возвращает словарь с настройками.
-    """
-    with open(config_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+def read_json(config_path: str = "settings.json") -> dict:
+    """Читает настройки из JSON-файла с обработкой ошибок."""
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Конфигурационный файл '{config_path}' не найден.")
 
 def parse_args() -> argparse.Namespace:
     """
         Парсит аргументы командной строки
-
         Возвращает аргументы
     """
     parser = argparse.ArgumentParser(description="Утилита для шифрования")
@@ -36,31 +32,34 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 def main():
-    args = parse_args()
+    try:
+        args = parse_args()
 
-    cyph_dir = args.path_to_cyph or settings.SYMMETRIC_KEY_DIR
-    pub_dir = args.path_to_public_key or settings.PUBLIC_KEY_DIR
-    priv_file = args.path_to_private_key or settings.SECRET_KEY_FILE
-    msg_file = args.path_to_message or settings.INITIAL_FILE
-    save_dir = args.path_to_save or settings.SAVE_DIR
+        json = read_json()
+        
+        cyph_dir = args.path_to_cyph or json.get("SYMMETRIC_KEY_DIR", "./keys")
+        pub_dir = args.path_to_public_key or json.get("PUBLIC_KEY_DIR", "./keys")
+        priv_file = args.path_to_private_key or json.get("SECRET_KEY_FILE", "./keys/private.pem")
+        msg_file = args.path_to_message or json.get("INITIAL_FILE", "message.txt")
+        save_dir = args.path_to_save or json.get("SAVE_DIR", "./output")
 
-    sym_key_path = os.path.join(cyph_dir, settings.SYMMETRIC_KEY_FILE)
+        sym_key_path = os.path.join(cyph_dir, json.get("SYMMETRIC_KEY_FILE"))
 
-    action = "generate" if args.generation else "encrypt" if args.encryption else "decrypt"
+        action = "generate" if args.generation else "encrypt" if args.encryption else "decrypt"
 
-    match action:
-        case "generate":
-            generate_keys(cyph_dir, pub_dir, priv_file)
-            
-        case "encrypt":
-            encrypt_message(msg_file, priv_file, sym_key_path, save_dir)
-            
-        case "decrypt":
-            enc_file_path = args.path_to_message or os.path.join(save_dir, settings.ENCRYPTED_FILE)
-            decrypt_text(enc_file_path, priv_file, sym_key_path, save_dir)
-            
-        case _:
-            print("Ошибка: Неизвестная операция.")
+        match action:
+            case "generate":
+                generate_keys(cyph_dir, pub_dir, priv_file)
+                
+            case "encrypt":
+                encrypt_message(msg_file, priv_file, sym_key_path, save_dir)
+                
+            case "decrypt":
+                enc_file_path = args.path_to_message or os.path.join(save_dir, json.get("ENCRYPTED_FILE"))
+                decrypt_text(enc_file_path, priv_file, sym_key_path, save_dir)
+                
+    except Exception as e:
+        print(f"\nКритическая ошибка выполнения: {e}")
 
 if __name__ == "__main__":
     main()
