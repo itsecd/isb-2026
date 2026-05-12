@@ -27,14 +27,3 @@ def write_file(path: str, data: bytes) -> None:
     with open(path, "wb") as f:
         f.write(data)
     print(f"Файл сохранён: {path} ({len(data)} байт)")
-
-
-DEFAULT_SETTINGS = {
-    "initial_file":   "data/initial.txt",
-    "encrypted_file": "data/encrypted.bin",
-    "decrypted_file": "data/decrypted.txt",
-    "nonce":          "keys/nonce.bin",
-    "encrypted_symmetric_key": "keys/encrypted_symmetric_key.bin",
-    "public_key":     "keys/public.pem",
-    "private_key":    "keys/private.pem",
-}
