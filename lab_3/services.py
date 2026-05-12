@@ -4,6 +4,9 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 import symmetric
 import asymmetric
+import utils
+
+
 
 def load_private_key(private_pem_path: str):
     """
@@ -12,9 +15,8 @@ def load_private_key(private_pem_path: str):
         Возвращает: Объект закрытого ключа RSA
     """
     try:
-        with open(private_pem_path, 'rb') as pem_in:
-            private_bytes = pem_in.read()
-            return load_pem_private_key(private_bytes, password=None)
+        private_bytes = utils.read_bytes(private_pem_path)
+        return load_pem_private_key(private_bytes, password=None)
     except ValueError:
         raise ValueError("Файл закрытого ключа имеет неверный формат или зашифрован.")
 
@@ -28,28 +30,21 @@ def generate_keys(path_to_cyph: str, path_to_public_key: str, path_to_private_ke
         idea_key = symmetric.generate_idea_key()
         private_key, public_key = asymmetric.generate_rsa_keypair()
 
-        os.makedirs(path_to_public_key, exist_ok=True)
-        public_pem = os.path.join(path_to_public_key, 'public.pem')
-        with open(public_pem, 'wb') as public_out:
-            public_out.write(public_key.public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo
-            ))
+        public_bytes = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
+        utils.save_to_dir(path_to_public_key, 'public.pem', public_bytes)
 
-        os.makedirs(os.path.dirname(path_to_private_key) or '.', exist_ok=True)
-        with open(path_to_private_key, 'wb') as private_out:
-            private_out.write(private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
-            ))
+        private_bytes = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+        utils.save_to_file(path_to_private_key, private_bytes)
 
         encrypted_idea_key = asymmetric.encrypt_idea_key_rsa(idea_key, public_key)
-
-        os.makedirs(path_to_cyph, exist_ok=True)
-        filename = os.path.join(path_to_cyph, 'symmetric_encrypted.txt')
-        with open(filename, 'wb') as key_file:
-            key_file.write(encrypted_idea_key)
+        utils.save_to_dir(path_to_cyph, 'symmetric_encrypted.txt', encrypted_idea_key)
 
         print("Ключи успешно сгенерированы и записаны в файлы!")
 
@@ -63,11 +58,8 @@ def encrypt_message(path_to_message: str, private_pem: str, path_to_cyph_key: st
         Возвращает: сохраняет зашифрованный файл
     """
     try:
-        with open(path_to_message, 'rb') as message_file:
-            text = message_file.read()
-
-        with open(path_to_cyph_key, 'rb') as c_file:
-            c_text = c_file.read()
+        text = utils.read_bytes(path_to_message)
+        c_text = utils.read_bytes(path_to_cyph_key)
 
         d_private_key = load_private_key(private_pem)
         dc_key = asymmetric.decrypt_idea_key_rsa(c_text, d_private_key)
@@ -75,9 +67,7 @@ def encrypt_message(path_to_message: str, private_pem: str, path_to_cyph_key: st
         iv, cyph_text = symmetric.encrypt_data_idea(text, dc_key)
 
         os.makedirs(path_to_save, exist_ok=True)
-        filename = os.path.join(path_to_save, "encrypted.txt")
-        with open(filename, 'wb') as encrypted_file:
-            encrypted_file.write(iv + cyph_text)
+        filename = utils.save_to_dir(path_to_save, "encrypted.txt", iv + cyph_text)
 
         print(f"Зашифрованный текст успешно сохранен: {filename}")
 
@@ -95,14 +85,12 @@ def decrypt_text(path_to_message: str, private_pem: str, path_to_cyph_key: str, 
         Возвращает: сохраняет расшифрованный файл
     """
     try:
-        with open(path_to_message, 'rb') as f:
-            combined_data = f.read()
+        combined_data = utils.read_bytes(path_to_message)
 
         if len(combined_data) < 8:
             raise ValueError("Файл слишком мал: отсутствует вектор инициализации (IV).")
 
-        with open(path_to_cyph_key, 'rb') as c_file:
-            c_text = c_file.read()
+        c_text = utils.read_bytes(path_to_cyph_key)
 
         d_private_key = load_private_key(private_pem)
         
@@ -114,11 +102,8 @@ def decrypt_text(path_to_message: str, private_pem: str, path_to_cyph_key: str, 
 
         print("Расшифрованный текст:\n", unpadded_dc_text.decode('UTF-8', errors='replace'))
 
-        os.makedirs(path_to_save, exist_ok=True)
-        filename = os.path.join(path_to_save, 'decrypted.txt')
-        with open(filename, 'wb') as decrypted_text:
-            decrypted_text.write(unpadded_dc_text)
-            
+        filename = utils.save_to_dir(path_to_save, 'decrypted.txt', unpadded_dc_text)
+          
         print(f"Расшифрованный текст успешно сохранен: {filename}")
 
     except FileNotFoundError as e:
