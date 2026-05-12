@@ -13,14 +13,9 @@ def main() -> None:
     group.add_argument("-gen", "--generation",  action="store_true", help="1: генерация ключей")
     group.add_argument("-enc", "--encryption",  action="store_true", help="2: шифрование файла")
     group.add_argument("-dec", "--decryption",  action="store_true", help="3: дешифрование файла")
-    group.add_argument("--init-settings",       action="store_true", help="settings.json")
 
     args = parser.parse_args()
-
-    if args.init_settings:
-        file_io.save_settings(file_io.DEFAULT_SETTINGS, args.settings)
-        return
-
+    
     cfg = file_io.load_settings(args.settings)
 
     if args.generation:
