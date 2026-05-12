@@ -1,7 +1,7 @@
 {
   "initial_file": "text.txt",
   "encrypted_file": "encrypted.bin",
-  "decrypted_file": "decrypted.txt",
+  "decrypted_file": "decrypt.txt",
   "symmetric_key": "symmetric_key.bin",
   "public_key": "public_key.pem",
   "secret_key": "secret_key.pem"

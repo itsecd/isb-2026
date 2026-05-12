@@ -5,8 +5,15 @@ from symmetric import generate_symmetric_key, choose_key_size
 
 def generate_key(path_symmetric_key: str, path_public_key: str, path_secret_key: str,
                  key_bits: int = None) -> None:
-    """Функция генерации ключей гибридной системы. 
-    Сначала создаётся симметричный ключ Camellia, затем пара RSA-ключей."""
+    """Функция генерации ключей гибридной системы.
+    Сначала создаётся симметричный ключ Camellia, затем пара RSA-ключей.
+
+    Args:
+        path_symmetric_key: Путь для сохранения зашифрованного симметричного ключа Camellia.
+        path_public_key:    Путь для сохранения открытого RSA-ключа.
+        path_secret_key:    Путь для сохранения закрытого RSA-ключа.
+        key_bits:           Длина симметричного ключа в битах (128, 192 или 256).
+    """
 
     try:
         print("Генерация симметричного ключа Camellia.")
