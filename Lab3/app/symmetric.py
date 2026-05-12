@@ -1,3 +1,8 @@
+
+"""
+Модуль симметричной криптографии CAST5.
+"""
+
 import os
 
 from cryptography.hazmat.primitives import padding
@@ -6,60 +11,116 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from app.file_utils import write_bytes, read_bytes
 
 
-# генерация ключа CAST5
 def generate_cast5_key(key_size_bits: int) -> bytes:
-    if key_size_bits < 40 or key_size_bits > 128 or key_size_bits % 8 != 0:
-        raise ValueError("Неверная длина ключа CAST5")
+    """
+    Генерирует ключ CAST5.
 
-    return os.urandom(key_size_bits // 8)
+    :param key_size_bits: длина ключа в битах
+    :return: симметричный ключ
+    """
+    try:
+        if key_size_bits < 40 or key_size_bits > 128 or key_size_bits % 8 != 0:
+            raise ValueError("Неверная длина ключа CAST5")
+
+        return os.urandom(key_size_bits // 8)
+
+    except Exception as error:
+        print(f"Ошибка генерации ключа CAST5: {error}")
+        raise
 
 
-
-# Padding / Unpadding
 def pad_data(data: bytes, block_size: int = 64) -> bytes:
-    padder = padding.ANSIX923(block_size).padder()
-    return padder.update(data) + padder.finalize()
+    """
+    Добавляет padding к данным.
+
+    :param data: исходные данные
+    :param block_size: размер блока
+    :return: дополненные данные
+    """
+    try:
+        padder = padding.PKCS7(block_size).padder()
+        return padder.update(data) + padder.finalize()
+
+    except Exception as error:
+        print(f"Ошибка padding: {error}")
+        raise
 
 
 def unpad_data(data: bytes, block_size: int = 64) -> bytes:
-    unpadder = padding.ANSIX923(block_size).unpadder()
-    return unpadder.update(data) + unpadder.finalize()
+    """
+    Удаляет padding из данных.
+
+    :param data: данные с padding
+    :param block_size: размер блока
+    :return: исходные данные
+    """
+    try:
+        unpadder = padding.PKCS7(block_size).unpadder()
+        return unpadder.update(data) + unpadder.finalize()
+
+    except Exception as error:
+        print(f"Ошибка unpadding: {error}")
+        raise
 
 
-# шифрование файла
-def encrypt_file(input_path: str, output_path: str, key: bytes):
-    data = read_bytes(input_path)
+def encrypt_file(input_path: str, output_path: str, key: bytes) -> None:
+    """
+    Шифрует файл алгоритмом CAST5.
 
-    padded_data = pad_data(data)
+    :param input_path: путь к исходному файлу
+    :param output_path: путь к зашифрованному файлу
+    :param key: симметричный ключ
+    """
+    try:
+        data = read_bytes(input_path)
 
-    iv = os.urandom(8)
+        padded_data = pad_data(data)
 
-    cipher = Cipher(
-        algorithms.CAST5(key),
-        modes.CBC(iv)
-    )
+        iv = os.urandom(8)
 
-    encryptor = cipher.encryptor()
-    encrypted = encryptor.update(padded_data) + encryptor.finalize()
+        cipher = Cipher(
+            algorithms.CAST5(key),
+            modes.CBC(iv)
+        )
 
-    write_bytes(output_path, iv + encrypted)
+        encryptor = cipher.encryptor()
+
+        encrypted = encryptor.update(padded_data) + encryptor.finalize()
+
+        write_bytes(output_path, iv + encrypted)
+
+    except Exception as error:
+        print(f"Ошибка шифрования файла: {error}")
+        raise
 
 
-# дешифрование файла
-def decrypt_file(input_path: str, output_path: str, key: bytes):
-    data = read_bytes(input_path)
+def decrypt_file(input_path: str, output_path: str, key: bytes) -> None:
+    """
+    Дешифрует файл алгоритмом CAST5.
 
-    iv = data[:8]
-    encrypted = data[8:]
+    :param input_path: путь к зашифрованному файлу
+    :param output_path: путь к расшифрованному файлу
+    :param key: симметричный ключ
+    """
+    try:
+        encrypted_data = read_bytes(input_path)
 
-    cipher = Cipher(
-        algorithms.CAST5(key),
-        modes.CBC(iv)
-    )
+        iv = encrypted_data[:8]
+        ciphertext = encrypted_data[8:]
 
-    decryptor = cipher.decryptor()
-    decrypted = decryptor.update(encrypted) + decryptor.finalize()
+        cipher = Cipher(
+            algorithms.CAST5(key),
+            modes.CBC(iv)
+        )
 
-    unpadded = unpad_data(decrypted)
+        decryptor = cipher.decryptor()
 
-    write_bytes(output_path, unpadded)
+        padded = decryptor.update(ciphertext) + decryptor.finalize()
+
+        decrypted = unpad_data(padded)
+
+        write_bytes(output_path, decrypted)
+
+    except Exception as error:
+        print(f"Ошибка дешифрования файла: {error}")
+        raise

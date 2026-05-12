@@ -1,38 +1,60 @@
+
 import json
 import tkinter as tk
 
 from app.gui import App
 
-def load_settings() -> dict:
+
+def load_settings(path: str = "settings.json") -> dict:
     """
-    Чтение настроек
+    Загружает настройки из JSON-файла.
+
+    :param path: путь к JSON-файлу настроек
+    :return: словарь настроек
     """
-    with open("settings.json", "r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            return json.load(file)
+
+    except FileNotFoundError:
+        print(f"Файл настроек {path} не найден")
+        raise
+
+    except json.JSONDecodeError:
+        print(f"Ошибка чтения JSON-файла {path}")
+        raise
+
+    except Exception as error:
+        print(f"Ошибка при чтении настроек: {error}")
+        raise
 
 
 def run_gui(settings: dict) -> None:
     """
-    Запуск графического интерфейса
+    Запускает графический интерфейс приложения.
+
+    :param settings: словарь настроек
     """
-    root = tk.Tk()
-    App(root, settings)
-    root.mainloop()
+    try:
+        root = tk.Tk()
+        App(root, settings)
+        root.mainloop()
+
+    except Exception as error:
+        print(f"Ошибка запуска GUI: {error}")
+        raise
 
 
 def main() -> None:
     """
-    Точка входа приложения
+    Точка входа приложения.
     """
-    settings = load_settings()
+    try:
+        settings = load_settings()
+        run_gui(settings)
 
-    mode = "gui"
-
-    match mode:
-        case "gui":
-            run_gui(settings)
-        case _:
-            print("Неизвестный режим запуска")
+    except Exception as error:
+        print(f"Ошибка выполнения программы: {error}")
 
 
 if __name__ == "__main__":

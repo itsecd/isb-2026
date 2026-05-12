@@ -1,32 +1,61 @@
-# работа с файлами (DRY)
 
-def write_bytes(path: str, data: bytes):
-    if not path:
-        raise ValueError("Путь к файлу не задан")
+"""
+Утилиты для работы с файлами.
+Реализуют DRY-подход для чтения и записи данных.
+"""
 
-    with open(path, "wb") as f:
-        f.write(data)
+def write_bytes(path: str, data: bytes) -> None:
+    """
+    Записывает байтовые данные в файл.
+
+    :param path: путь к файлу
+    :param data: байтовые данные
+    """
+    try:
+        if not path:
+            raise ValueError("Путь к файлу не задан")
+
+        with open(path, "wb") as file:
+            file.write(data)
+
+    except Exception as error:
+        print(f"Ошибка записи байтов в файл {path}: {error}")
+        raise
 
 
 def read_bytes(path: str) -> bytes:
-    if not path:
-        raise ValueError("Путь к файлу не задан")
+    """
+    Считывает байтовые данные из файла.
 
-    with open(path, "rb") as f:
-        return f.read()
+    :param path: путь к файлу
+    :return: байтовые данные
+    """
+    try:
+        if not path:
+            raise ValueError("Путь к файлу не задан")
+
+        with open(path, "rb") as file:
+            return file.read()
+
+    except Exception as error:
+        print(f"Ошибка чтения файла {path}: {error}")
+        raise
 
 
-def write_text(path: str, data: str):
-    if not path:
-        raise ValueError("Путь к файлу не задан")
+def write_text(path: str, data: str) -> None:
+    """
+    Записывает текст в файл.
 
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(data)
+    :param path: путь к файлу
+    :param data: текстовые данные
+    """
+    try:
+        if not path:
+            raise ValueError("Путь к файлу не задан")
 
+        with open(path, "w", encoding="utf-8") as file:
+            file.write(data)
 
-def read_text(path: str) -> str:
-    if not path:
-        raise ValueError("Путь к файлу не задан")
-
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
+    except Exception as error:
+        print(f"Ошибка записи текста в файл {path}: {error}")
+        raise
