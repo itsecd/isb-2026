@@ -3,22 +3,10 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import padding as sym_padding
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from files import load_private_key, load_ciphertext, save_decrypted_text, load_encrypted_key
+from utilits import decrypt_symmetric_key
+from files import load_private_key, load_ciphertext, read_binary, save_binary
 
-
-
-
-def decrypt_symmetric_key(enc_key: bytes, private_key: RSAPrivateKey) -> bytes:
-    """
-    Расшифровка симметричного AES-ключа закрытым RSA-ключом.
-    :param enc_key: зашифрованный симметричный AES-ключ
-    :param private_key: закрытый RSA-ключ для дешифрования симметричного ключа
-    :return: расшифрованный симметричный AES-ключ в виде байтов
-    """
-
-    padder = asym_padding.OAEP(mgf=asym_padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
-    decrypted_key = private_key.decrypt(enc_key, padder)
-    return decrypted_key
+    
 
 
 def text_decrypt(enc_txt: bytes, key: bytes) -> bytes:
@@ -58,10 +46,10 @@ def run_scenario3(enc_txt_path: str, prv_asym_key_path: str, enc_key_path: str, 
 
     enc_txt = load_ciphertext(enc_txt_path)
     private_key = load_private_key(prv_asym_key_path)
-    enc_key = load_encrypted_key(enc_key_path)
+    enc_key = read_binary(enc_key_path)
     decrypted_key = decrypt_symmetric_key(enc_key, private_key)
     decrypted_text = text_decrypt(enc_txt, decrypted_key)
-    save_decrypted_text(decrypted_text, dec_txt_path)
+    save_binary(decrypted_text, dec_txt_path)
     print(f"Scenario 3 completed successfully. Encrypted text from {enc_txt_path} decrypted and saved to {dec_txt_path}.")
 
 

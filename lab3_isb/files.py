@@ -52,26 +52,6 @@ def load_private_key(path: str) -> RSAPrivateKey:
     return private_key
 
 
-def load_encrypted_key(path: str) -> bytes:
-    """
-    Чтение зашифрованного симметричного AES-ключа из файла.
-    :param path: путь к файлу с зашифрованным симметричным ключом
-    :return: зашифрованный симметричный ключ в виде байтов
-    """
-
-    return read_binary(path)
-
-
-
-
-def read_encrypted_key(path: str) -> bytes:
-    """
-    Чтение зашифрованного симметричного AES-ключа из файла.
-    :param path: путь к файлу с зашифрованным симметричным ключом
-    :return: зашифрованный симметричный ключ в виде байтов
-    """
-    return read_binary(path)
-
 
 def load_ciphertext(path: str) -> bytes:
     """
@@ -81,14 +61,3 @@ def load_ciphertext(path: str) -> bytes:
     """
 
     return read_binary(path)
-
-
-def save_decrypted_text(text: bytes, path: str) -> None:
-    """
-    Сохранение расшифрованных данных в файл.
-    :param text: расшифрованные данные в виде байтов
-    :param path: путь для сохранения расшифрованных данных
-    :return: не возвращается
-    """
-
-    save_binary(text, path)
