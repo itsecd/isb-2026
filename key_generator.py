@@ -7,7 +7,15 @@ from utils import fail, write_file
 
 
 def generate_rsa_keys(key_size: int = 2048):
-    """Генерация пары RSA-ключей."""
+    """
+    Сгенерировать пару RSA-ключей.
+
+    Параметры:
+        key_size: размер ключа в битах (по умолчанию 2048).
+
+    Возвращает:
+        (private_key, public_key): закрытый и открытый RSA-ключи.
+    """
     print(f"Генерация RSA-ключей ({key_size} бит).")
     try:
         private_key = rsa.generate_private_key(
@@ -22,7 +30,15 @@ def generate_rsa_keys(key_size: int = 2048):
 
 
 def save_rsa_keys(private_key, public_key, private_path: str, public_path: str) -> None:
-    """Сохранение RSA-ключей в PEM-файлы."""
+    """
+    Сохранить RSA-ключи в PEM-файлы.
+
+    Параметры:
+        private_key:  закрытый RSA-ключ.
+        public_key:   открытый RSA-ключ.
+        private_path: путь для сохранения закрытого ключа (.pem).
+        public_path:  путь для сохранения открытого ключа (.pem).
+    """
     public_bytes = public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
@@ -40,7 +56,18 @@ def save_rsa_keys(private_key, public_key, private_path: str, public_path: str) 
 
 
 def generate_aes_key(key_size_bits: int) -> bytes:
-    """Генерация случайного AES-ключа."""
+    """
+    Сгенерировать случайный AES-ключ.
+
+    Параметры:
+        key_size_bits: размер ключа в битах (128, 192 или 256).
+
+    Возвращает:
+        AES-ключ (16/24/32 байта).
+
+    Исключения:
+        ValueError: недопустимый размер ключа.
+    """
     match key_size_bits:
         case 128 | 192 | 256:
             key_size_bytes = key_size_bits // 8
