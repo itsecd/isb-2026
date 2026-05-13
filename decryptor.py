@@ -7,7 +7,16 @@ from utils import fail, read_file, write_file
 
 
 def decrypt_symmetric_key(encrypted_key: bytes, private_key) -> bytes:
-    """Расшифрование симметричного ключа закрытым RSA-ключом."""
+    """
+    Расшифровать AES-ключ закрытым RSA-ключом.
+
+    Параметры:
+        encrypted_key: зашифрованный RSA-OAEP ключ (байты).
+        private_key:  закрытый RSA-ключ.
+
+    Возвращает:
+        Расшифрованный AES-ключ (16/24/32 байта).
+    """
     print("Расшифрование симметричного ключа RSA-ключом.")
     try:
         key = private_key.decrypt(
@@ -25,7 +34,15 @@ def decrypt_symmetric_key(encrypted_key: bytes, private_key) -> bytes:
 
 
 def unpad_data(data: bytes) -> bytes:
-    """Удаление ANSI X.923-заполнения."""
+    """
+    Удалить ANSI X.923-заполнение.
+
+    Параметры:
+        data: данные с заполнением (длина кратна 16).
+
+    Возвращает:
+        Данные без заполнения.
+    """
     try:
         unpadder = sym_padding.ANSIX923(128).unpadder()
         return unpadder.update(data) + unpadder.finalize()
@@ -34,7 +51,18 @@ def unpad_data(data: bytes) -> bytes:
 
 
 def aes_decrypt_file(input_path: str, output_path: str, key: bytes) -> None:
-    """Расшифрование файла алгоритмом AES-CBC."""
+    """
+    Расшифровать файл алгоритмом AES-CBC.
+
+    Параметры:
+        input_path:  путь к зашифрованному файлу (первые 16 байт — IV).
+        output_path: путь для сохранения расшифрованного файла.
+        key:         AES-ключ (16/24/32 байта).
+
+    Ошибки:
+        - файл короче 16 байт → повреждён,
+        - неверный ключ → ValueError при удалении заполнения.
+    """
     print(f"Расшифрование файла: {input_path}")
     data = read_file(input_path)
 
