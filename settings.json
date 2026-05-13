@@ -1,0 +1,9 @@
+{
+    "sym_key_length":192,
+    "initial_file":"./texts/initial_text.txt",
+    "encrypted_file":"./texts/encrypted_text.txt",
+    "decrypted_file":"./texts/decrypted_text.txt",
+    "symmetric_key":"./keys/sym_key.txt",
+    "public_key":"./keys/public_key.pem",
+    "private_key":"./keys/private_key.pem"
+}
