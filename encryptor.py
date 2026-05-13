@@ -9,7 +9,16 @@ from utils import fail, read_file, write_file
 
 
 def encrypt_symmetric_key(symmetric_key: bytes, public_key) -> bytes:
-    """Шифрование симметричного ключа открытым RSA-ключом."""
+    """
+    Зашифровать AES-ключ открытым RSA-ключом.
+
+    Параметры:
+        symmetric_key: AES-ключ (16/24/32 байта).
+        public_key:    открытый RSA-ключ.
+
+    Возвращает:
+        Зашифрованный ключ (байты, длина зависит от размера RSA-ключа).
+    """
     print("Шифрование симметричного ключа RSA-ключом.")
     try:
         encrypted_key = public_key.encrypt(
@@ -27,7 +36,15 @@ def encrypt_symmetric_key(symmetric_key: bytes, public_key) -> bytes:
 
 
 def pad_data(data: bytes) -> bytes:
-    """Добавление ANSI X.923-заполнения."""
+    """
+    Добавить ANSI X.923-заполнение до кратности 16 байт.
+
+    Параметры:
+        data: исходные данные.
+
+    Возвращает:
+        Данные с заполнением (длина кратна 16).
+    """
     try:
         padder = sym_padding.ANSIX923(128).padder()
         return padder.update(data) + padder.finalize()
@@ -36,7 +53,12 @@ def pad_data(data: bytes) -> bytes:
 
 
 def generate_iv() -> bytes:
-    """Генерация случайного вектора инициализации."""
+    """
+    Сгенерировать случайный вектор инициализации (IV).
+
+    Возвращает:
+        16 случайных байт.
+    """
     try:
         return os.urandom(16)
     except Exception as e:
@@ -44,7 +66,14 @@ def generate_iv() -> bytes:
 
 
 def aes_encrypt_file(input_path: str, output_path: str, key: bytes) -> None:
-    """Шифрование файла алгоритмом AES-CBC."""
+    """
+    Зашифровать файл алгоритмом AES-CBC.
+
+    Параметры:
+        input_path:  путь к исходному файлу.
+        output_path: путь для сохранения зашифрованного файла (IV + шифротекст).
+        key:         AES-ключ (16/24/32 байта).
+    """
     print(f"Шифрование файла AES-CBC: {input_path}")
     plaintext = read_file(input_path)
 
