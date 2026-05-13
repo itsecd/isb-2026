@@ -125,8 +125,8 @@ class CryptoApplication:
         """Генерация ключей."""
         self._update_status("Генерация ключей")
 
-        priv_key_path = self._get_path_by_position(0)
-        pub_key_path = self._get_path_by_position(1)
+        priv_key_path = self._get_path_by_position(1)
+        pub_key_path = self._get_path_by_position(0)
         enc_key_path = self._get_path_by_position(2)
         
         rsa_key_size = self._get_param_by_position(0)
