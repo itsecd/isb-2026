@@ -1,7 +1,0 @@
-
-*.exe
-*.class
-
-
-__pycache__/
-*.pyc

@@ -1,0 +1,6 @@
+{
+    "encrypted_file": "encrypted.bin",
+    "private_key": "private_key.pem",
+    "encrypted_symmetric_key": "encrypted_sym.key",
+    "decrypted_file": "decrypted.txt"
+}
