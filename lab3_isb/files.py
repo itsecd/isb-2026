@@ -8,9 +8,16 @@ def read_binary(path: str) -> bytes:
     :param path: путь к файлу
     :return: данные из файла в виде байтов
     """
-    with open(path, "rb") as f:
-        return f.read()
 
+    try:
+        with open(path, "rb") as f:
+            return f.read()
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"File not found: {path}") from e
+    except PermissionError as e:
+        raise PermissionError(f"No permission to read file: {path}") from e
+    except OSError as e:
+        raise OSError(f"File reading error for {path}: {e}") from e
 
 def save_binary(data: bytes, path: str) -> None:
     """
@@ -19,9 +26,13 @@ def save_binary(data: bytes, path: str) -> None:
     :param path: путь к файлу
     :return: не возвращается
     """
-    with open(path, "wb") as f:
-        f.write(data)
-
+    try: 
+        with open(path, "wb") as f:
+            f.write(data)
+    except PermissionError as e:
+        raise PermissionError(f"No permission to write file: {path}") from e
+    except OSError as e:
+        raise OSError(f"File writing error for {path}: {e}") from e
 
 
 def load_private_key(path: str) -> RSAPrivateKey:
@@ -31,7 +42,13 @@ def load_private_key(path: str) -> RSAPrivateKey:
     :return: закрытый RSA-ключ
     """
     private_bytes = read_binary(path)
-    private_key = load_pem_private_key(private_bytes,password=None)
+    try:
+        private_key = load_pem_private_key(private_bytes, password=None)
+    except ValueError as e:
+        raise ValueError(
+            f"Failed to load private RSA key from {path}. "
+            "The file may be corrupted, have an invalid format, or be password-protected."
+        ) from e
     return private_key
 
 
