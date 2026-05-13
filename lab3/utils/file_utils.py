@@ -3,95 +3,119 @@ from typing import Dict, Any, Union
 
 
 class FileManager:
-    """Управление файловыми операциями"""
+    """Управление файловыми операциями."""
     
     def __init__(self, config: Dict[str, Any]):
-        self.config = config
+        """
+        Инициализирует менеджер файлов и создает директорию для ключей.
         
+        Args:
+            config (Dict[str, Any]): конфигурация
+        """
         paths = config.get('paths')
-        if paths is None:
-            raise KeyError("Секция 'paths' не найдена в конфигурации")
+        match paths:
+            case None:
+                raise KeyError("Секция 'paths' не найдена")
         
         self._keys_dir = paths.get('keys_directory')
-        if self._keys_dir is None:
-            raise KeyError("Параметр 'keys_directory' не найден в секции 'paths'")
+        match self._keys_dir:
+            case None:
+                raise KeyError("Параметр 'keys_directory' не найден")
         
-        if self._keys_dir:
-            try:
-                os.makedirs(self._keys_dir, exist_ok=True)
-            except Exception as e:
-                print(f"Предупреждение: не удалось создать директорию {self._keys_dir}: {e}")
-        
+        os.makedirs(self._keys_dir, exist_ok=True)
         self._paths = paths
     
     def read_file(self, filepath: str, binary: bool = False) -> Union[str, bytes]:
-        """Чтение файла"""
-        if not filepath:
-            raise ValueError("Путь к файлу не может быть пустым")
+        """
+        Читает содержимое файла в текстовом или бинарном режиме.
+        
+        Args:
+            filepath (str): путь к файлу
+            binary (bool): бинарный режим
+        
+        Returns:
+            Union[str, bytes]: содержимое файла
+        """
+        match filepath:
+            case '':
+                raise ValueError("Путь к файлу не может быть пустым")
         
         mode = 'rb' if binary else 'r'
-        try:
-            with open(filepath, mode) as f:
-                return f.read()
-        except FileNotFoundError:
-            raise FileNotFoundError(f"Файл не найден: {filepath}")
-        except PermissionError:
-            raise PermissionError(f"Нет доступа к файлу: {filepath}")
-        except Exception as e:
-            raise IOError(f"Ошибка чтения файла {filepath}: {e}")
+        with open(filepath, mode) as f:
+            return f.read()
     
     def write_file(self, filepath: str, data: Union[str, bytes], binary: bool = False) -> None:
-        """Запись файла"""
-        if not filepath:
-            raise ValueError("Путь к файлу не может быть пустым")
+        """
+        Записывает данные в файл в текстовом или бинарном режиме.
         
-        if data is None:
-            raise ValueError("Нет данных для записи")
+        Args:
+            filepath (str): путь к файлу
+            data (Union[str, bytes]): данные
+            binary (bool): бинарный режим
+        """
+        match filepath:
+            case '':
+                raise ValueError("Путь к файлу не может быть пустым")
+        
+        match data:
+            case None:
+                raise ValueError("Нет данных для записи")
         
         directory = os.path.dirname(filepath)
-        if directory:
-            try:
+        match directory:
+            case '':
+                os.makedirs('.', exist_ok=True)
+            case _:
                 os.makedirs(directory, exist_ok=True)
-            except Exception as e:
-                raise IOError(f"Не удалось создать директорию {directory}: {e}")
         
         mode = 'wb' if binary else 'w'
-        try:
-            with open(filepath, mode) as f:
-                f.write(data)
-        except PermissionError:
-            raise PermissionError(f"Нет прав для записи в файл: {filepath}")
-        except Exception as e:
-            raise IOError(f"Ошибка записи файла {filepath}: {e}")
+        with open(filepath, mode) as f:
+            f.write(data)
     
     def file_exists(self, filepath: str) -> bool:
-        """Проверка существования файла"""
-        if not filepath:
-            return False
+        """
+        Проверяет существование файла по указанному пути.
+        
+        Args:
+            filepath (str): путь к файлу
+        
+        Returns:
+            bool: True если существует
+        """
+        match filepath:
+            case '':
+                return False
         return os.path.exists(filepath)
     
     def get_path(self, key: str) -> str:
-        """Получение пути из конфига"""
-        filename = self._paths.get(key)
-        if filename is None:
-            raise KeyError(f"Параметр '{key}' не найден в секции 'paths'")
+        """
+        Возвращает полный путь к файлу, объединяя keys_directory с именем файла.
         
-        if not filename:
-            raise ValueError(f"Путь для ключа '{key}' пуст")
+        Args:
+            key (str): ключ в секции 'paths'
+        
+        Returns:
+            str: полный путь
+        """
+        filename = self._paths.get(key)
+        match filename:
+            case None:
+                raise KeyError(f"Параметр '{key}' не найден")
+            case '':
+                raise ValueError(f"Путь для ключа '{key}' пуст")
         
         return os.path.join(self._keys_dir, filename)
     
     def delete_file(self, filepath: str) -> None:
-        """Удаление файла"""
-        if not filepath:
-            raise ValueError("Путь к файлу не может быть пустым")
+        """
+        Удаляет файл с диска, если он существует.
         
-        if not self.file_exists(filepath):
-            return
+        Args:
+            filepath (str): путь к файлу
+        """
+        match filepath:
+            case '':
+                raise ValueError("Путь к файлу не может быть пустым")
         
-        try:
+        if os.path.exists(filepath):
             os.remove(filepath)
-        except PermissionError:
-            raise PermissionError(f"Нет прав пользователя для удаления файла: {filepath}")
-        except Exception as e:
-            raise IOError(f"Ошибка удаления файла {filepath}: {e}")

@@ -14,19 +14,10 @@
     "crypto": {
         "seed": [16, 16],
         "chacha20": [32, 12],
-        "rsa": [
-            2048,
-            65537,
-            ["OAEP", "SHA256", "SHA256", null]
-        ]
+        "rsa": [2048, 65537, ["OAEP", "SHA256", "SHA256", null]]
     },
     "validation": {
-        "rsa": [
-            2048,
-            16384,
-            3,
-            65537
-        ]
+        "rsa": [2048, 16384, 3, 65537]
     },
     "ui": {
         "available_algorithms": ["SEED", "ChaCha20"],
