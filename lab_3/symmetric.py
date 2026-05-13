@@ -1,5 +1,6 @@
 import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
+from cryptography.exceptions import UnsupportedAlgorithm
 
 
 def generate_nonce() -> bytes:
@@ -9,7 +10,10 @@ def generate_nonce() -> bytes:
     Returns:
         bytes: 16-byte nonce
     """
-    return os.urandom(16)
+    try:
+        return os.urandom(16)
+    except Exception as e:
+        raise RuntimeError(f"Entropy source failure: {e}")
 
 
 def generate_symmetric_key(key_size: int) -> bytes:
@@ -22,12 +26,17 @@ def generate_symmetric_key(key_size: int) -> bytes:
     Returns:
         bytes: Generated key
     """
+    if not isinstance(key_size, int):
+        raise TypeError("key_size must be an integer")
     if key_size % 8 != 0:
         raise ValueError("key_size must be multiple of 8")
     if not 32 <= key_size <= 448:
         raise ValueError("Key size must be between 32 and 448 bits")
 
-    return os.urandom(key_size // 8)
+    try:
+        return os.urandom(key_size // 8)
+    except Exception as e:
+        raise RuntimeError(f"Failed to generate random bytes: {e}")
 
 
 def _init_chacha(key: bytes, nonce: bytes):
@@ -41,15 +50,22 @@ def _init_chacha(key: bytes, nonce: bytes):
     Returns:
         Cipher: initialized cipher object
     """
+    if not isinstance(key, bytes) or not isinstance(nonce, bytes):
+        raise TypeError("Key and nonce must be bytes")
     if len(key) != 32:
         raise ValueError("ChaCha20 key must be exactly 32 bytes (256 bits)")
     if len(nonce) != 16:
         raise ValueError("Nonce must be exactly 16 bytes (128 bits)")
 
-    return Cipher(
-        algorithms.ChaCha20(key, nonce),
-        mode=None
-    )
+    try:
+        return Cipher(
+            algorithms.ChaCha20(key, nonce),
+            mode=None
+        )
+    except UnsupportedAlgorithm as e:
+        raise RuntimeError("ChaCha20 algorithm is not supported in this environment") from e
+    except Exception as e:
+        raise RuntimeError(f"Initialization error: {e}")
 
 
 def chacha20_encrypt(data: bytes, key: bytes, nonce: bytes) -> bytes:
@@ -64,9 +80,15 @@ def chacha20_encrypt(data: bytes, key: bytes, nonce: bytes) -> bytes:
     Returns:
         bytes: ciphertext
     """
-    cipher = _init_chacha(key, nonce)
-    encryptor = cipher.encryptor()
-    return encryptor.update(data) + encryptor.finalize()
+    if not isinstance(data, bytes):
+        raise TypeError("Plaintext data must be bytes")
+
+    try:
+        cipher = _init_chacha(key, nonce)
+        encryptor = cipher.encryptor()
+        return encryptor.update(data) + encryptor.finalize()
+    except Exception as e:
+        raise RuntimeError(f"Encryption failed: {e}")
 
 
 def chacha20_decrypt(ciphertext: bytes, key: bytes, nonce: bytes) -> bytes:
@@ -81,9 +103,15 @@ def chacha20_decrypt(ciphertext: bytes, key: bytes, nonce: bytes) -> bytes:
     Returns:
         bytes: decrypted data
     """
-    cipher = _init_chacha(key, nonce)
-    decryptor = cipher.decryptor()
-    return decryptor.update(ciphertext) + decryptor.finalize()
+    if not isinstance(ciphertext, bytes):
+        raise TypeError("Ciphertext must be bytes")
+
+    try:
+        cipher = _init_chacha(key, nonce)
+        decryptor = cipher.decryptor()
+        return decryptor.update(ciphertext) + decryptor.finalize()
+    except Exception as e:
+        raise RuntimeError(f"Decryption failed: {e}")
 
 
 def pack_encrypted_data(nonce: bytes, ciphertext: bytes) -> bytes:
@@ -97,6 +125,9 @@ def pack_encrypted_data(nonce: bytes, ciphertext: bytes) -> bytes:
     Returns:
         bytes: combined data
     """
+    if not isinstance(nonce, bytes) or not isinstance(ciphertext, bytes):
+        raise TypeError("Nonce and ciphertext must be bytes")
+    
     return nonce + ciphertext
 
 
@@ -110,8 +141,11 @@ def unpack_encrypted_data(packed_data: bytes) -> tuple[bytes, bytes]:
     Returns:
         tuple[bytes, bytes]: (nonce, ciphertext)
     """
+    if not isinstance(packed_data, bytes):
+        raise TypeError("Packed data must be bytes")
+        
     if len(packed_data) < 16:
-        raise ValueError("Not enough data to extract nonce")
+        raise ValueError("Not enough data to extract nonce (minimum 16 bytes required)")
 
     nonce = packed_data[:16]
     ciphertext = packed_data[16:]

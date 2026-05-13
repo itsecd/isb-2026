@@ -36,9 +36,16 @@ def write_text(filepath: str, text: str) -> bool:
         bool: True if write succeeded.
     """
     try:
+        # Ensure directory exists before writing
+        dir_name = os.path.dirname(filepath)
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
+
         with open(filepath, 'w', encoding='utf-8') as f:
             f.write(text)
         return True
+    except PermissionError as e:
+        raise PermissionError(f"No permission to write to: {filepath}") from e
     except Exception as e:
         raise RuntimeError(f"Couldn't write file: {filepath}") from e
 
@@ -59,7 +66,8 @@ def write_bytes(filepath: str, data: bytes) -> None:
 
         with open(filepath, 'wb') as f:
             f.write(data)
-
+    except PermissionError as e:
+        raise PermissionError(f"No permission to write binary file: {filepath}") from e
     except Exception as e:
         raise RuntimeError(f"Failed to write binary file: {filepath}") from e
 
@@ -80,9 +88,11 @@ def load_settings(filepath: str) -> dict:
     except FileNotFoundError as e:
         raise FileNotFoundError(f"File not found: {filepath}") from e
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON format: {filepath}") from e
+        raise ValueError(f"Invalid JSON format in: {filepath}") from e
     except PermissionError as e:
         raise PermissionError(f"No permission to read file: {filepath}") from e
+    except Exception as e:
+        raise RuntimeError(f"Unexpected error loading settings from {filepath}: {e}")
 
 
 def load_encrypted_file(filepath: str) -> tuple[bytes, bytes]:
@@ -103,6 +113,10 @@ def load_encrypted_file(filepath: str) -> tuple[bytes, bytes]:
 
     except FileNotFoundError as e:
         raise FileNotFoundError(f"Encrypted file not found: {filepath}") from e
+    except PermissionError as e:
+        raise PermissionError(f"No permission to read encrypted file: {filepath}") from e
+    except ValueError as e:
+        raise ValueError(f"Data format error in {filepath}: {e}")
     except Exception as e:
         raise RuntimeError(f"Failed to load encrypted file: {filepath}") from e
 
@@ -127,5 +141,7 @@ def write_encrypted_file(filepath: str, nonce: bytes, ciphertext: bytes) -> None
         with open(filepath, 'wb') as f:
             f.write(packed)
 
+    except PermissionError as e:
+        raise PermissionError(f"No permission to write encrypted file: {filepath}") from e
     except Exception as e:
         raise RuntimeError(f"Failed to write encrypted file: {filepath}") from e

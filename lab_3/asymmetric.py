@@ -2,6 +2,7 @@ import os
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey, RSAPrivateKey
 from cryptography.hazmat.primitives import hashes, serialization
+from cryptography.exceptions import InvalidKey, UnsupportedAlgorithm
 from file_utils import read_file
 
 
@@ -12,8 +13,11 @@ def generate_rsa_keys() -> tuple[RSAPrivateKey, RSAPublicKey]:
     Returns:
         tuple[RSAPrivateKey, RSAPublicKey]: private and public keys
     """
-    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    return private_key, private_key.public_key()
+    try:
+        private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        return private_key, private_key.public_key()
+    except Exception as e:
+        raise RuntimeError(f"RSA key generation failed: {e}")
 
 
 def _get_oaep_padding():
@@ -44,7 +48,12 @@ def encrypt_symmetric_key(sym_key: bytes, public_key: RSAPublicKey) -> bytes:
     if not sym_key:
         raise ValueError("Symmetric key cannot be empty")
 
-    return public_key.encrypt(sym_key, _get_oaep_padding())
+    try:
+        return public_key.encrypt(sym_key, _get_oaep_padding())
+    except ValueError as e:
+        raise ValueError(f"Encryption failed, data might be too large: {e}")
+    except Exception as e:
+        raise RuntimeError(f"Unexpected encryption error: {e}")
 
 
 def decrypt_symmetric_key(encrypted_key_path: str, private_key: RSAPrivateKey) -> bytes:
@@ -58,14 +67,20 @@ def decrypt_symmetric_key(encrypted_key_path: str, private_key: RSAPrivateKey) -
     Returns:
         bytes: decrypted symmetric key
     """
-    encrypted_key = read_file(encrypted_key_path)
+    try:
+        encrypted_key = read_file(encrypted_key_path)
+        sym_key = private_key.decrypt(encrypted_key, _get_oaep_padding())
 
-    sym_key = private_key.decrypt(encrypted_key, _get_oaep_padding())
+        if len(sym_key) != 32:
+            raise ValueError("Decrypted symmetric key must be 32 bytes for ChaCha20")
 
-    if len(sym_key) != 32:
-        raise ValueError("Decrypted symmetric key must be 32 bytes for ChaCha20")
-
-    return sym_key
+        return sym_key
+    except FileNotFoundError:
+        raise FileNotFoundError(f"File not found: {encrypted_key_path}")
+    except (InvalidKey, ValueError):
+        raise ValueError("Decryption failed: invalid key or corrupted data")
+    except Exception as e:
+        raise RuntimeError(f"Decryption error: {e}")
 
 
 def save_symmetric_key(key: bytes, filepath: str) -> None:
@@ -79,9 +94,12 @@ def save_symmetric_key(key: bytes, filepath: str) -> None:
     Returns:
         None
     """
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    with open(filepath, 'wb') as f:
-        f.write(key)
+    try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'wb') as f:
+            f.write(key)
+    except (OSError, IOError) as e:
+        raise IOError(f"Failed to write symmetric key to {filepath}: {e}")
 
 
 def save_public_key(pub_key: RSAPublicKey, filepath: str) -> None:
@@ -95,15 +113,18 @@ def save_public_key(pub_key: RSAPublicKey, filepath: str) -> None:
     Returns:
         None
     """
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
-    with open(filepath, 'wb') as f:
-        f.write(
-            pub_key.public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo
+        with open(filepath, 'wb') as f:
+            f.write(
+                pub_key.public_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PublicFormat.SubjectPublicKeyInfo
+                )
             )
-        )
+    except Exception as e:
+        raise IOError(f"Failed to save public key to {filepath}: {e}")
 
 
 def load_public_key(filepath: str) -> RSAPublicKey:
@@ -116,7 +137,12 @@ def load_public_key(filepath: str) -> RSAPublicKey:
     Returns:
         RSAPublicKey: loaded public key
     """
-    return serialization.load_pem_public_key(read_file(filepath))
+    try:
+        return serialization.load_pem_public_key(read_file(filepath))
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Public key file not found: {filepath}")
+    except (ValueError, UnsupportedAlgorithm):
+        raise ValueError(f"Invalid public key format in {filepath}")
 
 
 def save_private_key(priv_key: RSAPrivateKey, filepath: str) -> None:
@@ -130,16 +156,19 @@ def save_private_key(priv_key: RSAPrivateKey, filepath: str) -> None:
     Returns:
         None
     """
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
-    with open(filepath, 'wb') as f:
-        f.write(
-            priv_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
+        with open(filepath, 'wb') as f:
+            f.write(
+                priv_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.TraditionalOpenSSL,
+                    encryption_algorithm=serialization.NoEncryption()
+                )
             )
-        )
+    except Exception as e:
+        raise IOError(f"Failed to save private key to {filepath}: {e}")
 
 
 def load_private_key(filepath: str) -> RSAPrivateKey:
@@ -152,4 +181,9 @@ def load_private_key(filepath: str) -> RSAPrivateKey:
     Returns:
         RSAPrivateKey: loaded private key
     """
-    return serialization.load_pem_private_key(read_file(filepath), password=None)
+    try:
+        return serialization.load_pem_private_key(read_file(filepath), password=None)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Private key file not found: {filepath}")
+    except (ValueError, TypeError):
+        raise ValueError(f"Failed to load private key from {filepath}. Check format or password.")

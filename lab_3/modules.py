@@ -1,4 +1,5 @@
 import argparse
+import sys
 from file_utils import *
 from symmetric import *
 from asymmetric import *
@@ -11,33 +12,37 @@ def parse_args() -> argparse.Namespace:
     Returns:
         argparse.Namespace: Parsed arguments.
     """
-    parser = argparse.ArgumentParser(description="Hybrid cryptosystem")
+    try:
+        parser = argparse.ArgumentParser(description="Hybrid cryptosystem")
 
-    parser.add_argument(
-        '-m', '--mode',
-        choices=['gen', 'enc', 'dec'],
-        required=True,
-        help=(
-            "Operation mode:\n"
-            "gen - generate RSA and symmetric keys\n"
-            "enc - encrypt input file\n"
-            "dec - decrypt input file"
+        parser.add_argument(
+            '-m', '--mode',
+            choices=['gen', 'enc', 'dec'],
+            required=True,
+            help=(
+                "Operation mode:\n"
+                "gen - generate RSA and symmetric keys\n"
+                "enc - encrypt input file\n"
+                "dec - decrypt input file"
+            )
         )
-    )
 
-    parser.add_argument('-k', '--key-size', type=int, default=256)
-    parser.add_argument('-so', '--sym-key-out', default='keys/sym_key.enc')
-    parser.add_argument('-pu', '--pub-key-out', default='keys/public.pem')
-    parser.add_argument('-pr', '--priv-key-out', default='keys/private.pem')
+        parser.add_argument('-k', '--key-size', type=int, default=256)
+        parser.add_argument('-so', '--sym-key-out', default='keys/sym_key.enc')
+        parser.add_argument('-pu', '--pub-key-out', default='keys/public.pem')
+        parser.add_argument('-pr', '--priv-key-out', default='keys/private.pem')
 
-    parser.add_argument('-i', '--in-file')
-    parser.add_argument('-o', '--out-file')
-    parser.add_argument('-pk', '--priv-key-file')
-    parser.add_argument('-sk', '--sym-key-file')
+        parser.add_argument('-i', '--in-file')
+        parser.add_argument('-o', '--out-file')
+        parser.add_argument('-pk', '--priv-key-file')
+        parser.add_argument('-sk', '--sym-key-file')
 
-    parser.add_argument('-c', '--config', default='src/settings.json')
+        parser.add_argument('-c', '--config', default='src/settings.json')
 
-    return parser.parse_args()
+        return parser.parse_args()
+    except Exception as e:
+        print(f"CLI Argument parsing error: {e}")
+        sys.exit(1)
 
 
 def merge_args_with_settings(args, settings: dict):
@@ -51,10 +56,14 @@ def merge_args_with_settings(args, settings: dict):
     Returns:
         argparse.Namespace: Updated arguments.
     """
-    for key, value in settings.items():
-        if hasattr(args, key) and getattr(args, key) is None:
-            setattr(args, key, value)
-    return args
+    try:
+        for key, value in settings.items():
+            if hasattr(args, key) and getattr(args, key) is None:
+                setattr(args, key, value)
+        return args
+    except Exception as e:
+        print(f"Error merging settings: {e}")
+        return args
 
 
 def generate_mode(args):
@@ -81,8 +90,10 @@ def generate_mode(args):
 
         print("Successful key generation")
 
+    except (ValueError, IOError, RuntimeError) as e:
+        print(f"Key generation failed: {e}")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Unexpected error in generation mode: {e}")
 
 
 def encrypt_mode(args):
@@ -96,8 +107,13 @@ def encrypt_mode(args):
         None
     """
     try:
+        if not args.in_file or not args.out_file:
+            raise ValueError("Input and Output files must be specified for encryption")
+
         print("Encrypting...")
 
+        data = read_file(args.in_file)
+        
         private_key = load_private_key(args.priv_key_file)
 
         sym_key = decrypt_symmetric_key(
@@ -105,15 +121,18 @@ def encrypt_mode(args):
             private_key
         )
 
-        nonce, ciphertext = load_encrypted_file(args.in_file)
+        nonce =  generate_nonce()
 
-        plaintext = chacha20_decrypt(ciphertext, sym_key, nonce)
+        ciphertext = chacha20_encrypt(data, sym_key, nonce)
         
-        write_bytes(args.out_file, plaintext)
+        write_encrypted_file(args.out_file, nonce, ciphertext)
+        
         print("Successful encrypt")
 
+    except (FileNotFoundError, ValueError, PermissionError, RuntimeError) as e:
+        print(f"Encryption error: {e}")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Unexpected error in encryption mode: {e}")
 
 
 def decrypt_mode(args):
@@ -127,6 +146,9 @@ def decrypt_mode(args):
         None
     """
     try:
+        if not args.in_file or not args.out_file:
+            raise ValueError("Input and Output files must be specified for decryption")
+
         print("Decrypting...")
 
         private_key = load_private_key(args.priv_key_file)
@@ -144,5 +166,7 @@ def decrypt_mode(args):
 
         print("Successful decrypt")
 
+    except (FileNotFoundError, ValueError, PermissionError, RuntimeError) as e:
+        print(f"Decryption error: {e}")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Unexpected error in decryption mode: {e}")
