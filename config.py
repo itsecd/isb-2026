@@ -1,64 +1,82 @@
+"""Конфигурация приложения - загрузка и сохранение настроек в JSON файлы"""
+
 import os
 import json
-from typing import Dict, Any
 
-BLOCK_SIZE = 16  # 128 бит для Camellia
-SYMMETRIC_KEY_SIZE = 32  # 256 бит для Camellia
-RSA_KEY_SIZE = 2048
-RSA_PUBLIC_EXPONENT = 65537
-
-HELP_DESCRIPTION = 'Гибридная криптосистема (RSA + Camellia) - Лабораторная работа №3'
-HELP_EPILOG = '''
-Примеры использования:
-
-  # Генерация ключей
-  python main.py --gen --public keys/public.pem --private keys/private.pem --symmetric keys/symmetric.key
-
-  # Шифрование данных
-  python main.py --enc --input data/plaintext.txt --private keys/private.pem --encrypted-symmetric keys/encrypted_symmetric.key
-
-  # Дешифрование данных
-  python main.py --dec --input data/encrypted.bin --private keys/private.pem --encrypted-symmetric keys/encrypted_symmetric.key
-
-  # Интерактивный режим
-  python main.py --interactive
-'''
+CRYPTO_CONFIG_FILE = 'crypto_config.json'
+SETTINGS_FILE = 'settings.json'
 
 
-def manage_settings(settings: Dict[str, str] = None) -> Dict[str, str]:
-    """
-    Загружает или сохраняет настройки в файл settings.json.
-    
-    Если settings не передан - загружает настройки из файла.
-    Если файла настроек нет - создаёт его с пустыми настройками.
-    Если settings передан - сохраняет их в файл.
-    
-    Args:
-        settings (Dict[str, str], optional): Настройки для сохранения.
-            Если None, выполняется загрузка настроек.
+def crypto_config() -> dict:
+    """Загружает криптографические константы из crypto_config.json.
     
     Returns:
-        Dict[str, str]: Загруженные настройки (при загрузке) или 
-            пустой словарь (при сохранении)
+        dict: Словарь с параметрами из файла.
     
     Raises:
-        json.JSONDecodeError: Если файл настроек повреждён
-        IOError: Если нет прав на запись/чтение файла
+        FileNotFoundError: Если файл crypto_config.json не существует.
     """
-    settings_file = 'settings.json'
+    if not os.path.exists(CRYPTO_CONFIG_FILE):
+        raise FileNotFoundError(
+            f"Файл {CRYPTO_CONFIG_FILE} не найден.\n"
+            f"Создайте его с содержимым:\n"
+            f'{{\n'
+            f'    "block_size": 16,\n'
+            f'    "symmetric_key_size": 32,\n'
+            f'    "rsa_key_size": 2048,\n'
+            f'    "rsa_public_exponent": 65537\n'
+            f'}}'
+        )
     
-    if settings is not None:
-        with open(settings_file, 'w', encoding='utf-8') as f:
-            json.dump(settings, f, indent=4, ensure_ascii=False)
-        print(" Настройки сохранены в settings.json")
-        return {}
-    
-    if not os.path.exists(settings_file):
-        with open(settings_file, 'w', encoding='utf-8') as f:
-            json.dump({}, f, indent=4, ensure_ascii=False)
-        print(f" Создан пустой файл настроек: {settings_file}")
-        print(" Пожалуйста, заполните настройки вручную или через режим 4")
-        return {}
-    
-    with open(settings_file, 'r', encoding='utf-8') as f:
+    with open(CRYPTO_CONFIG_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
+
+
+def settings() -> dict:
+    """Загружает пользовательские настройки из settings.json.
+    
+    Returns:
+        dict: Словарь с путями к файлам.
+    
+    Raises:
+        FileNotFoundError: Если файл settings.json не существует.
+    """
+    if not os.path.exists(SETTINGS_FILE):
+        raise FileNotFoundError(
+            f"Файл {SETTINGS_FILE} не найден.\n"
+            f"Создайте его с содержимым:\n"
+            f'{{\n'
+            f'    "initial_file": "data/plaintext.txt",\n'
+            f'    "encrypted_file": "data/encrypted.bin",\n'
+            f'    "decrypted_file": "data/decrypted.txt",\n'
+            f'    "symmetric_key": "keys/symmetric.key",\n'
+            f'    "encrypted_symmetric_key": "keys/encrypted_symmetric.key",\n'
+            f'    "public_key": "keys/public.pem",\n'
+            f'    "private_key": "keys/private.pem"\n'
+            f'}}'
+        )
+    
+    with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+
+def save_settings(settings_dict: dict) -> None:
+    """Сохраняет настройки путей в файл settings.json.
+    
+    Args:
+        settings_dict: Словарь с настройками для сохранения
+    """
+    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+        json.dump(settings_dict, f, indent=4, ensure_ascii=False)
+    print(f"[OK] Настройки сохранены в {SETTINGS_FILE}")
+
+
+_crypto_config_cache = None
+
+
+def get_crypto_config() -> dict:
+    """Возвращает криптографические константы (с кэшированием)."""
+    global _crypto_config_cache
+    if _crypto_config_cache is None:
+        _crypto_config_cache = crypto_config()
+    return _crypto_config_cache
