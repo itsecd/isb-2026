@@ -32,19 +32,27 @@ def save_asymmetric_keys(private_key, public_key, private_path, public_path):
         public_key: object of public key
         private_path: path to save private key
         public_path: path to save public key
+    Raises:
+        OSError: Error of writing data on drive
     """
-    with open(private_path, "wb") as f:
-        f.write(private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption()
-        ))
+    try:
+        with open(private_path, "wb") as f:
+            f.write(private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()
+            ))
+    except OSError as e:
+        raise OSError(f"Ошибка сохранения файла: {e}")
 
-    with open(public_path, "wb") as f:
-        f.write(public_key.public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
-        ))
+    try:
+        with open(public_path, "wb") as f:
+            f.write(public_key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo
+            ))
+    except OSError as e:
+        raise OSError(f"Ошибка сохранения файла: {e}")
 
 def encrypt_symmetric_key(sym_key, public_key, path):
     """
@@ -53,6 +61,8 @@ def encrypt_symmetric_key(sym_key, public_key, path):
         sym_key(bytes): symmetric key
         public_key: object of public RSA key
         path(str): path to save encrypted sym key
+    Raises:
+        OSError: Error of writing data on drive
     """
     encrypted_sym_key = public_key.encrypt(
         sym_key,
@@ -62,9 +72,11 @@ def encrypt_symmetric_key(sym_key, public_key, path):
             label=None
         )
     )
-    with open(path, "wb") as f:
-        f.write(encrypted_sym_key)
-
+    try:
+        with open(path, "wb") as f:
+            f.write(encrypted_sym_key)
+    except OSError as e:
+        raise OSError(f"Ошибка сохранения файла: {e}")
 
 def keygen(settings_path):
     """
@@ -73,12 +85,20 @@ def keygen(settings_path):
         settings_path(str): path to JSON settings file
     Returns:
         str: message of successful generation
+    Raises:
+        PermissionError: no access to folder
+        Exception: Key generation failure
     """
-    settings = settings_loader.load(settings_path)
+    try:
+        settings = settings_loader.load(settings_path)
 
-    sym_key = generate_symmetric_key(int(settings['aes_key_size']))
-    private_key, public_key = generate_asymmetric_keys()
+        sym_key = generate_symmetric_key(int(settings['aes_key_size']))
+        private_key, public_key = generate_asymmetric_keys()
 
-    save_asymmetric_keys(private_key, public_key, settings['private_key'], settings['public_key'])
-    encrypt_symmetric_key(sym_key, public_key, settings['symmetric_key'])
-    return "Keys successfully generated and saved."
+        save_asymmetric_keys(private_key, public_key, settings['private_key'], settings['public_key'])
+        encrypt_symmetric_key(sym_key, public_key, settings['symmetric_key'])
+        return "Keys successfully generated and saved."
+    except PermissionError:
+        raise Exception("Permission error: unable to save key files to the specified folders.")
+    except Exception as e:
+        raise Exception(f"Key generation failure: {e}")
