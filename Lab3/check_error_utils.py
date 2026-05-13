@@ -5,7 +5,14 @@ from functools import wraps
 
 
 def show_error(title: str, message: str, details: Optional[str] = None) -> None:
-    """Показывает сообщение об ошибке."""
+    """
+    Показывает диалоговое окно с сообщением об ошибке.
+    
+    Args:
+        title: Заголовок окна ошибки.
+        message: Основной текст сообщения об ошибке.
+        details: Дополнительные детали ошибки, добавляются к основному сообщению.
+    """
     full_message = message
     if details:
         full_message = f"{message}\n\nДетали:\n{details}"
@@ -13,17 +20,38 @@ def show_error(title: str, message: str, details: Optional[str] = None) -> None:
 
 
 def show_warning(title: str, message: str) -> None:
-    """Показывает предупреждение."""
+    """
+    Показывает диалоговое окно с предупреждением.
+    
+    Args:
+        title: Заголовок окна предупреждения.
+        message: Текст предупреждения.
+    """
     messagebox.showwarning(title, message)
 
 
 def show_info(title: str, message: str) -> None:
-    """Показывает информационное сообщение."""
+    """
+    Показывает информационное диалоговое окно.
+    
+    Args:
+        title: Заголовок окна информации.
+        message: Информационное сообщение.
+    """
     messagebox.showinfo(title, message)
 
 
 def show_question(title: str, message: str) -> bool:
-    """Показывает вопрос с кнопками Да/Нет."""
+    """
+    Показывает диалог подтверждения с кнопками Да/Нет.
+    
+    Args:
+        title: Заголовок окна вопроса.
+        message: Текст вопроса для пользователя.
+    
+    Returns:
+        True если пользователь нажал "Да", False если нажал "Нет".
+    """
     return messagebox.askyesno(title, message)
 
 
@@ -33,7 +61,19 @@ def handle_errors(
     fallback_return: Any = None,
     status_callback: Optional[Callable] = None
 ) -> Callable:
-    """Декоратор для автоматической обработки исключений в методах."""
+    """
+    Декоратор для автоматической обработки исключений в функциях.
+    Перехватывает любые ошибки, показывает сообщение и возвращает значение по умолчанию.
+    
+    Args:
+        error_title: Заголовок окна ошибки.
+        show_traceback: Показывать ли полный отладчик.
+        fallback_return: Значение, возвращаемое при ошибке.
+        status_callback: Функция для обновления статуса, принимает строку.
+    
+    Returns:
+        Декорированная функция с обработкой ошибок.
+    """
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -49,8 +89,8 @@ def handle_errors(
                 if status_callback:
                     try:
                         status_callback("Ошибка")
-                    except:
-                        pass
+                    except Exception as callback_error:
+                        print(f"Ошибка в status_callback: {callback_error}")
                 
                 return fallback_return
         return wrapper
@@ -58,7 +98,17 @@ def handle_errors(
 
 
 def confirm_action(title: str, message: str) -> Callable:
-    """Декоратор для подтверждения действия перед выполнением."""
+    """
+    Декоратор для подтверждения действия перед выполнением функции.
+    Показывает диалог подтверждения, функция выполняется только при согласии пользователя.
+    
+    Args:
+        title: Заголовок окна подтверждения.
+        message: Текст вопроса для пользователя.
+    
+    Returns:
+        Декорированная функция с подтверждением.
+    """
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -69,55 +119,17 @@ def confirm_action(title: str, message: str) -> Callable:
     return decorator
 
 
-class ErrorContext:
-    """Контекстный менеджер для обработки ошибок в блоке кода."""
-    
-    def __init__(
-        self,
-        error_title: str = "Ошибка",
-        show_traceback: bool = True,
-        status_callback: Optional[Callable] = None,
-        fallback_return: Any = None
-    ):
-        self.error_title = error_title
-        self.show_traceback = show_traceback
-        self.status_callback = status_callback
-        self.fallback_return = fallback_return
-        self.exception: Optional[Exception] = None
-    
-    def __enter__(self):
-        return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if exc_val is not None:
-            self.exception = exc_val
-            error_message = str(exc_val) if str(exc_val) else f"Ошибка: {exc_type.__name__}"
-            
-            details = None
-            if self.show_traceback and exc_tb:
-                details = traceback.format_exc()
-            
-            show_error(self.error_title, error_message, details)
-            
-            if self.status_callback:
-                try:
-                    self.status_callback("Ошибка")
-                except:
-                    pass
-            
-            return True
-        
-        return False
-    
-    def get_result(self, default: Any = None) -> Any:
-        """Возвращает результат или значение по умолчанию, если была ошибка."""
-        if self.exception:
-            return self.fallback_return if self.fallback_return is not None else default
-        return default
-
-
 def safe_file_operation(operation_name: str, status_callback: Optional[Callable] = None) -> Callable:
-    """Декоратор для безопасных файловых операций."""
+    """
+    Декоратор для безопасных файловых операций.
+    
+    Args:
+        operation_name: Название операции для заголовка ошибки.
+        status_callback: Функция для обновления статуса.
+    
+    Returns:
+        Декорированная функция с обработкой ошибок.
+    """
     return handle_errors(
         error_title=f"Ошибка при {operation_name}",
         show_traceback=True,
@@ -126,9 +138,18 @@ def safe_file_operation(operation_name: str, status_callback: Optional[Callable]
 
 
 def safe_encryption_operation(operation_name: str, status_callback: Optional[Callable] = None) -> Callable:
-    """Декоратор для безопасных криптографических операций."""
+    """
+    Декоратор для безопасных криптографических операций.
+    
+    Args:
+        operation_name: Название операции (не используется).
+        status_callback: Функция для обновления статуса.
+    
+    Returns:
+        Декорированная функция с обработкой ошибок.
+    """
     return handle_errors(
-        error_title=f"Криптографическая ошибка",
+        error_title="Криптографическая ошибка",
         show_traceback=True,
         status_callback=status_callback
     )
