@@ -2,13 +2,28 @@ import sys
 
 
 def fail(message: str, code: int = 1) -> None:
-    """Единая точка выхода с ошибкой."""
+    """
+    Вывести сообщение об ошибке и завершить программу.
+
+    Параметры:
+        message: текст ошибки.
+        code:    код возврата (по умолчанию 1).
+    """
     print(message)
     sys.exit(code)
 
 
 def read_file(path: str, mode: str = 'rb') -> bytes:
-    """Чтение файла с обработкой ошибок."""
+    """
+    Прочитать файл с обработкой ошибок.
+
+    Параметры:
+        path: путь к файлу.
+        mode: режим чтения ('rb' — бинарный по умолчанию, 'r' — текстовый).
+
+    Возвращает:
+        Содержимое файла.
+    """
     try:
         with open(path, mode) as f:
             return f.read()
@@ -19,7 +34,13 @@ def read_file(path: str, mode: str = 'rb') -> bytes:
 
 
 def write_file(path: str, data: bytes) -> None:
-    """Запись файла с обработкой ошибок."""
+    """
+    Записать данные в файл с обработкой ошибок.
+
+    Параметры:
+        path: путь к файлу.
+        data: данные для записи (байты).
+    """
     try:
         with open(path, 'wb') as f:
             f.write(data)
