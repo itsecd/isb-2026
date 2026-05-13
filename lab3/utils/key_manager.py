@@ -61,24 +61,3 @@ class KeyManager:
         """
         private_bytes = self.file_manager.read_file(self._private_path, binary=True)
         return self.asymmetric_crypto.load_private_key(private_bytes)
-    
-    def create_symmetric_key(self, algorithm: str, key_bytes: Optional[bytes] = None) -> bytes:
-        """
-        Создает симметричный ключ для указанного алгоритма.
-        
-        Args:
-            algorithm (str): 'SEED' или 'ChaCha20'
-            key_bytes (bytes, optional): опциональный ключ
-        
-        Returns:
-            bytes: симметричный ключ
-        """
-        from crypto.hybrid import HybridCrypto
-        hybrid = HybridCrypto(self.config)
-        cipher = hybrid.get_cipher(algorithm)
-        
-        match key_bytes:
-            case None:
-                return cipher.generate_key()
-            case _:
-                return key_bytes

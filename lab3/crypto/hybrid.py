@@ -1,6 +1,6 @@
 from typing import Dict, Any, Tuple
 
-from crypto.symmetric import SymmetricCipher, SEEDCipher, ChaCha20Cipher
+from crypto.symmetric import SEEDCipher, ChaCha20Cipher
 from crypto.asymmetric import AsymmetricCrypto
 
 
@@ -19,7 +19,7 @@ class HybridCrypto:
             'ChaCha20': ChaCha20Cipher(config)
         }
     
-    def get_cipher(self, algorithm_name: str) -> SymmetricCipher:
+    def get_cipher(self, algorithm_name: str):
         """
         Возвращает экземпляр симметричного шифра
         Args:
@@ -78,19 +78,3 @@ class HybridCrypto:
         symmetric_key = self.asymmetric.decrypt_with_private_key(encrypted_key, private_key)
         plaintext = cipher.decrypt(encrypted_data, symmetric_key)
         return plaintext
-
-
-def secure_clear_key(key: bytes) -> None:
-    """
-    Безопасно удаляет ключ из памяти
-    Args: key (bytes): ключ для удаления
-    """
-    return
-
-
-def secure_clear_keys(*keys) -> None:
-    """
-    Безопасно удаляет ключ из памяти
-    Args: *keys (bytes): ключи для удаления
-    """
-    return

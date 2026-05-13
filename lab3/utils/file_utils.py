@@ -105,17 +105,3 @@ class FileManager:
                 raise ValueError(f"Путь для ключа '{key}' пуст")
         
         return os.path.join(self._keys_dir, filename)
-    
-    def delete_file(self, filepath: str) -> None:
-        """
-        Удаляет файл с диска, если он существует.
-        
-        Args:
-            filepath (str): путь к файлу
-        """
-        match filepath:
-            case '':
-                raise ValueError("Путь к файлу не может быть пустым")
-        
-        if os.path.exists(filepath):
-            os.remove(filepath)
