@@ -1,5 +1,4 @@
 import json
-import sys
 import argparse
 
 from cryptography.hazmat.primitives.serialization import (
@@ -13,7 +12,16 @@ from utils import fail, read_file, write_file
 
 
 def load_key(path: str, key_type: str):
-    """Загрузка открытого или закрытого ключа."""
+    """
+    Загрузить открытый или закрытый RSA-ключ из PEM-файла.
+
+    Параметры:
+        path:     путь к PEM-файлу.
+        key_type: "public" или "private".
+
+    Возвращает:
+        Объект открытого или закрытого RSA-ключа.
+    """
     match key_type:
         case "public":
             label = "открытого"
@@ -34,7 +42,21 @@ def load_key(path: str, key_type: str):
 
 
 def load_config(path: str) -> dict:
-    """Загрузка JSON-конфигурации."""
+    """
+    Загрузить и проверить JSON-конфигурацию.
+
+    Параметры:
+        path: путь к JSON-файлу.
+
+    Возвращает:
+        Словарь с настройками.
+
+    Обязательные поля:
+        initial_file, encrypted_file, decrypted_file,
+        symmetric_key, public_key, secret_key.
+    Необязательное поле:
+        aes_key_size (по умолчанию 256).
+    """
     raw = read_file(path, mode='r')
     try:
         config = json.loads(raw)
@@ -54,13 +76,30 @@ def load_config(path: str) -> dict:
 
 
 def _read_and_decrypt_symmetric_key(symmetric_key_path: str, private_key) -> bytes:
-    """Загрузка зашифрованного симметричного ключа и его расшифрование."""
+    """
+    Прочитать зашифрованный AES-ключ из файла и расшифровать его.
+
+    Параметры:
+        symmetric_key_path: путь к файлу с зашифрованным AES-ключом.
+        private_key:        закрытый RSA-ключ.
+
+    Возвращает:
+        Расшифрованный AES-ключ.
+    """
     encrypted_key = read_file(symmetric_key_path)
     return decrypt_symmetric_key(encrypted_key, private_key)
 
 
 def mode_generate_keys(config: dict) -> None:
-    """Режим генерации ключей."""
+    """
+    Режим генерации ключей (-gen).
+
+    Создаёт RSA-пару и AES-ключ, сохраняет в файлы.
+    AES-ключ шифруется открытым RSA-ключом перед сохранением.
+
+    Параметры:
+        config: словарь с настройками из JSON.
+    """
     print("\nРежим генерации ключей\n")
 
     key_size = config['aes_key_size']
@@ -84,7 +123,15 @@ def mode_generate_keys(config: dict) -> None:
 
 
 def mode_encrypt(config: dict) -> None:
-    """Режим шифрования."""
+    """
+    Режим шифрования (-enc).
+
+    Расшифровывает AES-ключ закрытым RSA-ключом,
+    затем шифрует файл алгоритмом AES-CBC.
+
+    Параметры:
+        config: словарь с настройками из JSON.
+    """
     print("\nРежим шифрования\n")
     private_key = load_key(config['secret_key'], "private")
     symmetric_key = _read_and_decrypt_symmetric_key(config['symmetric_key'], private_key)
@@ -93,7 +140,15 @@ def mode_encrypt(config: dict) -> None:
 
 
 def mode_decrypt(config: dict) -> None:
-    """Режим расшифрования."""
+    """
+    Режим расшифрования (-dec).
+
+    Расшифровывает AES-ключ закрытым RSA-ключом,
+    затем расшифровывает файл алгоритмом AES-CBC.
+
+    Параметры:
+        config: словарь с настройками из JSON.
+    """
     print("\nРежим расшифрования\n")
     private_key = load_key(config['secret_key'], "private")
     symmetric_key = _read_and_decrypt_symmetric_key(config['symmetric_key'], private_key)
@@ -102,6 +157,14 @@ def mode_decrypt(config: dict) -> None:
 
 
 def main() -> None:
+    """
+    Точка входа. Разбирает аргументы командной строки и запускает режим.
+
+    Аргументы (взаимоисключающие):
+        -gen, --generation CONFIG   генерация ключей
+        -enc, --encryption CONFIG   шифрование файла
+        -dec, --decryption CONFIG   расшифрование файла
+    """
     parser = argparse.ArgumentParser(
         description='Гибридная криптосистема (RSA + AES)'
     )
