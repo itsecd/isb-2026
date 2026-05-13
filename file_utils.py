@@ -1,6 +1,10 @@
 import os
 import json
-from typing import Dict, Any
+from typing import Dict, Any, List
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey, RSAPrivateKey
+from cryptography.hazmat.primitives.serialization import load_pem_public_key, load_pem_private_key
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import serialization, hashes
 
 
 REQUIRED_SETTINGS: List[str] = [
@@ -57,6 +61,38 @@ def settings_validation_check(settings: Dict[str, Any]) -> None:
     return None
 
 
+def correcting_path(filename: str, mode: str) -> str:
+    '''
+    Corrects paths цкшееут by the user.
+
+    Args:
+        filename (str): The name of the file.
+        mode (str): A type of data.
+
+    Returns:
+        str: The correct version of the file path.
+    
+    Raises:
+        ValueError: If the file name does not contain the extension
+                    or invalid mode.
+    '''
+    if mode not in FOLDERS:
+        raise ValueError(f"Invalid mode '{mode}'. Expected 'text' or 'key'")
+
+    folder = FOLDERS[mode]
+
+    if not os.path.exists(folder):
+        os.makedirs(folder, exist_ok=True)
+
+    pure_filename = os.path.basename(filename)
+    name, ext = os.path.splitext(pure_filename)
+    if not ext:
+        raise ValueError(f"{pure_filename} is an invalid file name. Please add the extension .txt or .pem")
+    
+    right_filename = os.path.join(folder, pure_filename)
+    return right_filename
+
+
 def write_file_bytes(filename: str, data: bytes, mode: str) -> None:
     '''
     Serializing the data in bytes to a file,
@@ -75,24 +111,11 @@ def write_file_bytes(filename: str, data: bytes, mode: str) -> None:
                     or invalid mode.
     '''
 
-    if mode not in FOLDERS:
-        raise ValueError(f"Invalid mode '{mode}'. Expected 'text' or 'key'")
-
-    folder = FOLDERS[mode]
-
-    if not os.path.exists(folder):
-        os.makedirs(folder, exist_ok=True)
-
-    pure_filename = os.path.basename(filename)
-    name, ext = os.path.splitext(pure_filename)
-    if not ext:
-        raise ValueError(f"{pure_filename} is an invalid file name. Please add the extension .txt")
-
-    right_filename = os.path.join(folder, pure_filename)
-    with open(right_filename, 'wb') as file:
+    full_filename = correcting_path(filename, mode)
+    with open(full_filename, 'wb') as file:
         file.write(data)
     
-    print(f"The data is written on the path {right_filename}")
+    print(f"The data is written on the path {full_filename}")
     
 
 def read_file_bytes(filename: str, mode: str) -> bytes:
@@ -112,21 +135,11 @@ def read_file_bytes(filename: str, mode: str) -> bytes:
         FileNotFoundError: If file is not found.
     '''
 
-    if mode not in FOLDERS:
-        raise ValueError(f"Invalid mode '{mode}'. Expected 'text' or 'key'")
+    full_filename = correcting_path(filename, mode)
+    if not os.path.exists(full_filename):
+        raise FileNotFoundError(f"File {full_filename} is not found")
 
-    folder = FOLDERS[mode]
-
-    pure_filename = os.path.basename(filename)
-    name, ext = os.path.splitext(pure_filename)
-    if not ext:
-        raise ValueError(f"{pure_filename} is an invalid file name. Please add the extension .txt")
-
-    right_filename = os.path.join(folder, pure_filename)
-    if not os.path.exists(right_filename):
-        raise FileNotFoundError(f"File {right_filename} is not found")
-
-    with open(right_filename, 'rb') as file:
+    with open(full_filename, 'rb') as file:
         return file.read()
     
 
@@ -152,17 +165,100 @@ def read_initial_text(filename: str) -> str:
     return text
 
 
-def write_decrypted_text(filename: str, text: str) -> None:
+def write_public_key(filename: str, public_key: RSAPublicKey) -> None:
     '''
-    Encodes decrypted text string to bytes and saves it to a file.
+    Writes the public key to a file of the type .pem.
 
     Args:
         filename (str): The name of the file where to write the data.
-        text (str): The decrypted text string to save.
+        public_key (RSAPublicKey): Public key for asymmetric encryption.
 
     Returns:
         None: The message is displayed that the data is written to the file.
+
+    Raises:
+        ValueError: If the file name does not contain the extension.
     '''
 
-    text_bytes = text.encode('utf-8')
-    write_file_bytes(filename, text_bytes, mode="text")
+    full_filename = correcting_path(filename, mode='key')
+
+    with open(full_filename, 'wb') as public_out:
+        public_out.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo))
+
+    print(f"The public key is saved in file {full_filename}")
+
+
+def write_private_key(filename: str, private_key: RSAPrivateKey) -> None:
+    '''
+    Writes the private key to a file of the type .pem.
+
+    Args:
+        filename (str): The name of the file where to write the data.
+        public_key (RSAPublicKey): Private key for asymmetric encryption.
+
+    Returns:
+        None: The message is displayed that the data is written to the file.
+
+    Raises:
+        ValueError: If the file name does not contain the extension.
+    '''
+
+    full_filename = correcting_path(filename, mode='key')
+
+    with open(full_filename, 'wb') as private_out:
+        private_out.write(private_key.private_bytes(encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()))
+
+    print(f"The private key is saved in file {full_filename}")
+
+
+def read_public_key(filename: str) -> RSAPublicKey:
+    '''
+    Deserialization of the public key.
+
+    Args:
+        filename (str): The name of the file where to read the public key.
+
+    Returns:
+        RSAPublicKey: The public key.
+    
+    Raises:
+        ValueError: If the file name does not contain the extension.
+        FileNotFoundError: If file is not found.
+    '''
+    full_filename = correcting_path(filename, mode='key')
+
+    if not os.path.exists(full_filename):
+        raise FileNotFoundError(f"File {full_filename} is not found")
+
+    with open(full_filename, 'rb') as pem_in:
+        public_bytes = pem_in.read()
+
+    return load_pem_public_key(public_bytes)
+
+
+def read_private_key(filename: str) -> RSAPrivateKey:
+    '''
+    Deserialization of the private key.
+
+    Args:
+        filename (str): The name of the file where to read the private key.
+
+    Returns:
+        RSAPrivateKey: The private key.
+    
+    Raises:
+        ValueError: If the file name does not contain the extension.
+        FileNotFoundError: If file is not found.
+    '''
+    full_filename = correcting_path(filename, mode='key')
+
+    if not os.path.exists(full_filename):
+        raise FileNotFoundError(f"File {full_filename} is not found")
+
+    with open(full_filename, 'rb') as pem_in:
+        private_bytes = pem_in.read()
+
+    return load_pem_private_key(private_bytes, password=None)

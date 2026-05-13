@@ -57,7 +57,7 @@ def triple_des_encryption(text: str, key: bytes) -> Tuple[bytes, bytes]:
     return c_text, iv
 
 
-def triple_des_decryption(text_bytes: bytes, key: bytes, iv: bytes) -> str:
+def triple_des_decryption(text_bytes: bytes, key: bytes, iv: bytes) -> bytes:
     '''
     Decrypts text using the method 3DES.
 
@@ -68,7 +68,7 @@ def triple_des_decryption(text_bytes: bytes, key: bytes, iv: bytes) -> str:
 
 
     Returns:
-        str : The original, decoded text.
+        bytes : The original, decoded text.
     '''
 
     cipher = Cipher(algorithms.TripleDES(key), modes.CBC(iv))
@@ -79,5 +79,4 @@ def triple_des_decryption(text_bytes: bytes, key: bytes, iv: bytes) -> str:
     unpadder = padding.ANSIX923(64).unpadder()
     unpadded_dc_text = unpadder.update(dc_text) + unpadder.finalize()
 
-    text = unpadded_dc_text.decode('utf-8')
-    return text
+    return unpadded_dc_text
