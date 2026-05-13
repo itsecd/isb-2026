@@ -1,7 +1,7 @@
 import argparse
 import os
 import json
-from file_utils import read_json_file, settings_validation_check, write_file_bytes, read_file_bytes, read_initial_text, write_decrypted_text, write_public_key, write_private_key, read_public_key, read_private_key
+from file_utils import read_json_file, settings_validation_check, write_file_bytes, read_file_bytes, read_initial_text, write_public_key, write_private_key, read_public_key, read_private_key
 from symmetrical import gen_sym_key, triple_des_encryption, triple_des_decryption
 from asymmetrical import gen_assym_key, rsa_encryption, rsa_decryption
 
