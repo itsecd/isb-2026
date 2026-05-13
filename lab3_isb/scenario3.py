@@ -1,47 +1,11 @@
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives import hashes   
 from cryptography.hazmat.primitives import padding as sym_padding
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from files import load_private_key, load_ciphertext, save_decrypted_text, load_encrypted_key
 
 
-
-def load_ciphertext(path: str) -> bytes:
-    """
-    Чтение зашифрованного текста из файла.
-    :param path: путь к файлу с зашифрованным текстом
-    :return: зашифрованный текст в виде байтов
-    """
-
-    with open(path, 'rb') as f:
-        enc_txt = f.read()
-    return enc_txt
-
-
-def load_private_key(path: str) -> RSAPrivateKey:
-    """
-    Загрузка закрытого RSA-ключа из PEM-файла.
-    :param path: путь к файлу с закрытым RSA-ключом
-    :return: закрытый RSA-ключ
-    """
-
-    with open(path, 'rb') as pem_in:
-        private_bytes = pem_in.read()
-        private_key = load_pem_private_key(private_bytes,password=None)
-    return private_key
-
-
-def load_encrypted_key(path: str) -> bytes:
-    """
-    Чтение зашифрованного симметричного AES-ключа из файла.
-    :param path: путь к файлу с зашифрованным симметричным ключом
-    :return: зашифрованный симметричный ключ в виде байтов
-    """
-
-    with open(path, 'rb') as f:
-        enc_key = f.read()
-    return enc_key
 
 
 def decrypt_symmetric_key(enc_key: bytes, private_key: RSAPrivateKey) -> bytes:
@@ -80,17 +44,6 @@ def text_decrypt(enc_txt: bytes, key: bytes) -> bytes:
     text = unpadder.update(padded_text) + unpadder.finalize()
     return text
 
-
-def save_decrypted_text(text: bytes, path: str) -> None:
-    """
-    Сохранение расшифрованных данных в файл.
-    :param text: расшифрованные данные в виде байтов
-    :param path: путь для сохранения расшифрованных данных
-    :return: не возвращается
-    """
-
-    with open(path, 'wb') as out:
-        out.write(text)
 
 
 def run_scenario3(enc_txt_path: str, prv_asym_key_path: str, enc_key_path: str, dec_txt_path: str) -> None:

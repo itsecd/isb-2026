@@ -38,12 +38,17 @@ def argparsing() -> argparse.Namespace:
 
 def main():
     args = argparsing()
-    if args.scenario == "gen":
-        scenario1.run_scenario1(args.ENC_PATH, args.OPN_KEY_PATH, args.PRV_KEY_PATH, args.SIZE)
-    elif args.scenario == "enc":
-        scenario2.run_scenario2(args.TXT_PATH, args.PRV_ASYM_KEY_PATH, args.ENC_KEY_PATH, args.ENC_TXT_PATH)
-    elif args.scenario == "dec":
-        scenario3.run_scenario3(args.ENC_TXT_PATH, args.PRV_ASYM_KEY_PATH, args.ENC_KEY_PATH, args.DEC_TXT_PATH)
+    match args.scenario:
+        case "gen":
+            scenario1.run_scenario1(args.ENC_PATH, args.OPN_KEY_PATH, args.PRV_KEY_PATH, args.SIZE)
+        case "enc":
+            scenario2.run_scenario2(args.TXT_PATH, args.PRV_ASYM_KEY_PATH, args.ENC_KEY_PATH, args.ENC_TXT_PATH)           
+        case "dec":
+            scenario3.run_scenario3(args.ENC_TXT_PATH, args.PRV_ASYM_KEY_PATH, args.ENC_KEY_PATH, args.DEC_TXT_PATH)
+        case _:
+            raise ValueError("Unknown scenario")
+
+
 
 if __name__ == "__main__":
     main()

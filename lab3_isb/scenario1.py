@@ -6,7 +6,6 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 
 
-
 def generate_symmetric_key(size: int) -> bytes:
     """
     Генерация ключа для симметричного алгоритма AES.

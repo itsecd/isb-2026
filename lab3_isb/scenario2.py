@@ -1,37 +1,12 @@
 import os
+from files import save_binary, load_private_key, read_encrypted_key, read_binary
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives import hashes   
 from cryptography.hazmat.primitives import padding as sym_padding
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
-
-
-def load_private_key(path: str) -> RSAPrivateKey:
-    """
-    Загрузка закрытого RSA-ключа из PEM-файла.
-    :param path: путь к файлу с закрытым RSA-ключом
-    :return: закрытый RSA-ключ
-    """
-
-    with open(path, 'rb') as pem_in:
-        private_bytes = pem_in.read()
-        private_key = load_pem_private_key(private_bytes,password=None)
-    return private_key
-
-
-def read_encrypted_key(path: str) -> bytes:
-    """
-    Чтение зашифрованного симметричного AES-ключа из файла.
-    :param path: путь к файлу с зашифрованным симметричным ключом
-    :return: зашифрованный симметричный ключ в виде байтов
-    """
-
-    with open(path, 'rb') as f:
-        enc_key = f.read()
-    return enc_key
 
 
 def decrypt_symmetric_key(enc_key: bytes, private_key: RSAPrivateKey) -> bytes:
@@ -74,8 +49,7 @@ def save_encrypted_text(enc_txt: bytes, path: str) -> None:
     :return: не возвращается
     """
 
-    with open(path, 'wb') as out:
-        out.write(enc_txt)
+    save_binary(enc_txt, path)
 
 
 def run_scenario2(txt_path: str, prv_asym_key_path: str, enc_key_path: str, enc_txt_path: str) -> None:
@@ -91,8 +65,7 @@ def run_scenario2(txt_path: str, prv_asym_key_path: str, enc_key_path: str, enc_
     private_key = load_private_key(prv_asym_key_path)
     enc_key = read_encrypted_key(enc_key_path)
     decrypted_key = decrypt_symmetric_key(enc_key, private_key)
-    with open(txt_path, 'rb') as f:
-        text = f.read() 
+    text = read_binary(txt_path)
     enc_txt = text_encrypt(text, decrypted_key)
     save_encrypted_text(enc_txt, enc_txt_path)
     print(f"Scenario 2 completed successfully. Text from {txt_path} encrypted and saved to {enc_txt_path}.")
