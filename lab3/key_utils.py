@@ -31,13 +31,19 @@ def generate_asymmetric_keys() -> tuple:
 
     Returns:
         tuple: Кортеж (закрытый_ключ: RSAPrivateKey, открытый_ключ: RSAPublicKey).
+
+    Raises:
+        Exception: Если не удалось сгенерировать ключи.
     '''
-    private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048
-    )
-    public_key = private_key.public_key()
-    return private_key, public_key
+    try:
+        private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048
+        )
+        public_key = private_key.public_key()
+        return private_key, public_key
+    except Exception as e:
+        raise Exception(f"Ошибка генерации ключей RSA: {e}")
 
 
 def save_private_key(private_key, path: str) -> None:
@@ -53,15 +59,18 @@ def save_private_key(private_key, path: str) -> None:
     Raises:
         OSError: Если не удалось создать папку или записать файл.
     '''
-    folder = os.path.dirname(path)
-    if folder:
-        os.makedirs(folder, exist_ok=True)
-    with open(path, "wb") as f:
-        f.write(private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption()
-        ))
+    try:
+        folder = os.path.dirname(path)
+        if folder:
+            os.makedirs(folder, exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()
+            ))
+    except OSError as e:
+        raise OSError(f"Ошибка сохранения закрытого ключа: {e}")
 
 
 def save_public_key(public_key, path: str) -> None:
@@ -76,14 +85,17 @@ def save_public_key(public_key, path: str) -> None:
     Raises:
         OSError: Если не удалось создать папку или записать файл.
     '''
-    folder = os.path.dirname(path)
-    if folder:
-        os.makedirs(folder, exist_ok=True)
-    with open(path, "wb") as f:
-        f.write(public_key.public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
-        ))
+    try:
+        folder = os.path.dirname(path)
+        if folder:
+            os.makedirs(folder, exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(public_key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo
+            ))
+    except OSError as e:
+        raise OSError(f"Ошибка сохранения открытого ключа: {e}")
 
 
 def save_encrypted_symmetric_key(encrypted_key: bytes, path: str) -> None:
@@ -98,8 +110,11 @@ def save_encrypted_symmetric_key(encrypted_key: bytes, path: str) -> None:
     Raises:
         OSError: Если не удалось создать папку или записать файл.
     '''
-    folder = os.path.dirname(path)
-    if folder:
-        os.makedirs(folder, exist_ok=True)
-    with open(path, "wb") as f:
-        f.write(encrypted_key)
+    try:
+        folder = os.path.dirname(path)
+        if folder:
+            os.makedirs(folder, exist_ok=True)
+        with open(path, "wb") as f:
+            f.write(encrypted_key)
+    except OSError as e:
+        raise OSError(f"Ошибка сохранения зашифрованного ключа: {e}")

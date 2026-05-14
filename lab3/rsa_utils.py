@@ -17,8 +17,13 @@ def load_private_key(path: str):
         FileNotFoundError: Если файл не найден.
         ValueError: Если файл имеет неверный формат.
     '''
-    with open(path, "rb") as f:
-        return serialization.load_pem_private_key(f.read(), password=None)
+    try:
+        with open(path, "rb") as f:
+            return serialization.load_pem_private_key(f.read(), password=None)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Файл закрытого ключа не найден: {path}")
+    except ValueError as e:
+        raise ValueError(f"Неверный формат закрытого ключа: {e}")
 
 
 def load_public_key(path: str):
@@ -34,8 +39,13 @@ def load_public_key(path: str):
         FileNotFoundError: Если файл не найден.
         ValueError: Если файл имеет неверный формат.
     '''
-    with open(path, "rb") as f:
-        return serialization.load_pem_public_key(f.read())
+    try:
+        with open(path, "rb") as f:
+            return serialization.load_pem_public_key(f.read())
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Файл открытого ключа не найден: {path}")
+    except ValueError as e:
+        raise ValueError(f"Неверный формат открытого ключа: {e}")
 
 
 def encrypt_key(symmetric_key: bytes, public_key) -> bytes:
@@ -49,15 +59,21 @@ def encrypt_key(symmetric_key: bytes, public_key) -> bytes:
 
     Returns:
         bytes: Зашифрованный симметричный ключ.
+
+    Raises:
+        Exception: Если не удалось зашифровать ключ.
     '''
-    return public_key.encrypt(
-        symmetric_key,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
+    try:
+        return public_key.encrypt(
+            symmetric_key,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
         )
-    )
+    except Exception as e:
+        raise Exception(f"Ошибка шифрования ключа RSA: {e}")
 
 
 def decrypt_key(encrypted_key: bytes, private_key) -> bytes:
@@ -71,12 +87,18 @@ def decrypt_key(encrypted_key: bytes, private_key) -> bytes:
 
     Returns:
         bytes: Расшифрованный симметричный ключ.
+
+    Raises:
+        Exception: Если не удалось расшифровать ключ.
     '''
-    return private_key.decrypt(
-        encrypted_key,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
+    try:
+        return private_key.decrypt(
+            encrypted_key,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
         )
-    )
+    except Exception as e:
+        raise Exception(f"Ошибка расшифрования ключа RSA: {e}")

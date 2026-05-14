@@ -1,3 +1,5 @@
+'''Модуль симметричного шифрования 3DES.'''
+
 import os
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -41,9 +43,15 @@ def unpad_data(padded_data: bytes) -> bytes:
 
     Returns:
         bytes: Исходные данные без дополнения.
+
+    Raises:
+        ValueError: Если паддинг повреждён.
     '''
-    unpadder = padding.ANSIX923(64).unpadder()
-    return unpadder.update(padded_data) + unpadder.finalize()
+    try:
+        unpadder = padding.ANSIX923(64).unpadder()
+        return unpadder.update(padded_data) + unpadder.finalize()
+    except ValueError as e:
+        raise ValueError(f"Ошибка удаления паддинга: {e}")
 
 
 def encrypt(data: bytes, key: bytes) -> tuple:
