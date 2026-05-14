@@ -17,7 +17,7 @@ class CryptoWindow(QWidget):
         '''Инициализирует окно, загружает настройки и создаёт интерфейс.'''
         super().__init__()
         self.setWindowTitle("Лабораторная №3 — RSA + 3DES")
-        self.resize(780, 560)
+        self.resize(780, 600)
         self.config_path = "config.json"
         self.settings = self.get_defaults()
         if os.path.exists(self.config_path):
@@ -25,6 +25,7 @@ class CryptoWindow(QWidget):
         self.make_ui()
         self.log("Программа запущена")
         self.log("Вариант 4: 3DES, ключ 64/128/192 бит")
+        self.log("Можно указать свои пути к ключам или сгенерировать новые")
 
     def get_defaults(self):
         '''Возвращает словарь с путями по умолчанию.
@@ -52,7 +53,7 @@ class CryptoWindow(QWidget):
         main.addWidget(title)
         main.addWidget(QLabel("PyQt-интерфейс, JSON-настройки, CLI через argparse"))
 
-        keys = QGroupBox("1. Ключи")
+        keys = QGroupBox("1. Ключи (можно указать свои или сгенерировать новые)")
         keys_layout = QVBoxLayout()
         self.encrypted_key_edit = QLineEdit(self.settings["encrypted_key_file"])
         self.public_key_edit = QLineEdit(self.settings["public_key_file"])
@@ -71,7 +72,7 @@ class CryptoWindow(QWidget):
         des3_row.addStretch()
         keys_layout.addLayout(des3_row)
 
-        gen_btn = QPushButton("Сгенерировать ключи")
+        gen_btn = QPushButton("Сгенерировать НОВЫЕ ключи")
         gen_btn.clicked.connect(self.generate_action)
         keys_layout.addWidget(gen_btn)
         keys.setLayout(keys_layout)
@@ -88,9 +89,13 @@ class CryptoWindow(QWidget):
         files.setLayout(files_layout)
         main.addWidget(files)
 
+        info = QLabel("Если ключи уже существуют, просто нажмите Зашифровать или Расшифровать.")
+        info.setStyleSheet("color: gray;")
+        main.addWidget(info)
+
         buttons = QHBoxLayout()
-        enc_btn = QPushButton("Зашифровать")
-        dec_btn = QPushButton("Расшифровать")
+        enc_btn = QPushButton("Зашифровать (использует указанные пути к ключам)")
+        dec_btn = QPushButton("Расшифровать (использует указанные пути к ключам)")
         save_btn = QPushButton("Сохранить config.json")
         enc_btn.clicked.connect(self.encrypt_action)
         dec_btn.clicked.connect(self.decrypt_action)
@@ -186,6 +191,9 @@ class CryptoWindow(QWidget):
             generate_all_keys(s["encrypted_key_file"], s["public_key_file"], s["private_key_file"], s["key_size"])
             save_config(self.config_path, s)
             self.log("Ключи созданы")
+            self.log(f"Открытый ключ: {s['public_key_file']}")
+            self.log(f"Закрытый ключ: {s['private_key_file']}")
+            self.log(f"Зашифрованный 3DES ключ: {s['encrypted_key_file']}")
             QMessageBox.information(self, "Готово", "Ключи созданы")
         except Exception as e:
             self.show_error(e)
@@ -194,6 +202,8 @@ class CryptoWindow(QWidget):
         '''Обрабатывает нажатие кнопки шифрования файла.'''
         try:
             s = self.collect_settings()
+            self.log(f"Исходный файл: {s['input_file']}")
+            self.log(f"Открытый ключ: {s['public_key_file']}")
             self.log("Запущено шифрование файла...")
             encrypt_file(s["input_file"], s["public_key_file"], s["encrypted_key_file"], s["encrypted_file"])
             save_config(self.config_path, s)
@@ -206,6 +216,8 @@ class CryptoWindow(QWidget):
         '''Обрабатывает нажатие кнопки дешифрования файла.'''
         try:
             s = self.collect_settings()
+            self.log(f"Зашифрованный файл: {s['encrypted_file']}")
+            self.log(f"Закрытый ключ: {s['private_key_file']}")
             self.log("Запущено дешифрование файла...")
             decrypt_file(s["encrypted_file"], s["private_key_file"], s["encrypted_key_file"], s["decrypted_file"])
             save_config(self.config_path, s)
