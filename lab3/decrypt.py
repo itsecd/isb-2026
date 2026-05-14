@@ -2,6 +2,7 @@ from cryptography.hazmat.primitives import serialization, hashes, padding as sym
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 import settings_loader
+import file_manager
 
 def sym_key_decrypt(settings):
     """
@@ -10,21 +11,9 @@ def sym_key_decrypt(settings):
         settings(dict): dictionary with settings
     Returns:
         bytes: decrypted sym key
-    Raises:
-        FileNotFoundError: key file not found
     """
-    try:
-        with open(settings['private_key'], "rb") as f:
-            private_key = serialization.load_pem_private_key(f.read(), password=None)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Файл не найден: {settings}")
-    
-    try:
-        with open(settings['symmetric_key'], "rb") as f:
-            enc_sym_key = f.read()
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Файл не найден: {settings}")
-    
+    private_key = serialization.load_pem_private_key(file_manager.read_binary(settings['private_key']), password=None)
+    enc_sym_key = file_manager.read_binary(settings['symmetric_key'])
     return private_key.decrypt(
         enc_sym_key,
         asym_padding.OAEP(mgf=asym_padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
@@ -39,15 +28,10 @@ def sym_decrypt_encrypted_file(sym_key, input_path, output_path):
         input_path(str): path to encrypted .bin file
         output_path(str): path to save decrypted file
     Raises:
-        FileNotFoundError: source file for decryption not found
-        OSError: Error of writing data on drive
+        ValueError: integrity error, invalid padding
     """
-    
-    try:
-        with open(input_path, "rb") as f:
-            data = f.read()
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Файл не найден: {input_path}")
+
+    data = file_manager.read_binary(input_path)
 
     iv, ciphertext = data[:16], data[16:]
 
@@ -55,14 +39,12 @@ def sym_decrypt_encrypted_file(sym_key, input_path, output_path):
     decryptor = cipher.decryptor()
     padded_text = decryptor.update(ciphertext) + decryptor.finalize()
     unpadder = sym_padding.PKCS7(128).unpadder()
-    text = unpadder.update(padded_text) + unpadder.finalize()
 
     try:
-        with open(output_path, "wb") as f:
-            f.write(text)
-    except OSError as e:
-        raise OSError(f"Ошибка сохранения файла: {e}")
-    
+        text = unpadder.update(padded_text) + unpadder.finalize()
+    except ValueError:
+        raise ValueError("Invalid padding")
+    file_manager.write_binary(output_path, text)
 def run_decryption(settings_path):
     """
     Runs decrypting cycle
@@ -71,7 +53,7 @@ def run_decryption(settings_path):
     Returns:
         str: message of successful decryption
     Raises:
-        FileNotFoundError: source file for decryption not found
+        ValueError: integrity error, padding failure
         Exception: Decryption error
     """
     try:
@@ -79,8 +61,10 @@ def run_decryption(settings_path):
         sym_key = sym_key_decrypt(settings)
         sym_decrypt_encrypted_file(sym_key, settings['encrypted_file'], settings['decrypted_file'])
         return "File decrypted successfully."
-    
-    except FileNotFoundError as e:
-        raise Exception(f"File not found: {e}")
+
+    except ValueError as e:
+        if "padding" in str(e).lower():
+            raise Exception("Integrity error: data is corrupted or deleted.")
+        raise Exception(f"Data format error: {e}")
     except Exception as e:
         raise Exception (f"Decryption error.")

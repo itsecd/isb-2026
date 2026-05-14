@@ -18,7 +18,7 @@ def load(path):
         raise FileNotFoundError(f"Файл настроек не найден: {path}")
     except json.JSONDecodeError as e:
         raise ValueError(f"Ошибка чтения файла: {e}")
-    
+
 def save(path, settings):
     """
     Saving dictionary of settings in JSON file

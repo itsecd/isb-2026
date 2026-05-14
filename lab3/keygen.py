@@ -2,7 +2,7 @@ import os
 import settings_loader
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
-
+import file_manager
 
 def generate_symmetric_key(key_size):
     """
@@ -32,28 +32,19 @@ def save_asymmetric_keys(private_key, public_key, private_path, public_path):
         public_key: object of public key
         private_path: path to save private key
         public_path: path to save public key
-    Raises:
-        OSError: Error of writing data on drive
     """
-    try:
-        with open(private_path, "wb") as f:
-            f.write(private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
-            ))
-    except OSError as e:
-        raise OSError(f"Ошибка сохранения файла: {e}")
+    private = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+    file_manager.write_binary(private_path, private)
 
-    try:
-        with open(public_path, "wb") as f:
-            f.write(public_key.public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo
-            ))
-    except OSError as e:
-        raise OSError(f"Ошибка сохранения файла: {e}")
-
+    public = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+    file_manager.write_binary(public_path, public)
 def encrypt_symmetric_key(sym_key, public_key, path):
     """
     Encrypting sym key with public RSA key and save result
@@ -61,8 +52,6 @@ def encrypt_symmetric_key(sym_key, public_key, path):
         sym_key(bytes): symmetric key
         public_key: object of public RSA key
         path(str): path to save encrypted sym key
-    Raises:
-        OSError: Error of writing data on drive
     """
     encrypted_sym_key = public_key.encrypt(
         sym_key,
@@ -72,11 +61,7 @@ def encrypt_symmetric_key(sym_key, public_key, path):
             label=None
         )
     )
-    try:
-        with open(path, "wb") as f:
-            f.write(encrypted_sym_key)
-    except OSError as e:
-        raise OSError(f"Ошибка сохранения файла: {e}")
+    file_manager.write_binary(path, encrypted_sym_key)
 
 def keygen(settings_path):
     """
