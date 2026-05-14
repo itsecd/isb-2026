@@ -35,10 +35,6 @@ def main() -> None:
             case _ if args.decryption:
                 decrypt_data(settings)
 
-    except FileNotFoundError as err:
-        print(f"File cannot be found: {err}")
-    except PermissionError as err:
-        print(f"Not enough rights to reach file: {err}")
     except ValueError as err:
         print(f"Not valid value: {err}")
     except Exception as err:
