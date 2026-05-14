@@ -1,28 +1,7 @@
 import argparse
-import json
-import os.path
 
-from decrypt_data import decrypt_with_keys
-from encrypt_data import encrypt_with_keys
-from key_generator import generate_keys
-
-
-def load_settings() -> dict:
-    setting_file = 'settings.json'
-    if not os.path.exists(setting_file):
-        default_settings = {
-            'initial_file': 'text.txt',
-            'encrypted_file': 'encrypted.bin',
-            'decrypted_file': 'decrypted.txt',
-            'symmetric_key': 'symmetric_key.bin',
-            'public_key': 'public_key.pem',
-            'secret_key': 'secret_key.pem',
-            'symmetric_key_length': 128
-        }
-        with open(setting_file, 'w', encoding='utf-8') as json_file:
-            json.dump(default_settings, json_file)
-    with open(setting_file, 'r', encoding='utf-8') as json_file:
-        return json.load(json_file)
+from mixed import generate_keys, encrypt_data, decrypt_data
+from fileutils import load_settings
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -50,9 +29,9 @@ def main() -> None:
                 raise ValueError("Blowfish требует ключ от 32 до 448 бит и кратный 8")
             generate_keys(settings)
         elif args.encryption:
-            encrypt_with_keys(settings)
+            encrypt_data(settings)
         elif args.decryption:
-            decrypt_with_keys(settings)
+            decrypt_data(settings)
 
     except Exception as err:
         print(f"Error while working: {err}")
