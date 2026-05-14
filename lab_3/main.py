@@ -5,14 +5,19 @@ from cast5_operations import generate_key, encrypt_file, decrypt_file
 from rsa_operations import generate_keys, encrypt_with_public_key, decrypt_with_private_key
 
 # Имена файлов для хранения ключей
-RSA_PRIVATE = "rsa_private.pem"          # Закрытый ключ RSA
-RSA_PUBLIC = "rsa_public.pem"            # Открытый ключ RSA
-CAST5_KEY = "cast5_key.bin"              # Симметричный ключ CAST-5
+RSA_PRIVATE = "rsa_private.pem"           # Закрытый ключ RSA
+RSA_PUBLIC = "rsa_public.pem"             # Открытый ключ RSA
+CAST5_KEY = "cast5_key.bin"               # Симметричный ключ CAST-5
 ENCRYPTED_CAST5_KEY = "encrypted_cast5_key.bin"  # CAST-5 ключ, зашифрованный RSA
 
 
 def check_keys() -> bool:
-    """Проверяет наличие всех необходимых файлов ключей."""
+    """
+    Проверяет наличие всех необходимых файлов ключей.
+
+    Returns:
+        bool: True если все ключи существуют, False в противном случае.
+    """
     required = [RSA_PRIVATE, RSA_PUBLIC, CAST5_KEY, ENCRYPTED_CAST5_KEY]
     missing = [f for f in required if not file_exists(f)]
 
@@ -24,7 +29,15 @@ def check_keys() -> bool:
 
 
 def load_keys() -> tuple:
-    """Загружает все ключи из файлов."""
+    """
+    Загружает все ключи из файлов.
+
+    Returns:
+        tuple: (rsa_private, rsa_public, cast5_key, encrypted_cast5_key) в виде байтов.
+
+    Raises:
+        FileNotFoundError: Если какой-либо из файлов ключей не найден.
+    """
     return (
         load_bytes(RSA_PRIVATE),
         load_bytes(RSA_PUBLIC),
@@ -34,7 +47,20 @@ def load_keys() -> tuple:
 
 
 def mode_gen(keylen: int) -> None:
-    """Режим генерации ключей."""
+    """
+    Режим генерации ключей.
+
+    Генерирует:
+        1. Ключ CAST-5 заданной длины
+        2. Пару RSA-ключей (2048 бит)
+        3. Зашифрованный открытым RSA ключ CAST-5
+
+    Args:
+        keylen (int): Длина ключа CAST-5 в битах (40-128, кратно 8).
+
+    Returns:
+        None
+    """
     print(f"Генерация ключей CAST-5 ({keylen} бит):")
     cast5_key = generate_key(keylen)
     save_bytes(cast5_key, CAST5_KEY)
@@ -54,7 +80,22 @@ def mode_gen(keylen: int) -> None:
 
 
 def mode_enc(in_file: str, out_file: str) -> None:
-    """Режим шифрования файла."""
+    """
+    Режим шифрования файла.
+
+    Процесс:
+        1. Проверяет наличие входного файла
+        2. Проверяет наличие всех ключей
+        3. Расшифровывает ключ CAST-5 через RSA
+        4. Шифрует файл алгоритмом CAST-5
+
+    Args:
+        in_file (str): Путь к исходному файлу для шифрования.
+        out_file (str): Путь для сохранения зашифрованного файла.
+
+    Returns:
+        None
+    """
     if not file_exists(in_file):
         print(f"Ошибка: файл {in_file} не найден")
         sys.exit(1)
@@ -70,7 +111,22 @@ def mode_enc(in_file: str, out_file: str) -> None:
 
 
 def mode_dec(in_file: str, out_file: str) -> None:
-    """Режим расшифрования файла."""
+    """
+    Режим расшифрования файла.
+
+    Процесс:
+        1. Проверяет наличие входного файла
+        2. Проверяет наличие всех ключей
+        3. Расшифровывает ключ CAST-5 через RSA
+        4. Расшифровывает файл алгоритмом CAST-5
+
+    Args:
+        in_file (str): Путь к зашифрованному файлу.
+        out_file (str): Путь для сохранения расшифрованного файла.
+
+    Returns:
+        None
+    """
     if not file_exists(in_file):
         print(f"Ошибка: файл {in_file} не найден")
         sys.exit(1)
@@ -86,7 +142,17 @@ def mode_dec(in_file: str, out_file: str) -> None:
 
 
 def main() -> None:
-    """Главная функция, обрабатывающая аргументы командной строки."""
+    """
+    Главная функция, обрабатывающая аргументы командной строки.
+
+    Поддерживает три режима работы:
+        -gen   : генерация ключей (с опцией --keylen)
+        -enc   : шифрование файла (с опциями --input и --output)
+        -dec   : расшифрование файла (с опциями --input и --output)
+
+    Returns:
+        None
+    """
     parser = argparse.ArgumentParser(
         description="Гибридная криптосистема RSA + CAST-5"
     )
