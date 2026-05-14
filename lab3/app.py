@@ -1,3 +1,5 @@
+'''GUI-приложение гибридной криптосистемы RSA + 3DES на PyQt5.'''
+
 import os
 import sys
 from PyQt5.QtWidgets import (
@@ -9,7 +11,10 @@ from hybrid_utils import generate_all_keys, encrypt_file, decrypt_file
 
 
 class CryptoWindow(QWidget):
+    '''Главное окно приложения гибридной криптосистемы.'''
+
     def __init__(self):
+        '''Инициализирует окно, загружает настройки и создаёт интерфейс.'''
         super().__init__()
         self.setWindowTitle("Лабораторная №3 — RSA + 3DES")
         self.resize(780, 560)
@@ -22,6 +27,11 @@ class CryptoWindow(QWidget):
         self.log("Вариант 4: 3DES, ключ 64/128/192 бит")
 
     def get_defaults(self):
+        '''Возвращает словарь с путями по умолчанию.
+
+        Returns:
+            dict: Словарь с настройками по умолчанию.
+        '''
         base = os.getcwd()
         return {
             "input_file": os.path.join(base, "input.txt"),
@@ -34,6 +44,7 @@ class CryptoWindow(QWidget):
         }
 
     def make_ui(self):
+        '''Создаёт графический интерфейс окна.'''
         main = QVBoxLayout()
 
         title = QLabel("Гибридная криптосистема RSA + 3DES")
@@ -100,6 +111,16 @@ class CryptoWindow(QWidget):
         self.setLayout(main)
 
     def path_row(self, text, edit, save_mode):
+        '''Создаёт строку с меткой, полем ввода и кнопкой "Обзор".
+
+        Args:
+            text (str): Текст метки.
+            edit (QLineEdit): Поле ввода пути.
+            save_mode (bool): True для saveFileName, False для openFileName.
+
+        Returns:
+            QHBoxLayout: Горизонтальный слой с элементами.
+        '''
         row = QHBoxLayout()
         label = QLabel(text)
         label.setFixedWidth(190)
@@ -111,6 +132,12 @@ class CryptoWindow(QWidget):
         return row
 
     def choose_path(self, edit, save_mode):
+        '''Открывает диалог выбора файла или пути сохранения.
+
+        Args:
+            edit (QLineEdit): Поле ввода для установки выбранного пути.
+            save_mode (bool): True для saveFileName, False для openFileName.
+        '''
         if save_mode:
             path, _ = QFileDialog.getSaveFileName(self, "Выберите путь")
         else:
@@ -119,6 +146,11 @@ class CryptoWindow(QWidget):
             edit.setText(path)
 
     def collect_settings(self):
+        '''Собирает текущие настройки из полей интерфейса.
+
+        Returns:
+            dict: Словарь с настройками.
+        '''
         return {
             "input_file": self.input_edit.text(),
             "encrypted_file": self.encrypted_edit.text(),
@@ -130,9 +162,15 @@ class CryptoWindow(QWidget):
         }
 
     def log(self, text):
+        '''Добавляет сообщение в журнал работы.
+
+        Args:
+            text (str): Текст сообщения.
+        '''
         self.log_box.append(text)
 
     def save_config_action(self):
+        '''Обрабатывает нажатие кнопки сохранения конфигурации.'''
         try:
             save_config(self.config_path, self.collect_settings())
             self.log("config.json сохранён")
@@ -141,6 +179,7 @@ class CryptoWindow(QWidget):
             self.show_error(e)
 
     def generate_action(self):
+        '''Обрабатывает нажатие кнопки генерации ключей.'''
         try:
             s = self.collect_settings()
             self.log("Генерирую 3DES и RSA ключи...")
@@ -152,6 +191,7 @@ class CryptoWindow(QWidget):
             self.show_error(e)
 
     def encrypt_action(self):
+        '''Обрабатывает нажатие кнопки шифрования файла.'''
         try:
             s = self.collect_settings()
             self.log("Запущено шифрование файла...")
@@ -163,6 +203,7 @@ class CryptoWindow(QWidget):
             self.show_error(e)
 
     def decrypt_action(self):
+        '''Обрабатывает нажатие кнопки дешифрования файла.'''
         try:
             s = self.collect_settings()
             self.log("Запущено дешифрование файла...")
@@ -174,6 +215,11 @@ class CryptoWindow(QWidget):
             self.show_error(e)
 
     def show_error(self, error):
+        '''Отображает сообщение об ошибке.
+
+        Args:
+            error (Exception): Объект исключения.
+        '''
         self.log("Ошибка: " + str(error))
         QMessageBox.critical(self, "Ошибка", str(error))
 

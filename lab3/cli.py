@@ -1,9 +1,20 @@
+'''Консольный интерфейс гибридной криптосистемы RSA + 3DES.
+
+Режимы:
+    -gen (--generation): генерация ключей.
+    -enc (--encryption): шифрование файла.
+    -dec (--decryption): дешифрование файла.
+
+Настройки загружаются из JSON-файла (по умолчанию config.json).
+'''
+
 import argparse
 from config_utils import load_config
 from hybrid_utils import generate_all_keys, encrypt_file, decrypt_file
 
 
 def main():
+    '''Точка входа консольного интерфейса.'''
     parser = argparse.ArgumentParser(description="Гибридная криптосистема RSA + 3DES")
     parser.add_argument("-c", "--config", default="config.json", help="Путь к JSON-файлу настроек")
 
