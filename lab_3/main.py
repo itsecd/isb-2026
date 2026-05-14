@@ -23,16 +23,23 @@ def main() -> None:
     try:
         args = parse_arguments()
         settings = load_settings()
-        if args.generation:
-            key_length = settings['symmetric_key_length']
-            if not (32 <= key_length <= 448 and key_length % 8 == 0):
-                raise ValueError("Blowfish требует ключ от 32 до 448 бит и кратный 8")
-            generate_keys(settings)
-        elif args.encryption:
-            encrypt_data(settings)
-        elif args.decryption:
-            decrypt_data(settings)
+        match args:
+            case _ if args.generation:
+                key_length = settings['symmetric_key_length']
+                if not (32 <= key_length <= 448 and key_length % 8 == 0):
+                    raise ValueError("Blowfish требует ключ от 32 до 448 бит и кратный 8")
+                generate_keys(settings)
+            case _ if args.encryption:
+                encrypt_data(settings)
+            case _ if args.decryption:
+                decrypt_data(settings)
 
+    except FileNotFoundError as err:
+        print(f"File cannot be found: {err}")
+    except PermissionError as err:
+        print(f"Not enough rights to reach file: {err}")
+    except ValueError as err:
+        print(f"Not valid value: {err}")
     except Exception as err:
         print(f"Error while working: {err}")
 

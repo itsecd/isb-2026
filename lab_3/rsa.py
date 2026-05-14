@@ -15,11 +15,11 @@ def generate_key_pair() -> tuple:
     return private_key, private_key.public_key()
 
 
-def save_public_key(public_key, path: str) -> None:
+def save_public_key(path: str, public_key) -> None:
     """
     Serialize public key.
+    :param path: path where to save key
     :param public_key: public key
-    :param path: path where to save public key
     """
     with open(path, 'wb') as public_out:
         public_out.write(public_key.public_bytes(
@@ -28,11 +28,11 @@ def save_public_key(public_key, path: str) -> None:
         ))
 
 
-def save_private_key(private_key, path: str) -> None:
+def save_private_key(path: str, private_key) -> None:
     """
     Serialize private key.
+    :param path: path where to save key
     :param private_key: private key
-    :param path: path where to save public key
     """
     with open(path, 'wb') as private_out:
         private_out.write(private_key.private_bytes(
