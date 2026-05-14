@@ -1,6 +1,7 @@
 import argparse
 
-from mixed import generate_keys, encrypt_data, decrypt_data
+from mixed import encrypt_data, decrypt_data
+from keygen import generate_keys
 from fileutils import load_settings
 
 

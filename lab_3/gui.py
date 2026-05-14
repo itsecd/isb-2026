@@ -4,7 +4,8 @@ import sys
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox, filedialog
 
-from mixed import generate_keys as generate_keys, encrypt_data as encrypt_with_keys, decrypt_data as decrypt_with_keys
+from mixed import encrypt_data as encrypt_with_keys, decrypt_data as decrypt_with_keys
+from keygen import generate_keys as generate_keys
 
 SETTINGS_FILE = 'settings.json'
 
