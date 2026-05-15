@@ -1,8 +1,8 @@
-import os.path
 import json
+import os.path
 
 
-def read_bytes(path: str) -> bytes:
+def read_bytes(path: str) -> bytes | None:
     """
     Read bytes from file.
     :param path: path to file
@@ -13,10 +13,13 @@ def read_bytes(path: str) -> bytes:
             return file.read()
     except FileNotFoundError as err:
         print(f"File cannot be found: {err}")
+        raise
     except PermissionError as err:
         print(f"Not enough rights to reach file: {err}")
+        raise
     except Exception as err:
         print(f"Error while working: {err}")
+        raise
 
 
 def write_bytes(path: str, data: bytes) -> None:
@@ -30,13 +33,16 @@ def write_bytes(path: str, data: bytes) -> None:
             file.write(data)
     except FileNotFoundError as err:
         print(f"File cannot be found: {err}")
+        raise
     except PermissionError as err:
         print(f"Not enough rights to reach file: {err}")
+        raise PermissionError
     except Exception as err:
         print(f"Error while working: {err}")
+        raise
 
 
-def load_settings(setting_file: str) -> dict:
+def load_settings(setting_file: str = 'settings.json') -> dict:
     """
     Load settings from JSON file or default.
     :return: settings
@@ -52,11 +58,13 @@ def load_settings(setting_file: str) -> dict:
             'symmetric_key_length': 128
         }
         save_settings(setting_file, default_settings)
-        with open(setting_file, 'w', encoding='utf-8') as json_file:
-            json.dump(default_settings, json_file)
         return default_settings
-    with open(setting_file, 'r', encoding='utf-8') as json_file:
-        return json.load(json_file)
+    try:
+        with open(setting_file, 'r', encoding='utf-8') as json_file:
+            return json.load(json_file)
+    except Exception as err:
+        print(f"Error reading JSON file: {err}")
+        raise
 
 
 def save_settings(path: str, data: dict) -> None:
@@ -65,5 +73,9 @@ def save_settings(path: str, data: dict) -> None:
     :param path: path to save
     :param data: settings
     """
-    with open(path, 'w', encoding='utf-8') as json_file:
-        json.dump(data, json_file)
+    try:
+        with open(path, 'w', encoding='utf-8') as json_file:
+            json.dump(data, json_file)
+    except Exception as err:
+        print(f"Error writing JSON file: {err}")
+        raise

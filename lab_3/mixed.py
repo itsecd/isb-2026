@@ -1,5 +1,5 @@
 from rsa import load_private_key, decrypt_rsa
-from blowfish import encrypt_blowfish
+from blowfish import encrypt_blowfish, decrypt_blowfish
 from fileutils import write_bytes, read_bytes
 
 
@@ -35,6 +35,6 @@ def decrypt_data(settings: dict) -> None:
     print("Чтение ключей и зашифрованного файла")
     symmetric_key = get_symmetric_key(settings)
     data = read_bytes(settings['encrypted_file'])
-    decrypted_data = encrypt_blowfish(symmetric_key, data)
+    decrypted_data = decrypt_blowfish(symmetric_key, data)
     write_bytes(settings['decrypted_file'], decrypted_data)
     print(f"Текст был расшифрован и записан в {settings['decrypted_file']}")

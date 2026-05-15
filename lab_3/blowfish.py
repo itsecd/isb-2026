@@ -32,7 +32,7 @@ def encrypt_blowfish(key: bytes, data: bytes) -> bytes:
 
 def decrypt_blowfish(key: bytes, encrypted_data: bytes) -> bytes:
     """
-    Decrypt data using RSA.
+    Decrypt data using Blowfish.
     :param key: symmetric key
     :param encrypted_data: data to decrypt
     :return: decrypted data
