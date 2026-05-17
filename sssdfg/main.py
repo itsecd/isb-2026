@@ -33,26 +33,18 @@ def main():
         json_settings = read_json_file("setting.json")
         args = parse_args()
 
-        if args.generation:
-            mode = 1
+        if args.generation is not None:
+            print("Топор+")
+        elif args.encryption is not None:
+            print("Поздняков подписаться")
         else:
-            if args.encryption:
-                mode = 2
-            else:
-                if args.decryption:
-                    mode = 3    
+            print("Думайте")   
         
-        match mode:
-                case 1:
-                    print("Топор+")
-                case 2:
-                    print("Поздняков подписаться")
-                case 3:
-                    print("Думайте")  
-                case _:
-                    print("кто прочитал тот здохнет)")
     except Exception as e:
-        print("Увынск продолжение смотреть в телеграмм канале Топор+:", e)     
+        print("Увынск Топор+ подписаться:", e)     
+            
+if __name__ == "__main__":
+    main()
             
 if __name__ == "__main__":
     main()
