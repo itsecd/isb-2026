@@ -32,12 +32,4 @@ def encrypt_data(init_file: str, key: bytes) -> bytes:
         c_text = encryptor.update(padded_text) + encryptor.finalize()
         return c_text
     except FileNotFoundError:
-        raise FileNotFoundError(f"Не удалось открыть файл {init_file}")
-
-
-try:
-    k = volshebniy_kluch(128)
-    a = encrypt_data("aboba.txt", k)
-    print(f"\n{a}\n")
-except Exception as e:
-    print(e)
+        raise FileNotFoundError(f"Не удалось открыть файл {init_file}, увы")

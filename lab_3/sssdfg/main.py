@@ -55,11 +55,12 @@ def main():
             with open(sym_key_path, mode='rb') as key_file: 
                 c_sym_key = key_file.read()
             sym_key = asym.decrypt_with_private_key(c_sym_key, sec_key_path)
+            print(sym_key)
             c_text = sym.encrypt_data(init_file_path, sym_key)
             with open(ciph_file_path, 'wb') as c_file:
                 c_file.write(c_text)
-
         else:
+
             print("Думайте")   
         
     except Exception as e:
