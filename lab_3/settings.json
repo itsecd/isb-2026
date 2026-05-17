@@ -4,10 +4,12 @@
     "decrypted_file": "decrypted.txt",
 
     "symmetric_key": "sym_key.bin",
+
     "public_key": "public.pem",
     "private_key": "private.pem",
 
     "symmetric_algorithm": "IDEA",
     "asymmetric_algorithm": "RSA",
+
     "key_size": 2048
 }

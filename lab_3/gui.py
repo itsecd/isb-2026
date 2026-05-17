@@ -1,10 +1,10 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 
 from crypto_service import (
     generate_keys_service,
-    encrypt_file_service,
-    decrypt_file_service,
+    encrypt_service,
+    decrypt_service,
 )
 
 
@@ -13,37 +13,51 @@ def run_gui(config: dict) -> None:
     Запускает графический интерфейс.
     """
 
-    def generate_keys():
-        try:
-            match mode_var.get():
-                case "manual":
-                    key = key_entry.get()
+    def get_key_from_ui():
 
-                    if len(key) != 16:
-                        messagebox.showerror(
-                            "Ошибка",
-                            "Ключ должен быть 16 символов",
-                        )
-                        return
+        match mode_var.get():
+            case "manual":
+                key = key_entry.get().encode("utf-8")
 
-                    generate_keys_service(
-                        config,
-                        key.encode("utf-8"),
-                    )
-
-                case "random":
-                    generate_keys_service(config)
-
-                case _:
+                if len(key) != 16:
                     messagebox.showerror(
                         "Ошибка",
-                        "Неверный режим",
+                        "Ключ должен быть длиной 16 символов",
                     )
-                    return
+                    return None
+
+                return key
+
+            case "random":
+                return None
+
+            case _:
+                messagebox.showerror(
+                    "Ошибка",
+                    "Неверный режим выбора ключа",
+                )
+                return None
+
+    def choose_file():
+
+        file_path = filedialog.askopenfilename()
+
+        if file_path:
+            selected_file.set(file_path)
+
+    def generate_keys():
+
+        try:
+            key = get_key_from_ui()
+
+            generate_keys_service(
+                config=config,
+                manual_key=key,
+            )
 
             messagebox.showinfo(
                 "Успех",
-                "Ключи сгенерированы",
+                "Ключи успешно сгенерированы",
             )
 
         except Exception as e:
@@ -53,12 +67,16 @@ def run_gui(config: dict) -> None:
             )
 
     def encrypt_file():
+
         try:
-            encrypt_file_service(config)
+            encrypt_service(
+                config=config,
+                input_path=selected_file.get(),
+            )
 
             messagebox.showinfo(
                 "Успех",
-                "Файл зашифрован",
+                "Файл успешно зашифрован",
             )
 
         except Exception as e:
@@ -68,12 +86,13 @@ def run_gui(config: dict) -> None:
             )
 
     def decrypt_file():
+
         try:
-            decrypt_file_service(config)
+            decrypt_service(config)
 
             messagebox.showinfo(
                 "Успех",
-                "Файл расшифрован",
+                "Файл успешно расшифрован",
             )
 
         except Exception as e:
@@ -85,9 +104,19 @@ def run_gui(config: dict) -> None:
     root = tk.Tk()
 
     root.title("Гибридная криптосистема")
-    root.geometry("400x300")
+    root.geometry("500x550")
 
     mode_var = tk.StringVar(value="random")
+
+    selected_file = tk.StringVar(value=config["initial_file"])
+
+    encrypted_file = tk.StringVar(value=config["encrypted_file"])
+
+    decrypted_file = tk.StringVar(value=config["decrypted_file"])
+
+    public_key = tk.StringVar(value=config["public_key"])
+
+    private_key = tk.StringVar(value=config["private_key"])
 
     tk.Label(
         root,
@@ -119,6 +148,67 @@ def run_gui(config: dict) -> None:
     )
 
     key_entry.pack()
+
+    tk.Label(
+        root,
+        text="Файл для шифрования:",
+    ).pack(pady=5)
+
+    tk.Label(
+        root,
+        textvariable=selected_file,
+        wraplength=400,
+    ).pack()
+
+    tk.Button(
+        root,
+        text="Выбрать файл",
+        command=choose_file,
+    ).pack(pady=5)
+
+    tk.Label(
+        root,
+        text="Зашифрованный файл:",
+    ).pack()
+
+    tk.Label(
+        root,
+        textvariable=encrypted_file,
+        wraplength=400,
+    ).pack()
+
+    tk.Label(
+        root,
+        text="Расшифрованный файл:",
+    ).pack()
+
+    tk.Label(
+        root,
+        textvariable=decrypted_file,
+        wraplength=400,
+    ).pack()
+
+    tk.Label(
+        root,
+        text="Публичный ключ:",
+    ).pack()
+
+    tk.Label(
+        root,
+        textvariable=public_key,
+        wraplength=400,
+    ).pack()
+
+    tk.Label(
+        root,
+        text="Приватный ключ:",
+    ).pack()
+
+    tk.Label(
+        root,
+        textvariable=private_key,
+        wraplength=400,
+    ).pack()
 
     tk.Button(
         root,
