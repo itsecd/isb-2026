@@ -1,12 +1,6 @@
 import os
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.utils import CryptographyDeprecationWarning
-import warnings
-
-
-warnings.filterwarnings("ignore", category=CryptographyDeprecationWarning)
-
 
 def volshebniy_kluch(key_length: int) -> bytes:
     """
@@ -22,7 +16,7 @@ def volshebniy_kluch(key_length: int) -> bytes:
 
 def encrypt_data(init_file: str, key: bytes) -> bytes:
     """
-    acgskigbhuscfgkghjbaclhnjkacgflhkjuafcafgckl
+    Шифрует текст из файла по алгоритму Camellia.
     ASGHASFGasfgafgafhgjkd
     """
     try:
@@ -41,16 +35,9 @@ def encrypt_data(init_file: str, key: bytes) -> bytes:
         raise FileNotFoundError(f"Не удалось открыть файл {init_file}")
 
 
-def decrypt_data(c_text: bytes, key: bytes) -> bytes:
-    """
-    Расшжыдлоаопжлоффвмложивамит ыпаорлпвапит ашрп ролди еацрпо фвав врып
-    """
-    iv = os.urandom(16)
-    cipher = Cipher(algorithms.Camellia(key), modes.CBC(iv))
-    
-    decryptor = cipher.decryptor()
-    dc_text = decryptor.update(c_text) + decryptor.finalize()
-    
-    unpadder = padding.ANSIX923(128).unpadder()
-    unpadded_dc_text = unpadder.update(dc_text) + unpadder.finalize()
-    return unpadded_dc_text
+try:
+    k = volshebniy_kluch(128)
+    a = encrypt_data("aboba.txt", k)
+    print(f"\n{a}\n")
+except Exception as e:
+    print(e)

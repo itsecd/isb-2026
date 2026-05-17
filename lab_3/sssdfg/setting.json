@@ -1,0 +1,10 @@
+{
+    "initial_file": "./files/init_file.txt",
+    "cipher_text": "./files/cipher_text.txt",
+    "encrypted_file": "./files/enc_file.txt",
+    "decrypted_file": "./files/dec_file.txt",
+    "symmetric_key": "./files/sym_key.txt",
+    "public_key": "./files/pub_key.pem",
+    "secret_key": "./files/sec_key.pem",
+    "key_length": "128"
+}
