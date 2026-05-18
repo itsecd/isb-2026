@@ -1,51 +1,25 @@
-import json
+import argparse
 
-from AES import aes_decrypt, aes_encrypt, generate_and_save_keys
+from AES import aes_decrypt, aes_encrypt
+from key_gen import generate_and_save_keys
+from utils import save_settings, load_settings
 
 
-def load_settings():
+def get_config_path():
     """
-    Загружает настройки с файла settings.json
-    """
-    try:
-        with open('settings.json') as json_file:
-            settings = json.load(json_file)
-            return settings
-    except PermissionError:
-        print("Недостаточно прав для чтения файла settings.json")
-        exit(100)
-    except FileNotFoundError:
-        default_settings = {
-            "initial_file":"source_text.txt",
-            "encrypted_file":"encrypted_file.txt",
-            "decrypted_file":"decrypted_file.txt",
-            "lenght": 128,
-            "symmetric_key":"symmetric_key.txt",
-            "public_key":"public_key.pem",
-            "private_key":"private_key.pem"
-        }
-        save_settings(default_settings)
-    except Exception as e:
-        print(e)
-        exit(100)
+    Парсит аргументы командной строки и возвращает путь до файла конфигурации.
 
-        
-def save_settings(settings: dict):
     """
-    Сохраняет настройки в файл settings.json
-
-    Аргумент:
-        settings (dict): словарь с настройками
-    """
-    try:
-        with open('settings.json', 'w') as fp:
-            json.dump(settings, fp)
-    except PermissionError:
-        print("Недостаточно прав для сохранения файла settings.json")
-        exit(100)
-    except Exception as e:
-        print(e)
-        exit(100)
+    parser = argparse.ArgumentParser(
+        description="Получение пути до файла настроек"
+    )
+    parser.add_argument(
+        '-c', '--config',
+        help="Путь до файла с настройками",
+        default="settings.json",
+    )
+    args = parser.parse_args()
+    return args.config
 
 
 def generating(settings: dict):
@@ -75,6 +49,10 @@ def generating(settings: dict):
                         continue
                     try:
                         generate_and_save_keys(settings['lenght'], settings['public_key'], settings['private_key'], settings['symmetric_key'])
+                    except PermissionError:
+                        continue
+                    except FileNotFoundError:
+                        continue
                     except Exception as e:
                         print(e)
                         continue
@@ -87,9 +65,14 @@ def generating(settings: dict):
                     continue
         except ValueError:
             print("Ошибка ввода...\n")
+            continue
+        except PermissionError:
+            continue
+        except FileNotFoundError:
+            continue
         except Exception as e:
             print(e)
-            exit(100)
+            continue
 
 
 def encrypting(settings: dict):
@@ -119,6 +102,10 @@ def encrypting(settings: dict):
                         continue
                     try:
                         aes_encrypt(settings['initial_file'], settings['private_key'], settings['symmetric_key'], settings['encrypted_file'])
+                    except PermissionError:
+                        continue
+                    except FileNotFoundError:
+                        continue
                     except Exception as e:
                         print(e)
                         continue
@@ -131,9 +118,14 @@ def encrypting(settings: dict):
                     continue
         except ValueError:
             print("Ошибка ввода...\n")
+            continue
+        except PermissionError:
+            continue
+        except FileNotFoundError:
+            continue
         except Exception as e:
             print(e)
-            exit(100)
+            continue
 
 
 def decrypting(settings: dict):
@@ -163,6 +155,10 @@ def decrypting(settings: dict):
                         continue
                     try:
                         aes_decrypt(settings['encrypted_file'], settings['private_key'], settings['symmetric_key'], settings['decrypted_file'])
+                    except PermissionError:
+                        continue
+                    except FileNotFoundError:
+                        continue
                     except Exception as e:
                         print(e)
                         continue
@@ -175,9 +171,14 @@ def decrypting(settings: dict):
                     continue
         except ValueError:
             print("Ошибка ввода...\n")
+            continue
+        except PermissionError:
+            continue
+        except FileNotFoundError:
+            continue
         except Exception as e:
             print(e)
-            exit(100)
+            continue
 
 
 def main():
@@ -185,7 +186,8 @@ def main():
     Точка входа в программу. Основная функция
     """
     print("Лабораторная работа №3. Построение гибридной криптосистемы..")
-    settings = load_settings()
+    settings_path = get_config_path()
+    settings = load_settings(settings_path)
     while True:
         print("Выберете режим:\n[1] - Генерация ключей\n[2] - Шифрование\n[3] - Расшифровка\n[0] - Выход")
         try:
@@ -204,9 +206,13 @@ def main():
                     continue
         except ValueError:
             print("Ошибка ввода...\n")
+        except PermissionError:
+            continue
+        except FileNotFoundError:
+            continue
         except Exception as e:
             print(e)
-            exit(100)
+            continue
  
 
 if __name__ == "__main__":

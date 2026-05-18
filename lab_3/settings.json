@@ -1,1 +1,1 @@
-{"initial_file": "source_text.txt", "encrypted_file": "encrypted_file.txt", "decrypted_file": "decrypted_file.txt", "lenght": 128, "symmetric_key": "sym_key.txt", "public_key": "public_key.pem", "private_key": "private_key.pem"}
+{"initial_file": "source_text.txt", "encrypted_file": "encrypted_file.txt", "decrypted_file": "decrypted_file.txt", "lenght": 128, "symmetric_key": "sym_key.txt", "public_key": "public_key.pem", "private_key": "private_key.pem", "path": "settings.json"}

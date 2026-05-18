@@ -17,9 +17,7 @@ def generate_rsa_pair():
     return private_key, public_key
 
 
-def save_rsa_keys(
-    public_key: bytes, public_pem: str, private_key: bytes, private_pem: str
-):
+def save_rsa_keys(public_key: bytes, public_pem: str, private_key: bytes, private_pem: str):
     """
     Сохраняет пару ключей RSA в файлы
 
@@ -38,11 +36,11 @@ def save_rsa_keys(
                 )
             )
     except PermissionError:
-        print("Недостаточно прав для сохранения файла публичного ключа")
-        exit(100)
+        print("Недостаточно прав для сохранения файла публичного ключа (смените путь)")
+        raise PermissionError
     except Exception as e:
-        print(e)
-    
+        raise e
+
     try:
         with open(private_pem, "wb") as private_out:
             private_out.write(
@@ -54,10 +52,9 @@ def save_rsa_keys(
             )
     except PermissionError:
         print("Недостаточно прав для сохранения приватного ключа")
-        exit(100)
+        raise PermissionError
     except Exception as e:
-        print(e)
-        exit(100)
+        raise e
 
 
 def load_rsa_public(public_pem: str):
@@ -73,13 +70,12 @@ def load_rsa_public(public_pem: str):
             return load_pem_public_key(public_bytes)
     except PermissionError:
         print("Недостаточно прав для чтения публичного ключа")
-        exit(100)
+        raise PermissionError
     except FileNotFoundError:
         print("Не найден файл с публичным ключом")
-        exit(100)
+        raise FileNotFoundError
     except Exception as e:
-        print(e)
-        exit(100)
+        raise e
 
 
 def load_rsa_private(private_pem: str):
@@ -98,13 +94,13 @@ def load_rsa_private(private_pem: str):
             )
     except PermissionError:
         print("Недостаточно прав для чтения приватного ключа")
-        exit(100)
+        raise PermissionError
     except FileNotFoundError:
         print("Не найден файл с приватным ключом")
-        exit(100)
+        raise FileNotFoundError
     except Exception as e:
-        print(e)
-        exit(100)
+        raise e
+
 
 def rsa_encrypt(text: str, public_key: bytes):
     """
