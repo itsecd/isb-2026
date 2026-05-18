@@ -39,6 +39,7 @@ def main():
 
         init_file_path = json_settings.get("initial_file")
         ciph_file_path = json_settings.get("cipher_text")
+        dec_file_path = json_settings.get("decrypted_file")
         sym_key_path = json_settings.get("symmetric_key")
         pub_key_path = json_settings.get("public_key")
         sec_key_path = json_settings.get("secret_key")
@@ -55,13 +56,16 @@ def main():
             with open(sym_key_path, mode='rb') as key_file: 
                 c_sym_key = key_file.read()
             sym_key = asym.decrypt_with_private_key(c_sym_key, sec_key_path)
-            print(sym_key)
             c_text = sym.encrypt_data(init_file_path, sym_key)
             with open(ciph_file_path, 'wb') as c_file:
                 c_file.write(c_text)
         else:
-
-            print("Думайте")   
+            with open(sym_key_path, mode='rb') as key_file: 
+                c_sym_key = key_file.read()
+            sym_key = asym.decrypt_with_private_key(c_sym_key, sec_key_path)
+            dc_text = sym.decrypt_data(ciph_file_path, sym_key)
+            with open(dec_file_path, "wb") as dc_file:
+                dc_file.write(dc_text)
         
     except Exception as e:
         print("Увынск Топор+ подписаться:", e)     

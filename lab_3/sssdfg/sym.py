@@ -30,6 +30,23 @@ def encrypt_data(init_file: str, key: bytes) -> bytes:
         cipher = Cipher(algorithms.Camellia(key), modes.CBC(iv))
         encryptor = cipher.encryptor()
         c_text = encryptor.update(padded_text) + encryptor.finalize()
-        return c_text
+        return iv + c_text
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Не удалось открыть файл {init_file}, увы")
+    
+
+def decrypt_data(init_file: str, key: bytes) -> bytes:
+    try:
+        with open(init_file, "rb") as f:
+            iv_c_text = f.read()
+        iv = iv_c_text[:16]
+        c_text = iv_c_text[16:]
+        cipher = Cipher(algorithms.Camellia(key), modes.CBC(iv))
+        decryptor = cipher.decryptor()
+
+        dc_text = decryptor.update(c_text) + decryptor.finalize()
+        unpadder = padding.ANSIX923(128).unpadder()
+        unpadded_dc_text = unpadder.update(dc_text) + unpadder.finalize()
+        return unpadded_dc_text
     except FileNotFoundError:
         raise FileNotFoundError(f"Не удалось открыть файл {init_file}, увы")
