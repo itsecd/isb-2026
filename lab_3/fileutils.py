@@ -1,8 +1,10 @@
 import json
 import os.path
 
+from errors import FileUtilsError
 
-def read_bytes(path: str) -> bytes | None:
+
+def read_bytes(path: str) -> bytes:
     """
     Read bytes from file.
     :param path: path to file
@@ -12,14 +14,11 @@ def read_bytes(path: str) -> bytes | None:
         with open(path, 'rb') as file:
             return file.read()
     except FileNotFoundError as err:
-        print(f"File cannot be found: {err}")
-        raise
+        raise FileUtilsError(f"File not found: {path}") from err
     except PermissionError as err:
-        print(f"Not enough rights to reach file: {err}")
-        raise
+        raise FileUtilsError(f"Not enough rights to read file: {path}") from err
     except Exception as err:
-        print(f"Error while working: {err}")
-        raise
+        raise FileUtilsError(f"Error while reading file: {path}: {err}") from err
 
 
 def write_bytes(path: str, data: bytes) -> None:
@@ -32,14 +31,11 @@ def write_bytes(path: str, data: bytes) -> None:
         with open(path, 'wb') as file:
             file.write(data)
     except FileNotFoundError as err:
-        print(f"File cannot be found: {err}")
-        raise
+        raise FileUtilsError(f"File not found: {path}") from err
     except PermissionError as err:
-        print(f"Not enough rights to reach file: {err}")
-        raise PermissionError
+        raise FileUtilsError(f"Not enough rights to write file: {path}") from err
     except Exception as err:
-        print(f"Error while working: {err}")
-        raise
+        raise FileUtilsError(f"Error while writing file: {path}: {err}") from err
 
 
 def load_settings(setting_file: str = 'settings.json') -> dict:
@@ -63,8 +59,7 @@ def load_settings(setting_file: str = 'settings.json') -> dict:
         with open(setting_file, 'r', encoding='utf-8') as json_file:
             return json.load(json_file)
     except Exception as err:
-        print(f"Error reading JSON file: {err}")
-        raise
+        raise FileUtilsError(f"Error reading JSON file: {err}") from err
 
 
 def save_settings(path: str, data: dict) -> None:
@@ -77,5 +72,4 @@ def save_settings(path: str, data: dict) -> None:
         with open(path, 'w', encoding='utf-8') as json_file:
             json.dump(data, json_file)
     except Exception as err:
-        print(f"Error writing JSON file: {err}")
-        raise
+        raise FileUtilsError(f"Error writing JSON file: {err}") from err

@@ -1,8 +1,9 @@
 import argparse
 
-from mixed import encrypt_data, decrypt_data
-from keygen import generate_keys
+from errors import FileUtilsError
 from fileutils import load_settings
+from keygen import generate_keys
+from mixed import encrypt_data, decrypt_data
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -35,6 +36,8 @@ def main() -> None:
             case _ if args.decryption:
                 decrypt_data(settings)
 
+    except FileUtilsError as err:
+        print(f"Error while app working: {err}")
     except ValueError as err:
         print(f"Not valid value: {err}")
     except Exception as err:
