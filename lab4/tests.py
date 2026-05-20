@@ -1,7 +1,3 @@
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import unittest
 from hmac_core import compute_hmac, verify_hmac
 
@@ -10,7 +6,7 @@ class TestHMACCore(unittest.TestCase):
     def test_compute_hmac_returns_hex(self):
         h = compute_hmac("test", "key")
         self.assertIsInstance(h, str)
-        self.assertEqual(len(h), 64)  # SHA256 hex = 64 символа
+        self.assertEqual(len(h), 64)
 
     def test_compute_hmac_different_keys_different_results(self):
         h1 = compute_hmac("hello", "key1")
