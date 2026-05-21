@@ -41,7 +41,7 @@ HMAC = SHA-256( (K ⊕ opad) || inner_hash )
 
 ### Структура проекта
 lab4
-constants.py # Константы (DEFAULT_KEY, ENCODING)
+constants.py # Константы (DEFAULT_KEY, ENCODING)(не исполняемый файл)
 hmac_core.py # Ядро: compute_hmac(), verify_hmac()
 cli.py # CLI режим (argparse)
 gui.py # PyQt графический интерфейс
