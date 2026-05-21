@@ -1,7 +1,7 @@
 """Модуль с логикой вычисления и проверки HMAC."""
 import hmac
 import hashlib
-from constants import ENCODING
+from config_loader import ENCODING
 
 
 def compute_hmac(message: str, key: str) -> str:

@@ -2,7 +2,7 @@
 import tkinter as tk
 from tkinter import messagebox, scrolledtext
 from hmac_core import compute_hmac, verify_hmac
-from constants import DEFAULT_KEY
+from config_loader import DEFAULT_KEY
 
 
 class HMACApp:

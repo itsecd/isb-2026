@@ -1,11 +1,8 @@
 """Графический интерфейс на PyQt для работы с HMAC."""
 import sys
-from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QLineEdit, QTextEdit, QPushButton, QMessageBox
-)
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QTextEdit, QPushButton, QMessageBox)
 from hmac_core import compute_hmac, verify_hmac
-from constants import DEFAULT_KEY
+from config_loader import DEFAULT_KEY
 
 
 class HMACGUI(QMainWindow):

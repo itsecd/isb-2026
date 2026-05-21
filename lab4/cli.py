@@ -1,7 +1,7 @@
 """CLI режим с argparse."""
 import argparse
 from hmac_core import compute_hmac, verify_hmac
-from constants import DEFAULT_KEY
+from config_loader import DEFAULT_KEY
 
 
 def run_cli():
