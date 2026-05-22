@@ -16,16 +16,23 @@ def volshebniy_kluch(key_length: int) -> bytes:
     
 
 def asym_keygen(public_filepath: str, private_filepath: str) -> None:
-    keys = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    private_key = keys
-    public_key = keys.public_key()
-    public_pem = public_filepath
-    with open(public_pem, 'wb') as public_out:
-            public_out.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo))
-    private_pem = private_filepath
-    with open(private_pem, 'wb') as private_out:
-            private_out.write(private_key.private_bytes(encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()))
-    return
+    """
+    Генерирует пару ключей RSA и сериализует их в .pem файлы.
+    На вход принимает пути, по которым сохраняются ключи.
+    """
+    try:
+        keys = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        private_key = keys
+        public_key = keys.public_key()
+        public_pem = public_filepath
+        with open(public_pem, 'wb') as public_out:
+                public_out.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,
+                    format=serialization.PublicFormat.SubjectPublicKeyInfo))
+        private_pem = private_filepath
+        with open(private_pem, 'wb') as private_out:
+                private_out.write(private_key.private_bytes(encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.TraditionalOpenSSL,
+                    encryption_algorithm=serialization.NoEncryption()))
+        return
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Не удалось открыть файл {public_filepath}, увы")

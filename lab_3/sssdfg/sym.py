@@ -17,7 +17,8 @@ def volshebniy_kluch(key_length: int) -> bytes:
 def encrypt_data(init_file: str, key: bytes) -> bytes:
     """
     Шифрует текст из файла по алгоритму Camellia.
-    ASGHASFGasfgafgafhgjkd
+    На вход принимает путь до .txt файла с открытым текстом и ключ симметричного алгоритма.
+    Возвращает зашифрованный текст.
     """
     try:
         with open(init_file, "r", encoding="utf-8") as f:
@@ -36,6 +37,11 @@ def encrypt_data(init_file: str, key: bytes) -> bytes:
     
 
 def decrypt_data(init_file: str, key: bytes) -> bytes:
+    """
+    Расшифровывает бинарный файл, зашифрованный алгоритмом Camellia.
+    На вход принимает путь до файла с шифротекстом  и ключ симметричного алгоритма.
+    Возвращает расшифрованный текст.    
+    """
     try:
         with open(init_file, "rb") as f:
             iv_c_text = f.read()

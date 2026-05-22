@@ -10,7 +10,6 @@ def parse_args():
     Парсинг аргументов командной строки:
     -Выбор 1-го из 3-ёх режимов работы программы на выбор
     -Путь до .json файла с настройками
-    -sdfkaiubsgahiubkajhgbkajghb
     """
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required = True)
@@ -25,17 +24,21 @@ def parse_args():
 
 def read_json_file(filepath: str) -> dict:
     """
-    Bottom text
+    Чтение .json файла по указанному пути в словарь.
+    На вход принимает путь до .json файла.
     """
-    with open(filepath, 'r') as fp:
-        json_data = json.load(fp)
-    return json_data
+    try:
+        with open(filepath, 'r') as fp:
+            json_data = json.load(fp)
+        return json_data
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Не удалось открыть файл {filepath}, увы")
 
 
 def main():
     try:
-        json_settings = read_json_file("setting.json")
         args = parse_args()
+        json_settings = read_json_file(args.j)
 
         init_file_path = json_settings.get("initial_file")
         ciph_file_path = json_settings.get("cipher_text")
