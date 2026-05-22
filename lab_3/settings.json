@@ -1,0 +1,9 @@
+{
+    "initial_file": "test.txt",
+    "encrypted_file": "encrypted.blowfish",
+    "decrypted_file": "decrypted.txt",
+    "symmetric_key": "blowfish_key.bin",
+    "public_key": "public.pem",
+    "secret_key": "private.pem",
+    "key_length": 128
+}
