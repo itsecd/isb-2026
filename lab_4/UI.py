@@ -1,6 +1,7 @@
 import os
 import sys
 import sqlite3
+import argparse
 
 from PyQt5.QtWidgets import (
     QApplication,
@@ -20,11 +21,10 @@ from SQL import register_user, initSQL, get_user
 
 
 class AuthWindow(QWidget):
-    db_path = "users.db"
-
-    def __init__(self):
+    def __init__(self, db_path: str):
         """Constructor of class"""
         super().__init__()
+        self.db_path = db_path
         self.initUI()
 
     def initUI(self):
@@ -129,7 +129,8 @@ class AuthWindow(QWidget):
             )
             return
         try:
-            register_user(username, generate_hash(password, b""), b"", self.db_path)
+            salt = os.urandom(16)
+            register_user(username, generate_hash(password, salt), salt, self.db_path)
 
             QMessageBox.information(
                 self,
@@ -155,9 +156,28 @@ class AuthWindow(QWidget):
         self.reg_confirm.clear()
 
 
+def get_db_path(default_path: str = "users.db"):
+    """
+    Get path to SQL database file (default is users.db)
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--db-path",
+        "-d",
+        type=str,
+        default=default_path,
+        help="Path to SQL database file (default: %(default)s)",
+    )
+    args = parser.parse_args()
+    return args.db_path
+
+
 if __name__ == "__main__":
     """Main function. Entry point"""
+
+    db_path = get_db_path()
+
     app = QApplication(sys.argv)
-    window = AuthWindow()
+    window = AuthWindow(db_path)
     window.show()
     sys.exit(app.exec_())

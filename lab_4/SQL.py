@@ -35,8 +35,18 @@ def register_user(username: str, password_hash: bytes, salt: bytes, db_path: str
     try:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
+        # НЕБЕЗОПАСНО
+        # cursor.execute(
+        #     f"INSERT INTO users (username, password_hash, salt) VALUES ('{username}', '{password_hash.hex()}', '{salt.hex()}')"
+        # )
+
         cursor.execute(
-            f"INSERT INTO users (username, password_hash, salt) VALUES ('{username}', '{password_hash.hex()}', '{salt.hex()}')"
+            f"INSERT INTO users (username, password_hash, salt) VALUES (?, ?, ?)",
+            (
+                username,
+                password_hash.hex(),
+                salt.hex(),
+            ),
         )
 
         conn.commit()
@@ -60,7 +70,11 @@ def get_user(username: str, db_path: str):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    cursor.execute(f"SELECT password_hash, salt FROM users WHERE username='{username}'")
+    # НЕБЕЗОПАСНО
+    # cursor.execute(f"SELECT password_hash, salt FROM users WHERE username='{username}'")
+    cursor.execute(
+        f"SELECT password_hash, salt FROM users WHERE username=?", (username,)
+    )
     result = cursor.fetchone()
     conn.close()
     return result
