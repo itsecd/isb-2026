@@ -214,3 +214,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# VS Code
+.vscode/
+**/.vscode/
+
+# Ignore old folder
+isb-2026/
+
+# Python cache
+__pycache__/
+*.pyc
+.pytest_cache/
