@@ -11,7 +11,8 @@ class Database:
     
 
     def init_db(self):
-        with self.connection() as conn:
+        conn = self.connection()
+        try:
             cursor = conn.cursor()
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS users (
@@ -23,20 +24,32 @@ class Database:
                 )
             """)
             conn.commit()
+        finally:
+            conn.close()
 
 
     def add_user(self, username, password_hash, salt, is_safe):
-        with self.connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                "INSERT INTO users (username, password_hash, salt, is_safe) VALUES (?, ?, ?, ?)",
-                (username, password_hash, salt, int(is_safe))
-            )
-            conn.commit()
+        conn = self.connection()
+        try:
+            with conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "INSERT INTO users (username, password_hash, salt, is_safe) VALUES (?, ?, ?, ?)",
+                    (username, password_hash, salt, int(is_safe))
+                )
+        finally:
+            conn.close()
 
 
     def fetch_user(self, username):
-        with self.connection() as conn:
+        conn = self.connection()
+        try:
             cursor = conn.cursor()
             cursor.execute("SELECT password_hash, salt, is_safe FROM users WHERE username = ?", (username,))
             return cursor.fetchone()
+        finally:
+            conn.close()
+        
+    
+    def close(self):
+        pass
