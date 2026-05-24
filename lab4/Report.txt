@@ -1,0 +1,15 @@
+===Tests Report===
+
+test_bruteforce_collision_failure (__main__.TestAuthSystem.test_bruteforce_collision_failure) ... ok
+test_bruteforce_collision_success (__main__.TestAuthSystem.test_bruteforce_collision_success) ... ok
+test_database_initialization (__main__.TestAuthSystem.test_database_initialization) ... ok
+test_duplicate_username_error (__main__.TestAuthSystem.test_duplicate_username_error) ... ok
+test_empty_fields_validation (__main__.TestAuthSystem.test_empty_fields_validation) ... ok
+test_safe_registration_and_verification (__main__.TestAuthSystem.test_safe_registration_and_verification) ... ok
+test_unsafe_registration_and_verification (__main__.TestAuthSystem.test_unsafe_registration_and_verification) ... ok
+test_verify_non_existent_user (__main__.TestAuthSystem.test_verify_non_existent_user) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.713s
+
+OK
