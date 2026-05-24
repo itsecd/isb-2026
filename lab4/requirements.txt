@@ -1,0 +1,4 @@
+PyQt5==5.15.11
+pyqt5_sip==12.17.1
+python_bcrypt==0.3.2
+tqdm==4.67.3
