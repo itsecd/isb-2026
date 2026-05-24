@@ -1,10 +1,30 @@
 import argparse
 import random
 import sys
+import json
+import os
 
 from analysis_utils import count_bit_diff, diff_percent
 from hash_utils import compute_hash
 from mutation_utils import apply_mutation
+
+
+def load_algorithms():
+    """
+    Загрузка доступных алгоритмов хеширования из settings.json.
+
+    Returns:
+        dict: Словарь {название: hashlib_id}
+    """
+    if not os.path.exists("settings.json"):
+        raise FileNotFoundError("settings.json не найден")
+
+    try:
+        with open("settings.json", "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data.get("algorithms", {})
+    except Exception as e:
+        raise RuntimeError(f"Ошибка чтения settings.json: {e}")
 
 
 def parse_args():
@@ -30,11 +50,20 @@ def parse_args():
 def main():
     args = parse_args()
 
-    print(f"Старт исследования лавинного эффекта.")
-    print(f"Входные данные: '{args.string}', Алгоритм: {args.algo}, Тестов: {args.count}")
-
     try:
-        orig_hash = compute_hash(args.string, args.algo)
+        algorithms = load_algorithms()
+
+        if args.algo not in algorithms.values():
+            raise ValueError(
+                f"Алгоритм '{args.algo}' не найден в settings.json"
+            )
+
+        algo = algorithms.get(args.algo, args.algo)
+
+        print(f"Старт исследования лавинного эффекта.")
+        print(f"Входные данные: '{args.string}', Алгоритм: {algo}, Тестов: {args.count}")
+
+        orig_hash = compute_hash(args.string, algo)
         total_bits = len(orig_hash) * 4
 
         print(f"Исходный хэш: {orig_hash}\n")
@@ -45,7 +74,7 @@ def main():
 
             new_bytes, op = apply_mutation(args.string, mode)
 
-            new_hash = compute_hash(new_bytes, args.algo)
+            new_hash = compute_hash(new_bytes, algo)
             diff = count_bit_diff(orig_hash, new_hash)
             percent = diff_percent(diff, total_bits)
 
