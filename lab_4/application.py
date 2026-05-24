@@ -86,6 +86,7 @@ class HashApp(QWidget):
         self.table.setHorizontalHeaderLabels([
             "Операция", "Изменённые биты", "% различий", "Новый хеш"
         ])
+        self.table.setColumnWidth(1, 150)
         self.table.setColumnWidth(3, 1024)
         layout.addWidget(self.table)
 
