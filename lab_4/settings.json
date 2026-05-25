@@ -1,0 +1,7 @@
+{
+    "files": {
+        "data_base": "data_base.json",
+        "data_base_no_salt": "data_base_no_salt.json",
+        "cat_picture": "cat.jpg"
+    }
+}
