@@ -1,0 +1,14 @@
+{
+    "123": {
+        "salt": "0c53c730c42ebd5af22e8ab564fb91ca",
+        "hash": "eef1d0407134c31859a27bef7db05fd30438ee36cf7bb0d3f36b45d887427b93"
+    },
+    "1234": {
+        "salt": "4a413b7548d39dc2f8c7dbfc4cd64e7f",
+        "hash": "ec4807d0dd980c7245fa49c90908c16acf8b32e18867c900c8e6cc556cf5fe7e"
+    },
+    "12345": {
+        "salt": "4f41a3946859d2a191931afa741cf916",
+        "hash": "77fb6c812e0ebb73d51b34076b3336a2cdf89dcb6148bbe3d7dce394d63eb64d"
+    }
+}

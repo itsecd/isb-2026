@@ -1,0 +1,4 @@
+argon2-cffi
+PyQt5
+tqdm
+Pillow

@@ -1,0 +1,10 @@
+{
+    "123": {
+        "salt": "none",
+        "hash": "019ded71399bbb9493ab42de5fa059c4d5b1de5710ae0ce9ab3c3da012f20c0d"
+    },
+    "1234": {
+        "salt": "none",
+        "hash": "019ded71399bbb9493ab42de5fa059c4d5b1de5710ae0ce9ab3c3da012f20c0d"
+    }
+}
