@@ -1,9 +1,0 @@
-{
-    "initial_file": "text.txt",
-    "encrypted_file": "encrypted.bin",
-    "decrypted_file": "decrypted.txt",
-    "symmetric_key": "sym_key.enc",
-    "public_key": "public.pem",
-    "private_key": "private.pem",
-    "key_len": 128
-}
