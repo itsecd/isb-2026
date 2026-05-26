@@ -1,0 +1,8 @@
+Hybrid cryptographic systems combine the advantages of symmetric and asymmetric encryption algorithms. 
+Symmetric encryption provides high performance and fast processing of large amounts of data, while asymmetric encryption ensures secure key exchange between users.
+
+In this laboratory work, the SM4 block cipher algorithm is used for data encryption, and the RSA algorithm is used for protection of the symmetric encryption key. 
+The implementation supports file encryption and decryption, generation of cryptographic keys, and secure storage of encrypted information.
+
+The program was developed in Python using the cryptography library and command-line arguments. 
+The system demonstrates the practical application of modern cryptographic technologies for secure data transmission and storage.
