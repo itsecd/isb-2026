@@ -5,19 +5,19 @@ import tkinter as tk
 from app.gui import App
 
 
-def load_settings(path: str = "settings.json") -> dict:
+def load_json(path: str) -> dict:
     """
-    Загружает настройки из JSON-файла.
+    Загружает данные из JSON-файла.
 
-    :param path: путь к JSON-файлу настроек
-    :return: словарь настроек
+    :param path: путь к JSON-файлу
+    :return: словарь с данными
     """
     try:
         with open(path, "r", encoding="utf-8") as file:
             return json.load(file)
 
     except FileNotFoundError:
-        print(f"Файл настроек {path} не найден")
+        print(f"Файл {path} не найден")
         raise
 
     except json.JSONDecodeError:
@@ -25,37 +25,15 @@ def load_settings(path: str = "settings.json") -> dict:
         raise
 
     except Exception as error:
-        print(f"Ошибка при чтении настроек: {error}")
+        print(f"Ошибка при чтении файла: {error}")
         raise
 
-def load_const(path: str = "const.json") -> dict:
-    """
-    Загружает const.json.
-
-    :param path: путь к JSON-файлу констант
-    :return: словарь констант
-    """
-    try:
-        with open(path, "r", encoding="utf-8") as file:
-            return json.load(file)
-
-    except FileNotFoundError:
-        print(f"Файл констант {path} не найден")
-        raise
-
-    except json.JSONDecodeError:
-        print(f"Ошибка чтения JSON-файла {path}")
-        raise
-
-    except Exception as error:
-        print(f"Ошибка при чтении констант: {error}")
-        raise
-
-def run_gui(settings: dict) -> None:
+def run_gui(settings: dict, constants: dict) -> None:
     """
     Запускает графический интерфейс приложения.
 
     :param settings: словарь настроек
+    :param constants: словарь констант
     """
     try:
         root = tk.Tk()
@@ -72,8 +50,9 @@ def main() -> None:
     Точка входа приложения.
     """
     try:
-        settings = load_settings()
-        run_gui(settings)
+        settings = load_json("settings.json")
+        constants = load_json("const.json")
+        run_gui(settings, constants)
 
     except Exception as error:
         print(f"Ошибка выполнения программы: {error}")
