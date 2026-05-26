@@ -5,7 +5,7 @@
 * [Лабораторная №1](https://github.com/itsecd/isb-2026/tree/main/lab_1) "Простейшие методы шифрований текстовых сообщений",
 * [Лабораторная №2](https://github.com/itsecd/isb-2026/tree/main/lab_2) "Статистический анализ псевдослучайных последовательностей",
 * [Лабораторная №3](https://github.com/itsecd/isb-2026/tree/main/lab_3) "Построение гибридной криптосистемы",
-* Лабораторная №4
+* [Лабораторная №4](https://github.com/itsecd/isb-2026/blob/main/lab_4/README.md) "Хеш-функции"
 
 Методические указания к лабораторным работам находятся в директории [`docs`](https://github.com/itsecd/isb-2026/tree/main/docs) внутри репозитория.
 
