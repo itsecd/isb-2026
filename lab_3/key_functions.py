@@ -16,7 +16,7 @@ def generate_symmetric_key(aes_key_size: int = 256) -> bytes:
     return: 
             key: random bytes of appropriate length
     """
-    key_bytes = aes_key_size 
+    key_bytes = aes_key_size // 8
     key = os.urandom(key_bytes)
     return key
 
@@ -44,12 +44,14 @@ def write_public_key(public_key, public_pem: str) -> None:
             public_pem: path to file, where public_key is serialized, in str
     return: -
     """
-    with open(public_pem, 'wb') as public_out:
-        public_out.write(public_key.public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
-        ))
-
+    try:
+        with open(public_pem, 'wb') as public_out:
+            public_out.write(public_key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo
+            ))
+    except Exception as e:
+        raise Exception(f"Failed to write public key to {public_pem}: {e}")
 
 def write_private_key(private_key, private_pem: str) -> None:
     """
@@ -60,12 +62,15 @@ def write_private_key(private_key, private_pem: str) -> None:
             private_pem: path to file, where private_key is serialized, in str
     return: -
     """
-    with open(private_pem, 'wb') as private_out:
-        private_out.write(private_key.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption()
-        ))
+    try:
+        with open(private_pem, 'wb') as private_out:
+            private_out.write(private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()
+            ))
+    except Exception as e:
+        raise Exception(f"Failed to write private key to {private_pem}: {e}")
 
 
 def encrypt_symmetric_key(key: bytes, public_key) -> bytes:
@@ -78,15 +83,18 @@ def encrypt_symmetric_key(key: bytes, public_key) -> bytes:
     return:
             encrypt_key: bytes of encrypted symmetric key
     """
-    encrypt_key = public_key.encrypt(
-        key,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
+    try:
+        encrypt_key = public_key.encrypt(
+            key,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
         )
-    )
-    return encrypt_key
+        return encrypt_key
+    except Exception as e:
+        raise Exception(f"Failed to encrypt symmetric key: {e}")
 
 
 def write_symmetric_key(encrypt_key: bytes, file_name: str) -> None:
@@ -165,12 +173,15 @@ def decrypt_symmetric_key(content: bytes, d_private_key) -> bytes:
     return:
             dc_key: decrypted symmetric key in bytes
     """
-    dc_key = d_private_key.decrypt(
-        content,
-        padding.OAEP(
-            mgf=padding.MGF1(algorithm=hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None
+    try:
+        dc_key = d_private_key.decrypt(
+            content,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
         )
-    )
-    return dc_key
+        return dc_key
+    except Exception as e:
+        raise Exception(f"Failed to decrypt symmetric key: {e}")

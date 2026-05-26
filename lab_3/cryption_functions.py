@@ -42,15 +42,15 @@ def decrypt_text(iv: bytes, c_text: bytes, symmetric_key: bytes, aes_key_size: i
     """
     aes_block_size = 128
 
-    if aes_key_size == 128:
-        cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
-    elif aes_key_size == 192:
-        cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
-    elif aes_key_size == 256:
-        cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
-    else:
-        raise ValueError("AES key size must be 128, 192 or 256 bits")
-    
+    match aes_key_size:
+        case 128:
+            cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
+        case 192:
+            cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
+        case 256:
+            cipher = Cipher(algorithms.AES(symmetric_key), modes.CBC(iv))
+        case _:
+            raise ValueError("AES key size must be 128, 192 or 256 bits")
     decryptor = cipher.decryptor()
     dc_text = decryptor.update(c_text) + decryptor.finalize()
 

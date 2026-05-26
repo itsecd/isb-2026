@@ -25,8 +25,11 @@ def write_encrypt_text(file_name: str, iv: bytes, c_text: bytes) -> None:
             c_text: encrypted text in bytes
     return: -
     """
-    with open(file_name, "wb") as file:
-        file.write(iv + c_text)
+    try:
+        with open(file_name, "wb") as file:
+            file.write(iv + c_text)
+    except Exception as e:
+        raise Exception(f"Failed to write encrypted text to {file_name}: {e}")
 
 
 def read_encrypt_text(encrypted_text_file: str) -> tuple:
@@ -59,5 +62,8 @@ def write_decrypt_text(file_name: str, unpadded_dc_text: bytes) -> None:
             unpadded_dc_text: decrypted text without padding in bytes
     return: -
     """
-    with open(file_name, 'wb') as file:
-        file.write(unpadded_dc_text)
+    try:
+        with open(file_name, 'wb') as file:
+            file.write(unpadded_dc_text)
+    except Exception as e:
+        raise Exception(f"Failed to write decrypted text to {file_name}: {e}")
