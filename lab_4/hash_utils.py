@@ -1,6 +1,6 @@
 """
 Utilities for file hashing, checksum storage, integrity verification,
-and simple collision demonstration.
+verification result export, and collision demonstration.
 """
 
 import hashlib
@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 def sha256_file(path, chunk_size=8192):
     """
-    Compute SHA-256 hash for a file.
+    Compute SHA-256 hash for a file with a progress bar.
 
     Args:
         path (str): Path to the file.
@@ -22,12 +22,17 @@ def sha256_file(path, chunk_size=8192):
         str: Hex digest of the file.
     """
     hasher = hashlib.sha256()
-    with open(path, "rb") as f:
-        while True:
-            chunk = f.read(chunk_size)
-            if not chunk:
-                break
-            hasher.update(chunk)
+    total = os.path.getsize(path)
+
+    with tqdm(total=total, unit="B", unit_scale=True, desc="Hashing") as pbar:
+        with open(path, "rb") as f:
+            while True:
+                chunk = f.read(chunk_size)
+                if not chunk:
+                    break
+                hasher.update(chunk)
+                pbar.update(len(chunk))
+
     return hasher.hexdigest()
 
 
@@ -38,7 +43,7 @@ def save_checksum(source_path, checksum, checksum_path=None):
     Args:
         source_path (str): Original file path.
         checksum (str): Hex digest string.
-        checksum_path (str | None): Path to save checksum.
+        checksum_path (str | None): Output checksum path.
 
     Returns:
         str: Path to checksum file.

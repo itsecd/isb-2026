@@ -1,5 +1,5 @@
 """
-Simple PyQt6 interface for file hashing and integrity checking.
+Simple PyQt6 GUI for file hashing and integrity verification.
 """
 
 import sys
@@ -20,12 +20,12 @@ from hash_utils import sha256_file, save_checksum, verify_file, write_verificati
 
 class MainWindow(QMainWindow):
     """
-    Main application window for the file integrity checker.
+    Main window of the file integrity checker GUI.
     """
 
     def __init__(self):
         """
-        Initialize the window and widgets.
+        Initialize the window and interface controls.
         """
         super().__init__()
         self.setWindowTitle("File Integrity Checker")
@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
 
     def select_file(self):
         """
-        Open file selection dialog and store chosen file path.
+        Open a file picker dialog and store selected path.
         """
         path, _ = QFileDialog.getOpenFileName(self, "Select file")
         if path:
@@ -67,7 +67,7 @@ class MainWindow(QMainWindow):
 
     def compute_hash(self):
         """
-        Compute and show SHA-256 hash of the selected file.
+        Compute and display the SHA-256 hash of the selected file.
         """
         if not self.file_path:
             QMessageBox.warning(self, "Error", "Select a file first")
@@ -80,7 +80,7 @@ class MainWindow(QMainWindow):
 
     def save_hash(self):
         """
-        Save checksum of the selected file to a .sha256 file.
+        Save the checksum of the selected file.
         """
         if not self.file_path:
             QMessageBox.warning(self, "Error", "Select a file first")
@@ -94,7 +94,7 @@ class MainWindow(QMainWindow):
 
     def verify(self):
         """
-        Verify file integrity and write verification result to a file.
+        Verify the selected file and write verification result to a file.
         """
         if not self.file_path:
             QMessageBox.warning(self, "Error", "Select a file first")
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
 
 def main():
     """
-    Start the Qt application.
+    Launch the Qt application.
     """
     app = QApplication(sys.argv)
     w = MainWindow()

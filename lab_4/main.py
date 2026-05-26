@@ -5,18 +5,12 @@ Command-line interface for the file integrity checker.
 import argparse
 import sys
 
-from hash_utils import (
-    sha256_file,
-    save_checksum,
-    verify_file,
-    write_verification_result,
-    collision_demo,
-)
+from hash_utils import sha256_file, save_checksum, verify_file, write_verification_result, collision_demo
 
 
 def create_parser():
     """
-    Build the command-line argument parser.
+    Build and return the command-line parser.
 
     Returns:
         argparse.ArgumentParser: Configured parser.
@@ -37,7 +31,7 @@ def create_parser():
     p3.add_argument("-r", "--result", default="verify_result.txt", help="Result file path")
 
     p4 = sub.add_parser("collide", help="Collision demo")
-    p4.add_argument("-n", "--attempts", type=int, default=10000, help="Max attempts")
+    p4.add_argument("-n", "--attempts", type=int, default=10000, help="Maximum attempts")
     p4.add_argument("-p", "--prefix-len", type=int, default=8, help="Prefix length")
 
     return parser
@@ -45,10 +39,10 @@ def create_parser():
 
 def main(argv=None):
     """
-    Run command-line actions.
+    Run the selected command.
 
     Args:
-        argv (list[str] | None): Optional argument list.
+        argv (list[str] | None): Optional CLI arguments for testing.
 
     Returns:
         int: Exit code.
