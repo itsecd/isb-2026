@@ -1,39 +1,14 @@
 import argparse
 import random
 import sys
-import json
-import os
 
 from analysis_utils import count_bit_diff, diff_percent
 from hash_utils import compute_hash
 from mutation_utils import apply_mutation
-
-
-def load_algorithms():
-    """
-    Загрузка доступных алгоритмов хеширования из settings.json.
-
-    Returns:
-        dict: Словарь
-    """
-    if not os.path.exists("settings.json"):
-        raise FileNotFoundError("settings.json не найден")
-
-    try:
-        with open("settings.json", "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data.get("algorithms", {})
-    except Exception as e:
-        raise RuntimeError(f"Ошибка чтения settings.json: {e}")
+from file_utils import load_settings
 
 
 def parse_args():
-    """
-    Парсинг и валидация аргументов командной строки.
-
-    Returns:
-        Объект argparse.Namespace с аргументами командной строки.
-    """
     parser = argparse.ArgumentParser(description="Исследование лавинного эффекта хеш-функций.")
     parser.add_argument("-s", "--string", type=str, required=True, help="Исходная строка")
     parser.add_argument("-a", "--algo", type=str, required=True, help="Алгоритм хеширования")
@@ -51,7 +26,8 @@ def main():
     args = parse_args()
 
     try:
-        algorithms = load_algorithms()
+        settings = load_settings()
+        algorithms = settings.get("algorithms", {})
 
         if args.algo not in algorithms and args.algo not in algorithms.values():
             raise ValueError(f"Алгоритм '{args.algo}' не найден в settings.json")

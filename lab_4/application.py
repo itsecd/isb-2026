@@ -1,5 +1,3 @@
-import json
-import os
 import sys
 
 from PyQt5.QtCore import Qt
@@ -9,6 +7,7 @@ from PyQt5.QtWidgets import (
 )
 
 from analysis_utils import diff_percent, count_bit_diff
+from file_utils import load_settings
 from hash_utils import compute_hash
 from mutation_utils import apply_mutation
 
@@ -21,9 +20,9 @@ class HashApp(QWidget):
         self.resize(1280, 720)
 
         try:
-            self.settings = self.load_settings()
+            self.settings = load_settings()
         except Exception as e:
-            QMessageBox.critical(self, "Критическая ошибка", str(e))
+            QMessageBox.critical(self, "Критическая ошибка при чтении файла с настройками", str(e))
             sys.exit(1)
 
         self.algorithms = self.settings.get("algorithms", {})
@@ -37,22 +36,6 @@ class HashApp(QWidget):
         self.original_hash = ""
 
         self.init_ui()
-
-    def load_settings(self):
-        """
-        Загрузка настроек из JSON файла.
-
-        Returns:
-            Словарь с настройками приложения.
-        """
-        if not os.path.exists("settings.json"):
-            raise FileNotFoundError("settings.json не найден")
-
-        try:
-            with open("settings.json", "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as e:
-            raise RuntimeError(f"Ошибка чтения settings.json: {e}")
 
     def init_ui(self):
         layout = QVBoxLayout()
