@@ -155,7 +155,7 @@ def simulate_collision_search(target_prefix_len: int = 4) -> Tuple[str, str, int
         attempts = 0
         max_estimated = 16 ** target_prefix_len
 
-        with tqdm(total=max_estimated, desc="Поиск коллизии", unit=" hashes") as pbar:
+        with tqdm(total=max_estimated, desc="Collision Detection", unit="hashes") as pbar:
             while True:
                 attempts += 1
                 candidate = "".join(secrets.choice(alphabet)
