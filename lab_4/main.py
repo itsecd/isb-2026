@@ -1,6 +1,6 @@
 import sys
-from cli import run_cli
-from gui import run_gui
+from lab_4.cli import run_cli
+from lab_4.gui import run_gui
 
 
 def main() -> None:

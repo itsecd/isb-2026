@@ -1,6 +1,6 @@
 import unittest
 import os
-from hasher import calculate_file_hash, save_hash_to_file, verify_file_integrity
+from lab_4.hasher import calculate_file_hash, save_hash_to_file, verify_file_integrity
 
 
 class TestHasherModule(unittest.TestCase):

@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QTextEdit,
 )
-from hasher import calculate_file_hash, save_hash_to_file, verify_file_integrity
+from lab_4.hasher import calculate_file_hash, save_hash_to_file, verify_file_integrity
 
 
 class IntegrityCheckerApp(QMainWindow):

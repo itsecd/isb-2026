@@ -1,6 +1,6 @@
 import argparse
 import sys
-from hasher import (
+from lab_4.hasher import (
     calculate_file_hash,
     save_hash_to_file,
     verify_file_integrity,
