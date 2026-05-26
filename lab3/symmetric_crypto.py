@@ -9,19 +9,28 @@ class AESCipher:
         self.key = key
 
     def encrypt(self, plaintext, iv):
+        # 1. Создаем шифратор
         cipher = Cipher(algorithms.AES(self.key), modes.CBC(iv))
         encryptor = cipher.encryptor()
-        padder = padding.ANSIX923(16).padder()
+        
+        # 2. Добавляем Padding (PKCS7 - самый стандартный вариант)
+        # Используем PKCS7 вместо ANSIX923 для большей совместимости
+        padder = padding.PKCS7(128).padder()
         padded_data = padder.update(plaintext) + padder.finalize()
+        
+        # 3. Шифруем дополненные данные
         return encryptor.update(padded_data) + encryptor.finalize()
 
     def decrypt(self, ciphertext, iv):
+        # 1. Расшифровываем
         cipher = Cipher(algorithms.AES(self.key), modes.CBC(iv))
         decryptor = cipher.decryptor()
         padded_plaintext = decryptor.update(ciphertext) + decryptor.finalize()
-        unpadder = padding.ANSIX923(16).unpadder()
+        
+        # 2. Убираем Padding
+        unpadder = padding.PKCS7(128).unpadder()
         return unpadder.update(padded_plaintext) + unpadder.finalize()
 
 def generate_aes_key(key_size_bits):
     key_size_bytes = key_size_bits // 8
-    return generate_random_bytes(key_size_bytes)
+    return generate_random_bytes(key_size_bytes)    
