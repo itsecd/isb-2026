@@ -1,5 +1,6 @@
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
+from file_utils import write_file, read_file
 
 def generate_rsa_keypair():
     """
@@ -19,7 +20,6 @@ def save_private_key(private_key, path):
         private_key: Приватный ключ.
         path (str): Путь для сохранения.
     """
-    from file_utils import write_file
     pem = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.PKCS8,
@@ -35,7 +35,6 @@ def save_public_key(public_key, path):
         public_key: Публичный ключ.
         path (str): Путь для сохранения.
     """
-    from file_utils import write_file
     pem = public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
@@ -52,7 +51,6 @@ def load_private_key(path):
     Выходные данные:
         private_key: Приватный ключ, или None в случае ошибки.
     """
-    from file_utils import read_file
     data = read_file(path)
     if data is None:
         return None
@@ -72,7 +70,6 @@ def load_public_key(path):
     Выходные данные:
         public_key: Публичный ключ, или None в случае ошибки.
     """
-    from file_utils import read_file
     data = read_file(path)
     if data is None:
         return None
