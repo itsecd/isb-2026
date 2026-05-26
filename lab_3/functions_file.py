@@ -26,9 +26,13 @@ def write_encrypt_text(encrypted_file, iv, etext_in_bytes):
                 etext_in_bytes: зашифрованный текст в байтах
         возвращает: ничегошеньки
         """
+        try:
+                with open(encrypted_file, "wb") as file:
+                        file.write(iv + etext_in_bytes)
 
-        with open(encrypted_file, "wb") as file:
-                file.write(iv + etext_in_bytes)
+        except FileNotFoundError:
+                raise FileNotFoundError(f"Нет такого файла {encrypted_file}")
+        
 
 
 def read_encrypt_text(encrypted_file):
@@ -62,6 +66,9 @@ def write_decrypt_text(decrypted_file_in_bytes, decrypted_file):
                 decrypted_file: расшифрованный текст без заполнения в байтах
         возвращает: совсем ничего
         """
-        
-        with open(decrypted_file_in_bytes, 'wb') as file: 
-                file.write(decrypted_file)
+        try:
+                with open(decrypted_file_in_bytes, 'wb') as file: 
+                        file.write(decrypted_file)
+                        
+        except FileNotFoundError:
+                raise FileNotFoundError(f"Такой файл мы не находили {decrypted_file_in_bytes}")
