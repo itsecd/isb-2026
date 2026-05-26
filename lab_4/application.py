@@ -20,7 +20,12 @@ class HashApp(QWidget):
 
         self.resize(1280, 720)
 
-        self.settings = self.load_settings()
+        try:
+            self.settings = self.load_settings()
+        except Exception as e:
+            QMessageBox.critical(self, "Критическая ошибка", str(e))
+            sys.exit(1)
+
         self.algorithms = self.settings.get("algorithms", {})
 
         if not self.algorithms:
@@ -40,14 +45,14 @@ class HashApp(QWidget):
         Returns:
             Словарь с настройками приложения.
         """
-        if os.path.exists("settings.json"):
-            try:
-                with open("settings.json", "r", encoding="utf-8") as f:
-                    return json.load(f)
-            except Exception as e:
-                print(f"Ошибка загрузки: {e}")
-                return {}
-        return {}
+        if not os.path.exists("settings.json"):
+            raise FileNotFoundError("settings.json не найден")
+
+        try:
+            with open("settings.json", "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            raise RuntimeError(f"Ошибка чтения settings.json: {e}")
 
     def init_ui(self):
         layout = QVBoxLayout()

@@ -14,7 +14,7 @@ def load_algorithms():
     Загрузка доступных алгоритмов хеширования из settings.json.
 
     Returns:
-        dict: Словарь {название: hashlib_id}
+        dict: Словарь
     """
     if not os.path.exists("settings.json"):
         raise FileNotFoundError("settings.json не найден")
@@ -53,10 +53,8 @@ def main():
     try:
         algorithms = load_algorithms()
 
-        if args.algo not in algorithms.values():
-            raise ValueError(
-                f"Алгоритм '{args.algo}' не найден в settings.json"
-            )
+        if args.algo not in algorithms and args.algo not in algorithms.values():
+            raise ValueError(f"Алгоритм '{args.algo}' не найден в settings.json")
 
         algo = algorithms.get(args.algo, args.algo)
 

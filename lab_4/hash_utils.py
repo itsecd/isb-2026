@@ -16,15 +16,16 @@ def compute_hash(data, algorithm: str):
         ValueError: Если указанный алгоритм не поддерживается библиотекой hashlib.
         RuntimeError: Непредвиденная ошибка в процессе хеширования.
     """
-    if isinstance(data, str):
-        data_bytes = data.encode("utf-8")
-    elif isinstance(data, (bytes, bytearray)):
-        data_bytes = data
-    else:
-        raise TypeError("Ожидается строка или байты")
-
     if algorithm not in hashlib.algorithms_available:
         raise ValueError(f"Алгоритм '{algorithm}' не поддерживается системой")
+
+    match data:
+        case str():
+            data_bytes = data.encode("utf-8")
+        case bytes() | bytearray():
+            data_bytes = data
+        case _:
+            raise TypeError("Ожидается строка или байты")
 
     try:
         h = hashlib.new(algorithm)
