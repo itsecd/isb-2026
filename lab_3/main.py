@@ -1,7 +1,6 @@
 import argparse
 import json
-from key import (generate_symmetric_key, generate_asymmetric_keys, write_public_key, write_private_key, encrypt_symmetric_key,
- write_symmetric_key, read_symmetric_key, read_private_pem, decrypt_symmetric_key)
+from key import (generate_symmetric_key, generate_asymmetric_keys, write_public_key, write_private_key, encrypt_symmetric_key, read_symmetric_key, read_private_pem, decrypt_symmetric_key)
 from crypt import encrypt_text, decrypt_text
 from file_func import read_text_file, write_encrypt_text, read_encrypt_text, write_decrypt_text
 
@@ -54,7 +53,7 @@ def main():
                 encrypt_key = encrypt_symmetric_key(key, public_key)
                 print("1.4.1 Симметричный ключ зашифрован публичным ключом")
             
-                write_symmetric_key(encrypt_key, symmetric_key_file)
+                write_decrypt_text(encrypt_key, symmetric_key_file)
                 print("1.4.2 Зашифрованный симметричный ключ сохранен в файл .txt")
             
 
