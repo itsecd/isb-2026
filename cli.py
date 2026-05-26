@@ -42,6 +42,16 @@ def run_cli() -> None:
     verify_parser.add_argument(
         "-hash", "--hashfile", required=True, help="Path to the file with the reference hash")
 
+    collision_parser = subparsers.add_parser(
+        "collision", help="Launching the visualization of the collision search")
+    collision_parser.add_argument(
+        "-p",
+        "--prefix",
+        type=int,
+        default=4,
+        help="The length of the matching hash prefix is from 1 to 8 (default: 4)",
+    )
+
     args = parser.parse_args()
 
     try:
@@ -50,7 +60,7 @@ def run_cli() -> None:
             save_hash_to_file(h, args.out)
             print(f"Хеш успешно записан в: {args.out}\nSHA-256: {h}")
 
-        else:
+        elif args.command == "verify":
             flag, cur, exp = verify_file_integrity(args.file, args.hashfile)
             if flag:
                 print("Целостность подтверждена")
@@ -58,6 +68,15 @@ def run_cli() -> None:
                 print("Нарушение целостности")
                 print(f"Ожидаемый: {exp}")
                 print(f"Текущий: {cur}")
+
+        elif args.command == "collision":
+            base, cand, att = simulate_collision_search(args.prefix)
+            print(f"\nКоллизия успешно найдена за {att} попыток!")
+            print(f"Строка №1 (Базовая): {base}")
+            print(f"Строка №2 (Кандидат): {cand}")
+
+        else:
+            parser.print_help()
 
     except OSError as e:
         print(
