@@ -1,0 +1,8 @@
+{
+    "initial_file": "data/original.txt",
+    "encrypted_file": "data/encrypted.bin",
+    "decrypted_file": "data/decrypted.txt",
+    "sym_key": "keys/session_key.enc",
+    "private_key": "keys/private.pem",
+    "public_key": "keys/public.pem"
+}
