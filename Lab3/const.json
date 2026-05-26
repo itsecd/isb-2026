@@ -1,0 +1,19 @@
+
+{
+  "cast5": {
+    "block_size_bits": 64,
+    "block_size_bytes": 8
+  },
+  "padding_block_size": 64,
+  "iv_size_bytes": 8,
+  "algorithms": {
+    "symmetric": "CAST5",
+    "asymmetric": "RSA"
+  },
+
+  "errors": {
+    "invalid_key_size": "Неверная длина ключа",
+    "no_file": "Файл не выбран",
+    "empty_path": "Путь к файлу не задан"
+    }
+}
