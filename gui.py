@@ -144,12 +144,12 @@ class IntegrityCheckerApp(QMainWindow):
 
             if is_valid:
                 self.log_output.append(
-                    "Результат: ЦЕЛОСТНОСТЬ ХЕША ПОДТВЕРЖДЕНА ✅\n")
+                    "Результат: ЦЕЛОСТНОСТЬ ХЕША ПОДТВЕРЖДЕНА\n")
                 QMessageBox.information(
                     self, "Успех", "Модификаций не обнаружено. Файл целостен.")
             else:
                 self.log_output.append(
-                    "Результат: ВНИМАНИЕ! ОБНАРУЖЕНА ИЗМЕНЕНИЕ ДАННЫХ ❌\n")
+                    "Результат: ВНИМАНИЕ! ОБНАРУЖЕНА ИЗМЕНЕНИЕ ДАННЫХ\n")
                 QMessageBox.warning(
                     self, "Внимание", "Критическое несовпадение контрольных сумм!")
         except FileNotFoundError as e:
