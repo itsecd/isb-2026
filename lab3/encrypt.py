@@ -1,9 +1,19 @@
 import os
+from typing import Dict, Any
 from cryptography.hazmat.primitives import serialization, padding as sym_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from utils import get_asym_padding
 
-def encrypt_data(settings):
+def encrypt_data(settings: Dict[str, Any]) -> None:
+    """Выполняет гибридное шифрование текстового файла.
+
+    Расшифровывает сессионный ключ Camellia с помощью закрытого ключа RSA,
+    дополняет исходный текст паддингом ANSIX923 и шифрует его в режиме CBC.
+    Вектор инициализации (IV) сохраняется в первые 16 байт итогового файла.
+
+    Args:
+        settings (Dict[str, Any]): Конфигурационный словарь с путями к файлам.
+    """
     print("Запуск режима шифрования...")
     
     try:

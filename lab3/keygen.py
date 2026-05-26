@@ -1,9 +1,19 @@
 import os
+from typing import Dict, Any
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from utils import get_asym_padding
 
-def generate_keys(settings, key_size_bits=256):
+def generate_keys(settings: Dict[str, Any], key_size_bits: int = 256) -> None:
+    """Генерирует ключи для гибридной системы и сериализует их на диск.
+
+    Создает случайный симметричный ключ Camellia заданной длины и пару 
+    ключей RSA (2048 бит). Зашифровывает ключ Camellia открытым ключом RSA.
+
+    Args:
+        settings (Dict[str, Any]): Конфигурационный словарь с путями к файлам.
+        key_size_bits (int): Длина ключа Camellia в битах (128, 192 или 256).
+    """
     print("Запуск генерации ключей...")
     
     if key_size_bits not in [128, 192, 256]:

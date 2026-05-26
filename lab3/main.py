@@ -1,4 +1,5 @@
 import argparse
+from typing import Dict, Any
 from utils import load_settings
 from keygen import generate_keys
 from encrypt import encrypt_data

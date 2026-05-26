@@ -1,8 +1,18 @@
+from typing import Dict, Any
 from cryptography.hazmat.primitives import serialization, padding as sym_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from utils import get_asym_padding
 
-def decrypt_data(settings):
+def decrypt_data(settings: Dict[str, Any]) -> None:
+    """Выполняет дешифрование ранее зашифрованного файла.
+
+    Восстанавливает ключ Camellia через закрытый ключ RSA, считывает IV 
+    из первых 16 байт зашифрованного файла, расшифровывает основной шифротекст 
+    в режиме CBC и производит депаддинг ANSIX923.
+
+    Args:
+        settings (Dict[str, Any]): Конфигурационный словарь с путями к файлам.
+    """
     print("Запуск режима дешифрования...")
     
     try:
