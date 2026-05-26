@@ -41,7 +41,7 @@ def write_public_key(public_key, public_pem):
             public_pem: путь к файлу, в который содержится публичный ключ
     возвращает: ничего
     """
-
+    
     with open(public_pem, 'wb') as public_out:
         public_out.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo))
@@ -76,18 +76,6 @@ def encrypt_symmetric_key(key, public_key):
     encrypt_key = public_key.encrypt(key, padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()),algorithm=hashes.SHA256(),label=None))
     return encrypt_key
 
-
-def write_symmetric_key(encrypt_key, file_name):
-    """
-    запись ключа симметричного алгоритма шифрования в файл
-    аргументы: 
-            encrypt_key: байты зашифрованного симметричного ключа
-            file_name: путь к файлу, в который сериализован ключ шифрования, в виде строки
-    возвращает: -
-    """
-    
-    with open(file_name, 'wb') as key_file:
-        key_file.write(encrypt_key)
 
 
 def read_symmetric_key(symmetric_key_file):
