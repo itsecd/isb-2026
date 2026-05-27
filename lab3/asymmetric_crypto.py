@@ -65,11 +65,15 @@ class RSAKeyPair:
             ValueError: Если формат файла некорректен.
             AsymmetricCryptoError: Для других ошибок загрузки.
         """
+        priv_bytes = read_binary_file(priv_path)
+        pub_bytes = read_binary_file(pub_path)
+        
         try:
-            with open(priv_path, 'rb') as f:
-                priv_bytes = f.read()
-            with open(pub_path, 'rb') as f:
-                pub_bytes = f.read()
+            private_key = serialization.load_pem_private_key(priv_bytes, password=None)
+            public_key = serialization.load_pem_public_key(pub_bytes)
+            return RSAKeyPair(private_key, public_key)
+        except Exception as e:
+            raise AsymmetricCryptoError(f"Ошибка загрузки RSA-ключей: {e}")
             
             private_key = serialization.load_pem_private_key(priv_bytes, password=None)
             public_key = serialization.load_pem_public_key(pub_bytes)
