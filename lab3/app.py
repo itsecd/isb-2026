@@ -9,12 +9,27 @@ from PyQt5.QtWidgets import (
     QSlider, QVBoxLayout, QWidget, QFrame,
 )
 
-from crypto_utils import (
-    generate_rsa_keys, generate_cast5_key,
-    encrypt_symmetric_key, decrypt_symmetric_key,
-    encrypt_file, decrypt_file,
-    CAST5_MIN_BITS, CAST5_MAX_BITS,
-    keygen_mode, encrypt_mode, decrypt_mode,
+from config import (
+    CAST5_MIN_BITS,
+    CAST5_MAX_BITS,
+)
+
+from rsa_utils import (
+    generate_rsa_keys,
+    encrypt_symmetric_key,
+    decrypt_symmetric_key,
+)
+
+from cast5_utils import (
+    generate_cast5_key,
+    encrypt_file,
+    decrypt_file,
+)
+
+from cli import (
+    keygen_mode,
+    encrypt_mode,
+    decrypt_mode,
 )
 from file_utils import load_settings, save_settings, get_file_size_str
 
