@@ -1,0 +1,13 @@
+{
+    "input_file": "data/input.txt",
+
+    "encrypted_file": "data/encrypted_data.bin",
+
+    "decrypted_file": "data/output.txt",
+
+    "encrypted_key_file": "keys/session_key.dat",
+
+    "public_key_file": "keys/public_rsa.pem",
+
+    "private_key_file": "keys/private_rsa.pem"
+}
