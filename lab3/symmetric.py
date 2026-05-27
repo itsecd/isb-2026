@@ -2,93 +2,36 @@ import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
 import file_io
 
-KEY_SIZE   = 32   # 256 бит
-NONCE_SIZE = 16   # 128 бит
 
-
-def generate_sym_key() -> bytes:
+def generate_random_bytes(size: int) -> bytes:
     """
-    Генерация симметричного ключа для ChaCha20.
+    Генерация случайных байт заданной длины.
+
+    Args:
+        size: Количество байт.
 
     Returns:
-        bytes: Случайный ключ длиной KEY_SIZE байт (256 бит).
+        bytes: Случайные байты длиной size.
 
     Raises:
-        RuntimeError: Ошибка при генерации ключа.
+        ValueError: Недопустимый размер.
+        RuntimeError: Ошибка при генерации.
     """
+    if size <= 0:
+        raise ValueError(f"Размер должен быть положительным, получено: {size}")
     try:
-        return os.urandom(KEY_SIZE)
+        return os.urandom(size)
     except Exception as e:
-        raise RuntimeError(f"Ошибка при генерации ключа: {e}")
+        raise RuntimeError(f"Ошибка при генерации случайных байт: {e}")
 
 
-def generate_nonce() -> bytes:
-    """
-    Генерация одноразового случайного числа (nonce).
-
-    Returns:
-        bytes: Случайный nonce длиной NONCE_SIZE байт (128 бит).
-
-    Raises:
-        RuntimeError: Ошибка при генерации nonce.
-    """
-    try:
-        return os.urandom(NONCE_SIZE)
-    except Exception as e:
-        raise RuntimeError(f"Ошибка при генерации nonce: {e}")
-
-
-def save_encrypted_sym_key(blob: bytes, path: str) -> None:
-    """
-    Сохранение зашифрованного симметричного ключа в файл.
-
-    Args:
-        blob: Зашифрованный симметричный ключ.
-        path: Путь для сохранения.
-
-    Raises:
-        RuntimeError: Ошибка при сохранении.
-    """
-    file_io.write_file(path, blob)
-
-
-def load_encrypted_sym_key(path: str) -> bytes:
-    """
-    Загрузка зашифрованного симметричного ключа из файла.
-
-    Args:
-        path: Путь к файлу с зашифрованным ключом.
-
-    Returns:
-        bytes: Загруженные данные в байтовом формате.
-
-    Raises:
-        FileNotFoundError: Файл не найден.
-        RuntimeError: Ошибка при загрузке ключа.
-    """
-    return file_io.read_file(path)
-
-
-def save_nonce(nonce: bytes, path: str) -> None:
-    """
-    Сохранение nonce в файл.
-
-    Args:
-        nonce: Nonce для сохранения.
-        path: Путь для сохранения.
-
-    Raises:
-        RuntimeError: Ошибка при сохранении.
-    """
-    file_io.write_file(path, nonce)
-
-
-def load_nonce(path: str) -> bytes:
+def load_nonce(path: str, nonce_size: int) -> bytes:
     """
     Загрузка nonce из файла.
 
     Args:
         path: Путь к файлу с nonce.
+        nonce_size: Ожидаемый размер nonce в байтах.
 
     Returns:
         bytes: Загруженный nonce.
@@ -99,8 +42,8 @@ def load_nonce(path: str) -> bytes:
         RuntimeError: Ошибка при загрузке nonce.
     """
     data = file_io.read_file(path)
-    if len(data) != NONCE_SIZE:
-        raise ValueError(f"Nonce должен быть {NONCE_SIZE} байт, получено {len(data)}")
+    if len(data) != nonce_size:
+        raise ValueError(f"Nonce должен быть {nonce_size} байт, получено {len(data)}")
     return data
 
 
