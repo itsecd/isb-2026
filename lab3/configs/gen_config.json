@@ -2,5 +2,7 @@
     "encrypted_symmetric_key": "encrypted_sym.key",
     "public_key": "public_key.pem",
     "private_key": "private_key.pem",
-    "symmetric_key_size_bits": 256
+    "symmetric_key_size_bits": 256,
+    "user_public_key": "",
+    "user_private_key": ""
 }

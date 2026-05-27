@@ -1,0 +1,8 @@
+{
+    "default_symmetric_key_size": 256,
+    "default_rsa_key_size": 2048,
+    "rsa_public_exponent": 65537,
+    "symmetric_padding": "ANSIX923",
+    "hash_algorithm": "SHA256",
+    "encoding": "utf-8"
+}

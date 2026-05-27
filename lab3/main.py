@@ -1,296 +1,248 @@
-import os
-import json
 import argparse
 import sys
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import padding
-from cryptography.hazmat.primitives.asymmetric import rsa, padding as rsa_padding
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.serialization import load_pem_public_key, load_pem_private_key
+import os
 
-def log(msg):
-    print(msg)
+from modules.config import read_config, load_settings, validate_symmetric_key_size
+from modules.keys import (
+    generate_symmetric_key,
+    generate_asymmetric_keys,
+    save_private_key,
+    save_public_key,
+    load_private_key,
+    load_public_key,
+    save_encrypted_symmetric_key,
+    load_encrypted_symmetric_key
+)
+from modules.symmetric import encrypt_file, decrypt_file
+from modules.asymmetric import encrypt_symmetric_key, decrypt_symmetric_key
 
-def read_conf(path):
-    try:
-        with open(path, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        log(f"Ошибка: файл {path} не найден")
-        sys.exit(1)
-    except json.JSONDecodeError:
-        log(f"Ошибка: файл {path} содержит некорректный JSON")
-        sys.exit(1)
 
-def gen_sym_key(bits):
-    log(f"\nГенерация симметричного ключа AES ({bits} бит)")
-    key = os.urandom(bits // 8)
-    log("Симметричный ключ сгенерирован")
-    return key
+def mode_generation(config_path: str) -> None:
+    """
+    Режим генерации ключей гибридной криптосистемы.
 
-def gen_asym_keys():
-    log("\nГенерация пары ключей RSA (2048 бит)")
-    try:
-        private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=2048
-        )
-        public_key = private_key.public_key()
-        log("Пара ключей RSA сгенерирована")
-        return private_key, public_key
-    except Exception as e:
-        log(f"Ошибка при генерации RSA ключей: {e}")
-        sys.exit(1)
+    Выполняет следующие шаги:
+    1. Загружает конфигурацию из JSON-файла.
+    2. Генерирует симметричный ключ AES заданной длины.
+    3. Генерирует пару асимметричных ключей RSA.
+    4. Сохраняет открытый и закрытый ключи RSA в PEM-файлы.
+    5. Шифрует симметричный ключ открытым ключом RSA.
+    6. Сохраняет зашифрованный симметричный ключ.
 
-def save_asym_keys(private_key, public_key, priv_path, pub_path):
-    log(f"\nСохранение открытого ключа в {pub_path}")
-    try:
-        with open(pub_path, 'wb') as f:
-            f.write(public_key.public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo
-            ))
-    except IOError as e:
-        log(f"Ошибка при сохранении открытого ключа: {e}")
-        sys.exit(1)
+    Args:
+        config_path (str): путь к JSON-файлу конфигурации.
+
+    Параметры конфигурации:
+        - public_key: путь для сохранения открытого ключа.
+        - private_key: путь для сохранения закрытого ключа.
+        - encrypted_symmetric_key: путь для сохранения зашифрованного симметричного ключа.
+        - symmetric_key_size_bits (опционально): длина ключа AES (128, 192, 256).
+        - user_public_key (опционально): путь к пользовательскому открытому ключу.
+        - user_private_key (опционально): путь к пользовательскому закрытому ключу.
+    """
+    print("\nРежим генерации ключей\n")
     
-    log(f"Сохранение закрытого ключа в {priv_path}")
-    try:
-        with open(priv_path, 'wb') as f:
-            f.write(private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
-            ))
-    except IOError as e:
-        log(f"Ошибка при сохранении закрытого ключа: {e}")
-        sys.exit(1)
+    settings = load_settings()
+    config = read_config(config_path)
     
-    log("Ключи RSA сохранены")
-
-def enc_sym_key(sym_key, public_key, path):
-    log("\nШифрование симметричного ключа с помощью RSA")
-    try:
-        encrypted = public_key.encrypt(
-            sym_key,
-            rsa_padding.OAEP(
-                mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
+    symmetric_bits = validate_symmetric_key_size(
+        config.get('symmetric_key_size_bits', settings['default_symmetric_key_size'])
+    )
+    
+    symmetric_key = generate_symmetric_key(symmetric_bits)
+    
+    use_user_rsa_keys = bool(config.get('user_public_key')) and bool(config.get('user_private_key'))
+    
+    match use_user_rsa_keys:
+        case True:
+            print("\nИспользую пользовательские ключи RSA")
+            try:
+                public_key = load_public_key(config['user_public_key'])
+                private_key = load_private_key(config['user_private_key'])
+            except Exception:
+                print("Не удалось загрузить пользовательские ключи. Генерирую новые.")
+                private_key, public_key = generate_asymmetric_keys(
+                    key_size=settings['default_rsa_key_size'],
+                    public_exponent=settings['rsa_public_exponent']
+                )
+                save_private_key(private_key, config['private_key'])
+                save_public_key(public_key, config['public_key'])
+        case False:
+            print("\nГенерирую новую пару ключей RSA")
+            private_key, public_key = generate_asymmetric_keys(
+                key_size=settings['default_rsa_key_size'],
+                public_exponent=settings['rsa_public_exponent']
             )
-        )
-    except Exception as e:
-        log(f"Ошибка при шифровании ключа: {e}")
-        sys.exit(1)
+            save_private_key(private_key, config['private_key'])
+            save_public_key(public_key, config['public_key'])
     
-    log(f"Сохранение зашифрованного ключа в {path}")
-    try:
-        with open(path, 'wb') as f:
-            f.write(encrypted)
-    except IOError as e:
-        log(f"Ошибка при сохранении зашифрованного ключа: {e}")
-        sys.exit(1)
+    encrypted_sym_key = encrypt_symmetric_key(symmetric_key, public_key)
+    save_encrypted_symmetric_key(encrypted_sym_key, config['encrypted_symmetric_key'])
     
-    log("Симметричный ключ зашифрован")
+    print("\nГенерация ключей успешно завершена\n")
 
-def dec_sym_key(path, private_key):
-    log(f"\nЧтение зашифрованного ключа из {path}")
-    try:
-        with open(path, 'rb') as f:
-            encrypted = f.read()
-    except FileNotFoundError:
-        log(f"Ошибка: файл {path} не найден")
-        sys.exit(1)
-    except IOError as e:
-        log(f"Ошибка при чтении файла {path}: {e}")
-        sys.exit(1)
-    
-    log("Расшифровка симметричного ключа")
-    try:
-        sym_key = private_key.decrypt(
-            encrypted,
-            rsa_padding.OAEP(
-                mgf=rsa_padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
-            )
-        )
-    except Exception as e:
-        log(f"Ошибка при расшифровке ключа: {e}")
-        sys.exit(1)
-    
-    log("Симметричный ключ расшифрован")
-    return sym_key
 
-def enc_file_aes(in_path, out_path, sym_key):
-    log(f"\nЧтение файла {in_path}")
-    try:
-        with open(in_path, 'rb') as f:
-            data = f.read()
-    except FileNotFoundError:
-        log(f"Ошибка: файл {in_path} не найден")
-        sys.exit(1)
-    except IOError as e:
-        log(f"Ошибка при чтении файла {in_path}: {e}")
-        sys.exit(1)
-    
-    iv = os.urandom(16)
-    log("Сгенерирован IV")
-    
-    try:
-        padder = padding.ANSIX923(128).padder()
-        padded_data = padder.update(data) + padder.finalize()
-    except Exception as e:
-        log(f"Ошибка при паддинге: {e}")
-        sys.exit(1)
-    
-    log("Паддинг добавлен")
-    
-    try:
-        cipher = Cipher(algorithms.AES(sym_key), modes.CBC(iv))
-        encryptor = cipher.encryptor()
-        ciphertext = encryptor.update(padded_data) + encryptor.finalize()
-    except Exception as e:
-        log(f"Ошибка при шифровании AES: {e}")
-        sys.exit(1)
-    
-    log("Данные зашифрованы")
-    
-    log(f"Сохранение в {out_path}")
-    try:
-        with open(out_path, 'wb') as f:
-            f.write(iv + ciphertext)
-    except IOError as e:
-        log(f"Ошибка при сохранении файла: {e}")
-        sys.exit(1)
-    
-    log("Файл сохранён")
+def mode_encryption(config_path: str) -> None:
+    """
+    Режим шифрования данных гибридной криптосистемой.
 
-def dec_file_aes(in_path, out_path, sym_key):
-    log(f"\nЧтение файла {in_path}")
-    try:
-        with open(in_path, 'rb') as f:
-            iv = f.read(16)
-            ciphertext = f.read()
-    except FileNotFoundError:
-        log(f"Ошибка: файл {in_path} не найден")
-        sys.exit(1)
-    except IOError as e:
-        log(f"Ошибка при чтении файла {in_path}: {e}")
-        sys.exit(1)
-    
-    log("Расшифровка данных AES")
-    try:
-        cipher = Cipher(algorithms.AES(sym_key), modes.CBC(iv))
-        decryptor = cipher.decryptor()
-        padded_data = decryptor.update(ciphertext) + decryptor.finalize()
-    except Exception as e:
-        log(f"Ошибка при расшифровке AES: {e}")
-        sys.exit(1)
-    
-    log("Удаление паддинга")
-    try:
-        unpadder = padding.ANSIX923(128).unpadder()
-        data = unpadder.update(padded_data) + unpadder.finalize()
-    except Exception as e:
-        log(f"Ошибка при удалении паддинга: {e}")
-        sys.exit(1)
-    
-    log(f"Сохранение в {out_path}")
-    try:
-        with open(out_path, 'wb') as f:
-            f.write(data)
-    except IOError as e:
-        log(f"Ошибка при сохранении файла: {e}")
-        sys.exit(1)
-    
-    log("Файл сохранён")
+    Выполняет следующие шаги:
+    1. Загружает конфигурацию из JSON-файла.
+    2. Загружает закрытый ключ RSA.
+    3. Загружает зашифрованный симметричный ключ.
+    4. Расшифровывает симметричный ключ с помощью RSA.
+    5. Шифрует данные алгоритмом AES с расшифрованным ключом.
 
-def generation(config_path):
-    log("\nРежим генерации ключей")
-    conf = read_conf(config_path)
-    
-    bits = conf.get('symmetric_key_size_bits', 256)
-    if bits not in [128, 192, 256]:
-        log(f"Неправильная длина ключа {bits}, будет использованн 256")
-        bits = 256
-    
-    sym_key = gen_sym_key(bits)
-    priv_key, pub_key = gen_asym_keys()
-    save_asym_keys(priv_key, pub_key, conf['private_key'], conf['public_key'])
-    enc_sym_key(sym_key, pub_key, conf['encrypted_symmetric_key'])
-    
-    log("\nГенерация завершена\n")
+    Args:
+        config_path (str): путь к JSON-файлу конфигурации.
 
-def encryption(config_path):
-    log("\nРежим шифрования")
-    conf = read_conf(config_path)
+    Параметры конфигурации:
+        - initial_file: путь к файлу для шифрования.
+        - private_key: путь к закрытому ключу RSA.
+        - encrypted_symmetric_key: путь к зашифрованному симметричному ключу.
+        - encrypted_file: путь для сохранения зашифрованного файла.
+    """
+    print("\nРежим шифрования\n")
     
-    log(f"\nЗагрузка закрытого ключа из {conf['private_key']}")
+    config = read_config(config_path)
+    
     try:
-        with open(conf['private_key'], 'rb') as f:
-            priv_key = load_pem_private_key(f.read(), password=None)
-    except FileNotFoundError:
-        log(f"Ошибка: файл {conf['private_key']} не найден")
-        sys.exit(1)
-    except ValueError as e:
-        log(f"Ошибка: некорректный ключ - {e}")
-        sys.exit(1)
-    except Exception as e:
-        log(f"Ошибка при загрузке ключа: {e}")
+        private_key = load_private_key(config['private_key'])
+    except Exception:
+        print("Критическая ошибка при загрузке закрытого ключа.")
         sys.exit(1)
     
-    log("Закрытый ключ загружен")
-    
-    sym_key = dec_sym_key(conf['encrypted_symmetric_key'], priv_key)
-    enc_file_aes(conf['initial_file'], conf['encrypted_file'], sym_key)
-    
-    log("\nШифрование завершено\n")
-
-def decryption(config_path):
-    log("\nРежим дешифрования")
-    conf = read_conf(config_path)
-    
-    log(f"\nЗагрузка закрытого ключа из {conf['private_key']}")
     try:
-        with open(conf['private_key'], 'rb') as f:
-            priv_key = load_pem_private_key(f.read(), password=None)
-    except FileNotFoundError:
-        log(f"Ошибка: файл {conf['private_key']} не найден")
-        sys.exit(1)
-    except ValueError as e:
-        log(f"Ошибка: некорректный ключ - {e}")
-        sys.exit(1)
-    except Exception as e:
-        log(f"Ошибка при загрузке ключа: {e}")
+        encrypted_sym = load_encrypted_symmetric_key(config['encrypted_symmetric_key'])
+    except Exception:
+        print("Критическая ошибка при загрузке зашифрованного симметричного ключа.")
         sys.exit(1)
     
-    log("Закрытый ключ загружен")
+    try:
+        symmetric_key = decrypt_symmetric_key(encrypted_sym, private_key)
+    except Exception:
+        print("Критическая ошибка при расшифровке симметричного ключа.")
+        sys.exit(1)
     
-    sym_key = dec_sym_key(conf['encrypted_symmetric_key'], priv_key)
-    dec_file_aes(conf['encrypted_file'], conf['decrypted_file'], sym_key)
+    try:
+        encrypt_file(config['initial_file'], config['encrypted_file'], symmetric_key)
+    except Exception:
+        print("Критическая ошибка при шифровании файла.")
+        sys.exit(1)
     
-    log("\nДешифрование завершено\n")
+    print("\nШифрование успешно завершено\n")
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Гибридная криптосистема AES+RSA')
+
+def mode_decryption(config_path: str) -> None:
+    """
+    Режим дешифрования данных гибридной криптосистемой.
+
+    Выполняет следующие шаги:
+    1. Загружает конфигурацию из JSON-файла.
+    2. Загружает закрытый ключ RSA.
+    3. Загружает зашифрованный симметричный ключ.
+    4. Расшифровывает симметричный ключ с помощью RSA.
+    5. Расшифровывает данные алгоритмом AES с расшифрованным ключом.
+
+    Args:
+        config_path (str): путь к JSON-файлу конфигурации.
+
+    Параметры конфигурации:
+        - encrypted_file: путь к зашифрованному файлу.
+        - private_key: путь к закрытому ключу RSA.
+        - encrypted_symmetric_key: путь к зашифрованному симметричному ключу.
+        - decrypted_file: путь для сохранения расшифрованного файла.
+    """
+    print("\nРежим дешифрования\n")
+    
+    config = read_config(config_path)
+    
+    try:
+        private_key = load_private_key(config['private_key'])
+    except Exception:
+        print("Критическая ошибка при загрузке закрытого ключа.")
+        sys.exit(1)
+    
+    try:
+        encrypted_sym = load_encrypted_symmetric_key(config['encrypted_symmetric_key'])
+    except Exception:
+        print("Критическая ошибка при загрузке зашифрованного симметричного ключа.")
+        sys.exit(1)
+    
+    try:
+        symmetric_key = decrypt_symmetric_key(encrypted_sym, private_key)
+    except Exception:
+        print("Критическая ошибка при расшифровке симметричного ключа.")
+        sys.exit(1)
+    
+    try:
+        decrypt_file(config['encrypted_file'], config['decrypted_file'], symmetric_key)
+    except Exception:
+        print("Критическая ошибка при расшифровке файла.")
+        sys.exit(1)
+    
+    print("\nДешифрование успешно завершено\n")
+
+
+def create_parser() -> argparse.ArgumentParser:
+    """
+    Создаёт парсер аргументов командной строки.
+
+    Returns:
+        argparse.ArgumentParser: настроенный парсер.
+    """
+    parser = argparse.ArgumentParser(
+        description='Гибридная криптосистема AES + RSA. Лабораторная работа No3'
+    )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('-gen', '--generation', action='store_true', 
-                       help='Режим генерации ключей')
-    group.add_argument('-enc', '--encryption', action='store_true',
-                       help='Режим шифрования')
-    group.add_argument('-dec', '--decryption', action='store_true',
-                       help='Режим дешифрования')
-    parser.add_argument('config', help='Путь к конфигурационному JSON-файлу')
+    group.add_argument(
+        '-gen', '--generation',
+        action='store_true',
+        help='Запуск режима генерации ключей'
+    )
+    group.add_argument(
+        '-enc', '--encryption',
+        action='store_true',
+        help='Запуск режима шифрования файла'
+    )
+    group.add_argument(
+        '-dec', '--decryption',
+        action='store_true',
+        help='Запуск режима дешифрования файла'
+    )
+    parser.add_argument(
+        'config',
+        help='Путь к JSON-файлу с конфигурацией'
+    )
+    
+    return parser
+
+
+def main() -> None:
+    """
+    Главная функция программы.
+
+    Разбирает аргументы командной строки и запускает соответствующий режим.
+    Использует конструкцию match/case для выбора режима работы.
+    """
+    parser = create_parser()
     
     try:
         args = parser.parse_args()
     except SystemExit:
         sys.exit(1)
     
-    if args.generation:
-        generation(args.config)
-    elif args.encryption:
-        encryption(args.config)
-    elif args.decryption:
-        decryption(args.config)
+    match args:
+        case _ if args.generation:
+            mode_generation(args.config)
+        case _ if args.encryption:
+            mode_encryption(args.config)
+        case _ if args.decryption:
+            mode_decryption(args.config)
+        case _:
+            parser.print_help()
+            sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
