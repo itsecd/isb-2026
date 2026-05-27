@@ -3,60 +3,62 @@ import sys
 import workflow
 import crypto_storage as storage
 
-
 def collect_arguments() -> argparse.Namespace:
     """
     Настраивает и разбирает аргументы командной строки.
-    Требует указания одного из режимов: генерация, шифрование или дешифрование.
+    
+    Returns:
+        argparse.Namespace: Аргументы CLI
+    Raises:
+        Exception: При ошибке инициализации парсера.
     """
-    parser = argparse.ArgumentParser(description="Гибридная криптосистема RSA+Blowfish (Lab 3)")
-    mode_group = parser.add_mutually_exclusive_group(required=True)
-    mode_group.add_argument("--gen-keys", action="store_true", help="Режим генерации ключей")
-    mode_group.add_argument("--encrypt", action="store_true", help="Режим шифрования")
-    mode_group.add_argument("--decrypt", action="store_true", help="Режим дешифрования")
-
-    parser.add_argument("--config", default="path.json", help="Путь к JSON-конфигурации")
-    parser.add_argument("--input-file", help="Путь к входному файлу")
-    parser.add_argument("--output-file", help="Путь к выходному файлу")
-    parser.add_argument("--sym-key-path", help="Путь к зашифрованному симметричному ключу")
-    parser.add_argument("--priv-key-path", help="Путь к приватному RSA-ключу")
-    parser.add_argument("--pub-key-path", help="Путь к публичному RSA-ключу")
-    parser.add_argument("--key-size", type=int, choices=range(32, 449, 8), default=128,
-                        help="Длина ключа Blowfish в битах (32-448, шаг 8)")
-    return parser.parse_args()
-
+    try:
+        parser = argparse.ArgumentParser(description="Гибридная криптосистема RSA+Blowfish")
+        mode_group = parser.add_mutually_exclusive_group(required=True)
+        mode_group.add_argument("--gen-keys", action="store_true", help="Режим генерации ключей")
+        mode_group.add_argument("--encrypt", action="store_true", help="Режим шифрования")
+        mode_group.add_argument("--decrypt", action="store_true", help="Режим дешифрования")
+        parser.add_argument("--config", default="path.json", help="Путь к JSON-конфигурации")
+        parser.add_argument("--key-size", type=int, choices=range(32, 449, 8), default=128, help="Длина ключа Blowfish")
+        parser.add_argument("--input-file", help="Путь к входному файлу")
+        parser.add_argument("--output-file", help="Путь к выходному файлу")
+        parser.add_argument("--sym-key-path", help="Путь к зашифрованному симметричному ключу")
+        parser.add_argument("--priv-key-path", help="Путь к приватному RSA-ключу")
+        parser.add_argument("--pub-key-path", help="Путь к публичному RSA-ключу")
+        return parser.parse_args()
+    except Exception as exc:
+        print(f"Ошибка инициализации аргументов: {exc}", file=sys.stderr)
+        sys.exit(1)
 
 def main() -> None:
     """
     Точка входа приложения. Определяет режим работы и вызывает соответствующий модуль workflow.
+    
+    Raises:
+        Exception: При критической ошибке выполнения.
     """
-    args = collect_arguments()
-    
     try:
+        args = collect_arguments()
         config = storage.open_json(args.config)
-    except Exception as e:
-        print(f"Ошибка чтения конфигурации {args.config}: {e}", file=sys.stderr)
-        sys.exit(1)
-
-    sym_key = args.sym_key_path or config.get("sym_key", "keys/session_key.enc")
-    priv_key = args.priv_key_path or config.get("private_key", "keys/private.pem")
-    pub_key = args.pub_key_path or config.get("public_key", "keys/public.pem")
-    
-    src_file = args.input_file or config.get("initial_file", "data/original.txt")
-    dst_file = args.output_file or config.get("encrypted_file", "data/encrypted.bin")
-
-    try:
+        sym_key = args.sym_key_path or config["sym_key"]
+        priv_key = args.priv_key_path or config["private_key"]
+        pub_key = args.pub_key_path or config["public_key"]
+        src_file = args.input_file or config["initial_file"]
+        dst_file = args.output_file or config["encrypted_file"]
+        key_size = args.key_size
         if args.gen_keys:
-            workflow.run_key_generation(sym_key, priv_key, pub_key, args.key_size)
+            workflow.run_key_generation(sym_key, priv_key, pub_key, key_size)
         elif args.encrypt:
             workflow.run_encryption(src_file, dst_file, sym_key, priv_key)
         elif args.decrypt:
-            dst_file = args.output_file or config.get("decrypted_file", "data/decrypted.txt")
+            dst_file = args.output_file or config["decrypted_file"]
             workflow.run_decryption(src_file, dst_file, sym_key, priv_key)
+    except KeyError as exc:
+        print(f"Отсутствует обязательный ключ в конфигурации: {exc}", file=sys.stderr)
+        sys.exit(1)
     except Exception as error:
         print(f"Критическая ошибка выполнения: {error}", file=sys.stderr)
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
