@@ -5,6 +5,9 @@
 Симметричный алгоритм: SEED (128 бит).
 Асимметричный алгоритм: RSA (2048 бит).
 Режим симметричного шифрования: CBC с дополнением ANSI X.923.
+
+Все параметры загружаются из settings.json.
+Никакие значения не захардкожены в коде.
 """
 
 import argparse
@@ -22,21 +25,19 @@ class HybridCryptoSystem:
     Основной класс гибридной криптосистемы.
 
     Оркестрирует работу симметричного (SEED) и асимметричного (RSA)
-    шифрования, предоставляя три режима работы:
-    - генерация ключей;
-    - шифрование файла;
-    - дешифрование файла.
+    шифрования, предоставляя три режима работы.
 
     Атрибуты:
         _config (ConfigManager): Менеджер конфигурации.
     """
 
-    def __init__(self, config_path: str = "settings.json") -> None:
+    def __init__(self, config_path: str = None) -> None:
         """
-        Инициализирует криптосистему с указанной конфигурацией.
+        Инициализирует криптосистему.
 
         Аргументы:
             config_path: Путь к JSON-файлу с настройками.
+                         Если None, используется значение по умолчанию.
 
         Исключения:
             CryptoSystemError: При ошибках загрузки конфигурации.
@@ -55,66 +56,54 @@ class HybridCryptoSystem:
         """
         Загружает и расшифровывает симметричный ключ SEED.
 
-        Читает приватный RSA-ключ и зашифрованный симметричный ключ,
-        затем расшифровывает симметричный ключ с помощью RSA.
-
         Возвращает:
-            bytes: Расшифрованный ключ SEED (16 байт).
+            bytes: Расшифрованный ключ SEED.
 
         Исключения:
             CryptoSystemError: При ошибках загрузки или расшифрования.
         """
         print("Загрузка ключей")
         try:
-            private_pem = FileHandler.read_bytes(self._config.get('private_key'))
-            encrypted_key = FileHandler.read_bytes(self._config.get('symmetric_key'))
+            private_pem = FileHandler.read_bytes(self._config.private_key)
+            encrypted_key = FileHandler.read_bytes(self._config.symmetric_key)
             rsa_keys = RSAKeyManager.load_from_private_pem(private_pem)
             sym_key = rsa_keys.decrypt_key(encrypted_key)
             return sym_key
         except CryptoSystemError:
             raise
         except Exception as exc:
-            raise CryptoSystemError(f"Ошибка загрузки симметричного ключа: {exc}")
+            raise CryptoSystemError(
+                f"Ошибка загрузки симметричного ключа: {exc}")
 
     def generate_keys(self) -> None:
         """
         Режим генерации ключей гибридной системы.
-
-        Создаёт:
-        - ключ SEED (128 бит);
-        - пару RSA-ключей (2048 бит);
-        - зашифрованный RSA симметричный ключ.
-
-        Все ключи сохраняются по путям из конфигурации.
         """
         print("Режим генерации ключей")
 
         try:
-            sym_key = SEEDCipher.generate_key()
+            sym_key = SEEDCipher.generate_key(self._config.seed_key_size)
             print(f"Ключ SEED создан ({len(sym_key)} байт)")
 
-            rsa_keys = RSAKeyManager()
+            rsa_keys = RSAKeyManager(
+                key_size=self._config.rsa_key_size,
+                public_exponent=self._config.rsa_public_exponent
+            )
 
             print("Сохранение RSA-ключей")
             FileHandler.write_bytes(
-                self._config.get('public_key'),
-                rsa_keys.serialize_public()
-            )
+                self._config.public_key, rsa_keys.serialize_public())
             FileHandler.write_bytes(
-                self._config.get('private_key'),
-                rsa_keys.serialize_private()
-            )
+                self._config.private_key, rsa_keys.serialize_private())
 
             enc_sym_key = rsa_keys.encrypt_key(sym_key)
-            FileHandler.write_bytes(
-                self._config.get('symmetric_key'),
-                enc_sym_key
-            )
+            FileHandler.write_bytes(self._config.symmetric_key, enc_sym_key)
 
             print("Все ключи успешно сгенерированы и сохранены")
-            print(f"  Публичный ключ RSA:         {self._config.get('public_key')}")
-            print(f"  Приватный ключ RSA:         {self._config.get('private_key')}")
-            print(f"  Зашифрованный ключ SEED:    {self._config.get('symmetric_key')}")
+            print(f"  Публичный ключ RSA:         {self._config.public_key}")
+            print(f"  Приватный ключ RSA:         {self._config.private_key}")
+            print(f"  Зашифрованный ключ SEED:    {
+            self._config.symmetric_key}")
 
         except CryptoSystemError:
             raise
@@ -124,32 +113,30 @@ class HybridCryptoSystem:
     def encrypt_file(self) -> None:
         """
         Режим шифрования текстового файла.
-
-        Читает исходный файл, шифрует его алгоритмом SEED в режиме CBC,
-        сохраняет IV и шифротекст в выходной файл.
         """
         print("Режим шифрования файла")
 
         try:
             sym_key = self._load_symmetric_key()
 
-            cipher = SEEDCipher(sym_key)
+            cipher = SEEDCipher(
+                key=sym_key,
+                block_size=self._config.seed_block_size,
+                iv_size=self._config.seed_iv_size
+            )
             iv = cipher.set_iv()
             print(f"IV сгенерирован ({len(iv)} байт)")
 
-            text = FileHandler.read_text(self._config.get('initial_file'))
-            data = text.encode('utf-8')
+            text = FileHandler.read_text(self._config.initial_file)
+            data = text.encode(self._config.encoding)
             print(f"Размер исходных данных: {len(data)} байт")
 
             ciphertext = cipher.encrypt(data)
             print(f"Размер зашифрованных данных: {len(ciphertext)} байт")
 
             FileHandler.write_bytes(
-                self._config.get('encrypted_file'),
-                iv + ciphertext
-            )
-
-            print(f"Файл успешно зашифрован: {self._config.get('encrypted_file')}")
+                self._config.encrypted_file, iv + ciphertext)
+            print(f"Файл успешно зашифрован: {self._config.encrypted_file}")
 
         except CryptoSystemError:
             raise
@@ -159,23 +146,23 @@ class HybridCryptoSystem:
     def decrypt_file(self) -> None:
         """
         Режим дешифрования зашифрованного файла.
-
-        Читает зашифрованный файл, извлекает IV, расшифровывает данные
-        алгоритмом SEED и сохраняет результат в текстовый файл.
         """
         print("Режим дешифрования файла")
 
         try:
             sym_key = self._load_symmetric_key()
 
-            cipher = SEEDCipher(sym_key)
-
-            encrypted_data = FileHandler.read_bytes(
-                self._config.get('encrypted_file')
+            cipher = SEEDCipher(
+                key=sym_key,
+                block_size=self._config.seed_block_size,
+                iv_size=self._config.seed_iv_size
             )
 
-            iv = encrypted_data[:SEEDCipher.IV_SIZE]
-            ciphertext = encrypted_data[SEEDCipher.IV_SIZE:]
+            encrypted_data = FileHandler.read_bytes(
+                self._config.encrypted_file)
+
+            iv = encrypted_data[:self._config.seed_iv_size]
+            ciphertext = encrypted_data[self._config.seed_iv_size:]
             print(
                 f"IV извлечён ({len(iv)} байт), "
                 f"шифротекст ({len(ciphertext)} байт)"
@@ -183,14 +170,9 @@ class HybridCryptoSystem:
 
             plaintext = cipher.decrypt(ciphertext, iv)
 
-            text = plaintext.decode('utf-8')
-            FileHandler.write_text(
-                self._config.get('decrypted_file'),
-                text
-            )
-
-            print(f"Файл успешно расшифрован:"
-                  f" {self._config.get('decrypted_file')}")
+            text = plaintext.decode(self._config.encoding)
+            FileHandler.write_text(self._config.decrypted_file, text)
+            print(f"Файл успешно расшифрован: {self._config.decrypted_file}")
 
         except CryptoSystemError:
             raise
@@ -199,58 +181,35 @@ class HybridCryptoSystem:
 
 
 def create_parser() -> argparse.ArgumentParser:
-    """
-    Создаёт парсер аргументов командной строки.
-
-    Возвращает:
-        argparse.ArgumentParser: Настроенный парсер с тремя
-        взаимоисключающими режимами работы.
-    """
+    """Создаёт парсер аргументов командной строки."""
     parser = argparse.ArgumentParser(
         description='Гибридная криптосистема (SEED + RSA)',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Примеры использования:
-  python main.py --generate            Генерация ключей
-  python main.py --encrypt             Шифрование файла
-  python main.py --decrypt             Дешифрование файла
-  python main.py --generate -c my.json Использование своего конфига
+  python main.py --generate
+  python main.py --encrypt
+  python main.py --decrypt
+  python main.py --generate -c my_settings.json
         """
     )
 
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        '-gen', '--generate',
-        action='store_true',
-        help='Запустить режим генерации ключей'
-    )
-    group.add_argument(
-        '-enc', '--encrypt',
-        action='store_true',
-        help='Запустить режим шифрования файла'
-    )
-    group.add_argument(
-        '-dec', '--decrypt',
-        action='store_true',
-        help='Запустить режим дешифрования файла'
-    )
+    group.add_argument('-gen', '--generate', action='store_true',
+                       help='Запустить режим генерации ключей')
+    group.add_argument('-enc', '--encrypt', action='store_true',
+                       help='Запустить режим шифрования файла')
+    group.add_argument('-dec', '--decrypt', action='store_true',
+                       help='Запустить режим дешифрования файла')
 
-    parser.add_argument(
-        '-c', '--config',
-        default='settings.json',
-        help='Путь к файлу конфигурации (по умолчанию: settings.json)'
-    )
+    parser.add_argument('-c', '--config', default=None,
+                        help='Путь к файлу конфигурации')
 
     return parser
 
 
 def main() -> None:
-    """
-    Главная точка входа в программу.
-
-    Парсит аргументы командной строки и запускает
-    соответствующий режим работы криптосистемы.
-    """
+    """Главная точка входа."""
     parser = create_parser()
     args = parser.parse_args()
 

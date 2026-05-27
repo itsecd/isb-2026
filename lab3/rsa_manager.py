@@ -16,35 +16,34 @@ class RSAKeyManager:
     """
     Класс для управления RSA-ключами и операциями с ними.
 
-    Инкапсулирует генерацию, сериализацию, шифрование и расшифрование
-    симметричного ключа с использованием RSA-OAEP.
-
-    Атрибуты класса:
-        KEY_SIZE (int): Размер RSA-ключа в битах (2048).
-        PUBLIC_EXPONENT (int): Публичная экспонента (65537).
+    Все параметры (размер ключа, публичная экспонента) передаются
+    извне при создании экземпляра. Никакие значения не захардкожены.
 
     Атрибуты экземпляра:
         _private: Приватный RSA-ключ.
         _public: Публичный RSA-ключ.
+        _key_size (int): Размер ключа в битах.
+        _public_exponent (int): Публичная экспонента.
     """
 
-    KEY_SIZE: int = 2048
-    PUBLIC_EXPONENT: int = 65537
-
-    def __init__(self) -> None:
+    def __init__(self, key_size: int, public_exponent: int) -> None:
         """
-        Инициализирует менеджер и генерирует новую пару RSA-ключей.
+        Генерирует новую пару RSA-ключей.
 
-        При создании объекта автоматически вызывается генерация ключей.
+        Аргументы:
+            key_size: Размер ключа в битах.
+            public_exponent: Публичная экспонента.
 
         Исключения:
-            KeyGenerationError: Если генерация ключей не удалась.
+            KeyGenerationError: Если генерация не удалась.
         """
-        print(f"Генерация RSA-ключей ({self.KEY_SIZE} бит)")
+        print(f"Генерация RSA-ключей ({key_size} бит)")
+        self._key_size = key_size
+        self._public_exponent = public_exponent
         try:
             self._private = rsa.generate_private_key(
-                public_exponent=self.PUBLIC_EXPONENT,
-                key_size=self.KEY_SIZE
+                public_exponent=public_exponent,
+                key_size=key_size
             )
             self._public = self._private.public_key()
             print("RSA-ключи успешно сгенерированы")
@@ -55,30 +54,17 @@ class RSAKeyManager:
 
     @property
     def public_key(self):
-        """
-        Возвращает публичный RSA-ключ.
-
-        Возвращает:
-            Публичный ключ RSA.
-        """
+        """Возвращает публичный RSA-ключ."""
         return self._public
 
     @property
     def private_key(self):
-        """
-        Возвращает приватный RSA-ключ.
-
-        Возвращает:
-            Приватный ключ RSA.
-        """
+        """Возвращает приватный RSA-ключ."""
         return self._private
 
     def encrypt_key(self, symmetric_key: bytes) -> bytes:
         """
         Шифрует симметричный ключ с помощью RSA-OAEP.
-
-        Использует схему OAEP с хеш-функцией SHA-256 для обеспечения
-        семантической безопасности.
 
         Аргументы:
             symmetric_key: Симметричный ключ для шифрования.
@@ -117,8 +103,7 @@ class RSAKeyManager:
             bytes: Исходный симметричный ключ.
 
         Исключения:
-            DecryptionError: Если расшифрование не удалось
-             (неверный ключ или данные).
+            DecryptionError: Если расшифрование не удалось.
         """
         print("Расшифрование симметричного ключа (RSA-OAEP)")
         try:
@@ -135,29 +120,19 @@ class RSAKeyManager:
         except Exception as exc:
             raise DecryptionError(
                 f"Ошибка при RSA-расшифровании симметричного ключа: {exc}. "
-                f"Возможно, ключ повреждён"
-                f" или используется неверный приватный ключ."
+                f"Возможно,"
+                f" ключ повреждён или используется неверный приватный ключ."
             )
 
     def serialize_public(self) -> bytes:
-        """
-        Сериализует публичный ключ в формат PEM.
-
-        Возвращает:
-            bytes: Публичный ключ в PEM-формате.
-        """
+        """Сериализует публичный ключ в PEM."""
         return self._public.public_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         )
 
     def serialize_private(self) -> bytes:
-        """
-        Сериализует приватный ключ в формат PEM без шифрования.
-
-        Возвращает:
-            bytes: Приватный ключ в PEM-формате.
-        """
+        """Сериализует приватный ключ в PEM."""
         return self._private.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,
@@ -167,10 +142,7 @@ class RSAKeyManager:
     @classmethod
     def load_from_private_pem(cls, pem_bytes: bytes) -> 'RSAKeyManager':
         """
-        Создаёт экземпляр RSAKeyManager из PEM-байтов приватного ключа.
-
-        Это фабричный метод: он не вызывает __init__,
-        а создаёт объект и заполняет его поля из существующего ключа.
+        Создаёт экземпляр из PEM-байтов приватного ключа.
 
         Аргументы:
             pem_bytes: Приватный ключ в PEM-формате.
@@ -193,4 +165,6 @@ class RSAKeyManager:
         instance = cls.__new__(cls)
         instance._private = private_key
         instance._public = private_key.public_key()
+        instance._key_size = instance._private.key_size
+        instance._public_exponent = None
         return instance
