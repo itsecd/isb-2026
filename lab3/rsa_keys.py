@@ -37,6 +37,51 @@ def generate_rsa_keys(key_size: int = 2048):
         raise RuntimeError(f"Ошибка при генерации RSA-ключей: {e}")
 
 
+def _serialize_public_key(public_key) -> bytes:
+    """
+    Сериализация открытого ключа в PEM-формат.
+
+    Args:
+        public_key: Открытый ключ RSA.
+
+    Returns:
+        bytes: PEM-представление открытого ключа.
+
+    Raises:
+        RuntimeError: Ошибка при сериализации.
+    """
+    try:
+        return public_key.public_bytes(
+            serialization.Encoding.PEM,
+            serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+    except Exception as e:
+        raise RuntimeError(f"Ошибка при сериализации открытого ключа: {e}")
+
+
+def _serialize_private_key(private_key) -> bytes:
+    """
+    Сериализация закрытого ключа в PEM-формат (без шифрования).
+
+    Args:
+        private_key: Закрытый ключ RSA.
+
+    Returns:
+        bytes: PEM-представление закрытого ключа.
+
+    Raises:
+        RuntimeError: Ошибка при сериализации.
+    """
+    try:
+        return private_key.private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.TraditionalOpenSSL,
+            serialization.NoEncryption(),
+        )
+    except Exception as e:
+        raise RuntimeError(f"Ошибка при сериализации закрытого ключа: {e}")
+
+
 def save_rsa_keys(private_key, public_key, private_path: str, public_path: str) -> None:
     """
     Сохранение RSA-ключей в PEM-файлы.
@@ -50,51 +95,8 @@ def save_rsa_keys(private_key, public_key, private_path: str, public_path: str) 
     Raises:
         RuntimeError: Ошибка при сериализации или записи.
     """
-    try:
-        pub_pem = public_key.public_bytes(
-            serialization.Encoding.PEM,
-            serialization.PublicFormat.SubjectPublicKeyInfo,
-        )
-        priv_pem = private_key.private_bytes(
-            serialization.Encoding.PEM,
-            serialization.PrivateFormat.TraditionalOpenSSL,
-            serialization.NoEncryption(),
-        )
-    except Exception as e:
-        raise RuntimeError(f"Ошибка при сериализации RSA-ключей: {e}")
-
-    file_io.write_file(public_path, pub_pem)
-    file_io.write_file(private_path, priv_pem)
-
-
-def _load_pem_key(path: str, loader, label: str):
-    """
-    Вспомогательная функция: загрузка PEM-ключа из файла.
-
-    Args:
-        path: Путь к файлу с ключом.
-        loader: Функция десериализации (load_pem_public_key или load_pem_private_key).
-        label: Метка ключа для диагностических сообщений.
-
-    Returns:
-        Загруженный ключ.
-
-    Raises:
-        FileNotFoundError: Файл не найден.
-        ValueError: Некорректный формат PEM.
-        RuntimeError: Иная ошибка при загрузке.
-    """
-    try:
-        with open(path, "rb") as f:
-            key = loader(f.read())
-        print(f"{label} загружен: {path}")
-        return key
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Файл {label.lower()} не найден: {path}")
-    except (ValueError, TypeError) as e:
-        raise ValueError(f"Некорректный формат {label.lower()} '{path}': {e}")
-    except Exception as e:
-        raise RuntimeError(f"Ошибка при загрузке {label.lower()} '{path}': {e}")
+    file_io.write_file(public_path, _serialize_public_key(public_key))
+    file_io.write_file(private_path, _serialize_private_key(private_key))
 
 
 def load_public_key(path: str):
@@ -112,7 +114,16 @@ def load_public_key(path: str):
         ValueError: Некорректный формат PEM.
         RuntimeError: Иная ошибка при загрузке.
     """
-    return _load_pem_key(path, load_pem_public_key, "Открытый ключ")
+    try:
+        key = load_pem_public_key(file_io.read_file(path))
+        print(f"Открытый ключ загружен: {path}")
+        return key
+    except FileNotFoundError:
+        raise
+    except (ValueError, TypeError) as e:
+        raise ValueError(f"Некорректный формат открытого ключа '{path}': {e}")
+    except Exception as e:
+        raise RuntimeError(f"Ошибка при загрузке открытого ключа '{path}': {e}")
 
 
 def load_private_key(path: str):
@@ -130,7 +141,16 @@ def load_private_key(path: str):
         ValueError: Некорректный формат PEM.
         RuntimeError: Иная ошибка при загрузке.
     """
-    return _load_pem_key(path, lambda data: load_pem_private_key(data, password=None), "Закрытый ключ")
+    try:
+        key = load_pem_private_key(file_io.read_file(path), password=None)
+        print(f"Закрытый ключ загружен: {path}")
+        return key
+    except FileNotFoundError:
+        raise
+    except (ValueError, TypeError) as e:
+        raise ValueError(f"Некорректный формат закрытого ключа '{path}': {e}")
+    except Exception as e:
+        raise RuntimeError(f"Ошибка при загрузке закрытого ключа '{path}': {e}")
 
 
 def rsa_encrypt(public_key, data: bytes) -> bytes:
