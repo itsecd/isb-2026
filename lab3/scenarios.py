@@ -3,7 +3,7 @@ import symmetric
 import file_io
 
 
-def _load_crypto_context(private_key_path: str, encrypted_sym_key_path: str, nonce_path: str):
+def _load_crypto_context(private_key_path: str, encrypted_sym_key_path: str, nonce_path: str, nonce_size: int):
     """
     Загрузка криптографического контекста: закрытого ключа, симметричного ключа и nonce.
 
@@ -11,6 +11,7 @@ def _load_crypto_context(private_key_path: str, encrypted_sym_key_path: str, non
         private_key_path: Путь к закрытому RSA-ключу.
         encrypted_sym_key_path: Путь к зашифрованному симметричному ключу.
         nonce_path: Путь к файлу с nonce.
+        nonce_size: Ожидаемый размер nonce в байтах.
 
     Returns:
         tuple[bytes, bytes]: Расшифрованный симметричный ключ и nonce.
@@ -22,9 +23,9 @@ def _load_crypto_context(private_key_path: str, encrypted_sym_key_path: str, non
     """
     try:
         private_key = rsa_keys.load_private_key(private_key_path)
-        encrypted_sym_key = symmetric.load_encrypted_sym_key(encrypted_sym_key_path)
+        encrypted_sym_key = file_io.read_file(encrypted_sym_key_path)
         sym_key = rsa_keys.rsa_decrypt(private_key, encrypted_sym_key)
-        nonce = symmetric.load_nonce(nonce_path)
+        nonce = symmetric.load_nonce(nonce_path, nonce_size)
         return sym_key, nonce
     except FileNotFoundError as e:
         raise FileNotFoundError(f"Файл не найден при загрузке контекста: {e}")
@@ -34,7 +35,8 @@ def _load_crypto_context(private_key_path: str, encrypted_sym_key_path: str, non
         raise RuntimeError(f"Ошибка при загрузке криптографического контекста: {e}")
 
 
-def generate_keys(nonce_path: str, encrypted_sym_key_path: str, public_key_path: str, private_key_path: str) -> None:
+def generate_keys(nonce_path: str, encrypted_sym_key_path: str, public_key_path: str, private_key_path: str,
+                  key_size: int, nonce_size: int) -> None:
     """
     1: Генерация ключей гибридной системы.
 
@@ -43,6 +45,8 @@ def generate_keys(nonce_path: str, encrypted_sym_key_path: str, public_key_path:
         encrypted_sym_key_path: Путь для сохранения зашифрованного симметричного ключа.
         public_key_path: Путь для сохранения открытого RSA-ключа.
         private_key_path: Путь для сохранения закрытого RSA-ключа.
+        key_size: Размер симметричного ключа в байтах.
+        nonce_size: Размер nonce в байтах.
 
     Raises:
         RuntimeError: Ошибка при генерации ключей.
@@ -50,22 +54,23 @@ def generate_keys(nonce_path: str, encrypted_sym_key_path: str, public_key_path:
     print("\nГенерация ключей (ChaCha20 + RSA)\n" + "─" * 60)
 
     try:
-        sym_key = symmetric.generate_sym_key()
-        nonce = symmetric.generate_nonce()
+        sym_key = symmetric.generate_random_bytes(key_size)
+        nonce = symmetric.generate_random_bytes(nonce_size)
 
         private_key, public_key = rsa_keys.generate_rsa_keys(key_size=2048)
         rsa_keys.save_rsa_keys(private_key, public_key, private_key_path, public_key_path)
 
         encrypted_sym_key = rsa_keys.rsa_encrypt(public_key, sym_key)
-        symmetric.save_encrypted_sym_key(encrypted_sym_key, encrypted_sym_key_path)
-        symmetric.save_nonce(nonce, nonce_path)
+        file_io.write_file(encrypted_sym_key_path, encrypted_sym_key)
+        file_io.write_file(nonce_path, nonce)
 
         print("─" * 60)
     except Exception as e:
         raise RuntimeError(f"Ошибка при генерации ключей: {e}")
 
 
-def encrypt_data(input_file: str, private_key_path: str, encrypted_sym_key_path: str, nonce_path: str, output_file: str) -> None:
+def encrypt_data(input_file: str, private_key_path: str, encrypted_sym_key_path: str, nonce_path: str,
+                 output_file: str, nonce_size: int) -> None:
     """
     2: Шифрование данных гибридной системой.
 
@@ -75,14 +80,15 @@ def encrypt_data(input_file: str, private_key_path: str, encrypted_sym_key_path:
         encrypted_sym_key_path: Путь к зашифрованному симметричному ключу.
         nonce_path: Путь к файлу с nonce.
         output_file: Путь для сохранения зашифрованного файла.
+        nonce_size: Ожидаемый размер nonce в байтах.
 
     Raises:
         FileNotFoundError: Входной файл или ключи не найдены.
-        RuntimeError: Ошибка при шифровании. 
+        RuntimeError: Ошибка при шифровании.
     """
     print("\nШифрование данных (ChaCha20 + RSA)\n" + "─" * 60)
     try:
-        sym_key, nonce = _load_crypto_context(private_key_path, encrypted_sym_key_path, nonce_path)
+        sym_key, nonce = _load_crypto_context(private_key_path, encrypted_sym_key_path, nonce_path, nonce_size)
         plaintext = file_io.read_file(input_file)
         ciphertext = symmetric.chacha20_crypt(plaintext, sym_key, nonce)
         file_io.write_file(output_file, ciphertext)
@@ -94,7 +100,8 @@ def encrypt_data(input_file: str, private_key_path: str, encrypted_sym_key_path:
         raise RuntimeError(f"Ошибка при шифровании: {e}")
 
 
-def decrypt_data(input_file: str, private_key_path: str, encrypted_sym_key_path: str, nonce_path: str, output_file: str) -> None:
+def decrypt_data(input_file: str, private_key_path: str, encrypted_sym_key_path: str, nonce_path: str,
+                 output_file: str, nonce_size: int) -> None:
     """
     3: Дешифрование данных гибридной системой.
 
@@ -104,6 +111,7 @@ def decrypt_data(input_file: str, private_key_path: str, encrypted_sym_key_path:
         encrypted_sym_key_path: Путь к зашифрованному симметричному ключу.
         nonce_path: Путь к файлу с nonce.
         output_file: Путь для сохранения расшифрованного файла.
+        nonce_size: Ожидаемый размер nonce в байтах.
 
     Raises:
         FileNotFoundError: Входной файл или ключи не найдены.
@@ -111,7 +119,7 @@ def decrypt_data(input_file: str, private_key_path: str, encrypted_sym_key_path:
     """
     print("\nДешифрование данных (ChaCha20 + RSA)\n" + "─" * 60)
     try:
-        sym_key, nonce = _load_crypto_context(private_key_path, encrypted_sym_key_path, nonce_path)
+        sym_key, nonce = _load_crypto_context(private_key_path, encrypted_sym_key_path, nonce_path, nonce_size)
         ciphertext = file_io.read_file(input_file)
         plaintext = symmetric.chacha20_crypt(ciphertext, sym_key, nonce)
         file_io.write_file(output_file, plaintext)
