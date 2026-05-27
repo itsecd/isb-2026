@@ -2,8 +2,8 @@ import sys
 
 from PyQt5.QtWidgets import (
     QApplication,
-    QFileDialog,
     QComboBox,
+    QFileDialog,
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
@@ -232,12 +232,9 @@ class CryptoApp(QWidget):
 
     def try_load_from_args(self):
         """Load settings from a path passed through command line arguments."""
-        match len(sys.argv) > 1:
-            case True:
-                self.config_path_edit.setText(sys.argv[1])
-                self.load_config()
-            case False:
-                pass
+        if len(sys.argv) > 1:
+            self.config_path_edit.setText(sys.argv[1])
+            self.load_config()
 
     def choose_config(self):
         """Open a dialog for choosing a JSON settings file."""
@@ -248,23 +245,19 @@ class CryptoApp(QWidget):
             "JSON files (*.json);;All files (*)",
         )
 
-        match path:
-            case "":
-                return
-            case _:
-                self.config_path_edit.setText(path)
-                self.load_config()
+        if path == "":
+            return
+
+        self.config_path_edit.setText(path)
+        self.load_config()
 
     def load_config(self):
         """Load settings from the selected JSON file."""
         path = self.config_path_edit.text().strip()
 
-        match path:
-            case "":
-                self.show_error("Не указан путь к файлу настроек")
-                return
-            case _:
-                pass
+        if path == "":
+            self.show_error("Не указан путь к файлу настроек")
+            return
 
         try:
             self.settings = load_settings(path)
@@ -299,11 +292,8 @@ class CryptoApp(QWidget):
 
     def get_checked_settings(self):
         """Return loaded settings and update the selected AES key size."""
-        match self.settings is None:
-            case True:
-                raise RuntimeError("Сначала загрузите файл настроек")
-            case False:
-                pass
+        if self.settings is None:
+            raise RuntimeError("Сначала загрузите файл настроек")
 
         self.settings["aes_key_size"] = int(self.aes_size_box.currentText())
         return self.settings
@@ -373,16 +363,31 @@ class CryptoApp(QWidget):
             self.show_error(exc)
 
     def log(self, text):
-        """Add a message to the application log."""
+        """
+        Add a message to the application log.
+
+        Args:
+            text: Message text.
+        """
         self.log_box.append(text)
 
     def show_error(self, error):
-        """Show an error message in the log and dialog window."""
+        """
+        Show an error message in the log and dialog window.
+
+        Args:
+            error: Error object or message text.
+        """
         self.log(f"Ошибка: {error}")
         QMessageBox.critical(self, "Ошибка", str(error))
 
     def show_info(self, text):
-        """Show an information dialog window."""
+        """
+        Show an information dialog window.
+
+        Args:
+            text: Message text.
+        """
         QMessageBox.information(self, "Готово", text)
 
 
