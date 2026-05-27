@@ -5,20 +5,19 @@ from cryptography.hazmat.primitives.ciphers import (
     algorithms,
     modes,
 )
-
 from cryptography.hazmat.primitives.padding import PKCS7
 
-from config import (
-    CAST5_MIN_BITS,
-    CAST5_MAX_BITS,
-    CAST5_BLOCK_SIZE,
-    CAST5_IV_SIZE,
-)
+from config_loader import load_crypto_config
+from file_utils import read_bytes, write_bytes
 
-from file_utils import (
-    read_bytes,
-    write_bytes,
-)
+
+CONFIG = load_crypto_config()
+
+CAST5_MIN_BITS = CONFIG["cast5_min_bits"]
+CAST5_MAX_BITS = CONFIG["cast5_max_bits"]
+
+CAST5_BLOCK_SIZE = CONFIG["cast5_block_size"]
+CAST5_IV_SIZE = CONFIG["cast5_iv_size"]
 
 
 def check_cast5_key_size(key_size_bits):
@@ -31,9 +30,19 @@ def check_cast5_key_size(key_size_bits):
 
     return:
         validated CAST5 key length
+
+    raises:
+        ValueError:
+            if key length is invalid
     """
 
-    key_size_bits = int(key_size_bits)
+    try:
+        key_size_bits = int(key_size_bits)
+
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            "Key length must be a number"
+        ) from exc
 
     if key_size_bits % 8 != 0:
         raise ValueError(
@@ -41,9 +50,7 @@ def check_cast5_key_size(key_size_bits):
         )
 
     if not (
-        CAST5_MIN_BITS
-        <= key_size_bits
-        <= CAST5_MAX_BITS
+        CAST5_MIN_BITS <= key_size_bits <= CAST5_MAX_BITS
     ):
         raise ValueError(
             f"CAST5 key length must be between "
@@ -55,7 +62,7 @@ def check_cast5_key_size(key_size_bits):
 
 
 def generate_cast5_key(
-    key_size_bits=CAST5_MAX_BITS
+    key_size_bits=CAST5_MAX_BITS,
 ):
     """
     Generate random CAST5 key.
@@ -68,11 +75,11 @@ def generate_cast5_key(
         generated CAST5 key
     """
 
-    checked = check_cast5_key_size(
+    checked_key_size = check_cast5_key_size(
         key_size_bits
     )
 
-    return os.urandom(checked // 8)
+    return os.urandom(checked_key_size // 8)
 
 
 def encrypt_file(
@@ -88,7 +95,7 @@ def encrypt_file(
             path to input file
 
         output_path:
-            path to encrypted file
+            path to encrypted output file
 
         key:
             CAST5 encryption key
@@ -96,13 +103,11 @@ def encrypt_file(
 
     data = read_bytes(input_path)
 
-    padder = PKCS7(
-        CAST5_BLOCK_SIZE
-    ).padder()
+    padder = PKCS7(CAST5_BLOCK_SIZE).padder()
 
     padded_data = (
-        padder.update(data)
-        + padder.finalize()
+        padder.update(data) +
+        padder.finalize()
     )
 
     iv = os.urandom(CAST5_IV_SIZE)
@@ -115,8 +120,8 @@ def encrypt_file(
     encryptor = cipher.encryptor()
 
     encrypted_data = (
-        encryptor.update(padded_data)
-        + encryptor.finalize()
+        encryptor.update(padded_data) +
+        encryptor.finalize()
     )
 
     write_bytes(
@@ -138,15 +143,17 @@ def decrypt_file(
             path to encrypted file
 
         output_path:
-            path to decrypted file
+            path to decrypted output file
 
         key:
             CAST5 decryption key
+
+    raises:
+        ValueError:
+            if encrypted file is invalid
     """
 
-    encrypted_data = read_bytes(
-        input_path
-    )
+    encrypted_data = read_bytes(input_path)
 
     if len(encrypted_data) < CAST5_IV_SIZE:
         raise ValueError(
@@ -155,9 +162,7 @@ def decrypt_file(
 
     iv = encrypted_data[:CAST5_IV_SIZE]
 
-    ciphertext = encrypted_data[
-        CAST5_IV_SIZE:
-    ]
+    ciphertext = encrypted_data[CAST5_IV_SIZE:]
 
     cipher = Cipher(
         algorithms.CAST5(key),
@@ -167,17 +172,15 @@ def decrypt_file(
     decryptor = cipher.decryptor()
 
     padded_data = (
-        decryptor.update(ciphertext)
-        + decryptor.finalize()
+        decryptor.update(ciphertext) +
+        decryptor.finalize()
     )
 
-    unpadder = PKCS7(
-        CAST5_BLOCK_SIZE
-    ).unpadder()
+    unpadder = PKCS7(CAST5_BLOCK_SIZE).unpadder()
 
     data = (
-        unpadder.update(padded_data)
-        + unpadder.finalize()
+        unpadder.update(padded_data) +
+        unpadder.finalize()
     )
 
     write_bytes(output_path, data)
