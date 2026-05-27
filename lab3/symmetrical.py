@@ -21,9 +21,8 @@ def create_blowfish_key(length_bits: int) -> bytes:
                 raise ValueError("Недопустимая длина ключа.")
             case _:
                 return os.urandom(length_bits // 8)
-    except Exception as exc:
-        print(f"Ошибка генерации симметричного ключа: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка генерации симметричного ключа: {err}") from err
 
 def cipher_blowfish_cbc(plaintext: bytes, secret: bytes) -> bytes:
     """
@@ -45,9 +44,8 @@ def cipher_blowfish_cbc(plaintext: bytes, secret: bytes) -> bytes:
         padder = padding.PKCS7(64).padder()
         padded = padder.update(plaintext) + padder.finalize()
         return iv + engine.update(padded) + engine.finalize()
-    except Exception as exc:
-        print(f"Ошибка симметричного шифрования: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка режима шифрования: {err}") from err
 
 def decipher_blowfish_cbc(ciphertext: bytes, secret: bytes) -> bytes:
     """
@@ -73,6 +71,5 @@ def decipher_blowfish_cbc(ciphertext: bytes, secret: bytes) -> bytes:
                 padded_plain = engine.update(payload) + engine.finalize()
                 unpadder = padding.PKCS7(64).unpadder()
                 return unpadder.update(padded_plain) + unpadder.finalize()
-    except Exception as exc:
-        print(f"Ошибка симметричного дешифрования: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка режима дешифрования: {err}") from err
