@@ -1,118 +1,186 @@
-import json
-from pathlib import Path
+import os
+
+from cryptography.hazmat.primitives.ciphers import (
+    Cipher,
+    algorithms,
+    modes,
+)
+from cryptography.hazmat.primitives.padding import PKCS7
+
+from config_loader import load_crypto_config
+from file_utils import read_bytes, write_bytes
 
 
-def load_settings(path):
+CONFIG = load_crypto_config()
+
+CAST5_MIN_BITS = CONFIG["cast5_min_bits"]
+CAST5_MAX_BITS = CONFIG["cast5_max_bits"]
+
+CAST5_BLOCK_SIZE = CONFIG["cast5_block_size"]
+CAST5_IV_SIZE = CONFIG["cast5_iv_size"]
+
+
+def check_cast5_key_size(key_size_bits):
     """
-    Load application settings from JSON file.
+    Validate CAST5 key length.
 
     args:
-        path:
-            path to settings JSON file
+        key_size_bits:
+            CAST5 key length in bits
 
     return:
-        dictionary with loaded settings
+        validated CAST5 key length
+
+    raises:
+        ValueError:
+            if key length is invalid
     """
 
-    settings_path = Path(path)
+    try:
+        key_size_bits = int(key_size_bits)
 
-    with settings_path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            "Key length must be a number"
+        ) from exc
+
+    if key_size_bits % 8 != 0:
+        raise ValueError(
+            "Key length must be multiple of 8 bits"
+        )
+
+    if not (
+        CAST5_MIN_BITS <= key_size_bits <= CAST5_MAX_BITS
+    ):
+        raise ValueError(
+            f"CAST5 key length must be between "
+            f"{CAST5_MIN_BITS} and "
+            f"{CAST5_MAX_BITS} bits"
+        )
+
+    return key_size_bits
 
 
-def save_settings(path, settings):
+def generate_cast5_key(
+    key_size_bits=CAST5_MAX_BITS,
+):
     """
-    Save application settings to JSON file.
+    Generate random CAST5 key.
 
     args:
-        path:
-            path to output JSON file
+        key_size_bits:
+            CAST5 key length in bits
 
-        settings:
-            dictionary with application settings
+    return:
+        generated CAST5 key
     """
 
-    settings_path = Path(path)
+    checked_key_size = check_cast5_key_size(
+        key_size_bits
+    )
 
-    create_parent_folder(settings_path)
-
-    with settings_path.open("w", encoding="utf-8") as file:
-        json.dump(settings, file, ensure_ascii=False, indent=4)
+    return os.urandom(checked_key_size // 8)
 
 
-def read_bytes(path):
+def encrypt_file(
+    input_path,
+    output_path,
+    key,
+):
     """
-    Read file contents as bytes.
+    Encrypt file using CAST5-CBC.
 
     args:
-        path:
+        input_path:
             path to input file
 
-    return:
-        binary file contents
+        output_path:
+            path to encrypted output file
+
+        key:
+            CAST5 encryption key
     """
 
-    file_path = Path(path)
+    data = read_bytes(input_path)
 
-    with file_path.open("rb") as file:
-        return file.read()
+    padder = PKCS7(CAST5_BLOCK_SIZE).padder()
+
+    padded_data = (
+        padder.update(data) +
+        padder.finalize()
+    )
+
+    iv = os.urandom(CAST5_IV_SIZE)
+
+    cipher = Cipher(
+        algorithms.CAST5(key),
+        modes.CBC(iv),
+    )
+
+    encryptor = cipher.encryptor()
+
+    encrypted_data = (
+        encryptor.update(padded_data) +
+        encryptor.finalize()
+    )
+
+    write_bytes(
+        output_path,
+        iv + encrypted_data,
+    )
 
 
-def write_bytes(path, data):
+def decrypt_file(
+    input_path,
+    output_path,
+    key,
+):
     """
-    Write binary data to file.
+    Decrypt file using CAST5-CBC.
 
     args:
-        path:
-            path to output file
+        input_path:
+            path to encrypted file
 
-        data:
-            binary data to write
+        output_path:
+            path to decrypted output file
+
+        key:
+            CAST5 decryption key
+
+    raises:
+        ValueError:
+            if encrypted file is invalid
     """
 
-    file_path = Path(path)
+    encrypted_data = read_bytes(input_path)
 
-    create_parent_folder(file_path)
+    if len(encrypted_data) < CAST5_IV_SIZE:
+        raise ValueError(
+            "Encrypted file is too short"
+        )
 
-    with file_path.open("wb") as file:
-        file.write(data)
+    iv = encrypted_data[:CAST5_IV_SIZE]
 
+    ciphertext = encrypted_data[CAST5_IV_SIZE:]
 
-def create_parent_folder(path):
-    """
-    Create parent directory if it does not exist.
+    cipher = Cipher(
+        algorithms.CAST5(key),
+        modes.CBC(iv),
+    )
 
-    args:
-        path:
-            file path whose parent folder must be created
-    """
+    decryptor = cipher.decryptor()
 
-    folder = Path(path).parent
+    padded_data = (
+        decryptor.update(ciphertext) +
+        decryptor.finalize()
+    )
 
-    if str(folder) == ".":
-        return
+    unpadder = PKCS7(CAST5_BLOCK_SIZE).unpadder()
 
-    folder.mkdir(parents=True, exist_ok=True)
+    data = (
+        unpadder.update(padded_data) +
+        unpadder.finalize()
+    )
 
-
-def get_file_size_str(path):
-    """
-    Convert file size to human-readable string.
-
-    args:
-        path:
-            path to file
-
-    return:
-        formatted file size string
-    """
-
-    size = Path(path).stat().st_size
-
-    if size < 1024:
-        return f"{size} Б"
-
-    if size < 1024 * 1024:
-        return f"{size / 1024:.1f} КБ"
-
-    return f"{size / (1024 * 1024):.2f} МБ"
+    write_bytes(output_path, data)
