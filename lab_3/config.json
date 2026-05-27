@@ -1,4 +1,6 @@
 ﻿{
+  "rsa_key_size": 2048,
+  "rsa_public_exponent": 65537,
   "key_size": 32,
   "secret_key": "keys/private_key.pem",
   "public_key": "keys/public_key.pem",

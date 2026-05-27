@@ -12,41 +12,54 @@ def save_private_key(private_key: rsa.RSAPrivateKey, path: str) -> None:
     """
     Сохраняет RSA приватный ключ в PEM формате.
     """
-    pem = private_key.private_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.TraditionalOpenSSL,
-        encryption_algorithm=serialization.NoEncryption(),
-    )
+    try:
+        pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
 
-    with open(path, "wb") as f:
-        f.write(pem)
+        with open(path, "wb") as f:
+            f.write(pem)
+    except PermissionError as e:
+        raise PermissionError(f"Write permission denied for private key: {path}") from e
+    except OSError as e:
+        raise OSError(f"Failed to save private key: {path}") from e
 
 
 def save_public_key(public_key: rsa.RSAPublicKey, path: str) -> None:
     """
     Сохраняет RSA публичный ключ в PEM формате.
     """
-    pem = public_key.public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo,
-    )
+    try:
+        pem = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
 
-    with open(path, "wb") as f:
-        f.write(pem)
+        with open(path, "wb") as f:
+            f.write(pem)
+    except PermissionError as e:
+        raise PermissionError(f"Write permission denied for public key: {path}") from e
+    except OSError as e:
+        raise OSError(f"Failed to save public key: {path}") from e
 
 
 def encrypt_symmetric_key(sym_key: bytes, public_key: rsa.RSAPublicKey) -> bytes:
     """
     Шифрует симметричный AES ключ с помощью RSA-OAEP.
     """
-    return public_key.encrypt(
-        sym_key,
-        padding.OAEP(
-            mgf=padding.MGF1(hashes.SHA256()),
-            algorithm=hashes.SHA256(),
-            label=None,
-        ),
-    )
+    try:
+        return public_key.encrypt(
+            sym_key,
+            padding.OAEP(
+                mgf=padding.MGF1(hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None,
+            ),
+        )
+    except Exception as e:
+        raise Exception(f"Failed to encrypt symmetric key: {e}") from e
 
 
 def generate_keys_pipeline(config: Dict[str, Any]) -> None:

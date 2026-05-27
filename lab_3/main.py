@@ -1,13 +1,11 @@
-﻿#!/usr/bin/env python3
-
-import argparse
+﻿import argparse
 from typing import Any, Dict
 
 from AES import encrypt as aes_encrypt
 from AES import decrypt as aes_decrypt
 
 from RSA import decrypt as rsa_decrypt
-from RSA import load_private_key
+from RSA import load_private_key, load_public_key
 
 from utils import load_config, read_bytes, write_bytes
 from key_gen import generate_keys_pipeline
@@ -69,18 +67,76 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     print(f"{args.config}")
-    config = load_config(args.config)
 
-    print("[*] 1. Key generation")
-    generate_keys_pipeline(config)
+    try:
+        config = load_config(args.config)
+    except Exception as e:
+        print(f"[-] Failed to load config: {e}")
+        return
 
-    print("[*] 2. File encryption")
-    encrypt_file(config)
+    while True:
+        print("\n------MENU------")
+        print("1. Generate keys")
+        print("2. Encrypt file (using existing keys)")
+        print("3. Decrypt file (using existing keys)")
+        print("4. Use custom keys (update config paths)")
+        print("5. Exit")
 
-    print("[*] 3. File decryption")
-    decrypt_file(config)
+        choice = input("Select option (1-5): ").strip()
 
-    print("[+] Full pipeline completed")
+        match choice:
+            case "1":
+                try:
+                    print("[*] Key generation")
+                    generate_keys_pipeline(config)
+                except Exception as e:
+                    print(f"[-] Error during key generation: {e}")
+
+            case "2":
+                try:
+                    print("[*] File encryption")
+                    encrypt_file(config)
+                except FileNotFoundError as e:
+                    print(f"[-] File not found: {e}")
+                except PermissionError as e:
+                    print(f"[-] Permission denied: {e}")
+                except Exception as e:
+                    print(f"[-] Error during encryption: {e}")
+
+            case "3":
+                try:
+                    print("[*] File decryption")
+                    decrypt_file(config)
+                except FileNotFoundError as e:
+                    print(f"[-] File not found: {e}")
+                except PermissionError as e:
+                    print(f"[-] Permission denied: {e}")
+                except Exception as e:
+                    print(f"[-] Error during decryption: {e}")
+
+            case "4":
+                try:
+                    print("[*] Use custom keys")
+                    custom_private = input("Enter path to your private key: ").strip()
+                    custom_public = input("Enter path to your public key: ").strip()
+                    custom_sym = input("Enter path to your encrypted symmetric key: ").strip()
+
+                    if custom_private:
+                        config["secret_key"] = custom_private
+                    if custom_public:
+                        config["public_key"] = custom_public
+                    if custom_sym:
+                        config["symmetric_key"] = custom_sym
+                    print("[+] Custom keys paths updated")
+                except Exception as e:
+                    print(f"[-] Error updating custom keys: {e}")
+
+            case "5":
+                print("[+] Exiting")
+                break
+
+            case _:
+                print("[-] Invalid option. Please select 1-5")
 
 
 if __name__ == "__main__":
