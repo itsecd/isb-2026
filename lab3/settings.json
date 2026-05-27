@@ -4,9 +4,17 @@
     "decrypted_file": "data/decrypted.txt",
 
     "encrypted_symmetric_key": "keys/symmetric_key.bin",
-
     "public_key": "keys/public.pem",
     "private_key": "keys/private.pem",
 
-    "cast5_key_size": 128
+    "cast5_key_size": 128,
+
+    "cast5_block_size": 64,
+    "cast5_iv_size": 8,
+    "cast5_min_key_size": 40,
+    "cast5_max_key_size": 128,
+    "cast5_key_step": 8,
+
+    "rsa_public_exponent": 65537,
+    "rsa_key_size": 2048
 }
