@@ -1,5 +1,6 @@
 import hashing
 from hashing import serialize
+from ui import App
 
 
 def main(settings: dict[str, str | int | bytes]) -> None:
@@ -9,6 +10,7 @@ def main(settings: dict[str, str | int | bytes]) -> None:
         settings (dict): Параметры приложения
     """
     hash_db = hashing.load_checksums(settings)
+    app = App(settings, hash_db)
     serialize(data=json.dumps(hash_db, indent=2).encode('utf-8'), path=settings["hash_db_path"])
 
 

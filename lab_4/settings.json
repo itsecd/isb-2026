@@ -1,3 +1,4 @@
 {
-    "hash_db_path": "checksums.json"
+    "hash_db_path": "checksums.json",
+    "hash_algorithm": "sha256"
 }

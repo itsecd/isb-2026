@@ -1,6 +1,7 @@
 import hashlib
 import os
 import json
+from typing import Literal
 
 
 def serialize(path: str, data: bytes) -> None:
@@ -29,7 +30,7 @@ def deserialize(path: str) -> bytes:
     return data
 
 
-def get_file_hash(data: bytes) -> str:
+def get_file_hash(data: bytes, algo: Literal["sha256", "md5", "sha512"]) -> str:
     """
     Функция, вычисляющая хэш для набора байт
     Args:
@@ -37,7 +38,8 @@ def get_file_hash(data: bytes) -> str:
     Returns:
         str - хэш-строка
     """
-    h = hashlib.sha256(data)
+    h = hashlib.new(algo)
+    h.update(data)
     return h.hexdigest()
 
 
