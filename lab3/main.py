@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--size', type=int, choices=[128, 192, 256], default=256, help='Длина ключа Camellia в битах (128, 192 или 256)')
 
     parser.add_argument('--public_key', type=str, help='Путь к публичному ключу RSA')
-    parser.add_argument('--secret_key', type=str, help='Путь к секретному ключу RSA')
+    parser.add_argument('--secret_key', type=str, help='Путь к секретному ключу RSA')   
     parser.add_argument('--symmetric_key', type=str, help='Путь к зашифрованному ключу Camellia')
     parser.add_argument('--initial_file', type=str, help='Путь к исходному файлу')
     parser.add_argument('--encrypted_file', type=str, help='Путь к зашифрованному файлу')

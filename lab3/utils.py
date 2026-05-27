@@ -16,8 +16,14 @@ def load_settings(filepath: str = 'settings.json') -> Dict[str, Any]:
         with open(filepath, 'r') as json_file:
             return json.load(json_file)
     except FileNotFoundError:
-        print(f"[-] Файл {filepath} не найден!")
-        exit(1)
+        print(f"Файл {filepath} не найден!")
+        return 0
+    except json.JSONDecodeError as e:
+        print(f"Ошибка декодирования JSON в файле {filepath}: {e}")
+        return 0
+    except Exception as e:
+        print(f"Неизвестная ошибка при открытии файла '{filepath}': '{e}'")
+        return 0
 
 def get_asym_padding() -> asym_padding.OAEP:
     """Возвращает настроенную схему паддинга RSA-OAEP.
