@@ -16,7 +16,16 @@ REQUIRED_CONFIG_KEYS = [
 ]
 
 def load_key(path: str, key_type: str):
-    """Загрузить открытый или закрытый RSA-ключ из PEM-файла."""
+    """Загрузить открытый или закрытый RSA-ключ из PEM-файла.
+    Args:
+        path:     Путь к PEM-файлу.
+        key_type: Тип ключа ('public' или 'private').
+    Returns:
+        Объект соответствующего RSA-ключа.
+    Raises:
+        ValueError:    При неизвестном типе ключа.
+        RuntimeError:  При ошибках чтения или парсинга PEM.
+    """
     match key_type:
         case "public":
             label = "открытого"
@@ -36,7 +45,15 @@ def load_key(path: str, key_type: str):
         raise RuntimeError(f"Ошибка при загрузке {label} ключа: {e}") from e
 
 def load_config(path: str) -> dict:
-    """Загрузить и проверить JSON-конфигурацию."""
+    """Загрузить и проверить JSON-конфигурацию.
+    Args:
+        path: Путь к JSON-файлу настроек.
+    Returns:
+        Словарь с настройками (с дефолтным aes_key_size=256).
+    Raises:
+        ValueError:    При ошибках JSON или отсутствии обязательных полей.
+        RuntimeError:  При ошибках чтения файла.
+    """
     raw = read_file(path, mode='r')
     try:
         config = json.loads(raw)
@@ -53,7 +70,12 @@ def load_config(path: str) -> dict:
     return config
 
 def mode_generate_keys(config: dict) -> None:
-    """Режим генерации ключей."""
+    """Режим генерации ключей (-gen).
+    Args:
+        config: Словарь настроек из JSON.
+    Raises:
+        Propagates exceptions from key generation, serialization and I/O.
+    """
     print("\nРежим генерации ключей\n")
     key_size = config['aes_key_size']
     
@@ -74,7 +96,13 @@ def mode_generate_keys(config: dict) -> None:
     print("\nГенерация ключей завершена.\n")
 
 def mode_encrypt(config: dict, public_key_path: str = None) -> None:
-    """Режим шифрования с поддержкой пользовательского ключа."""
+    """Режим шифрования файла (-enc).
+    Args:
+        config:           Словарь настроек из JSON.
+        public_key_path:  Путь к пользовательскому открытому ключу (опционально).
+    Raises:
+        Propagates exceptions from key loading, crypto operations and I/O.
+    """
     print("\nРежим шифрования\n")
     
     match public_key_path:
@@ -92,7 +120,13 @@ def mode_encrypt(config: dict, public_key_path: str = None) -> None:
     print("\nШифрование завершено!\n")
 
 def mode_decrypt(config: dict, private_key_path: str = None) -> None:
-    """Режим расшифрования с поддержкой пользовательского ключа."""
+    """Режим расшифрования файла (-dec).
+    Args:
+        config:            Словарь настроек из JSON.
+        private_key_path:  Путь к пользовательскому закрытому ключу (опционально).
+    Raises:
+        Propagates exceptions from key loading, crypto operations and I/O.
+    """
     print("\nРежим расшифрования\n")
     
     match private_key_path:
@@ -107,6 +141,7 @@ def mode_decrypt(config: dict, private_key_path: str = None) -> None:
     print("\nРасшифрование завершено.\n")
 
 def main() -> None:
+    """Точка входа программы. Парсит аргументы, загружает конфиг и запускает режим."""
     parser = argparse.ArgumentParser(description='Гибридная криптосистема (RSA + AES)')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-gen', '--generation', metavar='CONFIG')
