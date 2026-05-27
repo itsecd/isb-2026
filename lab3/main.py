@@ -1,158 +1,384 @@
 import argparse
 import json
 
-from crypto_utils import *
+from crypto_utils import (
+    generate_cast5_key,
+    generate_rsa_keys,
+    save_private_key,
+    save_public_key,
+    encrypt_symmetric_key,
+    load_private_key,
+    decrypt_symmetric_key,
+    encrypt_file_cast5,
+    decrypt_file_cast5
+)
+
+from constants import DEFAULT_SETTINGS_PATH
+from exceptions import (
+    FileProcessingError,
+    CryptoSystemError
+)
 
 
-def load_settings(path="settings.json"):
+def load_settings(path: str = DEFAULT_SETTINGS_PATH) -> dict:
+    """
+    Загружает настройки из JSON-файла.
 
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    Args:
+        path (str):
+            Путь к settings.json.
 
-def generate_keys(settings):
+    Returns:
+        dict:
+            Словарь настроек.
 
-    print("[+] Генерация ключа CAST5...")
+    Raises:
+        FileProcessingError:
+            Если файл настроек
+            невозможно открыть.
+    """
 
-    key_size = settings["cast5_key_size"]
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            return json.load(file)
 
-    symmetric_key = generate_cast5_key(key_size)
+    except Exception as error:
+        raise FileProcessingError(
+            f"Ошибка загрузки настроек: {error}"
+        ) from error
 
-    print("[+] Генерация RSA ключей...")
 
-    private_key, public_key = generate_rsa_keys()
+def generate_keys(settings: dict) -> None:
+    """
+    Генерирует симметричный ключ CAST5
+    и пару RSA ключей.
 
-    print("[+] Сохранение RSA ключей...")
+    Args:
+        settings (dict):
+            Настройки системы.
 
-    save_private_key(
-        private_key,
-        settings["private_key"]
-    )
+    Raises:
+        CryptoSystemError:
+            При ошибке генерации ключей.
+    """
 
-    save_public_key(
-        public_key,
-        settings["public_key"]
-    )
+    try:
+        print("[+] Генерация ключа CAST5...")
 
-    print("[+] Шифрование симметричного ключа RSA...")
+        key_size = settings["cast5_key_size"]
 
-    encrypted_sym_key = encrypt_symmetric_key(
-        symmetric_key,
-        public_key
-    )
+        symmetric_key = generate_cast5_key(
+            key_size
+        )
 
-    with open(settings["encrypted_symmetric_key"], "wb") as f:
-        f.write(encrypted_sym_key)
+        print("[+] Генерация RSA ключей...")
 
-    print("[+] Ключи успешно созданы")
+        private_key, public_key = (
+            generate_rsa_keys()
+        )
 
-def encrypt_data(settings):
+        print("[+] Сохранение RSA ключей...")
 
-    print("[+] Загрузка RSA private key...")
+        save_private_key(
+            private_key,
+            settings["private_key"]
+        )
 
-    private_key = load_private_key(
-        settings["private_key"]
-    )
+        save_public_key(
+            public_key,
+            settings["public_key"]
+        )
 
-    print("[+] Загрузка зашифрованного симметричного ключа...")
+        print(
+            "[+] Шифрование "
+            "симметричного ключа RSA..."
+        )
 
-    with open(settings["encrypted_symmetric_key"], "rb") as f:
-        encrypted_key = f.read()
+        encrypted_sym_key = (
+            encrypt_symmetric_key(
+                symmetric_key,
+                public_key
+            )
+        )
 
-    print("[+] Расшифрование симметричного ключа...")
+        with open(
+            settings[
+                "encrypted_symmetric_key"
+            ],
+            "wb"
+        ) as file:
+            file.write(
+                encrypted_sym_key
+            )
 
-    symmetric_key = decrypt_symmetric_key(
-        encrypted_key,
-        private_key
-    )
+        print(
+            "[+] Ключи успешно созданы"
+        )
 
-    print("[+] Шифрование файла CAST5...")
+    except Exception as error:
+        raise CryptoSystemError(
+            f"Ошибка генерации ключей: "
+            f"{error}"
+        ) from error
 
-    encrypt_file_cast5(
-        settings["initial_file"],
-        settings["encrypted_file"],
-        symmetric_key
-    )
 
-    print("[+] Файл успешно зашифрован")
+def encrypt_data(settings: dict) -> None:
+    """
+    Выполняет шифрование файла.
 
-def decrypt_data(settings):
+    Args:
+        settings (dict):
+            Настройки системы.
 
-    print("[+] Загрузка RSA private key...")
+    Raises:
+        CryptoSystemError:
+            При ошибке шифрования.
+    """
 
-    private_key = load_private_key(
-        settings["private_key"]
-    )
+    try:
+        print(
+            "[+] Загрузка RSA "
+            "private key..."
+        )
 
-    print("[+] Загрузка зашифрованного симметричного ключа...")
+        private_key = (
+            load_private_key(
+                settings["private_key"]
+            )
+        )
 
-    with open(settings["encrypted_symmetric_key"], "rb") as f:
-        encrypted_key = f.read()
+        print(
+            "[+] Загрузка "
+            "зашифрованного "
+            "симметричного ключа..."
+        )
 
-    print("[+] Расшифрование симметричного ключа...")
+        with open(
+            settings[
+                "encrypted_symmetric_key"
+            ],
+            "rb"
+        ) as file:
+            encrypted_key = (
+                file.read()
+            )
 
-    symmetric_key = decrypt_symmetric_key(
-        encrypted_key,
-        private_key
-    )
+        print(
+            "[+] Расшифрование "
+            "симметричного ключа..."
+        )
 
-    print("[+] Дешифрование файла CAST5...")
+        symmetric_key = (
+            decrypt_symmetric_key(
+                encrypted_key,
+                private_key
+            )
+        )
 
-    decrypt_file_cast5(
-        settings["encrypted_file"],
-        settings["decrypted_file"],
-        symmetric_key
-    )
+        print(
+            "[+] Шифрование "
+            "файла CAST5..."
+        )
 
-    print("[+] Файл успешно расшифрован")
+        encrypt_file_cast5(
+            settings["initial_file"],
+            settings["encrypted_file"],
+            symmetric_key
+        )
 
-def main():
+        print(
+            "[+] Файл успешно "
+            "зашифрован"
+        )
 
-    parser = argparse.ArgumentParser()
+    except Exception as error:
+        raise CryptoSystemError(
+            f"Ошибка шифрования: "
+            f"{error}"
+        ) from error
 
-    group = parser.add_mutually_exclusive_group(
-        required=True
-    )
 
-    group.add_argument(
-        "-gen",
-        "--generation",
-        action="store_true",
-        help="Генерация ключей"
-    )
+def decrypt_data(settings: dict) -> None:
+    """
+    Выполняет дешифрование файла.
 
-    group.add_argument(
-        "-enc",
-        "--encryption",
-        action="store_true",
-        help="Шифрование"
-    )
+    Args:
+        settings (dict):
+            Настройки системы.
 
-    group.add_argument(
-        "-dec",
-        "--decryption",
-        action="store_true",
-        help="Дешифрование"
-    )
+    Raises:
+        CryptoSystemError:
+            При ошибке дешифрования.
+    """
 
-    parser.add_argument(
-        "-s",
-        "--settings",
-        default="settings.json",
-        help="Путь к settings.json"
-    )
+    try:
+        print(
+            "[+] Загрузка RSA "
+            "private key..."
+        )
 
-    args = parser.parse_args()
+        private_key = (
+            load_private_key(
+                settings["private_key"]
+            )
+        )
 
-    settings = load_settings(args.settings)
+        print(
+            "[+] Загрузка "
+            "зашифрованного "
+            "симметричного ключа..."
+        )
 
-    if args.generation:
-        generate_keys(settings)
+        with open(
+            settings[
+                "encrypted_symmetric_key"
+            ],
+            "rb"
+        ) as file:
+            encrypted_key = (
+                file.read()
+            )
 
-    elif args.encryption:
-        encrypt_data(settings)
+        print(
+            "[+] Расшифрование "
+            "симметричного ключа..."
+        )
 
-    elif args.decryption:
-        decrypt_data(settings)
+        symmetric_key = (
+            decrypt_symmetric_key(
+                encrypted_key,
+                private_key
+            )
+        )
+
+        print(
+            "[+] Дешифрование "
+            "файла CAST5..."
+        )
+
+        decrypt_file_cast5(
+            settings["encrypted_file"],
+            settings["decrypted_file"],
+            symmetric_key
+        )
+
+        print(
+            "[+] Файл успешно "
+            "расшифрован"
+        )
+
+    except Exception as error:
+        raise CryptoSystemError(
+            f"Ошибка дешифрования: "
+            f"{error}"
+        ) from error
+
+
+def main() -> None:
+    """
+    Главная функция программы.
+
+    Выполняет обработку
+    аргументов командной строки
+    и запуск нужного режима.
+    """
+
+    try:
+        parser = argparse.ArgumentParser()
+
+        group = (
+            parser
+            .add_mutually_exclusive_group(
+                required=True
+            )
+        )
+
+        group.add_argument(
+            "-gen",
+            "--generation",
+            action="store_true",
+            help="Генерация ключей"
+        )
+
+        group.add_argument(
+            "-enc",
+            "--encryption",
+            action="store_true",
+            help="Шифрование"
+        )
+
+        group.add_argument(
+            "-dec",
+            "--decryption",
+            action="store_true",
+            help="Дешифрование"
+        )
+
+        parser.add_argument(
+            "-s",
+            "--settings",
+            default=(
+                DEFAULT_SETTINGS_PATH
+            ),
+            help=(
+                "Путь "
+                "к settings.json"
+            )
+        )
+
+        args = (
+            parser.parse_args()
+        )
+
+        settings = (
+            load_settings(
+                args.settings
+            )
+        )
+
+        match (
+            args.generation,
+            args.encryption,
+            args.decryption
+        ):
+            case (
+                True,
+                False,
+                False
+            ):
+                generate_keys(
+                    settings
+                )
+
+            case (
+                False,
+                True,
+                False
+            ):
+                encrypt_data(
+                    settings
+                )
+
+            case (
+                False,
+                False,
+                True
+            ):
+                decrypt_data(
+                    settings
+                )
+
+            case _:
+                raise ValueError(
+                    "Некорректный "
+                    "режим работы"
+                )
+
+    except Exception as error:
+        print(
+            f"[!] Ошибка: "
+            f"{error}"
+        )
 
 
 if __name__ == "__main__":
