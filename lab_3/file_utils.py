@@ -62,18 +62,3 @@ def write_file(path, data):
     except Exception as e:
         print(f"Ошибка записи файла {path}: {e}")
     return False
-
-def load_settings(settings_path='settings.json'):
-    """
-    Загружает настройки из JSON файла.
-
-    Входные данные:
-        settings_path (str): Путь к файлу настроек (по умолчанию 'settings.json').
-
-    Выходные данные:
-        dict: Словарь настроек. Если файл не найден или невалиден, программа завершается с кодом 1.
-    """
-    settings = read_json(settings_path)
-    if settings is None:
-        sys.exit(1)
-    return settings
