@@ -1,0 +1,12 @@
+{
+  "rsa_key_size": 2048,
+  "rsa_public_exponent": 65537,
+  "chacha20_key_size": 32,
+  "nonce_size": 16,
+  "rsa_encrypted_key_size": 256,
+  "initial_file": "input.txt",
+  "encrypted_file": "encrypted.txt",
+  "decrypted_file": "decrypted.txt",
+  "public_key": "keys/public.pem",
+  "secret_key": "keys/private.pem"
+}
