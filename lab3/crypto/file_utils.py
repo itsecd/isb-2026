@@ -121,34 +121,3 @@ def read_text_file(path):
 
     except OSError as e:
         raise OSError(f"Ошибка чтения текстового файла: {e}")
-
-def compare_files_content(first_path, second_path):
-    """
-    Сравнивает содержимое двух файлов.
-
-    Args:
-        first_path (str): Путь к первому файлу.
-        second_path (str): Путь ко второму файлу.
-
-    Returns:
-        bool: True, если содержимое совпадает.
-
-    Raises:
-        FileNotFoundError: Если один из файлов не найден.
-        OSError: При ошибке чтения.
-    """
-
-    try:
-        with open(first_path, 'rb') as first_file:
-            first_data = first_file.read()
-
-        with open(second_path, 'rb') as second_file:
-            second_data = second_file.read()
-
-        return first_data == second_data
-
-    except FileNotFoundError as err:
-        raise FileNotFoundError(f"Файл не найден: {err}")
-
-    except OSError as e:
-        raise OSError(f"Ошибка сравнения файлов: {e}")
