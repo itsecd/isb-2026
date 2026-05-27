@@ -9,6 +9,11 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
 from file_utils import generate_random_bytes
 
+# Определяем пользовательское исключение для ошибок симметричного шифрования
+class SymmetricCryptoError(Exception):
+    """Исключение для ошибок, связанных с симметричным шифрованием (AES)."""
+    pass
+
 class AESCipher:
     """
     Класс для шифрования и дешифрования данных с помощью AES в режиме CBC.
@@ -38,18 +43,26 @@ class AESCipher:
 
         Returns:
             bytes: Зашифрованный текст.
+
+        Raises:
+            SymmetricCryptoError: При ошибках шифрования (например, неверный IV).
         """
-        # 1. Создаем шифратор
-        cipher = Cipher(algorithms.AES(self.key), modes.CBC(iv))
-        encryptor = cipher.encryptor()
-        
-        # 2. Добавляем Padding (PKCS7 - самый стандартный вариант)
-        # Используем PKCS7 вместо ANSIX923 для большей совместимости
-        padder = padding.PKCS7(128).padder()
-        padded_data = padder.update(plaintext) + padder.finalize()
-        
-        # 3. Шифруем дополненные данные
-        return encryptor.update(padded_data) + encryptor.finalize()
+        try:
+            # 1. Создаем шифратор
+            cipher = Cipher(algorithms.AES(self.key), modes.CBC(iv))
+            encryptor = cipher.encryptor()
+            
+            # 2. Добавляем Padding (PKCS7 - самый стандартный вариант)
+            # Используем PKCS7 вместо ANSIX923 для большей совместимости
+            padder = padding.PKCS7(128).padder()
+            padded_data = padder.update(plaintext) + padder.finalize()
+            
+            # 3. Шифруем дополненные данные
+            return encryptor.update(padded_data) + encryptor.finalize()
+        except Exception as e:
+            # Логируем детали ошибки, если необходимо
+            # logger.error(f"Ошибка шифрования AES: {e}")
+            raise SymmetricCryptoError(f"Ошибка шифрования AES: {e}")
 
     def decrypt(self, ciphertext, iv):
         """
@@ -61,15 +74,26 @@ class AESCipher:
 
         Returns:
             bytes: Расшифрованный открытый текст.
+
+        Raises:
+            SymmetricCryptoError: При ошибках дешифрования (например, поврежденный шифртекст, неверный IV).
         """
-        # 1. Расшифровываем
-        cipher = Cipher(algorithms.AES(self.key), modes.CBC(iv))
-        decryptor = cipher.decryptor()
-        padded_plaintext = decryptor.update(ciphertext) + decryptor.finalize()
-        
-        # 2. Убираем Padding
-        unpadder = padding.PKCS7(128).unpadder()
-        return unpadder.update(padded_plaintext) + unpadder.finalize()
+        try:
+            # 1. Расшифровываем
+            cipher = Cipher(algorithms.AES(self.key), modes.CBC(iv))
+            decryptor = cipher.decryptor()
+            padded_plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+            
+            # 2. Убираем Padding
+            unpadder = padding.PKCS7(128).unpadder()
+            plaintext = unpadder.update(padded_plaintext) + unpadder.finalize()
+            return plaintext
+        except ValueError as e: # cryptography может выбросить ValueError при ошибках padding или decryptor
+             # logger.error(f"Ошибка дешифрования AES (padding/decryptor): {e}")
+             raise SymmetricCryptoError(f"Ошибка дешифрования AES: {e}")
+        except Exception as e:
+             # logger.error(f"Общая ошибка дешифрования AES: {e}")
+             raise SymmetricCryptoError(f"Общая ошибка дешифрования AES: {e}")
 
 def generate_aes_key(key_size_bits):
     """
@@ -80,6 +104,12 @@ def generate_aes_key(key_size_bits):
 
     Returns:
         bytes: Сгенерированный ключ AES.
+
+    Raises:
+        ValueError: Если размер ключа недействителен.
     """
+    valid_sizes = [128, 192, 256]
+    if key_size_bits not in valid_sizes:
+        raise ValueError(f"Недопустимый размер ключа AES: {key_size_bits}. Допустимые значения: {valid_sizes}")
     key_size_bytes = key_size_bits // 8
     return generate_random_bytes(key_size_bytes)
