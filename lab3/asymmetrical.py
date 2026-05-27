@@ -5,7 +5,9 @@ def generate_rsa_keys() -> tuple[rsa.RSAPrivateKey, rsa.RSAPublicKey]:
     """
     Генерирует пару ключей RSA (приватный и публичный).
     Использует стандартную публичную экспоненту 65537 и размер ключа 2048 бит.
-
+    
+    Returns:
+        tuple[rsa.RSAPrivateKey, rsa.RSAPublicKey]: Кортеж (приватный ключ, публичный ключ).
     """
     private_key = rsa.generate_private_key(
         public_exponent=65537,
@@ -16,8 +18,17 @@ def generate_rsa_keys() -> tuple[rsa.RSAPrivateKey, rsa.RSAPublicKey]:
 def encrypt_sym_key(sym_key: bytes, public_key: rsa.RSAPublicKey) -> bytes:
     """
     Шифрует симметричный ключ с помощью публичного ключа RSA.
-    Использует схему дополнения OAEP с хешированием SHA256.
+    Использует схему OAEP с хешированием SHA256.
+    
+    Args:
+        sym_key (bytes): Симметричный ключ для шифрования.
+        public_key (rsa.RSAPublicKey): Публичный RSA-ключ получателя.
 
+    Returns:
+        bytes: Зашифрованный симметричный ключ.
+
+    Raises:
+        ValueError: Если длина ключа превышает максимально допустимую для RSA-2048 с OAEP.
     """
     return public_key.encrypt(
         sym_key,
@@ -32,6 +43,15 @@ def decrypt_sym_key(encrypted_sym_key: bytes, private_key: rsa.RSAPrivateKey) ->
     """
     Расшифровывает симметричный ключ с помощью приватного ключа RSA.
 
+    Args:
+        encrypted_sym_key (bytes): Зашифрованный симметричный ключ.
+        private_key (rsa.RSAPrivateKey): Приватный RSA-ключ для дешифрования.
+
+    Returns:
+        bytes: Расшифрованный симметричный ключ.
+
+    Raises:
+        ValueError: Если дешифрование не удалось (неверный ключ или поврежденные данные).
     """
     return private_key.decrypt(
         encrypted_sym_key,
