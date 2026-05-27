@@ -21,9 +21,8 @@ def check_file(target_path: str) -> None:
                 return
             case dir_path:
                 os.makedirs(dir_path, exist_ok=True)
-    except Exception as exc:
-        print(f"Ошибка создания директории: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка создания директории: {err}") from err
 
 def save_private_key(destination: str, private_key: rsa.RSAPrivateKey) -> None:
     """
@@ -44,9 +43,8 @@ def save_private_key(destination: str, private_key: rsa.RSAPrivateKey) -> None:
                 format=serialization.PrivateFormat.TraditionalOpenSSL,
                 encryption_algorithm=serialization.NoEncryption()
             ))
-    except Exception as exc:
-        print(f"Ошибка сохранения приватного ключа: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка сохранения приватного ключа: {err}") from err
 
 def save_public_key(destination: str, public_key: rsa.RSAPublicKey) -> None:
     """
@@ -66,9 +64,8 @@ def save_public_key(destination: str, public_key: rsa.RSAPublicKey) -> None:
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PublicFormat.SubjectPublicKeyInfo
             ))
-    except Exception as exc:
-        print(f"Ошибка сохранения публичного ключа: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка сохранения публичного ключа: {err}") from err
 
 def open_private_key(source: str) -> rsa.RSAPrivateKey:
     """
@@ -87,9 +84,8 @@ def open_private_key(source: str) -> rsa.RSAPrivateKey:
     try:
         with open(source, "rb") as stream:
             return load_pem_private_key(stream.read(), password=None)
-    except Exception as exc:
-        print(f"Ошибка загрузки приватного ключа: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка загрузки приватного ключа: {err}") from err
 
 def open_public_key(source: str) -> rsa.RSAPublicKey:
     """
@@ -108,9 +104,8 @@ def open_public_key(source: str) -> rsa.RSAPublicKey:
     try:
         with open(source, "rb") as stream:
             return load_pem_public_key(stream.read())
-    except Exception as exc:
-        print(f"Ошибка загрузки публичного ключа: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка загрузки публичного ключа: {err}") from err
 
 def open_binary(source: str) -> bytes:
     """
@@ -128,9 +123,8 @@ def open_binary(source: str) -> bytes:
     try:
         with open(source, "rb") as stream:
             return stream.read()
-    except Exception as exc:
-        print(f"Ошибка чтения бинарного файла: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка чтения бинарного файла: {err}") from err
 
 def save_binary(destination: str, payload: bytes) -> None:
     """
@@ -147,9 +141,8 @@ def save_binary(destination: str, payload: bytes) -> None:
         check_file(destination)
         with open(destination, "wb") as stream:
             stream.write(payload)
-    except Exception as exc:
-        print(f"Ошибка записи бинарных данных: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка записи бинарных данных: {err}") from err
 
 def open_json(source: str) -> dict:
     """
@@ -168,6 +161,5 @@ def open_json(source: str) -> dict:
     try:
         with open(source, "r", encoding="utf-8") as stream:
             return json.load(stream)
-    except Exception as exc:
-        print(f"Ошибка загрузки JSON: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка загрузки JSON-конфигурации: {err}") from err
