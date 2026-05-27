@@ -2,7 +2,7 @@ import os
 import json
 
 
-def _read_binary(path: str) -> bytes:
+def read_file(path: str) -> bytes:
     """
     Чтение бинарных данных из файла.
 
@@ -27,7 +27,7 @@ def _read_binary(path: str) -> bytes:
         raise RuntimeError(f"Ошибка при чтении файла '{path}': {e}")
 
 
-def _write_binary(path: str, data: bytes) -> None:
+def write_file(path: str, data: bytes) -> None:
     """
     Запись бинарных данных в файл с созданием директорий.
 
@@ -92,34 +92,3 @@ def save_settings(settings: dict, path: str) -> None:
         print(f"Настройки сохранены: {path}")
     except Exception as e:
         raise RuntimeError(f"Ошибка при сохранении настроек '{path}': {e}")
-
-
-def read_file(path: str) -> bytes:
-    """
-    Чтение бинарных данных из файла.
-
-    Args:
-        path: Путь к файлу.
-
-    Returns:
-        bytes: Содержимое файла.
-
-    Raises:
-        FileNotFoundError: Файл не найден.
-        RuntimeError: Ошибка при чтении.
-    """
-    return _read_binary(path)
-
-
-def write_file(path: str, data: bytes) -> None:
-    """
-    Запись бинарных данных в файл.
-
-    Args:
-        path: Путь для сохранения.
-        data: Данные для записи.
-
-    Raises:
-        RuntimeError: Ошибка при записи.
-    """
-    _write_binary(path, data)
