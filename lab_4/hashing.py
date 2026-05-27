@@ -13,8 +13,11 @@ def serialize(path: str, data: bytes) -> None:
     directory = os.path.dirname(os.path.abspath(path))
     if not os.path.exists(directory):
         os.makedirs(directory)
-    with open(path, mode='wb') as file:
-        file.write(data)
+    try:
+        with open(path, mode='wb') as file:
+            file.write(data)
+    except OSError as e:
+        print(f"Ошибка при работе с файлом! {e}")
 
 
 def deserialize(path: str) -> bytes:
@@ -25,9 +28,12 @@ def deserialize(path: str) -> bytes:
     Returns:
         Байты - данные из считанного фалы
     """
-    with open(path, mode='rb') as file:
-        data = file.read()
-    return data
+    try:
+        with open(path, mode='rb') as file:
+            data = file.read()
+        return data
+    except OSError as e:
+        print(f"Ошибка при работе с файлом! {e}")
 
 
 def get_file_hash(data: bytes, algo: Literal["sha256", "md5", "sha512"]) -> str:
