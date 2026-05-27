@@ -1,3 +1,13 @@
+"""
+Модуль главного скрипта для гибридной криптосистемы RSA-AES.
+
+Этот скрипт предоставляет интерфейс командной строки для:
+- Генерации ключей (AES и RSA)
+- Шифрования данных с использованием гибридной схемы
+- Дешифрования данных
+Конфигурация осуществляется через файл settings.json.
+"""
+
 import argparse
 import json
 from file_utils import read_binary_file, write_binary_file, generate_random_bytes
@@ -5,6 +15,12 @@ from symmetric_crypto import AESCipher, generate_aes_key
 from asymmetric_crypto import RSAKeyPair
 
 def load_settings():
+    """
+    Загружает настройки из файла settings.json.
+
+    Возвращает:
+        dict: Словарь с настройками. Если файл не найден, возвращается пустой словарь.
+    """
     try:
         with open('settings.json', 'r') as f:
             return json.load(f)
@@ -12,7 +28,13 @@ def load_settings():
         return {}
 
 def main():
-    parser = argparse.ArgumentParser()
+    """
+    Основная функция приложения.
+
+    Обрабатывает аргументы командной строки и запускает соответствующий режим работы:
+    генерация ключей, шифрование или дешифрование.
+    """
+    parser = argparse.ArgumentParser(description="Гибридная криптосистема RSA-AES.")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-gen', '--generation', action='store_true', help='Генерация ключей')
     group.add_argument('-enc', '--encryption', action='store_true', help='Шифрование')
