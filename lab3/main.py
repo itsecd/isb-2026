@@ -46,13 +46,14 @@ def main() -> None:
         src_file = args.input_file or config["initial_file"]
         dst_file = args.output_file or config["encrypted_file"]
         key_size = args.key_size
-        if args.gen_keys:
-            workflow.run_key_generation(sym_key, priv_key, pub_key, key_size)
-        elif args.encrypt:
-            workflow.run_encryption(src_file, dst_file, sym_key, priv_key)
-        elif args.decrypt:
-            dst_file = args.output_file or config["decrypted_file"]
-            workflow.run_decryption(src_file, dst_file, sym_key, priv_key)
+        match (args.gen_keys, args.encrypt, args.decrypt):
+            case (True, _, _):
+                workflow.run_key_generation(sym_key, priv_key, pub_key, key_size)
+            case (_, True, _):
+                workflow.run_encryption(src_file, dst_file, sym_key, priv_key)
+            case (_, _, True):
+                dst_file = args.output_file or config["decrypted_file"]
+                workflow.run_decryption(src_file, dst_file, sym_key, priv_key)
     except KeyError as exc:
         print(f"Отсутствует обязательный ключ в конфигурации: {exc}", file=sys.stderr)
         sys.exit(1)
