@@ -1,10 +1,16 @@
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 
-from config import (
-    RSA_KEY_SIZE,
-    RSA_PUBLIC_EXPONENT,
-)
+from config_loader import load_crypto_config
+
+
+CONFIG = load_crypto_config()
+
+RSA_KEY_SIZE = CONFIG["rsa_key_size"]
+
+RSA_PUBLIC_EXPONENT = CONFIG[
+    "rsa_public_exponent"
+]
 
 from file_utils import (
     read_bytes,
