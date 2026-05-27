@@ -31,14 +31,6 @@ def decryption_mode(settings):
         decrypted_text = sm4_decrypt(sm4_key, encrypted_data)
         save_text_file(settings["decrypted_file"], decrypted_text)
 
-        print("[✉ ? ✉] Сравнение исходного и расшифрованного файлов...")
-        files_equal = compare_files_content(settings["initial_file"], settings["decrypted_file"])
-
-        if files_equal:
-            print("[✉ ✔ ✉] Файлы совпадают.")
-        else:
-            print("[!] Файлы НЕ совпадают.")
-
         print("[✔] Файл успешно расшифрован!")
 
     except Exception as err:
