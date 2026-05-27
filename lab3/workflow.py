@@ -23,9 +23,8 @@ def run_key_generation(sym_path: str, priv_path: str, pub_path: str, key_bits: i
         storage.save_private_key(priv_path, priv_key)
         storage.save_public_key(pub_path, pub_key)
         print("Ключевая пара и сессионный ключ сгенерированы и сохранены.")
-    except Exception as exc:
-        print(f"Ошибка выполнения генерации ключей: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка генерации ключей: {err}") from err
 
 def run_encryption(src_path: str, dst_path: str, sym_path: str, priv_path: str) -> None:
     """
@@ -48,9 +47,8 @@ def run_encryption(src_path: str, dst_path: str, sym_path: str, priv_path: str) 
         ciphertext = symmetrical.cipher_blowfish_cbc(plaintext, session_key)
         storage.save_binary(dst_path, ciphertext)
         print("Данные успешно зашифрованы гибридной схемой.")
-    except Exception as exc:
-        print(f"Ошибка выполнения шифрования: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка шифрования: {err}") from err
 
 def run_decryption(src_path: str, dst_path: str, sym_path: str, priv_path: str) -> None:
     """
@@ -73,6 +71,5 @@ def run_decryption(src_path: str, dst_path: str, sym_path: str, priv_path: str) 
         plaintext = symmetrical.decipher_blowfish_cbc(ciphertext, session_key)
         storage.save_binary(dst_path, plaintext)
         print("Данные успешно расшифрованы.")
-    except Exception as exc:
-        print(f"Ошибка выполнения дешифрования: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка дешифрования: {err}") from err
