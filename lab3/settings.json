@@ -2,8 +2,20 @@
     "input_file": "data/input.txt",
     "encrypted_file": "data/encrypted.bin",
     "decrypted_file": "data/decrypted.txt",
+
     "encrypted_key_file": "keys/cast5_key.enc",
+
     "public_key_file": "keys/public.pem",
     "private_key_file": "keys/private.pem",
-    "cast5_key_size": 128
+
+    "cast5_key_size": 128,
+
+    "cast5_min_bits": 40,
+    "cast5_max_bits": 128,
+
+    "cast5_block_size": 64,
+    "cast5_iv_size": 8,
+
+    "rsa_key_size": 2048,
+    "rsa_public_exponent": 65537
 }
