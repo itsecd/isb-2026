@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives import serialization
 
 from cryptography.hazmat.primitives.serialization import load_pem_private_key, load_pem_public_key
 
+from crypto.file_utils import read_binary_file
 
 
 def generate_rsa_keys():
@@ -96,8 +97,8 @@ def load_public_key(path):
     """
 
     try:
-        with open(path, 'rb') as file:
-            return load_pem_public_key(file.read())
+        key_data = read_binary_file(path)
+        return load_pem_public_key(key_data)
 
     except FileNotFoundError:
         raise FileNotFoundError(f"Публичный ключ не найден: {path}")
@@ -122,8 +123,9 @@ def load_private_key(path):
     """
 
     try:
-        with open(path, 'rb') as file:
-            return load_pem_private_key(file.read(), password=None)
+        key_data = read_binary_file(path)
+
+        return load_pem_private_key(key_data, password=None)
 
     except FileNotFoundError:
         raise FileNotFoundError(f"Приватный ключ не найден: {path}")
