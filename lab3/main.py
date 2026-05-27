@@ -35,8 +35,8 @@ def main() -> None:
         case _ if args.nonce:
             cfg["nonce"] = args.nonce
 
-    nonce_size = cfg.get("nonce_size", 16)
-    key_size = cfg.get("key_size", 32)
+    nonce_size = cfg["nonce_size"]
+    key_size = cfg["key_size"]
 
     try:
         match args:
