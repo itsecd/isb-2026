@@ -9,10 +9,13 @@ from PyQt5.QtWidgets import (
     QSlider, QVBoxLayout, QWidget, QFrame,
 )
 
-from config import (
-    CAST5_MIN_BITS,
-    CAST5_MAX_BITS,
-)
+from config_loader import load_crypto_config
+
+
+CONFIG = load_crypto_config()
+
+CAST5_MIN_BITS = CONFIG["cast5_min_bits"]
+CAST5_MAX_BITS = CONFIG["cast5_max_bits"]
 
 from rsa_utils import (
     generate_rsa_keys,
@@ -89,7 +92,7 @@ class CryptoApp(QWidget):
         self._worker      = None
         self._valid_sizes = list(range(CAST5_MIN_BITS, CAST5_MAX_BITS + 1, 8))
 
-        self.setWindowTitle("RSA + CAST5  //  Криптосистема")
+        self.setWindowTitle("RSA + CAST5  //  КРИПТОВАЛЮТА")
         self.setMinimumSize(860, 660)
 
         self._create_widgets()
@@ -147,7 +150,7 @@ class CryptoApp(QWidget):
         root.setContentsMargins(20, 20, 20, 16)
         root.setSpacing(14)
 
-        title = QLabel("КРИПТОСИСТЕМА")
+        title = QLabel("КРИПТОВАЛЮТА")
         title.setObjectName("titleLbl")
         sub = QLabel("RSA-OAEP  ·  CAST5-CBC  ·  PKCS7")
         sub.setObjectName("subLbl")
