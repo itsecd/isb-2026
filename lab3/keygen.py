@@ -1,8 +1,7 @@
 import os
 from typing import Dict, Any
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives import serialization
-from utils import get_asym_padding
+import utils
 
 def generate_keys(settings: Dict[str, Any], key_size_bits: int = 256) -> None:
     """Генерирует ключи для гибридной системы и сериализует их на диск.
@@ -30,26 +29,13 @@ def generate_keys(settings: Dict[str, Any], key_size_bits: int = 256) -> None:
     public_key = keys.public_key()
     print("Сгенерирована пара ключей RSA (2048 бит).")
 
-    try:
-        with open(settings['public_key'], 'wb') as pub_out:
-            pub_out.write(public_key.public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo
-            ))
-        
-        with open(settings['secret_key'], 'wb') as priv_out:
-            priv_out.write(private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
-            ))
-        print(f"Асимметричные ключи сохранены в: {settings['public_key']} и {settings['secret_key']}.")
+    if not utils.save_public_key(public_key, settings['public_key']) or \
+       not utils.save_private_key(private_key, settings['secret_key']):
+        return
+    print(f"Асимметричные ключи сохранены в: {settings['public_key']} и {settings['secret_key']}.")
 
-        enc_sym_key = public_key.encrypt(sym_key, get_asym_padding())
-        
-        with open(settings['symmetric_key'], 'wb') as sym_out:
-            sym_out.write(enc_sym_key)
+    enc_sym_key = public_key.encrypt(sym_key, utils.get_asym_padding())
+    
+    if utils.write_bytes_safe(settings['symmetric_key'], enc_sym_key, "Ошибка при сохранении ключей"):
         print(f"Симметричный ключ зашифрован RSA и сохранен в: {settings['symmetric_key']}.")
         print("Генерация ключей завершена!\n")
-    except IOError as e:
-        print(f"Ошибка при сохранении ключей: {e}")

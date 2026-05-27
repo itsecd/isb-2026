@@ -1,8 +1,8 @@
 import os
 from typing import Dict, Any
-from cryptography.hazmat.primitives import serialization, padding as sym_padding
+from cryptography.hazmat.primitives import padding as sym_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from utils import get_asym_padding
+import utils
 
 def encrypt_data(settings: Dict[str, Any]) -> None:
     """Выполняет гибридное шифрование текстового файла.
@@ -16,29 +16,23 @@ def encrypt_data(settings: Dict[str, Any]) -> None:
     """
     print("Запуск режима шифрования...")
     
-    try:
-        with open(settings['secret_key'], 'rb') as pem_in:
-            private_bytes = pem_in.read()
-        private_key = serialization.load_pem_private_key(private_bytes, password=None)
-    except FileNotFoundError:
-        print(f"Файл {settings['secret_key']} не найден!")
+    private_key = utils.load_private_key(settings['secret_key'])
+    if private_key is None:
+        return
+    
+    enc_sym_key = utils.read_bytes_safe(settings['symmetric_key'])
+    if enc_sym_key is None:
         return
     
     try:
-        with open(settings['symmetric_key'], 'rb') as sym_in:
-            enc_sym_key = sym_in.read()
-        
-        sym_key = private_key.decrypt(enc_sym_key, get_asym_padding())
+        sym_key = private_key.decrypt(enc_sym_key, utils.get_asym_padding())
         print("Симметричный ключ успешно расшифрован.")
-    except FileNotFoundError:
-        print(f"Файл {settings['symmetric_key']} не найден!")
+    except Exception as e:
+        print(f"Ошибка расшифрования симметричного ключа: {e}")
         return
     
-    try:
-        with open(settings['initial_file'], 'rb') as f:
-            text = f.read()
-    except FileNotFoundError:
-        print(f"Файл {settings['initial_file']} не найден!")
+    text = utils.read_bytes_safe(settings['initial_file'])
+    if text is None:
         return
 
     padder = sym_padding.ANSIX923(128).padder() 
@@ -49,11 +43,6 @@ def encrypt_data(settings: Dict[str, Any]) -> None:
     encryptor = cipher.encryptor()
     c_text = encryptor.update(padded_text) + encryptor.finalize()
 
-    try:
-        with open(settings['encrypted_file'], 'wb') as f:
-            f.write(iv + c_text)
-        
+    if utils.write_bytes_safe(settings['encrypted_file'], iv + c_text, "Ошибка при сохранении зашифрованного файла"):
         print(f"Данные зашифрованы алгоритмом Camellia (с IV) и сохранены в: {settings['encrypted_file']}.")
         print("Шифрование завершено!\n")
-    except IOError as e:
-        print(f"Ошибка при сохранении зашифрованного файла: {e}")
