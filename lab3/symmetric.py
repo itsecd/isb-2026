@@ -1,8 +1,10 @@
 import os
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
+import file_io
 
 KEY_SIZE   = 32   # 256 бит
 NONCE_SIZE = 16   # 128 бит
+
 
 def generate_sym_key() -> bytes:
     """
@@ -22,7 +24,7 @@ def generate_sym_key() -> bytes:
 
 def generate_nonce() -> bytes:
     """
-    Генерация одноразового случайного числа (nonce) для ChaCha20.
+    Генерация одноразового случайного числа (nonce).
 
     Returns:
         bytes: Случайный nonce длиной NONCE_SIZE байт (128 бит).
@@ -41,19 +43,13 @@ def save_encrypted_sym_key(blob: bytes, path: str) -> None:
     Сохранение зашифрованного симметричного ключа в файл.
 
     Args:
-        blob: Зашифрованный симметричный ключ в байтовом формате.
-        path: Путь для сохранения файла.
+        blob: Зашифрованный симметричный ключ.
+        path: Путь для сохранения.
 
     Raises:
-        RuntimeError: Ошибка при сохранении ключа.
+        RuntimeError: Ошибка при сохранении.
     """
-    try:
-        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-        with open(path, "wb") as f:
-            f.write(blob)
-        print(f"Зашифрованный симметричный ключ сохранён: {path}")
-    except Exception as e:
-        raise RuntimeError(f"Ошибка при сохранении ключа: {e}")
+    file_io.write_file(path, blob)
 
 
 def load_encrypted_sym_key(path: str) -> bytes:
@@ -67,13 +63,10 @@ def load_encrypted_sym_key(path: str) -> bytes:
         bytes: Загруженные данные в байтовом формате.
 
     Raises:
+        FileNotFoundError: Файл не найден.
         RuntimeError: Ошибка при загрузке ключа.
     """
-    try:
-        with open(path, "rb") as f:
-            return f.read()
-    except Exception as e:
-        raise RuntimeError(f"Ошибка при загрузке ключа: {e}")
+    return file_io.read_file(path)
 
 
 def save_nonce(nonce: bytes, path: str) -> None:
@@ -81,19 +74,13 @@ def save_nonce(nonce: bytes, path: str) -> None:
     Сохранение nonce в файл.
 
     Args:
-        nonce: Nonce для сохранения в байтовом формате.
-        path: Путь для сохранения файла.
+        nonce: Nonce для сохранения.
+        path: Путь для сохранения.
 
     Raises:
-        RuntimeError: Ошибка при сохранении nonce.
+        RuntimeError: Ошибка при сохранении.
     """
-    try:
-        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-        with open(path, "wb") as f:
-            f.write(nonce)
-        print(f"Nonce сохранён: {path}")
-    except Exception as e:
-        raise RuntimeError(f"Ошибка при сохранении nonce: {e}")
+    file_io.write_file(path, nonce)
 
 
 def load_nonce(path: str) -> bytes:
@@ -107,16 +94,14 @@ def load_nonce(path: str) -> bytes:
         bytes: Загруженный nonce.
 
     Raises:
+        FileNotFoundError: Файл не найден.
+        ValueError: Некорректный размер nonce.
         RuntimeError: Ошибка при загрузке nonce.
     """
-    try:
-        with open(path, "rb") as f:
-            data = f.read()
-        if len(data) != NONCE_SIZE:
-            raise ValueError(f"Nonce должен быть {NONCE_SIZE} байт, получено {len(data)}")
-        return data
-    except Exception as e:
-        raise RuntimeError(f"Ошибка при загрузке nonce: {e}")
+    data = file_io.read_file(path)
+    if len(data) != NONCE_SIZE:
+        raise ValueError(f"Nonce должен быть {NONCE_SIZE} байт, получено {len(data)}")
+    return data
 
 
 def chacha20_crypt(data: bytes, key: bytes, nonce: bytes) -> bytes:
