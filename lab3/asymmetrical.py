@@ -14,9 +14,8 @@ def generate_rsa_keys() -> tuple[rsa.RSAPrivateKey, rsa.RSAPublicKey]:
     try:
         private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         return private_key, private_key.public_key()
-    except Exception as exc:
-        print(f"Ошибка генерации RSA-ключей: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка генерации RSA-ключей: {err}") from err
 
 def encrypt_sym_key(sym_key: bytes, public_key: rsa.RSAPublicKey) -> bytes:
     """
@@ -38,9 +37,8 @@ def encrypt_sym_key(sym_key: bytes, public_key: rsa.RSAPublicKey) -> bytes:
             algorithm=hashes.SHA256(),
             label=None
         ))
-    except Exception as exc:
-        print(f"Ошибка шифрования сессионного ключа: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка шифрования сессионного ключа: {err}") from err
 
 def decrypt_sym_key(encrypted_sym_key: bytes, private_key: rsa.RSAPrivateKey) -> bytes:
     """
@@ -62,6 +60,5 @@ def decrypt_sym_key(encrypted_sym_key: bytes, private_key: rsa.RSAPrivateKey) ->
             algorithm=hashes.SHA256(),
             label=None
         ))
-    except Exception as exc:
-        print(f"Ошибка дешифрования сессионного ключа: {exc}")
-        raise
+    except Exception as err:
+        raise Exception(f"Ошибка дешифрования сессионного ключа: {err}") from err
