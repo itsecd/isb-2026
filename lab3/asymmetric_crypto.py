@@ -1,3 +1,10 @@
+"""
+Модуль для асимметричного шифрования с использованием RSA.
+
+Содержит класс RSAKeyPair для генерации, загрузки, сохранения
+RSA-ключей и шифрования/дешифрования симметричных ключей.
+"""
+
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
@@ -5,7 +12,23 @@ from cryptography.hazmat.primitives import hashes
 from file_utils import read_binary_file, write_binary_file
 
 class RSAKeyPair:
+    """
+    Класс для управления парой RSA-ключей (приватный и публичный).
+    Предоставляет методы для генерации, сохранения, загрузки
+    и использования ключей для шифрования симметричного ключа.
+    """
+
     def __init__(self, private_key=None, public_key=None):
+        """
+        Инициализирует объект RSAKeyPair.
+
+        Если ключи не предоставлены, генерирует новую пару.
+
+        Args:
+            private_key (RSAPrivateKey, optional): Существующий приватный ключ.
+            public_key (RSAPublicKey, optional): Существующий публичный ключ.
+                                                 Используется, если предоставлен private_key.
+        """
         if private_key is None:
             self.private_key = rsa.generate_private_key(
                 public_exponent=65537,
@@ -18,6 +41,16 @@ class RSAKeyPair:
 
     @staticmethod
     def load_from_files(priv_path, pub_path):
+        """
+        Загружает RSA-ключи из файлов.
+
+        Args:
+            priv_path (str): Путь к файлу приватного ключа.
+            pub_path (str): Путь к файлу публичного ключа.
+
+        Returns:
+            RSAKeyPair: Новый экземпляр класса с загруженными ключами.
+        """
         with open(priv_path, 'rb') as f:
             priv_bytes = f.read()
         with open(pub_path, 'rb') as f:
@@ -27,6 +60,13 @@ class RSAKeyPair:
         return RSAKeyPair(private_key, public_key)
 
     def save_to_files(self, priv_path, pub_path):
+        """
+        Сохраняет RSA-ключи в файлы в формате PEM.
+
+        Args:
+            priv_path (str): Путь для сохранения приватного ключа.
+            pub_path (str): Путь для сохранения публичного ключа.
+        """
         pub_bytes = self.public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
@@ -41,6 +81,15 @@ class RSAKeyPair:
         write_binary_file(priv_path, priv_bytes)
 
     def encrypt_symmetric_key(self, symmetric_key):
+        """
+        Шифрует симметричный ключ (например, AES) с помощью публичного RSA-ключа.
+
+        Args:
+            symmetric_key (bytes): Симметричный ключ для шифрования.
+
+        Returns:
+            bytes: Зашифрованный симметричный ключ.
+        """
         return self.public_key.encrypt(
             symmetric_key,
             asym_padding.OAEP(
@@ -51,6 +100,15 @@ class RSAKeyPair:
         )
 
     def decrypt_symmetric_key(self, encrypted_symmetric_key):
+        """
+        Расшифровывает симметричный ключ (например, AES) с помощью приватного RSA-ключа.
+
+        Args:
+            encrypted_symmetric_key (bytes): Зашифрованный симметричный ключ.
+
+        Returns:
+            bytes: Расшифрованный симметричный ключ.
+        """
         return self.private_key.decrypt(
             encrypted_symmetric_key,
             asym_padding.OAEP(
