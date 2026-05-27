@@ -1,6 +1,10 @@
 import os
 import json
-from typing import Dict, Any
+from typing import Dict, Any, Optional
+
+
+DB_SALT = "users_salted.json"
+DB_NOSALT = "users_nosalt.json"
 
 
 def read_json_file(filename: str) -> Dict[str, Any]:
@@ -31,7 +35,7 @@ def write_json_file(filename: str, data: Dict[str, Any]) -> None:
         json.dump(data, json_file, indent=4, ensure_ascii=False)
 
 
-def safe_load_database(filename: str) -> Optinal[Dict[str, Any]]:
+def safe_load_database(filename: str) -> Optional[Dict[str, Any]]:
     """
     Saves the database, considering all exceptions.
 
@@ -44,10 +48,10 @@ def safe_load_database(filename: str) -> Optinal[Dict[str, Any]]:
 
     try:
         database = read_json_file(filename)
+        return database
 
     except FileNotFoundError:
-        database = {}
-        return database
+        return {}
 
     except json.JSONDecodeError:
         print(f"Error: Something went wrong with the file!\n"

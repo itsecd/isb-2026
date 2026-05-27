@@ -1,30 +1,33 @@
+import sys
 import os
 import json
 import argparse
 from hash_units import generate_salt, calculate_hash
-from file_units import read_json_file, write_json_file, safe_load_database
+from file_units import read_json_file, write_json_file, safe_load_database, DB_NOSALT, DB_SALT
 from checks import check_login, check_secure_user_data, check_unsecure_user_data
 
 
-DB_SALT = "users_salted.json"
-DB_NOSALT = "users_nosalt.json"
+def run_gui_mode() -> None:
+    """
+    Runs the program through the PyQt interface
+    """
+
+    from PyQt6.QtWidgets import QApplication
+    from gui import AuthApp
+    
+    app = QApplication(sys.argv)
+    window = AuthApp()
+    window.show()
+    sys.exit(app.exec())
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Hashing passwords and protecting credentials")
+def run_console_mode(args: argparse.Namespace) -> None:
+    """
+    Launches the program via the console.
 
-    group_mode = parser.add_mutually_exclusive_group(required = True)
-    group_mode.add_argument('-sec', '--secured', action='store_const', const='sec', dest='mode', help='use secure storage mode (with salt)')
-    group_mode.add_argument('-unsec', '--unsecured', action='store_const', const='unsec', dest='mode', help='use unsecure storage mode (without salt)')
-    
-    group_action = parser.add_mutually_exclusive_group(required = True)
-    group_action.add_argument('-reg', '--registration', action='store_const', const='reg', dest='action', help='register a new user in the system')
-    group_action.add_argument('-auth', '--authorization', action='store_const', const='auth', dest='action', help='authorize an existing user')
-    
-    parser.add_argument('-l', '--login', required=True, help='user identity login from 3 to 20 characters')
-    parser.add_argument('-p', '--password', required=True, help='user password')
-    
-    args = parser.parse_args()
+    Args:
+        args (argparse.Namespace): Arguments entered by the user.
+    """
 
     if not check_login(args.login):
         return
@@ -135,6 +138,28 @@ def main():
                 print(f"The password {args.password} is not suitable for the login {args.login}.\n"
                       f"Try to enter the password again.")
 
+
+def main():
+    if '--cli' in sys.argv:
+        parser = argparse.ArgumentParser(description="Hashing passwords and protecting credentials")
+        parser.add_argument('--cli', action='store_true', help='run in console mode')
+
+        group_mode = parser.add_mutually_exclusive_group(required = True)
+        group_mode.add_argument('-sec', '--secured', action='store_const', const='sec', dest='mode', help='use secure storage mode (with salt)')
+        group_mode.add_argument('-unsec', '--unsecured', action='store_const', const='unsec', dest='mode', help='use unsecure storage mode (without salt)')
+        
+        group_action = parser.add_mutually_exclusive_group(required = True)
+        group_action.add_argument('-reg', '--registration', action='store_const', const='reg', dest='action', help='register a new user in the system')
+        group_action.add_argument('-auth', '--authorization', action='store_const', const='auth', dest='action', help='authorize an existing user')
+        
+        parser.add_argument('-l', '--login', required=True, help='user identity login from 3 to 20 characters')
+        parser.add_argument('-p', '--password', required=True, help='user password')
+        
+        args = parser.parse_args()
+        run_console_mode(args)
+
+    else:
+        run_gui_mode()
 
 
 if __name__ == "__main__":

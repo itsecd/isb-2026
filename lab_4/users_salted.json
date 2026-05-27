@@ -1,6 +1,14 @@
 {
     "minialbina": {
-        "hash": "12345",
-        "salt": "6789"
+        "hash": "aff35d42c42bc1e2bfd80ddb9404fc9456e6cb081cf142778c842005cd92fe37",
+        "salt": "298714399eac6eae2843aeb998ae3b94"
+    },
+    "gtfrtgh": {
+        "hash": "e3a72a301aa032fe614ab81c30311005de3e851906cfbcdba0489f217cc36801",
+        "salt": "cf12d53dd7fac0be8db7d18cd8279e07"
+    },
+    "good_user": {
+        "hash": "3266a24cd8c3e2deed13a0d52748a04712896f04aa0589d7a789b06822857209",
+        "salt": "92512ad4eb8a7d4d1a66dee5ce6828fd"
     }
 }
