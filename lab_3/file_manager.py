@@ -10,7 +10,17 @@ class FileManager:
 
     @staticmethod
     def read(path: str) -> bytes:
-        """Чтение файла."""
+        """
+        Args:
+            path: str - путь к файлу
+
+        Returns:
+            bytes - содержимое файла
+
+        Raises:
+            FileNotFoundError: файл не найден
+            RuntimeError: ошибка чтения
+        """
         file_path = Path(path)
 
         if not file_path.exists():
@@ -24,7 +34,17 @@ class FileManager:
 
     @staticmethod
     def write(path: str, data: bytes) -> None:
-        """Запись файла."""
+        """
+        Args:
+            path: str - путь для сохранения
+            data: bytes - данные для записи
+
+        Returns:
+            None
+
+        Raises:
+            RuntimeError: ошибка записи
+        """
         try:
             Path(path).parent.mkdir(parents=True, exist_ok=True)
 

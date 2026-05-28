@@ -1,5 +1,5 @@
 """
-Модуль генерации ключей.
+Модуль генерации ключей (гибридная система: SEED + RSA).
 """
 
 import os
@@ -10,43 +10,58 @@ from asymmetric_cipher import AsymmetricCipher
 
 
 class KeyGenerator:
-    """Генерация SEED и RSA ключей."""
+    """Генерация SEED (симметричного) и RSA (асимметричного) ключей."""
 
-    KEY_SIZE = 16
+    @staticmethod
+    def _save_bytes(path: str, data: bytes) -> None:
+        """
+        Args:
+            path: str - путь для сохранения файла
+            data: bytes - данные для записи
+
+        Returns:
+            None
+        """
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "wb") as file:
+            file.write(data)
 
     @staticmethod
     def generate(settings: dict, log_callback) -> None:
-        """Генерация ключей гибридной системы."""
+        """
+        Args:
+            settings: dict - словарь с путями из settings.json
+            log_callback: callable - функция логирования
+
+        Returns:
+            None
+
+        Raises:
+            KeyError: отсутствует параметр в settings
+        """
         try:
-            symmetric_key = os.urandom(KeyGenerator.KEY_SIZE)
+            symmetric_key = os.urandom(settings["symmetric_key_size"])
             log_callback("SEED ключ сгенерирован.")
 
             private_key = rsa.generate_private_key(
-                public_exponent=65537,
-                key_size=2048
+                public_exponent=settings["rsa_public_exponent"],
+                key_size=settings["rsa_key_size"]
             )
             public_key = private_key.public_key()
+            log_callback("RSA ключи сгенерированы.")
 
-            Path(settings["public_key"]).parent.mkdir(
-                parents=True, exist_ok=True
+            public_bytes = public_key.public_bytes(
+                serialization.Encoding.PEM,
+                serialization.PublicFormat.SubjectPublicKeyInfo
             )
+            KeyGenerator._save_bytes(settings["public_key"], public_bytes)
 
-            with open(settings["public_key"], "wb") as file:
-                file.write(
-                    public_key.public_bytes(
-                        serialization.Encoding.PEM,
-                        serialization.PublicFormat.SubjectPublicKeyInfo
-                    )
-                )
-
-            with open(settings["private_key"], "wb") as file:
-                file.write(
-                    private_key.private_bytes(
-                        serialization.Encoding.PEM,
-                        serialization.PrivateFormat.TraditionalOpenSSL,
-                        serialization.NoEncryption()
-                    )
-                )
+            private_bytes = private_key.private_bytes(
+                serialization.Encoding.PEM,
+                serialization.PrivateFormat.TraditionalOpenSSL,
+                serialization.NoEncryption()
+            )
+            KeyGenerator._save_bytes(settings["private_key"], private_bytes)
 
             log_callback("RSA ключи сохранены.")
 
@@ -54,11 +69,9 @@ class KeyGenerator:
                 symmetric_key,
                 Path(settings["public_key"])
             )
+            KeyGenerator._save_bytes(settings["symmetric_key"], encrypted_key)
 
-            with open(settings["symmetric_key"], "wb") as file:
-                file.write(encrypted_key)
-
-            log_callback("SEED ключ зашифрован RSA.")
+            log_callback("SEED ключ зашифрован RSA и сохранён.")
 
         except KeyError as exc:
             raise KeyError(f"Отсутствует параметр в settings.json: {exc}") from exc

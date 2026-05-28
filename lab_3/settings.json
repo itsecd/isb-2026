@@ -4,5 +4,10 @@
     "decrypted_file": "data/decrypted.txt",
     "symmetric_key": "keys/seed_key.bin",
     "public_key": "keys/public.pem",
-    "private_key": "keys/private.pem"
+    "private_key": "keys/private.pem",
+    "symmetric_key_size": 16,
+    "rsa_public_exponent": 65537,
+    "rsa_key_size": 2048,
+    "seed_block_size": 128,
+    "seed_key_size": 16
 }
