@@ -1,4 +1,4 @@
-"""Модуль асимметричной криптографии (Ориса-2048)"""
+"""Модуль асимметричной криптографии (RSA-2048)"""
 
 import os
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
@@ -9,7 +9,18 @@ from file_utils import read_binary_file, write_binary_file
 
 
 def generate_rsa_keys(key_size: int = 2048, public_exponent: int = 65537):
-    """Генерирует пару RSA ключей."""
+    """Генерирует пару RSA ключей.
+    
+    Args:
+        key_size: Размер ключа в битах (по умолчанию 2048)
+        public_exponent: Открытая экспонента (по умолчанию 65537)
+    
+    Returns:
+        tuple: (private_key, public_key)
+    
+    Raises:
+        Exception: При ошибке генерации
+    """
     try:
         private_key = rsa.generate_private_key(
             public_exponent=public_exponent,
@@ -22,7 +33,18 @@ def generate_rsa_keys(key_size: int = 2048, public_exponent: int = 65537):
 
 
 def save_rsa_private_key(private_key, private_path: str) -> bool:
-    """Сохраняет приватный ключ RSA в PEM файл."""
+    """Сохраняет приватный ключ RSA в PEM файл.
+    
+    Args:
+        private_key: Объект приватного ключа RSA
+        private_path: Путь для сохранения
+    
+    Returns:
+        bool: True при успешном сохранении
+    
+    Raises:
+        Exception: При ошибке сохранения
+    """
     try:
         os.makedirs(os.path.dirname(private_path), exist_ok=True)
         
@@ -38,7 +60,18 @@ def save_rsa_private_key(private_key, private_path: str) -> bool:
 
 
 def save_rsa_public_key(public_key, public_path: str) -> bool:
-    """Сохраняет публичный ключ RSA в PEM файл."""
+    """Сохраняет публичный ключ RSA в PEM файл.
+    
+    Args:
+        public_key: Объект публичного ключа RSA
+        public_path: Путь для сохранения
+    
+    Returns:
+        bool: True при успешном сохранении
+    
+    Raises:
+        Exception: При ошибке сохранения
+    """
     try:
         os.makedirs(os.path.dirname(public_path), exist_ok=True)
         
@@ -53,7 +86,18 @@ def save_rsa_public_key(public_key, public_path: str) -> bool:
 
 
 def load_rsa_private_key(private_path: str):
-    """Загружает приватный ключ RSA из PEM файла."""
+    """Загружает приватный ключ RSA из PEM файла.
+    
+    Args:
+        private_path: Путь к файлу ключа
+    
+    Returns:
+        Объект приватного ключа RSA
+    
+    Raises:
+        FileNotFoundError: Если файл не найден
+        Exception: При ошибке загрузки
+    """
     try:
         data = read_binary_file(private_path)
         return serialization.load_pem_private_key(
@@ -68,7 +112,18 @@ def load_rsa_private_key(private_path: str):
 
 
 def load_rsa_public_key(public_path: str):
-    """Загружает публичный ключ RSA из PEM файла."""
+    """Загружает публичный ключ RSA из PEM файла.
+    
+    Args:
+        public_path: Путь к файлу ключа
+    
+    Returns:
+        Объект публичного ключа RSA
+    
+    Raises:
+        FileNotFoundError: Если файл не найден
+        Exception: При ошибке загрузки
+    """
     try:
         data = read_binary_file(public_path)
         return serialization.load_pem_public_key(
@@ -82,7 +137,21 @@ def load_rsa_public_key(public_path: str):
 
 
 def encrypt_with_rsa(data: bytes, public_key) -> bytes:
-    """Шифрует данные с помощью RSA-OAEP (SHA256)."""
+    """Шифрует данные с помощью RSA-OAEP (SHA-256).
+    
+    Максимальный размер данных для RSA-2048: 190 байт.
+    
+    Args:
+        data: Байтовые данные для шифрования
+        public_key: Публичный ключ RSA
+    
+    Returns:
+        bytes: Зашифрованные данные
+    
+    Raises:
+        ValueError: Если данные слишком большие
+        Exception: При ошибке шифрования
+    """
     try:
         max_size = 190
         match len(data):
@@ -106,7 +175,18 @@ def encrypt_with_rsa(data: bytes, public_key) -> bytes:
 
 
 def decrypt_with_rsa(ciphertext: bytes, private_key) -> bytes:
-    """Расшифровывает данные с помощью RSA-OAEP."""
+    """Расшифровывает данные с помощью RSA-OAEP.
+    
+    Args:
+        ciphertext: Зашифрованные данные
+        private_key: Приватный ключ RSA
+    
+    Returns:
+        bytes: Расшифрованные данные
+    
+    Raises:
+        Exception: При ошибке расшифрования
+    """
     try:
         return private_key.decrypt(
             ciphertext,

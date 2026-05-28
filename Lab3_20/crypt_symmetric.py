@@ -1,4 +1,4 @@
-"""Модуль симметричной криптографии (Камила)"""
+"""Модуль симметричной криптографии (Camellia)"""
 
 import os
 from cryptography.hazmat.primitives import padding
@@ -9,7 +9,17 @@ from file_utils import read_binary_file, write_binary_file
 
 
 def generate_camellia_key(key_size_bits: int) -> bytes:
-    """Генерирует случайный ключ для Camellia заданного размера."""
+    """Генерирует случайный ключ для Camellia.
+    
+    Args:
+        key_size_bits: Размер ключа (128, 192 или 256)
+    
+    Returns:
+        bytes: Ключ указанного размера
+    
+    Raises:
+        ValueError: При недопустимом размере ключа
+    """
     match key_size_bits:
         case 128 | 192 | 256:
             key_size_bytes = key_size_bits // 8
@@ -19,14 +29,30 @@ def generate_camellia_key(key_size_bits: int) -> bytes:
 
 
 def encrypt_file_camellia(input_path: str, output_path: str, key: bytes) -> bool:
-    """Шифрует файл с помощью Camellia в режиме CBC с PKCS7 паддингом."""
+    """Шифрует файл с помощью Camellia в режиме CBC.
+    
+    Формат выходного файла: [IV (16 байт)] + [зашифрованные данные]
+    
+    Args:
+        input_path: Путь к исходному файлу
+        output_path: Путь для сохранения зашифрованного файла
+        key: Ключ Camellia (16, 24 или 32 байта)
+    
+    Returns:
+        bool: True при успешном шифровании
+    
+    Raises:
+        FileNotFoundError: Если исходный файл не найден
+        ValueError: При недопустимом размере ключа
+        Exception: При других ошибках
+    """
     try:
         key_size_bits = len(key) * 8
         match key_size_bits:
             case 128 | 192 | 256:
                 pass
             case _:
-                raise ValueError(f"Недопустимый размер ключа: {key_size_bits} бит. Допустимы: 128, 192, 256")
+                raise ValueError(f"Недопустимый размер ключа: {key_size_bits} бит")
         
         plaintext = read_binary_file(input_path)
         
@@ -54,14 +80,28 @@ def encrypt_file_camellia(input_path: str, output_path: str, key: bytes) -> bool
 
 
 def decrypt_file_camellia(input_path: str, output_path: str, key: bytes) -> bool:
-    """Расшифровывает файл, зашифрованный функцией encrypt_file_camellia."""
+    """Расшифровывает файл, зашифрованный encrypt_file_camellia().
+    
+    Args:
+        input_path: Путь к зашифрованному файлу
+        output_path: Путь для сохранения расшифрованного файла
+        key: Ключ Camellia (16, 24 или 32 байта)
+    
+    Returns:
+        bool: True при успешном расшифровании
+    
+    Raises:
+        FileNotFoundError: Если зашифрованный файл не найден
+        ValueError: При недопустимом размере ключа или поврежденном файле
+        Exception: При других ошибках
+    """
     try:
         key_size_bits = len(key) * 8
         match key_size_bits:
             case 128 | 192 | 256:
                 pass
             case _:
-                raise ValueError(f"Недопустимый размер ключа: {key_size_bits} бит. Допустимы: 128, 192, 256")
+                raise ValueError(f"Недопустимый размер ключа: {key_size_bits} бит")
         
         data = read_binary_file(input_path)
         

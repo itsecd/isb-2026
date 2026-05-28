@@ -1,4 +1,3 @@
-# crypto/hybrid.py
 """Объединяющий модуль для гибридной криптосистемы"""
 
 import os
@@ -13,13 +12,25 @@ from file_utils import read_binary_file, write_binary_file
 
 
 def generate_hybrid_keys(settings: Dict[str, Any], camellia_key_size: int) -> Tuple[bool, str]:
-    """Генерация всех ключей для гибридной системы."""
+    """Генерирует все ключи для гибридной системы.
+    
+    Создает симметричный ключ Camellia и пару RSA ключей.
+    Сохраняет приватный и публичный ключи RSA, а также
+    зашифрованный публичным ключом симметричный ключ.
+    
+    Args:
+        settings: Словарь с путями к файлам (private_key, public_key, symmetric_key_encrypted)
+        camellia_key_size: Размер ключа Camellia (128, 192 или 256)
+    
+    Returns:
+        Tuple[bool, str]: (успех, сообщение)
+    """
     try:
         match camellia_key_size:
             case 128 | 192 | 256:
                 pass
             case _:
-                return False, f"Недопустимый размер ключа: {camellia_key_size} бит. Допустимы: 128, 192, 256"
+                return False, f"Недопустимый размер ключа: {camellia_key_size} бит"
         
         sym_key = generate_camellia_key(camellia_key_size)
         private_key, public_key = generate_rsa_keys()
@@ -37,7 +48,18 @@ def generate_hybrid_keys(settings: Dict[str, Any], camellia_key_size: int) -> Tu
 
 
 def encrypt_hybrid(settings: Dict[str, Any]) -> Tuple[bool, str]:
-    """Гибридное шифрование файла."""
+    """Выполняет гибридное шифрование файла.
+    
+    Расшифровывает симметричный ключ с помощью приватного RSA ключа,
+    затем шифрует исходный файл этим ключом (Camellia-CBC).
+    
+    Args:
+        settings: Словарь с путями (initial_file, encrypted_file, 
+                  private_key, symmetric_key_encrypted)
+    
+    Returns:
+        Tuple[bool, str]: (успех, сообщение)
+    """
     try:
         match os.path.exists(settings.get("initial_file", "")):
             case False:
@@ -70,7 +92,18 @@ def encrypt_hybrid(settings: Dict[str, Any]) -> Tuple[bool, str]:
 
 
 def decrypt_hybrid(settings: Dict[str, Any]) -> Tuple[bool, str]:
-    """Гибридное расшифрование файла."""
+    """Выполняет гибридное расшифрование файла.
+    
+    Расшифровывает симметричный ключ с помощью приватного RSA ключа,
+    затем расшифровывает файл этим ключом (Camellia-CBC).
+    
+    Args:
+        settings: Словарь с путями (encrypted_file, decrypted_file,
+                  private_key, symmetric_key_encrypted)
+    
+    Returns:
+        Tuple[bool, str]: (успех, сообщение)
+    """
     try:
         match os.path.exists(settings.get("encrypted_file", "")):
             case False:

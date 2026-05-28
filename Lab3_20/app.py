@@ -1,4 +1,3 @@
-# app.py
 """GUI интерфейс для гибридной криптосистемы"""
 
 import sys
@@ -133,7 +132,7 @@ class CryptoApp(QMainWindow):
                 background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
                     stop:0 #1a0b2e, stop:1 #2d1b4e);
             }
-            QLabel { color: #e0d4f7; font-size: 12px; }
+            QLabel { color: #00a550; font-size: 12px; }
             QPushButton {
                 background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                     stop:0 #6c3483, stop:1 #512e6b);
@@ -172,7 +171,7 @@ class CryptoApp(QMainWindow):
             }
             QTextEdit {
                 background-color: #1a0f2a;
-                color: #e0d4f7;
+                color: #50c878;
                 border: 1px solid #6c3483;
                 border-radius: 6px;
                 font-family: monospace;

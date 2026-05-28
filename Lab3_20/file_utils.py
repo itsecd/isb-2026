@@ -4,9 +4,19 @@ import os
 import json
 from typing import Any, Dict
 
-
 def read_binary_file(file_path: str) -> bytes:
-    """Читает данные из бинарного файла."""
+    """Читает данные из бинарного файла.
+    
+    Args:
+        file_path: Путь к файлу
+    
+    Returns:
+        bytes: Содержимое файла
+    
+    Raises:
+        FileNotFoundError: Если файл не существует
+        PermissionError: Если нет прав на чтение
+    """
     try:
         match os.path.exists(file_path):
             case False:
@@ -25,7 +35,18 @@ def read_binary_file(file_path: str) -> bytes:
 
 
 def write_binary_file(file_path: str, data: bytes) -> bool:
-    """Записывает байтовые данные в бинарный файл."""
+    """Записывает байтовые данные в бинарный файл.
+    
+    Args:
+        file_path: Путь для сохранения
+        data: Байтовые данные
+    
+    Returns:
+        bool: True при успешной записи
+    
+    Raises:
+        PermissionError: Если нет прав на запись
+    """
     try:
         directory = os.path.dirname(file_path)
         match directory:
@@ -44,13 +65,21 @@ def write_binary_file(file_path: str, data: bytes) -> bool:
 
 
 def read_text_file(file_path: str, encoding: str = 'utf-8') -> str:
-    """Читает данные из текстового файла."""
+    """Читает данные из текстового файла.
+    
+    Args:
+        file_path: Путь к файлу
+        encoding: Кодировка (по умолчанию 'utf-8')
+    
+    Returns:
+        str: Содержимое файла
+    
+    Raises:
+        FileNotFoundError: Если файл не существует
+    """
     try:
-        match os.path.exists(file_path):
-            case False:
-                raise FileNotFoundError(f"Файл не найден: {file_path}")
-            case _:
-                pass
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"Файл не найден: {file_path}")
         
         with open(file_path, 'r', encoding=encoding) as f:
             return f.read()
@@ -61,14 +90,20 @@ def read_text_file(file_path: str, encoding: str = 'utf-8') -> str:
 
 
 def write_text_file(file_path: str, data: str, encoding: str = 'utf-8') -> bool:
-    """Записывает текстовые данные в файл."""
+    """Записывает текстовые данные в файл.
+    
+    Args:
+        file_path: Путь для сохранения
+        data: Текстовые данные
+        encoding: Кодировка (по умолчанию 'utf-8')
+    
+    Returns:
+        bool: True при успешной записи
+    """
     try:
         directory = os.path.dirname(file_path)
-        match directory:
-            case "":
-                pass
-            case _:
-                os.makedirs(directory, exist_ok=True)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
         
         with open(file_path, 'w', encoding=encoding) as f:
             f.write(data)
@@ -78,7 +113,18 @@ def write_text_file(file_path: str, data: str, encoding: str = 'utf-8') -> bool:
 
 
 def load_json_settings(file_path: str, default_settings: Dict[str, Any] = None) -> Dict[str, Any]:
-    """Загружает настройки из JSON файла."""
+    """Загружает настройки из JSON файла.
+    
+    Обязательные поля: initial_file, encrypted_file, decrypted_file,
+    symmetric_key_encrypted, public_key, private_key.
+    
+    Args:
+        file_path: Путь к JSON файлу
+        default_settings: Настройки по умолчанию
+    
+    Returns:
+        Dict[str, Any]: Словарь с настройками
+    """
     required_fields = [
         "initial_file", "encrypted_file", "decrypted_file",
         "symmetric_key_encrypted", "public_key", "private_key"
@@ -118,7 +164,15 @@ def load_json_settings(file_path: str, default_settings: Dict[str, Any] = None) 
 
 
 def save_json_settings(file_path: str, settings: Dict[str, Any]) -> bool:
-    """Сохраняет настройки в JSON файл."""
+    """Сохраняет настройки в JSON файл.
+    
+    Args:
+        file_path: Путь для сохранения
+        settings: Словарь с настройками
+    
+    Returns:
+        bool: True при успешном сохранении
+    """
     try:
         write_text_file(file_path, json.dumps(settings, indent=4, ensure_ascii=False))
         return True
@@ -127,7 +181,14 @@ def save_json_settings(file_path: str, settings: Dict[str, Any]) -> bool:
 
 
 def get_file_size_str(file_path: str) -> str:
-    """Возвращает размер файла в удобочитаемом формате."""
+    """Возвращает размер файла в удобочитаемом формате.
+    
+    Args:
+        file_path: Путь к файлу
+    
+    Returns:
+        str: Размер в формате "X B/KB/MB" или "Не указан"
+    """
     try:
         match os.path.exists(file_path):
             case False:
