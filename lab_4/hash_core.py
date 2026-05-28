@@ -1,279 +1,208 @@
+from __future__ import annotations
+
 import hashlib
-import json
 import random
-import string
 from dataclasses import dataclass
-from pathlib import Path
+from typing import Callable, Iterable
 
-
-def load_config(config_path: str | Path | None = None) -> dict:
-    """Загрузить настройки проекта из JSON-файла."""
-    path = Path(config_path) if config_path else Path(__file__).with_name("config.json")
-    try:
-        with path.open("r", encoding="utf-8") as file:
-            return json.load(file)
-    except FileNotFoundError as exc:
-        raise FileNotFoundError(
-            f"Не найден файл конфигурации: {path}. "
-            "Положите config.json рядом с hash_core.py."
-        ) from exc
-
-
-CONFIG = load_config()
-
-HASHING_CONFIG = CONFIG["hashing"]
-EXPERIMENT_CONFIG = CONFIG["experiments"]
-BITS_CONFIG = CONFIG["bits"]
-QUALITY_CONFIG = CONFIG["quality"]
-DISPLAY_CONFIG = CONFIG["display"]
-GUI_CONFIG = CONFIG["gui"]
-
-DEFAULT_ALGORITHM = HASHING_CONFIG["default_algorithm"]
-TEXT_ENCODING = HASHING_CONFIG["text_encoding"]
-DECODE_ERRORS = HASHING_CONFIG["decode_errors"]
-SUPPORTED_ALGORITHMS = tuple(HASHING_CONFIG["supported_algorithms"])
-
-DEFAULT_EXPERIMENT_COUNT = EXPERIMENT_CONFIG["default_count"]
-MIN_EXPERIMENT_COUNT = EXPERIMENT_CONFIG["min_count"]
-MAX_EXPERIMENT_COUNT = EXPERIMENT_CONFIG["max_count"]
-MODIFICATION_TYPES = tuple(EXPERIMENT_CONFIG["modification_types"])
-MODIFICATION_LABELS = EXPERIMENT_CONFIG["modification_labels"]
-ALL_MODIFICATIONS = EXPERIMENT_CONFIG["all_modifications_alias"]
-
-BITS_IN_HEX_DIGIT = BITS_CONFIG["hex_digit"]
-BITS_IN_BYTE = BITS_CONFIG["byte"]
-
-HASH_PREVIEW_LENGTH = DISPLAY_CONFIG["hash_preview_length"]
-TABLE_HASH_PREVIEW_LENGTH = DISPLAY_CONFIG["table_hash_preview_length"]
-TEXT_PREVIEW_LENGTH = DISPLAY_CONFIG["text_preview_length"]
-PROGRESS_BAR_LENGTH = DISPLAY_CONFIG["progress_bar_length"]
-PROGRESS_NCOLS = DISPLAY_CONFIG["progress_ncols"]
-
-EXCELLENT_AVALANCHE_PERCENT = QUALITY_CONFIG["excellent_percent"]
-MODERATE_AVALANCHE_PERCENT = QUALITY_CONFIG["moderate_percent"]
-WARNING_AVALANCHE_PERCENT = QUALITY_CONFIG["warning_percent"]
-IDEAL_AVALANCHE_PERCENT = QUALITY_CONFIG["ideal_percent"]
-QUALITY_LEVELS = QUALITY_CONFIG["levels"]
-
-GUI_WINDOW_TITLE = GUI_CONFIG["window_title"]
-GUI_MIN_WIDTH = GUI_CONFIG["min_width"]
-GUI_MIN_HEIGHT = GUI_CONFIG["min_height"]
-GUI_DEFAULT_TEXT = GUI_CONFIG["default_text"]
-GUI_SPLITTER_SIZES = GUI_CONFIG["splitter_sizes"]
-GUI_COLORS = GUI_CONFIG["colors"]
-
-MODIFICATION_ERROR_HINT = ", ".join(MODIFICATION_TYPES)
-
-
-@dataclass
-class AvalancheResult:
-    """Результат одного эксперимента по лавинному эффекту."""
-    original_text: str
-    modified_text: str
-    modification_type: str
-    original_hash: str
-    modified_hash: str
-    changed_bits: int
-    total_bits: int
-    diff_percent: float
+import config_loader as settings
 
 
 @dataclass(frozen=True)
 class AvalancheQuality:
-    """Текстовая оценка качества лавинного эффекта."""
     level: str
     title: str
     description: str
 
 
-def compute_hash(text: str, algorithm: str = DEFAULT_ALGORITHM) -> str:
-    """Вычислить хеш строки."""
-    if algorithm not in SUPPORTED_ALGORITHMS:
-        raise ValueError(
-            f"Неподдерживаемый алгоритм '{algorithm}'. "
-            f"Доступны: {', '.join(SUPPORTED_ALGORITHMS)}"
-        )
-    h = hashlib.new(algorithm, text.encode(TEXT_ENCODING))
+@dataclass(frozen=True)
+class AvalancheResult:
+    original_text: str
+    modified_text: str
+    original_hash: str
+    modified_hash: str
+    changed_bits: int
+    total_bits: int
+    diff_percent: float
+    modification_type: str
+
+
+def compute_hash(text: str, algorithm: str = settings.DEFAULT_ALGORITHM) -> str:
+    """Посчитать хеш строки выбранным алгоритмом."""
+    if algorithm not in settings.SUPPORTED_ALGORITHMS:
+        raise ValueError(f"Неподдерживаемый алгоритм: {algorithm}")
+    h = hashlib.new(algorithm)
+    h.update(text.encode(settings.TEXT_ENCODING))
     return h.hexdigest()
 
 
-def hash_to_bits(hex_digest: str) -> str:
-    """Преобразовать hex-хеш в двоичную строку."""
-    return bin(int(hex_digest, 16))[2:].zfill(len(hex_digest) * BITS_IN_HEX_DIGIT)
+def hash_to_bits(hash_hex: str) -> str:
+    """Преобразовать hex-представление хеша в строку битов."""
+    return "".join(f"{int(char, 16):0{settings.HEX_DIGIT_BITS}b}" for char in hash_hex)
 
 
-def count_differing_bits(hash1: str, hash2: str) -> int:
-    """Подсчитать количество различающихся бит."""
-    if len(hash1) != len(hash2):
-        raise ValueError("Длины хешей не совпадают.")
-    bits1 = hash_to_bits(hash1)
-    bits2 = hash_to_bits(hash2)
-    return sum(b1 != b2 for b1, b2 in zip(bits1, bits2))
+def count_differing_bits(hash_a: str, hash_b: str) -> int:
+    """Подсчитать количество различающихся битов в двух hex-хешах."""
+    bits_a = hash_to_bits(hash_a)
+    bits_b = hash_to_bits(hash_b)
+    if len(bits_a) != len(bits_b):
+        raise ValueError("Длины хешей не совпадают")
+    return sum(a != b for a, b in zip(bits_a, bits_b))
 
 
-def diff_percent(changed: int, total: int) -> float:
-    """Процент изменённых бит."""
-    if total == 0:
+def diff_percent(changed_bits: int, total_bits: int) -> float:
+    """Вернуть процент изменившихся битов."""
+    if total_bits == 0:
         return 0.0
-    return round(changed / total * 100, 2)
+    return changed_bits * 100 / total_bits
 
 
 def change_one_char(text: str, position: int | None = None) -> tuple[str, int]:
-    """Заменить один символ на другой."""
+    """Заменить один символ строки на другой печатный символ."""
     if not text:
-        raise ValueError("Строка не должна быть пустой.")
-    if position is None:
-        position = random.randint(0, len(text) - 1)
-    position = position % len(text)
-    old_char = text[position]
-    alphabet = string.ascii_letters + string.digits
-    candidates = [c for c in alphabet if c != old_char]
-    new_char = random.choice(candidates)
-    modified = text[:position] + new_char + text[position + 1:]
-    return modified, position
+        raise ValueError("Нельзя изменить символ в пустой строке")
+
+    pos = random.randrange(len(text)) if position is None else position % len(text)
+    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    current = text[pos]
+    replacement = random.choice(alphabet)
+    while replacement == current:
+        replacement = random.choice(alphabet)
+
+    return text[:pos] + replacement + text[pos + 1 :], pos
 
 
-def change_one_bit(
-    text: str,
-    byte_index: int | None = None,
-    bit_index: int | None = None,
-) -> tuple[str, int, int]:
-    """Инвертировать один бит в байтовом представлении строки."""
+def change_one_bit(text: str) -> tuple[str, int, int]:
+    """Инвертировать один случайный бит в UTF-8-представлении строки."""
     if not text:
-        raise ValueError("Строка не должна быть пустой.")
-    data = bytearray(text.encode(TEXT_ENCODING))
-    if byte_index is None:
-        byte_index = random.randint(0, len(data) - 1)
-    byte_index = byte_index % len(data)
-    if bit_index is None:
-        bit_index = random.randint(0, BITS_IN_BYTE - 1)
-    bit_index = bit_index % BITS_IN_BYTE
-    data[byte_index] ^= (1 << bit_index)
-    try:
-        modified = data.decode(TEXT_ENCODING)
-    except UnicodeDecodeError:
-        modified = data.decode(TEXT_ENCODING, errors=DECODE_ERRORS)
-    return modified, byte_index, bit_index
+        raise ValueError("Нельзя изменить бит в пустой строке")
+
+    data = bytearray(text.encode(settings.TEXT_ENCODING))
+    byte_i = random.randrange(len(data))
+    bit_i = random.randrange(settings.BYTE_BITS)
+    data[byte_i] ^= 1 << bit_i
+    modified = data.decode(settings.TEXT_ENCODING, errors=settings.DECODE_ERRORS)
+    return modified, byte_i, bit_i
 
 
 def change_case(text: str, position: int | None = None) -> tuple[str, int]:
     """Изменить регистр одной буквы."""
-    letter_positions = [i for i, c in enumerate(text) if c.isalpha()]
+    letter_positions = [i for i, char in enumerate(text) if char.isalpha()]
     if not letter_positions:
-        raise ValueError("В строке нет букв для изменения регистра.")
-    if position is None or position not in letter_positions:
-        position = random.choice(letter_positions)
-    char = text[position]
-    new_char = char.lower() if char.isupper() else char.upper()
-    modified = text[:position] + new_char + text[position + 1:]
-    return modified, position
+        raise ValueError("В строке нет букв для смены регистра")
+
+    if position is None:
+        pos = random.choice(letter_positions)
+    else:
+        pos = letter_positions[position % len(letter_positions)]
+
+    char = text[pos]
+    replacement = char.lower() if char.isupper() else char.upper()
+    return text[:pos] + replacement + text[pos + 1 :], pos
 
 
-def format_modification_error(modification: str) -> str:
-    return (
-        f"Неизвестный тип модификации: '{modification}'. "
-        f"Ожидается: {MODIFICATION_ERROR_HINT}."
-    )
-
-
-def get_avalanche_quality(percent: float) -> AvalancheQuality:
-    """Вернуть оценку качества лавинного эффекта по проценту различий."""
-    match percent:
-        case p if p >= EXCELLENT_AVALANCHE_PERCENT:
-            level = "excellent"
-        case p if p >= MODERATE_AVALANCHE_PERCENT:
-            level = "moderate"
+def _apply_modification(text: str, modification_type: str) -> tuple[str, str]:
+    match modification_type:
+        case "char":
+            modified, pos = change_one_char(text)
+            label = settings.MODIFICATION_LABELS["char"].format(pos=pos)
+        case "bit":
+            modified, byte_i, bit_i = change_one_bit(text)
+            label = settings.MODIFICATION_LABELS["bit"].format(byte_i=byte_i, bit_i=bit_i)
+        case "case":
+            modified, pos = change_case(text)
+            label = settings.MODIFICATION_LABELS["case"].format(pos=pos)
         case _:
-            level = "weak"
-
-    level_config = QUALITY_LEVELS[level]
-    return AvalancheQuality(
-        level=level,
-        title=level_config["title"],
-        description=level_config["description"],
-    )
+            raise ValueError(f"Неизвестный тип модификации: {modification_type}")
+    return modified, label
 
 
 def run_single_experiment(
-    original: str,
-    modification: str = "char",
-    algorithm: str = DEFAULT_ALGORITHM,
+    text: str,
+    modification_type: str,
+    algorithm: str = settings.DEFAULT_ALGORITHM,
 ) -> AvalancheResult:
-    """Провести один эксперимент лавинного эффекта."""
-    match modification:
-        case "char":
-            modified, _ = change_one_char(original)
-            mod_label = MODIFICATION_LABELS["char"]
-        case "bit":
-            modified, byte_i, bit_i = change_one_bit(original)
-            mod_label = MODIFICATION_LABELS["bit"].format(byte_i=byte_i, bit_i=bit_i)
-        case "case":
-            modified, pos = change_case(original)
-            mod_label = MODIFICATION_LABELS["case"].format(pos=pos)
-        case _:
-            raise ValueError(format_modification_error(modification))
-
-    h_orig = compute_hash(original, algorithm)
-    h_mod = compute_hash(modified, algorithm)
-    changed = count_differing_bits(h_orig, h_mod)
-    total = len(hash_to_bits(h_orig))
+    """Выполнить один эксперимент для выбранного типа изменения."""
+    modified_text, label = _apply_modification(text, modification_type)
+    original_hash = compute_hash(text, algorithm)
+    modified_hash = compute_hash(modified_text, algorithm)
+    changed_bits = count_differing_bits(original_hash, modified_hash)
+    total_bits = len(hash_to_bits(original_hash))
 
     return AvalancheResult(
-        original_text=original,
-        modified_text=modified,
-        modification_type=mod_label,
-        original_hash=h_orig,
-        modified_hash=h_mod,
-        changed_bits=changed,
-        total_bits=total,
-        diff_percent=diff_percent(changed, total),
+        original_text=text,
+        modified_text=modified_text,
+        original_hash=original_hash,
+        modified_hash=modified_hash,
+        changed_bits=changed_bits,
+        total_bits=total_bits,
+        diff_percent=diff_percent(changed_bits, total_bits),
+        modification_type=label,
     )
 
 
 def run_experiments(
-    original: str,
-    count: int = DEFAULT_EXPERIMENT_COUNT,
-    algorithm: str = DEFAULT_ALGORITHM,
-    progress_callback=None,
+    text: str,
+    count: int = settings.DEFAULT_EXPERIMENT_COUNT,
+    algorithm: str = settings.DEFAULT_ALGORITHM,
+    modifications: Iterable[str] = settings.MODIFICATION_TYPES,
+    progress_callback: Callable[[int, int], None] | None = None,
 ) -> list[AvalancheResult]:
-    """Провести серию экспериментов по всем типам модификаций."""
-    if count < MIN_EXPERIMENT_COUNT:
-        raise ValueError(f"Количество экспериментов должно быть >= {MIN_EXPERIMENT_COUNT}.")
-    results = []
-    total_steps = count * len(MODIFICATION_TYPES)
-    step = 0
-    for mod in MODIFICATION_TYPES:
+    """Запустить серию экспериментов."""
+    if count < settings.MIN_EXPERIMENT_COUNT:
+        raise ValueError(f"Количество экспериментов должно быть >= {settings.MIN_EXPERIMENT_COUNT}")
+
+    modification_list = tuple(modifications)
+    total = count * len(modification_list)
+    results: list[AvalancheResult] = []
+
+    for mod in modification_list:
         for _ in range(count):
-            try:
-                result = run_single_experiment(original, mod, algorithm)
-                results.append(result)
-            except ValueError:
-                pass  # например, строка без букв для 'case' — пропускаем
-            step += 1
-            if progress_callback:
-                progress_callback(step, total_steps)
+            results.append(run_single_experiment(text, mod, algorithm))
+            if progress_callback is not None:
+                progress_callback(len(results), total)
+
     return results
 
 
 def summarize_results(results: list[AvalancheResult]) -> dict:
-    """Сводная статистика по списку результатов."""
+    """Сформировать сводную статистику по экспериментам."""
     if not results:
         return {}
-    percents = [r.diff_percent for r in results]
-    bits = [r.changed_bits for r in results]
-    by_mod: dict[str, list[float]] = {}
-    for r in results:
-        by_mod.setdefault(r.modification_type, []).append(r.diff_percent)
+
+    total_experiments = len(results)
+    avg_diff = sum(r.diff_percent for r in results) / total_experiments
+    avg_bits = round(sum(r.changed_bits for r in results) / total_experiments, 2)
+    total_bits = results[0].total_bits
+
+    by_modification: dict[str, float] = {}
+    for mod in dict.fromkeys(r.modification_type for r in results):
+        mod_results = [r for r in results if r.modification_type == mod]
+        by_modification[mod] = round(
+            sum(r.diff_percent for r in mod_results) / len(mod_results),
+            2,
+        )
 
     return {
-        "total_experiments": len(results),
-        "avg_diff_percent": round(sum(percents) / len(percents), 2),
-        "min_diff_percent": min(percents),
-        "max_diff_percent": max(percents),
-        "avg_changed_bits": round(sum(bits) / len(bits), 1),
-        "total_bits": results[0].total_bits,
-        "by_modification": {
-            mod: round(sum(vals) / len(vals), 2)
-            for mod, vals in by_mod.items()
-        },
+        "total_experiments": total_experiments,
+        "avg_diff_percent": round(avg_diff, 2),
+        "min_diff_percent": round(min(r.diff_percent for r in results), 2),
+        "max_diff_percent": round(max(r.diff_percent for r in results), 2),
+        "avg_changed_bits": avg_bits,
+        "total_bits": total_bits,
+        "by_modification": by_modification,
     }
+
+
+def get_avalanche_quality(percent: float) -> AvalancheQuality:
+    """Оценить качество лавинного эффекта по проценту изменившихся битов."""
+    if percent >= settings.EXCELLENT_AVALANCHE_PERCENT:
+        level = "excellent"
+    elif percent >= settings.MODERATE_AVALANCHE_PERCENT:
+        level = "moderate"
+    else:
+        level = "weak"
+
+    data = settings.QUALITY_LEVELS[level]
+    return AvalancheQuality(level=level, title=data["title"], description=data["description"])
+

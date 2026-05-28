@@ -6,7 +6,7 @@ try:
 except ImportError:
     tqdm = None
 
-from hash_core import (
+from config_loader import (
     ALL_MODIFICATIONS,
     CONFIG,
     DEFAULT_ALGORITHM,
@@ -18,6 +18,8 @@ from hash_core import (
     PROGRESS_BAR_LENGTH,
     PROGRESS_NCOLS,
     SUPPORTED_ALGORITHMS,
+)
+from hash_core import (
     compute_hash,
     get_avalanche_quality,
     run_single_experiment,

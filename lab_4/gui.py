@@ -15,7 +15,7 @@ except ImportError:
     print("Ошибка: PyQt6 не установлен. Выполните: pip install PyQt6")
     sys.exit(1)
 
-from hash_core import (
+from config_loader import (
     EXCELLENT_AVALANCHE_PERCENT,
     GUI_COLORS,
     GUI_DEFAULT_TEXT,
@@ -33,6 +33,8 @@ from hash_core import (
     WARNING_AVALANCHE_PERCENT,
     TABLE_HASH_PREVIEW_LENGTH,
     TEXT_PREVIEW_LENGTH,
+)
+from hash_core import (
     AvalancheResult,
     compute_hash,
     get_avalanche_quality,
