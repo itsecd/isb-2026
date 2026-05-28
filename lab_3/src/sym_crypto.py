@@ -3,7 +3,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, modes
 from cryptography.hazmat.decrepit.ciphers import algorithms as decrepit_algorithms
 from cryptography.hazmat.primitives import padding as sym_padding
 
-def encrypt_seed(plain_text: bytes, sym_key: bytes, block_size: int = 128) -> tuple[bytes, bytes]:
+def encrypt_seed(plain_text: bytes, sym_key: bytes, block_size: int) -> tuple[bytes, bytes]:
     """Data encryption using the SEED algorithm.
         Args:
             plain_text (bytes): Text to be encrypted.
@@ -27,7 +27,7 @@ def encrypt_seed(plain_text: bytes, sym_key: bytes, block_size: int = 128) -> tu
     except Exception as e:
         raise RuntimeError(f"Symmetric Encryption failure (SEED): {e}")
 
-def decrypt_seed(cipher_text: bytes, sym_key: bytes, iv: bytes, block_size: int = 128) -> bytes:
+def decrypt_seed(cipher_text: bytes, sym_key: bytes, iv: bytes, block_size: int) -> bytes:
     """Decryption of data by the SEED algorithm.
         Args:
             cipher_text (bytes): Text to be decrypted.

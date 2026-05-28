@@ -17,7 +17,7 @@ def get_asym_padding():
     except Exception as e:
         raise RuntimeError(f"RSA padding configuration error: {e}")
 
-def generate_rsa_keys(public_exponent: int = 65537, key_size: int = 2048) -> tuple[bytes, bytes]:
+def generate_rsa_keys(public_exponent: int, key_size: int) -> tuple[bytes, bytes]:
     """Generating an RSA key pair.
         Args:
             public_exponent: Public exponent of the RSA key to use.
