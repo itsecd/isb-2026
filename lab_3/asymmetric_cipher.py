@@ -5,6 +5,7 @@
 from pathlib import Path
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes, serialization
+from file_manager import FileManager
 
 
 class AsymmetricCipher:
@@ -28,9 +29,7 @@ class AsymmetricCipher:
             raise FileNotFoundError("Файл открытого ключа не найден.")
 
         try:
-            with open(public_key_path, "rb") as file:
-                public_key_data = file.read()
-
+            public_key_data = FileManager.read(str(public_key_path))
             public_key = serialization.load_pem_public_key(public_key_data)
 
             return public_key.encrypt(
@@ -63,9 +62,7 @@ class AsymmetricCipher:
             raise FileNotFoundError("Файл закрытого ключа не найден.")
 
         try:
-            with open(private_key_path, "rb") as file:
-                private_key_data = file.read()
-
+            private_key_data = FileManager.read(str(private_key_path))
             private_key = serialization.load_pem_private_key(
                 private_key_data,
                 password=None

@@ -7,24 +7,11 @@ from pathlib import Path
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from asymmetric_cipher import AsymmetricCipher
+from file_manager import FileManager
 
 
 class KeyGenerator:
     """Генерация SEED (симметричного) и RSA (асимметричного) ключей."""
-
-    @staticmethod
-    def _save_bytes(path: str, data: bytes) -> None:
-        """
-        Args:
-            path: str - путь для сохранения файла
-            data: bytes - данные для записи
-
-        Returns:
-            None
-        """
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
-        with open(path, "wb") as file:
-            file.write(data)
 
     @staticmethod
     def generate(settings: dict, log_callback) -> None:
@@ -54,14 +41,14 @@ class KeyGenerator:
                 serialization.Encoding.PEM,
                 serialization.PublicFormat.SubjectPublicKeyInfo
             )
-            KeyGenerator._save_bytes(settings["public_key"], public_bytes)
+            FileManager.write(settings["public_key"], public_bytes)
 
             private_bytes = private_key.private_bytes(
                 serialization.Encoding.PEM,
                 serialization.PrivateFormat.TraditionalOpenSSL,
                 serialization.NoEncryption()
             )
-            KeyGenerator._save_bytes(settings["private_key"], private_bytes)
+            FileManager.write(settings["private_key"], private_bytes)
 
             log_callback("RSA ключи сохранены.")
 
@@ -69,7 +56,7 @@ class KeyGenerator:
                 symmetric_key,
                 Path(settings["public_key"])
             )
-            KeyGenerator._save_bytes(settings["symmetric_key"], encrypted_key)
+            FileManager.write(settings["symmetric_key"], encrypted_key)
 
             log_callback("SEED ключ зашифрован RSA и сохранён.")
 

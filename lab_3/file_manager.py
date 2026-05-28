@@ -2,11 +2,12 @@
 Модуль работы с файлами.
 """
 
+import json
 from pathlib import Path
 
 
 class FileManager:
-    """Чтение и запись файлов."""
+    """Чтение, запись файлов и работа с JSON."""
 
     @staticmethod
     def read(path: str) -> bytes:
@@ -53,3 +54,23 @@ class FileManager:
 
         except Exception as exc:
             raise RuntimeError(f"Ошибка записи файла: {exc}") from exc
+
+    @staticmethod
+    def load_json(path: str) -> dict:
+        """
+        Args:
+            path: str - путь к JSON файлу
+
+        Returns:
+            dict - загруженные данные
+
+        Raises:
+            FileNotFoundError: файл не найден
+            json.JSONDecodeError: ошибка парсинга JSON
+            RuntimeError: ошибка чтения
+        """
+        data = FileManager.read(path)
+        try:
+            return json.loads(data.decode("utf-8"))
+        except json.JSONDecodeError as exc:
+            raise json.JSONDecodeError(f"Ошибка парсинга JSON: {exc}", exc.doc, exc.pos)

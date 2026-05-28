@@ -2,8 +2,8 @@
 Главное приложение (PyQt5).
 """
 
-import json
 import sys
+import json
 from pathlib import Path
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout,
@@ -20,39 +20,23 @@ class MainWindow(QWidget):
     """Главное окно приложения."""
 
     def __init__(self) -> None:
-        """
-        Args: None
-
-        Returns: None
-        """
         super().__init__()
         self.setWindowTitle("Гибридная система — SEED + RSA")
         self.resize(500, 400)
-        self.settings = self.load_settings()
         self.init_ui()
 
-    def load_settings(self) -> dict:
-        """
-        Args: None
-
-        Returns:
-            dict - настройки из файла
-
-        Raises:
-            SystemExit: ошибка загрузки
-        """
+    def _load_settings(self) -> dict:
+        """Загружает настройки из JSON. Если файла нет — программа завершается."""
         try:
-            with open("settings.json", "r", encoding="utf-8") as file:
-                return json.load(file)
+            return FileManager.load_json("settings.json")
         except FileNotFoundError:
-            QMessageBox.critical(self, "Ошибка", "settings.json не найден.")
+            QMessageBox.critical(self, "Ошибка", "settings.json не найден. Программа будет закрыта.")
             sys.exit(1)
         except json.JSONDecodeError:
-            QMessageBox.critical(self, "Ошибка", "Ошибка формата JSON.")
+            QMessageBox.critical(self, "Ошибка", "Ошибка формата JSON. Программа будет закрыта.")
             sys.exit(1)
 
     def init_ui(self) -> None:
-        """Args: None Returns: None"""
         layout = QVBoxLayout()
 
         self.log = QTextEdit()
@@ -75,85 +59,72 @@ class MainWindow(QWidget):
         self.setLayout(layout)
 
     def log_message(self, message: str) -> None:
-        """
-        Args:
-            message: str - сообщение для лога
-
-        Returns: None
-        """
         self.log.append(message)
 
     def safe_generate(self) -> None:
-        """Args: None Returns: None"""
         try:
-            KeyGenerator.generate(self.settings, self.log_message)
+            settings = self._load_settings()
+            KeyGenerator.generate(settings, self.log_message)
             QMessageBox.information(self, "Успех", "Ключи созданы.")
         except Exception as exc:
             self.handle_error(exc)
 
     def safe_encrypt(self) -> None:
-        """Args: None Returns: None"""
         try:
-            encrypted_key = FileManager.read(self.settings["symmetric_key"])
+            settings = self._load_settings()
+            encrypted_key = FileManager.read(settings["symmetric_key"])
             symmetric_key = AsymmetricCipher.decrypt(
                 encrypted_key,
-                Path(self.settings["private_key"])
+                Path(settings["private_key"])
             )
 
             self.log_message("SEED ключ расшифрован.")
 
-            data = FileManager.read(self.settings["initial_file"])
+            data = FileManager.read(settings["initial_file"])
             encrypted = SymmetricCipher.encrypt(
                 data,
                 symmetric_key,
-                self.settings["seed_block_size"],
-                self.settings["seed_key_size"]
+                settings["seed_block_size"],
+                settings["seed_key_size"]
             )
-            FileManager.write(self.settings["encrypted_file"], encrypted)
+            FileManager.write(settings["encrypted_file"], encrypted)
 
             self.log_message("Файл успешно зашифрован.")
-
+            QMessageBox.information(self, "Успех", "Файл зашифрован.")
         except Exception as exc:
             self.handle_error(exc)
 
     def safe_decrypt(self) -> None:
-        """Args: None Returns: None"""
         try:
-            encrypted_key = FileManager.read(self.settings["symmetric_key"])
+            settings = self._load_settings()
+            encrypted_key = FileManager.read(settings["symmetric_key"])
             symmetric_key = AsymmetricCipher.decrypt(
                 encrypted_key,
-                Path(self.settings["private_key"])
+                Path(settings["private_key"])
             )
 
             self.log_message("SEED ключ расшифрован.")
 
-            encrypted_data = FileManager.read(self.settings["encrypted_file"])
+            encrypted_data = FileManager.read(settings["encrypted_file"])
             decrypted = SymmetricCipher.decrypt(
                 encrypted_data,
                 symmetric_key,
-                self.settings["seed_block_size"],
-                self.settings["seed_key_size"]
+                settings["seed_block_size"],
+                settings["seed_key_size"]
             )
-            FileManager.write(self.settings["decrypted_file"], decrypted)
+            FileManager.write(settings["decrypted_file"], decrypted)
 
             self.log_message("Файл успешно расшифрован.")
-
+            QMessageBox.information(self, "Успех", "Файл расшифрован.")
         except Exception as exc:
             self.handle_error(exc)
 
     def handle_error(self, error: Exception) -> None:
-        """
-        Args:
-            error: Exception - ошибка
-
-        Returns: None
-        """
         self.log_message(f"Ошибка: {error}")
         QMessageBox.critical(self, "Ошибка", str(error))
 
 
 def main() -> None:
-    """Args: None Returns: None"""
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
