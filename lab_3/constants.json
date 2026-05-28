@@ -1,0 +1,17 @@
+{
+  "RSA_PRIVATE_FILE": "rsa_private.pem",
+  "RSA_PUBLIC_FILE": "rsa_public.pem",
+  "CAST5_KEY_FILE": "cast5_key.bin",
+  "ENCRYPTED_CAST5_KEY_FILE": "encrypted_cast5_key.bin",
+  "KEY_FILES": [
+    "rsa_private.pem",
+    "rsa_public.pem",
+    "cast5_key.bin",
+    "encrypted_cast5_key.bin"
+  ],
+  "CAST5_MIN_KEY_LEN": 40,
+  "CAST5_MAX_KEY_LEN": 128,
+  "CAST5_KEY_STEP": 8,
+  "CAST5_DEFAULT_KEY_LEN": 128,
+  "RSA_KEY_SIZE": 2048
+}

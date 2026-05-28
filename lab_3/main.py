@@ -1,33 +1,36 @@
 import sys
 import argparse
-from constants import (
-    RSA_PRIVATE_FILE, RSA_PUBLIC_FILE, CAST5_KEY_FILE, ENCRYPTED_CAST5_KEY_FILE,
-    KEY_FILES, CAST5_DEFAULT_KEY_LEN, CAST5_MIN_KEY_LEN, CAST5_MAX_KEY_LEN,
-    CAST5_KEY_STEP
+from file_utils import (
+    load_config, get_rsa_private_file, get_rsa_public_file,
+    get_cast5_key_file, get_encrypted_cast5_key_file, get_key_files,
+    get_cast5_default_key_len, get_cast5_min_key_len, get_cast5_max_key_len,
+    get_cast5_key_step, get_rsa_key_size,
+    save_bytes, load_bytes, file_exists, check_keys_exist, validate_key_length
 )
-from file_utils import save_bytes, load_bytes, file_exists, check_keys_exist, validate_key_length
 from cast5_operations import generate_cast5_key, encrypt_cast5_file, decrypt_cast5_file
 from rsa_operations import generate_rsa_keys, encrypt_with_rsa_public_key, decrypt_with_rsa_private_key
+
+load_config()
 
 
 def mode_gen(keylen: int) -> None:
     """Генерация ключей."""
     print(f"Генерация ключей CAST-5 ({keylen} бит):")
     cast5_key = generate_cast5_key(keylen)
-    save_bytes(cast5_key, CAST5_KEY_FILE)
-    print(f"  -> {CAST5_KEY_FILE} ({len(cast5_key)} байт)")
+    save_bytes(cast5_key, get_cast5_key_file())
+    print(f"  -> {get_cast5_key_file()} ({len(cast5_key)} байт)")
 
-    print("Генерация ключей RSA (2048 бит):")
+    print(f"Генерация ключей RSA ({get_rsa_key_size()} бит):")
     rsa_priv, rsa_pub = generate_rsa_keys()
-    save_bytes(rsa_priv, RSA_PRIVATE_FILE)
-    save_bytes(rsa_pub, RSA_PUBLIC_FILE)
-    print(f"  -> {RSA_PRIVATE_FILE}")
-    print(f"  -> {RSA_PUBLIC_FILE}")
+    save_bytes(rsa_priv, get_rsa_private_file())
+    save_bytes(rsa_pub, get_rsa_public_file())
+    print(f"  -> {get_rsa_private_file()}")
+    print(f"  -> {get_rsa_public_file()}")
 
     print("Шифрование ключа CAST-5 открытым RSA:")
     encrypted = encrypt_with_rsa_public_key(cast5_key, rsa_pub)
-    save_bytes(encrypted, ENCRYPTED_CAST5_KEY_FILE)
-    print(f"  -> {ENCRYPTED_CAST5_KEY_FILE}")
+    save_bytes(encrypted, get_encrypted_cast5_key_file())
+    print(f"  -> {get_encrypted_cast5_key_file()}")
 
 
 def mode_enc(in_file: str, out_file: str) -> None:
@@ -36,14 +39,14 @@ def mode_enc(in_file: str, out_file: str) -> None:
         print(f"Ошибка: файл {in_file} не найден")
         sys.exit(1)
 
-    all_exist, missing = check_keys_exist(KEY_FILES)
+    all_exist, missing = check_keys_exist()
     if not all_exist:
         print(f"Ошибка: отсутствуют ключи: {missing}")
-        print(f"Запустите: python main.py -gen --keylen {CAST5_DEFAULT_KEY_LEN}")
+        print(f"Запустите: python main.py -gen --keylen {get_cast5_default_key_len()}")
         sys.exit(1)
 
-    rsa_priv = load_bytes(RSA_PRIVATE_FILE)
-    enc_cast5 = load_bytes(ENCRYPTED_CAST5_KEY_FILE)
+    rsa_priv = load_bytes(get_rsa_private_file())
+    enc_cast5 = load_bytes(get_encrypted_cast5_key_file())
     cast5_key = decrypt_with_rsa_private_key(enc_cast5, rsa_priv)
 
     encrypt_cast5_file(in_file, out_file, cast5_key)
@@ -56,14 +59,14 @@ def mode_dec(in_file: str, out_file: str) -> None:
         print(f"Ошибка: файл {in_file} не найден")
         sys.exit(1)
 
-    all_exist, missing = check_keys_exist(KEY_FILES)
+    all_exist, missing = check_keys_exist()
     if not all_exist:
         print(f"Ошибка: отсутствуют ключи: {missing}")
-        print(f"Запустите: python main.py -gen --keylen {CAST5_DEFAULT_KEY_LEN}")
+        print(f"Запустите: python main.py -gen --keylen {get_cast5_default_key_len()}")
         sys.exit(1)
 
-    rsa_priv = load_bytes(RSA_PRIVATE_FILE)
-    enc_cast5 = load_bytes(ENCRYPTED_CAST5_KEY_FILE)
+    rsa_priv = load_bytes(get_rsa_private_file())
+    enc_cast5 = load_bytes(get_encrypted_cast5_key_file())
     cast5_key = decrypt_with_rsa_private_key(enc_cast5, rsa_priv)
 
     decrypt_cast5_file(in_file, out_file, cast5_key)
@@ -78,18 +81,20 @@ def main() -> None:
     group.add_argument('-enc', '--encryption', action='store_true', help='Шифрование файла')
     group.add_argument('-dec', '--decryption', action='store_true', help='Расшифрование файла')
 
-    parser.add_argument('--keylen', type=int, default=CAST5_DEFAULT_KEY_LEN,
-                        help=f'Длина ключа CAST-5 ({CAST5_MIN_KEY_LEN}-{CAST5_MAX_KEY_LEN}, кратно {CAST5_KEY_STEP})')
+    default_len = get_cast5_default_key_len()
+    min_len = get_cast5_min_key_len()
+    max_len = get_cast5_max_key_len()
+    step = get_cast5_key_step()
+
+    parser.add_argument('--keylen', type=int, default=default_len,
+                        help=f'Длина ключа CAST-5 ({min_len}-{max_len}, кратно {step})')
     parser.add_argument('--input', '-i', type=str, help='Входной файл')
     parser.add_argument('--output', '-o', type=str, help='Выходной файл')
 
     args = parser.parse_args()
 
-    match (
-        args.generation,
-        args.encryption,
-        args.decryption
-    ):
+    # Определяем режим через match-case
+    match (args.generation, args.encryption, args.decryption):
         case (True, False, False):
             mode = "gen"
         case (False, True, False):

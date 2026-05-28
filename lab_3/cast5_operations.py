@@ -1,10 +1,7 @@
 from Crypto.Cipher import CAST
 from Crypto.Random import get_random_bytes
 from Crypto.Util.Padding import pad, unpad
-from file_utils import validate_key_length, file_exists
-from constants import CAST5_KEY_FILE
-
-BLOCK_SIZE = CAST.block_size
+from file_utils import validate_key_length, file_exists, load_bytes, save_bytes
 
 
 def generate_cast5_key(length_bits: int) -> bytes:
@@ -35,16 +32,13 @@ def encrypt_cast5_file(input_path: str, output_path: str, key: bytes) -> None:
     if not key:
         raise ValueError("Ключ не может быть пустым")
 
+    plain_data = load_bytes(input_path)
+
     cipher = CAST.new(key, CAST.MODE_CBC)
     iv = cipher.iv
+    encrypted_data = cipher.encrypt(pad(plain_data, CAST.block_size))
 
-    with open(input_path, 'rb') as f:
-        plain_data = f.read()
-
-    encrypted_data = cipher.encrypt(pad(plain_data, BLOCK_SIZE))
-
-    with open(output_path, 'wb') as f:
-        f.write(iv + encrypted_data)
+    save_bytes(iv + encrypted_data, output_path)
 
 
 def decrypt_cast5_file(input_path: str, output_path: str, key: bytes) -> None:
@@ -61,15 +55,15 @@ def decrypt_cast5_file(input_path: str, output_path: str, key: bytes) -> None:
     if not key:
         raise ValueError("Ключ не может быть пустым")
 
-    with open(input_path, 'rb') as f:
-        iv = f.read(BLOCK_SIZE)
-        encrypted_data = f.read()
+    data = load_bytes(input_path)
 
-    if len(iv) != BLOCK_SIZE:
+    iv = data[:CAST.block_size]
+    encrypted_data = data[CAST.block_size:]
+
+    if len(iv) != CAST.block_size:
         raise ValueError("Неверный вектор инициализации")
 
     cipher = CAST.new(key, CAST.MODE_CBC, iv=iv)
-    decrypted_data = unpad(cipher.decrypt(encrypted_data), BLOCK_SIZE)
+    decrypted_data = unpad(cipher.decrypt(encrypted_data), CAST.block_size)
 
-    with open(output_path, 'wb') as f:
-        f.write(decrypted_data)
+    save_bytes(decrypted_data, output_path)
