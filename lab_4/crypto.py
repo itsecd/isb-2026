@@ -1,4 +1,5 @@
 import hashlib
+from tqdm import tqdm
 from read_write_file import save_hash_to_file, load_hash_from_file
 
 def calculate_sha256(file_path : str) -> str:
@@ -43,6 +44,23 @@ def verify_file_hash(file_path : str, hash_file_path : str)-> tuple[bool, str, s
     return current_hash == saved_hash, current_hash, saved_hash
 
 
+def find_partial_collision(target_prefix : str, max_iterations=10000000, out_file=None)-> tuple[str, str]:
+    """
+    Поиск коллизии
+    :param target_prefix: искомый хеш
+    :param max_iterations: максимальное количество попыток подбора
+    :param out_file: Поток для визуализации процесса подбора коллизии при помощи tqdm
+    :return: подобранный текст и полученный хеш
+    """
+    for i in tqdm(range(max_iterations), desc=f"Поиск '{target_prefix}'", file=out_file):
+        candidate = f"{i}"
+        current_hash = hashlib.sha256(candidate.encode()).hexdigest()
+        if current_hash.startswith(target_prefix):
+            return candidate, current_hash
+    return None, None
+
+
+
 if __name__ == "__main__":
     test_file = "crypto.py"
 
@@ -51,3 +69,6 @@ if __name__ == "__main__":
 
     saved = save_file_hash(test_file)
     print("Хеш сохранен в:", saved)
+
+    c, k = find_partial_collision("abc123", max_iterations=10000)
+    print(f"Результат: {c}, {k}")
