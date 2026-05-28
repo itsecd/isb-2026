@@ -6,8 +6,11 @@ from src.asym_crypto import generate_rsa_keys, encrypt_rsa, decrypt_rsa
 from src.sym_crypto import encrypt_seed, decrypt_seed
 
 
-def parse_arguments():
-    """CMD parsing."""
+def parse_arguments()->argparse.Namespace:
+    """CMD parsing.
+        Returns:
+            argparse.Namespace: parsed arguments
+    """
     parser = argparse.ArgumentParser(description="RSA & SEED hybrid encryption")
 
     group = parser.add_mutually_exclusive_group(required=True)
@@ -28,14 +31,27 @@ def parse_arguments():
 
 
 def determine_mode(args) -> str:
-    """Determining the operating mode for use in a match/case."""
+    """Determining the operating mode for use in a match/case.
+        Args:
+            args (argparse.Namespace): Command line arguments.
+        Returns:
+            str: Operating mode or unknown if no valid flag was set.
+
+    """
     if args.generation: return 'generation'
     if args.encryption: return 'encryption'
     if args.decryption: return 'decryption'
     return 'unknown'
 
 
-def main():
+def main()->None:
+    """Main function.
+    Raises:
+        IOError: if file does not exist
+        ValueError: if file is empty
+        RuntimeError: if file is invalid
+        Exception: if unexpected error occurs.
+    """
     try:
         args = parse_arguments()
 
