@@ -5,7 +5,7 @@ import util
 
 def volshebniy_kluch(key_length: int) -> bytes:
     """
-    Генерирует ключ для алгоритма Camellia длиной 128, 192 или 256 байтов.
+    Генерирует ключ для алгоритма Camellia/AES длиной 128, 192 или 256 битов.
     На вход принимает длину ключа и возвращает ключ заданной длины.
     Принимает:
         key_length - длина ключа
@@ -16,7 +16,8 @@ def volshebniy_kluch(key_length: int) -> bytes:
     if (key_length in [128,192,256]):
         return os.urandom(key_length//8)
     else:
-        raise RuntimeError("Привет, я люблю числа 128, 192 и 256 и обожаю делать ключи такой длины.")
+        raise RuntimeError("Поддерживаются генерация ключей только длиной 128, 192, 256 битов.")
+
     
 
 def asym_keygen(public_filepath: str, private_filepath: str) -> None:

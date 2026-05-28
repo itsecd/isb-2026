@@ -43,7 +43,7 @@ def write_public_key(public_pem: str, public_key: bytes,) -> None:
                     public_out.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,
                         format=serialization.PublicFormat.SubjectPublicKeyInfo))
     except Exception as e:
-        print("Увынск Топор+ подписаться:", e) 
+        raise e(f"В ходе работы произошла ошибка {e}")  
 
 def write_private_key(private_pem: str, private_key: bytes) -> None:
     """
@@ -58,18 +58,18 @@ def write_private_key(private_pem: str, private_key: bytes) -> None:
                         format=serialization.PrivateFormat.TraditionalOpenSSL,
                         encryption_algorithm=serialization.NoEncryption()))
     except Exception as e:
-        print("Увынск Топор+ подписаться:", e) 
+        raise e(f"В ходе работы произошла ошибка {e}") 
 
 
 def write_file(filepath: str, text: str) -> None:
-      """
-      Функция для записи данных в файл
-      Принимает:
+    """
+    Функция для записи данных в файл
+    Принимает:
         filepath - путь до файла для записи
         text - данные для записи
-      """
+    """
     try:
-      with open (filepath, "wb") as f:
+        with open (filepath, "wb") as f:
             f.write(text)
     except Exception as e:
-        print("Увынск Топор+ подписаться:", e) 
+        raise e(f"В ходе работы произошла ошибка {e}") 
