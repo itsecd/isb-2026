@@ -1,3 +1,2 @@
-cryptography
-PyQt5
-pandas
+cryptography==41.0.7
+PyQt5==5.15.9

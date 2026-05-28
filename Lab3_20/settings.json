@@ -1,6 +1,6 @@
 {
-    "initial_file": "D:/\u041e\u0418\u0411/lab3/data/input.txt",
-    "encrypted_file": "D:/\u041e\u0418\u0411/lab3/data/encrypted.bin",
+    "initial_file": "D:/lab3/data/input.txt",
+    "encrypted_file": "D:/lab3/data/encrypted.bin",
     "decrypted_file": "data/decrypted.txt",
     "symmetric_key_encrypted": "keys/symmetric.key.enc",
     "public_key": "keys/public.pem",
