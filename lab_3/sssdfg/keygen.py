@@ -7,6 +7,10 @@ def volshebniy_kluch(key_length: int) -> bytes:
     """
     Генерирует ключ для алгоритма Camellia длиной 128, 192 или 256 байтов.
     На вход принимает длину ключа и возвращает ключ заданной длины.
+    Принимает:
+        key_length - длина ключа
+    Возвращает:
+        - ключ заданной длины
     Для нестандартных значений длины возвращает ошибку.
     """
     if (key_length in [128,192,256]):
@@ -18,7 +22,9 @@ def volshebniy_kluch(key_length: int) -> bytes:
 def asym_keygen(public_filepath: str, private_filepath: str) -> None:
     """
     Генерирует пару ключей RSA и сериализует их в .pem файлы.
-    На вход принимает пути, по которым сохраняются ключи.
+    Приниает:
+        public_filepath - путь для сохранения открытого ключа
+        private_filepath - путь для сохранения закрытого ключа
     """
     try:
         keys = rsa.generate_private_key(public_exponent=65537, key_size=2048)
