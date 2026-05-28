@@ -12,6 +12,10 @@ ctk.set_default_color_theme("blue")
 
 class CryptoApp(ctk.CTk):
     def __init__(self):
+        """Initialisation function of the window
+         Raises:
+             Exception: if unexpected error occurs.
+        """
         super().__init__()
 
         self.title("Hybrid Cryptosystem (RSA + SEED)")
@@ -31,6 +35,7 @@ class CryptoApp(ctk.CTk):
         self.create_widgets()
 
     def create_widgets(self):
+        """Creates the widgets in the window"""
         self.title_label = ctk.CTkLabel(self, text="Lab №3",
                                         font=ctk.CTkFont(size=18, weight="bold"))
         self.title_label.pack(pady=(15, 10))
@@ -53,6 +58,7 @@ class CryptoApp(ctk.CTk):
         self.log("Application started. Settings loaded successfully.", "success")
 
     def setup_generation_tab(self):
+        """Sets up the generation tab"""
         tab = self.tabview.tab("Key generation")
 
         title_lbl = ctk.CTkLabel(tab, text="Specify the paths to save the generated keys:",
@@ -76,6 +82,7 @@ class CryptoApp(ctk.CTk):
         btn.pack(pady=(5, 5))
 
     def setup_encryption_tab(self):
+        """Sets up the encryption tab"""
         tab = self.tabview.tab("Encryption")
 
         self.enc_input_var = ctk.StringVar(value=self.files.get('initial_file', ''))
@@ -92,6 +99,7 @@ class CryptoApp(ctk.CTk):
         btn.pack(pady=(20, 10))
 
     def setup_decryption_tab(self):
+        """Sets up the decryption tab"""
         tab = self.tabview.tab("Decryption")
 
         self.dec_input_var = ctk.StringVar(value=self.files.get('encrypted_file', ''))
@@ -107,7 +115,17 @@ class CryptoApp(ctk.CTk):
                             font=ctk.CTkFont(size=14, weight="bold"))
         btn.pack(pady=(20, 10))
 
-    def create_file_row(self, parent, label_text, string_var, is_save=False):
+    def create_file_row(self, parent, label_text, string_var, is_save=False)->None:
+        """
+        Creates the file row in the window.
+        Args:
+            parent (tkinter.Frame): The parent window
+            label_text (tkinter.Label): The text label
+            string_var (tkinter.StringVar): The string variable
+            is_save (bool): If true, save the file
+        Returns:
+            None
+        """
         frame = ctk.CTkFrame(parent, fg_color="transparent")
         frame.pack(fill="x", padx=20, pady=5)
 
@@ -118,6 +136,7 @@ class CryptoApp(ctk.CTk):
         entry.pack(side="left", padx=10, fill="x", expand=True)
 
         def browse():
+            """Browses the path"""
             if is_save:
                 path = filedialog.asksaveasfilename()
             else:
@@ -129,6 +148,12 @@ class CryptoApp(ctk.CTk):
         btn.pack(side="right")
 
     def log(self, message: str, level: str = "info"):
+        """Writes a message to the log window
+            Args:
+                message (str): The message to log
+                level (str): The log level
+
+        """
         self.log_textbox.configure(state="normal")
 
         prefix = "[INFO] "
@@ -142,6 +167,9 @@ class CryptoApp(ctk.CTk):
         self.log_textbox.configure(state="disabled")
 
     def generate_action(self):
+        """Generates the key
+            Raises:
+                Exception: if generation fails"""
         self.log("Starting key generation...")
         try:
             pub_key_path = self.gen_pub_var.get()
@@ -166,6 +194,9 @@ class CryptoApp(ctk.CTk):
             self.log(f"Generation error: {e}", "error")
 
     def encrypt_action(self):
+        """Encrypts the file
+            Raises:
+                Exception: if encryption fails"""
         self.log("Starting data encryption...")
         try:
             input_file = self.enc_input_var.get()
@@ -189,6 +220,10 @@ class CryptoApp(ctk.CTk):
             self.log(f"Encryption error: {e}", "error")
 
     def decrypt_action(self):
+        """Decrypts the file
+            Raises:
+                Exception: if decryption fails
+        """
         self.log("Starting data decryption...")
         try:
             input_file = self.dec_input_var.get()
