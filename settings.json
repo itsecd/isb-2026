@@ -1,8 +1,8 @@
 {
-    "initial_file": "D:/isb-2026/Lab3_2/data/input.txt",
-    "encrypted_file": "D:/isb-2026/Lab3_2/data/encrypted.bin",
-    "decrypted_file": "D:/isb-2026/Lab3_2/data/decrypted.txt",
-    "symmetric_key_encrypted": "D:/isb-2026/Lab3_2/keys/symmetric.key.enc",
-    "public_key": "D:/isb-2026/Lab3_2/keys/public.pem",
-    "private_key": "D:/isb-2026/Lab3_2/keys/private.pem"
+    "initial_file": "D:/isb-2026/Lab3_20/data/input.txt",
+    "encrypted_file": "D:/isb-2026/Lab3_20/data/encrypted.bin",
+    "decrypted_file": "D:/isb-2026/Lab3_20/data/decrypted.txt",
+    "symmetric_key_encrypted": "D:/isb-2026/Lab3_20/keys/symmetric.key.enc",
+    "public_key": "D:/isb-2026/Lab3_20/keys/public.pem",
+    "private_key": "D:/isb-2026/Lab3_20/keys/private.pem"
 }
