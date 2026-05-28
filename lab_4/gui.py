@@ -16,10 +16,28 @@ except ImportError:
     sys.exit(1)
 
 from hash_core import (
+    EXCELLENT_AVALANCHE_PERCENT,
+    GUI_COLORS,
+    GUI_DEFAULT_TEXT,
+    GUI_MIN_HEIGHT,
+    GUI_MIN_WIDTH,
+    GUI_SPLITTER_SIZES,
+    GUI_WINDOW_TITLE,
+    HASH_PREVIEW_LENGTH,
+    IDEAL_AVALANCHE_PERCENT,
+    MAX_EXPERIMENT_COUNT,
+    MIN_EXPERIMENT_COUNT,
+    MODERATE_AVALANCHE_PERCENT,
+    MODIFICATION_TYPES,
+    SUPPORTED_ALGORITHMS,
+    WARNING_AVALANCHE_PERCENT,
+    TABLE_HASH_PREVIEW_LENGTH,
+    TEXT_PREVIEW_LENGTH,
+    AvalancheResult,
+    compute_hash,
+    get_avalanche_quality,
     run_experiments,
     summarize_results,
-    compute_hash,
-    AvalancheResult,
 )
 
 
@@ -199,8 +217,8 @@ QLabel#hashValue {
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Лавинный эффект хеш-функций — Лабораторная №4")
-        self.setMinimumSize(1000, 680)
+        self.setWindowTitle(GUI_WINDOW_TITLE)
+        self.setMinimumSize(GUI_MIN_WIDTH, GUI_MIN_HEIGHT)
         self.worker: Optional[ExperimentWorker] = None
         self._results: list[AvalancheResult] = []
         self._setup_ui()
@@ -219,7 +237,7 @@ class MainWindow(QMainWindow):
         header = QVBoxLayout()
         title = QLabel("Лавинный эффект хеш-функций")
         title.setObjectName("title")
-        subtitle = QLabel("Лабораторная работа №4 · SHA-256 / MD5 / SHA-1 / SHA3-256")
+        subtitle = QLabel(f"Лабораторная работа №4 · {' / '.join(a.upper() for a in SUPPORTED_ALGORITHMS)}")
         subtitle.setObjectName("subtitle")
         header.addWidget(title)
         header.addWidget(subtitle)
@@ -245,7 +263,7 @@ class MainWindow(QMainWindow):
         params_layout.setSpacing(6)
 
         params_layout.addWidget(QLabel("Исходная строка:"))
-        self.text_input = QLineEdit("SSAU is the best university")
+        self.text_input = QLineEdit(GUI_DEFAULT_TEXT)
         self.text_input.setPlaceholderText("Введите текст для хеширования…")
         self.text_input.textChanged.connect(self._update_hash_preview)
         params_layout.addWidget(self.text_input)
@@ -253,7 +271,7 @@ class MainWindow(QMainWindow):
         row1 = QHBoxLayout()
         row1.addWidget(QLabel("Алгоритм:"))
         self.algo_combo = QComboBox()
-        self.algo_combo.addItems(["sha256", "sha1", "md5", "sha3_256"])
+        self.algo_combo.addItems(SUPPORTED_ALGORITHMS)
         self.algo_combo.currentTextChanged.connect(self._update_hash_preview)
         row1.addWidget(self.algo_combo)
         params_layout.addLayout(row1)
@@ -261,8 +279,8 @@ class MainWindow(QMainWindow):
         row2 = QHBoxLayout()
         row2.addWidget(QLabel("Экспериментов:"))
         self.count_spin = QSpinBox()
-        self.count_spin.setRange(1, 100)
-        self.count_spin.setValue(10)
+        self.count_spin.setRange(MIN_EXPERIMENT_COUNT, MAX_EXPERIMENT_COUNT)
+        self.count_spin.setValue(MIN_EXPERIMENT_COUNT * 10)
         row2.addWidget(self.count_spin)
         params_layout.addLayout(row2)
 
@@ -328,7 +346,7 @@ class MainWindow(QMainWindow):
 
         splitter.addWidget(left)
         splitter.addWidget(right)
-        splitter.setSizes([320, 680])
+        splitter.setSizes(GUI_SPLITTER_SIZES)
 
         root.addWidget(splitter)
 
@@ -349,7 +367,7 @@ class MainWindow(QMainWindow):
         try:
             h = compute_hash(text, algo)
             # Переносим для читаемости
-            self.hash_preview.setText(h[:32] + "\n" + h[32:])
+            self.hash_preview.setText(h[:HASH_PREVIEW_LENGTH] + "\n" + h[HASH_PREVIEW_LENGTH:])
         except Exception as e:
             self.hash_preview.setText(f"Ошибка: {e}")
 
@@ -365,12 +383,13 @@ class MainWindow(QMainWindow):
         self.run_btn.setEnabled(False)
         self.cancel_btn.setVisible(True)
         self.progress_bar.setVisible(True)
-        self.progress_bar.setRange(0, count * 3)
+        total_experiments = count * len(MODIFICATION_TYPES)
+        self.progress_bar.setRange(0, total_experiments)
         self.progress_bar.setValue(0)
         self.results_table.setRowCount(0)
         self.stat_text.clear()
         self._results = []
-        self.status.showMessage(f"Запуск {count * 3} экспериментов…")
+        self.status.showMessage(f"Запуск {total_experiments} экспериментов…")
 
         self.worker = ExperimentWorker(text, count, algo)
         self.worker.progress.connect(self._on_progress)
@@ -415,20 +434,21 @@ class MainWindow(QMainWindow):
             items = [
                 str(row + 1),
                 r.modification_type,
-                repr(r.modified_text)[:30],
-                r.modified_hash[:16] + "…",
-                r.original_hash[:16] + "…",
+                repr(r.modified_text)[:TEXT_PREVIEW_LENGTH],
+                r.modified_hash[:TABLE_HASH_PREVIEW_LENGTH] + "…",
+                r.original_hash[:TABLE_HASH_PREVIEW_LENGTH] + "…",
                 f"{r.diff_percent:.1f}%",
             ]
             for col, val in enumerate(items):
                 item = QTableWidgetItem(val)
                 item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                if r.diff_percent >= 45:
-                    item.setForeground(QColor("#a8d8a8"))   
-                elif r.diff_percent >= 25:
-                    item.setForeground(QColor("#f9ca24"))   
-                else:
-                    item.setForeground(QColor("#ff6b6b"))   
+                match r.diff_percent:
+                    case p if p >= EXCELLENT_AVALANCHE_PERCENT:
+                        item.setForeground(QColor(GUI_COLORS["excellent"]))
+                    case p if p >= WARNING_AVALANCHE_PERCENT:
+                        item.setForeground(QColor(GUI_COLORS["warning"]))
+                    case _:
+                        item.setForeground(QColor(GUI_COLORS["weak"]))
                 self.results_table.setItem(row, col, item)
 
     def _populate_stats(self, results: list[AvalancheResult]):
@@ -445,7 +465,7 @@ class MainWindow(QMainWindow):
             f"  Среднее % различий  : {s['avg_diff_percent']:.2f}%",
             f"  Минимум             : {s['min_diff_percent']:.2f}%",
             f"  Максимум            : {s['max_diff_percent']:.2f}%",
-            f"  Средн. изм. бит     : {s['avg_changed_bits']} / 256",
+            f"  Средн. изм. бит     : {s['avg_changed_bits']} / {s['total_bits']}",
             "",
             "  По типу модификации:",
             "  " + "─" * 44,
@@ -457,13 +477,17 @@ class MainWindow(QMainWindow):
             "",
             "  " + "─" * 44,
         ]
-        quality = s["avg_diff_percent"]
-        if quality >= 45:
-            verdict = "ОТЛИЧНЫЙ лавинный эффект (~50%) - алгоритм качественный"
-        elif quality >= 30:
-            verdict = "УМЕРЕННЫЙ лавинный эффект - есть слабые места"
-        else:
-            verdict = "СЛАБЫЙ лавинный эффект - алгоритм ненадёжен"
+        quality = get_avalanche_quality(s["avg_diff_percent"])
+        match quality.level:
+            case "excellent":
+                verdict = (
+                    f"ОТЛИЧНЫЙ лавинный эффект (~{IDEAL_AVALANCHE_PERCENT}%) "
+                    f"- {quality.description}"
+                )
+            case "moderate":
+                verdict = f"УМЕРЕННЫЙ лавинный эффект - {quality.description}"
+            case _:
+                verdict = f"СЛАБЫЙ лавинный эффект - {quality.description}"
         lines.append(f"  Вывод: {verdict}")
         lines.append("")
         lines.append("  Теория: для идеальной хеш-функции изменение одного")

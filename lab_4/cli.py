@@ -1,6 +1,5 @@
 import argparse
 import sys
-import time
 
 try:
     from tqdm import tqdm
@@ -8,167 +7,233 @@ except ImportError:
     tqdm = None
 
 from hash_core import (
-    run_single_experiment,
-    run_experiments,
-    summarize_results,
+    ALL_MODIFICATIONS,
+    CONFIG,
+    DEFAULT_ALGORITHM,
+    DEFAULT_EXPERIMENT_COUNT,
+    HASH_PREVIEW_LENGTH,
+    IDEAL_AVALANCHE_PERCENT,
+    MIN_EXPERIMENT_COUNT,
+    MODIFICATION_TYPES,
+    PROGRESS_BAR_LENGTH,
+    PROGRESS_NCOLS,
+    SUPPORTED_ALGORITHMS,
     compute_hash,
+    get_avalanche_quality,
+    run_single_experiment,
+    summarize_results,
 )
 
+_use_color = True
 
-_USE_COLOR = True
 
-def _c(code: str, text: str) -> str:
-    if not _USE_COLOR:
+def cli_config(*keys):
+    value = CONFIG["cli"]
+    for key in keys:
+        value = value[key]
+    return value
+
+
+def _c(color_name: str, text: str) -> str:
+    if not _use_color:
         return text
+    code = cli_config("ansi_codes", color_name)
     return f"\033[{code}m{text}\033[0m"
 
-GREEN  = lambda t: _c("92", t)
-YELLOW = lambda t: _c("93", t)
-CYAN   = lambda t: _c("96", t)
-BOLD   = lambda t: _c("1",  t)
-RED    = lambda t: _c("91", t)
-DIM    = lambda t: _c("2",  t)
+
+def green(text: str) -> str:
+    return _c("green", text)
 
 
+def yellow(text: str) -> str:
+    return _c("yellow", text)
+
+
+def cyan(text: str) -> str:
+    return _c("cyan", text)
+
+
+def bold(text: str) -> str:
+    return _c("bold", text)
+
+
+def red(text: str) -> str:
+    return _c("red", text)
+
+
+def dim(text: str) -> str:
+    return _c("dim", text)
+
+
+def color_for_percent(percent: float):
+    quality = get_avalanche_quality(percent)
+    match quality.level:
+        case "excellent":
+            return green
+        case "moderate":
+            return yellow
+        case _:
+            return red
 
 
 def print_banner():
-    banner = r"""   
-  Лабораторная №4 · Лавинный эффект хеш-функций
-"""
-    print(CYAN(banner))
+    print(cyan(cli_config("banner")))
 
 
-def print_hash_pair(label: str, original: str, modified: str,
-                    h_orig: str, h_mod: str, diff_pct: float, bits: int):
-    print(f"  {BOLD(label)}")
-    print(f"    Исходный текст : {DIM(repr(original))}")
-    print(f"    Изменённый     : {YELLOW(repr(modified))}")
-    print(f"    SHA-256 до     : {DIM(h_orig[:32])}…")
-    print(f"    SHA-256 после  : {YELLOW(h_mod[:32])}…")
+def print_hash_pair(
+    label: str,
+    original: str,
+    modified: str,
+    h_orig: str,
+    h_mod: str,
+    diff_pct: float,
+    changed_bits: int,
+    total_bits: int,
+    algorithm: str,
+):
+    labels = cli_config("labels")
+    print(f"  {bold(label)}")
+    print(f"    {labels['source_text']} : {dim(repr(original))}")
+    print(f"    {labels['modified_text']}     : {yellow(repr(modified))}")
+    print(f"    {algorithm.upper()} до     : {dim(h_orig[:HASH_PREVIEW_LENGTH])}…")
+    print(f"    {algorithm.upper()} после  : {yellow(h_mod[:HASH_PREVIEW_LENGTH])}…")
 
-    bar_len = 40
-    filled = int(bar_len * diff_pct / 100)
-    bar = GREEN("█" * filled) + DIM("░" * (bar_len - filled))
-    color = GREEN if diff_pct >= 45 else YELLOW if diff_pct >= 25 else RED
-    print(f"    Различий бит   : [{bar}] {color(f'{diff_pct:.1f}%')} ({bits} / 256)")
+    filled = int(PROGRESS_BAR_LENGTH * diff_pct / 100)
+    bar = green("█" * filled) + dim("░" * (PROGRESS_BAR_LENGTH - filled))
+    color = color_for_percent(diff_pct)
+    print(
+        f"    {labels['bit_difference']}   : [{bar}] "
+        f"{color(f'{diff_pct:.1f}%')} ({changed_bits} / {total_bits})"
+    )
     print()
 
 
 def print_summary_table(summary: dict, algorithm: str):
-    print(BOLD("\n  ╔══════════════════════════════════════════╗"))
-    print(BOLD("  ║         СВОДНАЯ СТАТИСТИКА               ║"))
-    print(BOLD("  ╚══════════════════════════════════════════╝"))
-    print(f"  Алгоритм       : {CYAN(algorithm.upper())}")
-    print(f"  Экспериментов  : {summary['total_experiments']}")
-    print(f"  Среднее %      : {GREEN(str(summary['avg_diff_percent'])) if summary['avg_diff_percent'] >= 45 else YELLOW(str(summary['avg_diff_percent']))}")
-    print(f"  Мин. %         : {summary['min_diff_percent']}")
-    print(f"  Макс. %        : {summary['max_diff_percent']}")
-    print(f"  Сред. бит      : {summary['avg_changed_bits']} / 256")
+    labels = cli_config("labels")
+    table = cli_config("table")
+
+    print(bold("\n" + table["summary_top"]))
+    print(bold(table["summary_title"]))
+    print(bold(table["summary_bottom"]))
+    print(f"  {labels['algorithm']}       : {cyan(algorithm.upper())}")
+    print(f"  {labels['experiments']}  : {summary['total_experiments']}")
+    avg_color = color_for_percent(summary["avg_diff_percent"])
+    print(f"  {labels['average_percent']}      : {avg_color(str(summary['avg_diff_percent']))}")
+    print(f"  {labels['min_percent']}         : {summary['min_diff_percent']}")
+    print(f"  {labels['max_percent']}        : {summary['max_diff_percent']}")
+    print(f"  {labels['average_bits']}      : {summary['avg_changed_bits']} / {summary['total_bits']}")
     print()
-    print(f"  {'Тип модификации':<35} {'Ср. % различий':>15}")
-    print(f"  {'─' * 52}")
+
+    mod_width = table["modification_column_width"]
+    pct_width = table["percent_column_width"]
+    print(f"  {labels['modification_type']:<{mod_width}} {labels['average_difference_percent']:>{pct_width}}")
+    print(f"  {'─' * table['separator_length']}")
     for mod, pct in summary["by_modification"].items():
-        color = GREEN if pct >= 45 else YELLOW
-        print(f"  {mod:<35} {color(f'{pct:>14.2f}%')}")
+        color = color_for_percent(pct)
+        print(f"  {mod:<{mod_width}} {color(f'{pct:>{pct_width - 1}.2f}%')}")
 
-    quality = summary["avg_diff_percent"]
+    quality = get_avalanche_quality(summary["avg_diff_percent"])
+    verdict_color = color_for_percent(summary["avg_diff_percent"])
+    suffix = f" (~{IDEAL_AVALANCHE_PERCENT}%)" if quality.level == "excellent" else ""
     print()
-    if quality >= 45:
-        verdict = GREEN("Отличный лавинный эффект (~50%)")
-    elif quality >= 30:
-        verdict = YELLOW("Умеренный лавинный эффект")
-    else:
-        verdict = RED("Слабый лавинный эффект")
-    print(f"  Вывод: {verdict}")
+    print(f"  {labels['result']}: {verdict_color(quality.title + suffix)}")
     print()
-
-
 
 
 def build_parser() -> argparse.ArgumentParser:
+    messages = cli_config("messages")
     parser = argparse.ArgumentParser(
-        prog="lab4_cli",
-        description="Исследование лавинного эффекта криптографических хеш-функций.",
+        prog=cli_config("prog"),
+        description=cli_config("description"),
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""Примеры:
-  python cli.py --text "hello world" --count 10
-  python cli.py --text "пароль" --count 5 --algo md5 --mod bit
-  python cli.py --text "cryptography" --count 15 --algo sha3_256 --no-color
-        """,
+        epilog=cli_config("epilog"),
     )
     parser.add_argument(
         "--text", "-t",
         required=True,
-        help="Исходная строка для хеширования.",
+        help=messages["text_help"],
     )
     parser.add_argument(
         "--count", "-n",
         type=int,
-        default=10,
-        help="Количество экспериментов каждого типа (по умолчанию: 10).",
+        default=DEFAULT_EXPERIMENT_COUNT,
+        help=(
+            f"{messages['count_help']} "
+            f"({messages['default_note']}: {DEFAULT_EXPERIMENT_COUNT})."
+        ),
     )
     parser.add_argument(
         "--algo", "-a",
-        choices=["sha256", "sha1", "md5", "sha3_256"],
-        default="sha256",
-        help="Алгоритм хеширования (по умолчанию: sha256).",
+        choices=SUPPORTED_ALGORITHMS,
+        default=DEFAULT_ALGORITHM,
+        help=(
+            f"{messages['algo_help']} "
+            f"({messages['default_note']}: {DEFAULT_ALGORITHM})."
+        ),
     )
     parser.add_argument(
         "--mod", "-m",
-        choices=["char", "bit", "case", "all"],
-        default="all",
-        help="Тип модификации: char, bit, case или all (по умолчанию: all).",
+        choices=(*MODIFICATION_TYPES, ALL_MODIFICATIONS),
+        default=ALL_MODIFICATIONS,
+        help=(
+            f"{messages['mod_help_prefix']}: "
+            f"{', '.join(MODIFICATION_TYPES)} или {ALL_MODIFICATIONS} "
+            f"({messages['default_note']}: {ALL_MODIFICATIONS})."
+        ),
     )
     parser.add_argument(
         "--no-color",
         action="store_true",
-        help="Отключить ANSI-цвета в выводе.",
+        help=messages["no_color_help"],
     )
     parser.add_argument(
         "--verbose", "-v",
         action="store_true",
-        help="Подробный вывод каждого эксперимента.",
+        help=messages["verbose_help"],
     )
     return parser
 
 
-
-
 def main():
-    global _USE_COLOR
+    global _use_color
 
     parser = build_parser()
     args = parser.parse_args()
+    messages = cli_config("messages")
 
-    if args.no_color:
-        _USE_COLOR = False
+    match args.no_color:
+        case True:
+            _use_color = False
 
-    if args.count < 1:
-        parser.error("--count должен быть >= 1")
+    if args.count < MIN_EXPERIMENT_COUNT:
+        parser.error(messages["count_error"].format(min_count=MIN_EXPERIMENT_COUNT))
 
     print_banner()
 
-    # Исходный хеш
+    labels = cli_config("labels")
     h_orig = compute_hash(args.text, args.algo)
-    print(f"  Исходная строка : {YELLOW(repr(args.text))}")
-    print(f"  {args.algo.upper()} хеш      : {DIM(h_orig)}")
+    print(f"  {labels['source_text']} : {yellow(repr(args.text))}")
+    print(f"  {args.algo.upper()} {labels['hash']}      : {dim(h_orig)}")
     print()
 
-    modifications = ["char", "bit", "case"] if args.mod == "all" else [args.mod]
+    match args.mod:
+        case mod if mod == ALL_MODIFICATIONS:
+            modifications = MODIFICATION_TYPES
+        case mod:
+            modifications = (mod,)
     total = args.count * len(modifications)
 
-    print(BOLD(f"  Запуск {total} экспериментов…\n"))
+    print(bold(f"  {messages['starting'].format(total=total)}\n"))
 
     results = []
 
     if tqdm is not None:
         pbar = tqdm(
             total=total,
-            desc="  Эксперименты",
-            unit="эксп.",
-            ncols=70,
-            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]",
+            desc=cli_config("progress", "description"),
+            unit=cli_config("progress", "unit"),
+            ncols=PROGRESS_NCOLS,
+            bar_format=cli_config("progress", "bar_format"),
         )
 
     def callback(current, _total):
@@ -177,20 +242,28 @@ def main():
 
     try:
         for mod in modifications:
-            for i in range(args.count):
+            for _ in range(args.count):
                 try:
                     r = run_single_experiment(args.text, mod, args.algo)
                     results.append(r)
                     if args.verbose:
                         print_hash_pair(
-                            f"Эксперимент #{len(results)} ({r.modification_type})",
-                            r.original_text, r.modified_text,
-                            r.original_hash, r.modified_hash,
-                            r.diff_percent, r.changed_bits,
+                            messages["experiment_label"].format(
+                                number=len(results),
+                                modification_type=r.modification_type,
+                            ),
+                            r.original_text,
+                            r.modified_text,
+                            r.original_hash,
+                            r.modified_hash,
+                            r.diff_percent,
+                            r.changed_bits,
+                            r.total_bits,
+                            args.algo,
                         )
                     callback(len(results), total)
                 except ValueError as e:
-                    sys.stderr.write(f"\n  [предупреждение] {e}\n")
+                    sys.stderr.write("\n  " + messages["warning"].format(error=e) + "\n")
     finally:
         if tqdm is not None:
             pbar.close()
@@ -198,17 +271,22 @@ def main():
     print()
 
     if not results:
-        print(RED("  Нет результатов. Проверьте параметры."))
+        print(red("  " + messages["no_results"]))
         sys.exit(1)
 
     if not args.verbose:
-        print(BOLD("  Пример результата (последний эксперимент):"))
+        print(bold("  " + messages["sample_result"]))
         r = results[-1]
         print_hash_pair(
             r.modification_type,
-            r.original_text, r.modified_text,
-            r.original_hash, r.modified_hash,
-            r.diff_percent, r.changed_bits,
+            r.original_text,
+            r.modified_text,
+            r.original_hash,
+            r.modified_hash,
+            r.diff_percent,
+            r.changed_bits,
+            r.total_bits,
+            args.algo,
         )
 
     summary = summarize_results(results)
@@ -219,8 +297,8 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n  Прервано пользователем.")
+        print("\n\n  " + cli_config("messages", "interrupted"))
         sys.exit(0)
     except Exception as e:
-        print(f"\n  {RED('Ошибка:')} {e}")
+        print(f"\n  {red(cli_config('messages', 'error'))} {e}")
         sys.exit(1)
