@@ -1,13 +1,12 @@
+# crypto_core.py
 import os
 import json
-import argparse
 import sys
 from cryptography.hazmat.primitives import padding as sym_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
 
-#наши сеттингс
 
 def load_settings(path):
     """
@@ -39,7 +38,7 @@ def load_settings(path):
                 raise ValueError(f"В {path} нет поля {n}")
         return s
     except FileNotFoundError:
-        print(f"[!] {path} не найден, проверь путь")
+        print(f" {path} не найден, проверь путь")
         sys.exit(1)
     except json.JSONDecodeError:
         print(" JSON кривой")
@@ -48,7 +47,6 @@ def load_settings(path):
         print(f"[!] {e}")
         sys.exit(1)
 
-#генерируем ключи
 
 def read_binary_file(file_path):
     """
@@ -63,6 +61,7 @@ def read_binary_file(file_path):
     with open(file_path, 'rb') as f:
         return f.read()
 
+
 def write_binary_file(file_path, data):
     """
     Записывает байтовые данные в бинарный файл.
@@ -73,6 +72,7 @@ def write_binary_file(file_path, data):
     """
     with open(file_path, 'wb') as f:
         f.write(data)
+
 
 def generate_camellia_key(key_size_bits):
     """
@@ -85,7 +85,8 @@ def generate_camellia_key(key_size_bits):
         bytes: сгенерированный ключ длиной key_size_bits/8 байт
     """
     print(f" Генерируем Camellia {key_size_bits} бит")
-    return os.urandom(key_size_bits // 8) 
+    return os.urandom(key_size_bits // 8)
+
 
 def generate_rsa_keys():
     """
@@ -100,6 +101,7 @@ def generate_rsa_keys():
         key_size=2048
     )
     return private_key, private_key.public_key()
+
 
 def save_rsa_keys(private_key, public_key, private_path, public_path):
     """
@@ -128,7 +130,6 @@ def save_rsa_keys(private_key, public_key, private_path, public_path):
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         ))
 
-#Шифруем Орисой
 
 def encrypt_symmetric_key(sym_key, public_key, output_path):
     """
@@ -149,6 +150,7 @@ def encrypt_symmetric_key(sym_key, public_key, output_path):
         )
     )
     write_binary_file(output_path, enc)
+
 
 def decrypt_symmetric_key(private_key, encrypted_key_path):
     """
@@ -172,9 +174,8 @@ def decrypt_symmetric_key(private_key, encrypted_key_path):
         )
     )
 
-# Шифруем камилой
 
-def encrypt_file(input_path, output_path, key):
+def encrypt_file_content(input_path, output_path, key):
     """
     Шифрует файл с помощью Camellia в режиме CBC с PKCS7 паддингом.
     IV (16 байт) записывается в начало выходного файла.
@@ -191,17 +192,18 @@ def encrypt_file(input_path, output_path, key):
     padder = sym_padding.PKCS7(128).padder()
     padded = padder.update(plain) + padder.finalize()
 
-    iv = os.urandom(16)   # для CBC нужен IV
+    iv = os.urandom(16)
 
     cipher = Cipher(algorithms.Camellia(key), modes.CBC(iv))
     enc = cipher.encryptor()
     ciphertext = enc.update(padded) + enc.finalize()
 
-    write_binary_file(output_path, iv + ciphertext)  
+    write_binary_file(output_path, iv + ciphertext)
 
-def decrypt_file(input_path, output_path, key):
+
+def decrypt_file_content(input_path, output_path, key):
     """
-    Расшифровывает файл, зашифрованный функцией encrypt_file.
+    Расшифровывает файл, зашифрованный функцией encrypt_file_content.
     Извлекает IV из первых 16 байт, затем расшифровывает остальное.
     
     Параметры:
@@ -225,7 +227,6 @@ def decrypt_file(input_path, output_path, key):
 
     write_binary_file(output_path, plain)
 
-#режимы работы 
 
 def generation_mode(settings, key_size):
     """
@@ -244,6 +245,7 @@ def generation_mode(settings, key_size):
 
     print(" Всё сгенерировано (ключи + зашифрованный симметричный)")
 
+
 def encryption_mode(settings):
     """
     Режим шифрования: загружает приватный ключ, расшифровывает симметричный ключ,
@@ -257,8 +259,9 @@ def encryption_mode(settings):
 
     sym = decrypt_symmetric_key(priv, settings["symmetric_key_encrypted"])
 
-    encrypt_file(settings["initial_file"], settings["encrypted_file"], sym)
+    encrypt_file_content(settings["initial_file"], settings["encrypted_file"], sym)
     print(" Файл зашифрован")
+
 
 def decryption_mode(settings):
     """
@@ -273,38 +276,5 @@ def decryption_mode(settings):
 
     sym = decrypt_symmetric_key(priv, settings["symmetric_key_encrypted"])
 
-    decrypt_file(settings["encrypted_file"], settings["decrypted_file"], sym)
+    decrypt_file_content(settings["encrypted_file"], settings["decrypted_file"], sym)
     print(" Файл расшифрован, проверь результат")
-
-
-def main():
-    """
-    Главная функция, обрабатывающая аргументы командной строки и запускающая
-    соответствующий режим работы (генерация/шифрование/расшифрование).
-    """
-    p = argparse.ArgumentParser()
-    g = p.add_mutually_exclusive_group(required=True)
-
-    g.add_argument("--generation", action="store_true")
-    g.add_argument("--encryption", action="store_true")
-    g.add_argument("--decryption", action="store_true")
-
-    p.add_argument("--settings", required=True)
-    p.add_argument("--keysize", type=int, choices=[128,192,256],
-                   help="Для Camellia: 128/192/256 бит")
-
-    args = p.parse_args()
-    cfg = load_settings(args.settings)
-
-    if args.generation:
-        if not args.keysize:
-            print("Ошибка: при --generation нужен --keysize")
-            sys.exit(1)
-        generation_mode(cfg, args.keysize)
-    elif args.encryption:
-        encryption_mode(cfg)
-    elif args.decryption:
-        decryption_mode(cfg)
-
-if __name__ == "__main__":
-    main()
