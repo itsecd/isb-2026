@@ -1,46 +1,33 @@
 import json
 from pathlib import Path
+from exceptions import ConfigError, FileOperationError
 
 
-def load_crypto_config(
-    path="settings.json",
-):
+def load_crypto_config(path="settings.json"):
     """
     Load crypto configuration from JSON file.
 
-    args:
-        path:
-            path to JSON config file
+    Args:
+        path: Path to JSON config file.
 
-    return:
-        configuration dictionary
+    Returns:
+        Configuration dictionary.
 
-    raises:
-        FileNotFoundError:
-            if config file does not exist
-
-        ValueError:
-            if JSON structure is invalid
+    Raises:
+        ConfigError: If config file does not exist or JSON is invalid.
+        FileOperationError: If file cannot be read.
     """
-
     settings_path = Path(path)
 
     try:
-        with settings_path.open(
-            "r",
-            encoding="utf-8",
-        ) as file:
-
+        with settings_path.open("r", encoding="utf-8") as file:
             return json.load(file)
 
     except FileNotFoundError as exc:
-        raise FileNotFoundError(
-            f"Settings file not found: "
-            f"{settings_path}"
-        ) from exc
+        raise ConfigError(f"Settings file not found: {settings_path}") from exc
 
     except json.JSONDecodeError as exc:
-        raise ValueError(
-            f"Invalid JSON structure: "
-            f"{settings_path}"
-        ) from exc
+        raise ConfigError(f"Invalid JSON structure: {settings_path}") from exc
+
+    except OSError as exc:
+        raise FileOperationError(f"Failed to read config file: {settings_path}") from exc
