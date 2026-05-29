@@ -129,3 +129,20 @@ class KeyLoadError(CryptoSystemError):
             message: Error message text.
         """
         super().__init__(message)
+
+
+class KeySizeError(CryptoSystemError):
+    """
+    Exception raised for key size validation errors.
+
+    Indicates that key size is invalid for the algorithm.
+    """
+
+    def __init__(self, message: str = "Key size error") -> None:
+        """
+        Initializes key size exception.
+
+        Args:
+            message: Error message text.
+        """
+        super().__init__(message)
