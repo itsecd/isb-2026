@@ -224,7 +224,10 @@ class MainWindow(QMainWindow):
             msg.setIcon(QMessageBox.Information)
             msg.setText(f"Log successfully saved to '{filename}'.")
             msg.setWindowTitle("Success")
-            msg.setStyleSheet("QMessageBox { background-color: #2b2b2b; color: white; } QLabel { color: white; } QPushButton { background-color: #0d6efd; color: white; padding: 5px 15px; border-radius: 4px; }")
+            msg.setStyleSheet("QMessageBox { background-color: #2b2b2b; color: white; } "
+                              "QLabel { color: white; } "
+                              "QPushButton { background-color: #0d6efd; color: white; "
+                              "padding: 5px 15px; border-radius: 4px; }")
             msg.exec_()
         except Exception as e:
             self.text_log.append(f"[!] Failed to save log: {e}")
