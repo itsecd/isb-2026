@@ -1,186 +1,154 @@
-import os
-
-from cryptography.hazmat.primitives.ciphers import (
-    Cipher,
-    algorithms,
-    modes,
-)
-from cryptography.hazmat.primitives.padding import PKCS7
-
-from config_loader import load_crypto_config
-from file_utils import read_bytes, write_bytes
+import json
+from pathlib import Path
+from exceptions import FileOperationError, ConfigError
 
 
-CONFIG = load_crypto_config()
-
-CAST5_MIN_BITS = CONFIG["cast5_min_bits"]
-CAST5_MAX_BITS = CONFIG["cast5_max_bits"]
-
-CAST5_BLOCK_SIZE = CONFIG["cast5_block_size"]
-CAST5_IV_SIZE = CONFIG["cast5_iv_size"]
-
-
-def check_cast5_key_size(key_size_bits):
+def load_settings(path):
     """
-    Validate CAST5 key length.
+    Load application settings from JSON file.
 
-    args:
-        key_size_bits:
-            CAST5 key length in bits
+    Args:
+        path: Path to settings JSON file.
 
-    return:
-        validated CAST5 key length
+    Returns:
+        Dictionary with loaded settings.
 
-    raises:
-        ValueError:
-            if key length is invalid
+    Raises:
+        FileOperationError: If settings file does not exist or cannot be read.
+        ConfigError: If JSON structure is invalid.
     """
+    settings_path = Path(path)
 
     try:
-        key_size_bits = int(key_size_bits)
+        with settings_path.open("r", encoding="utf-8") as file:
+            return json.load(file)
 
-    except (TypeError, ValueError) as exc:
-        raise ValueError(
-            "Key length must be a number"
-        ) from exc
+    except FileNotFoundError as exc:
+        raise FileOperationError(f"Settings file not found: {settings_path}") from exc
 
-    if key_size_bits % 8 != 0:
-        raise ValueError(
-            "Key length must be multiple of 8 bits"
-        )
+    except json.JSONDecodeError as exc:
+        raise ConfigError(f"Invalid JSON structure: {settings_path}") from exc
 
-    if not (
-        CAST5_MIN_BITS <= key_size_bits <= CAST5_MAX_BITS
-    ):
-        raise ValueError(
-            f"CAST5 key length must be between "
-            f"{CAST5_MIN_BITS} and "
-            f"{CAST5_MAX_BITS} bits"
-        )
-
-    return key_size_bits
+    except OSError as exc:
+        raise FileOperationError(f"Failed to read settings file: {settings_path}") from exc
 
 
-def generate_cast5_key(
-    key_size_bits=CAST5_MAX_BITS,
-):
+def save_settings(path, settings):
     """
-    Generate random CAST5 key.
+    Save application settings to JSON file.
 
-    args:
-        key_size_bits:
-            CAST5 key length in bits
+    Args:
+        path: Path to output JSON file.
+        settings: Dictionary with application settings.
 
-    return:
-        generated CAST5 key
+    Raises:
+        FileOperationError: If file cannot be written.
     """
+    settings_path = Path(path)
 
-    checked_key_size = check_cast5_key_size(
-        key_size_bits
-    )
+    try:
+        create_parent_folder(settings_path)
 
-    return os.urandom(checked_key_size // 8)
+        with settings_path.open("w", encoding="utf-8") as file:
+            json.dump(settings, file, ensure_ascii=False, indent=4)
+
+    except OSError as exc:
+        raise FileOperationError(f"Failed to save settings file: {settings_path}") from exc
 
 
-def encrypt_file(
-    input_path,
-    output_path,
-    key,
-):
+def read_bytes(path):
     """
-    Encrypt file using CAST5-CBC.
+    Read file contents as bytes.
 
-    args:
-        input_path:
-            path to input file
+    Args:
+        path: Path to input file.
 
-        output_path:
-            path to encrypted output file
+    Returns:
+        Binary file contents.
 
-        key:
-            CAST5 encryption key
+    Raises:
+        FileOperationError: If file does not exist or cannot be read.
     """
+    file_path = Path(path)
 
-    data = read_bytes(input_path)
+    try:
+        with file_path.open("rb") as file:
+            return file.read()
 
-    padder = PKCS7(CAST5_BLOCK_SIZE).padder()
+    except FileNotFoundError as exc:
+        raise FileOperationError(f"File not found: {file_path}") from exc
 
-    padded_data = (
-        padder.update(data) +
-        padder.finalize()
-    )
-
-    iv = os.urandom(CAST5_IV_SIZE)
-
-    cipher = Cipher(
-        algorithms.CAST5(key),
-        modes.CBC(iv),
-    )
-
-    encryptor = cipher.encryptor()
-
-    encrypted_data = (
-        encryptor.update(padded_data) +
-        encryptor.finalize()
-    )
-
-    write_bytes(
-        output_path,
-        iv + encrypted_data,
-    )
+    except OSError as exc:
+        raise FileOperationError(f"Failed to read file: {file_path}") from exc
 
 
-def decrypt_file(
-    input_path,
-    output_path,
-    key,
-):
+def write_bytes(path, data):
     """
-    Decrypt file using CAST5-CBC.
+    Write binary data to file.
 
-    args:
-        input_path:
-            path to encrypted file
+    Args:
+        path: Path to output file.
+        data: Binary data to write.
 
-        output_path:
-            path to decrypted output file
-
-        key:
-            CAST5 decryption key
-
-    raises:
-        ValueError:
-            if encrypted file is invalid
+    Raises:
+        FileOperationError: If file cannot be written.
     """
+    file_path = Path(path)
 
-    encrypted_data = read_bytes(input_path)
+    try:
+        create_parent_folder(file_path)
 
-    if len(encrypted_data) < CAST5_IV_SIZE:
-        raise ValueError(
-            "Encrypted file is too short"
-        )
+        with file_path.open("wb") as file:
+            file.write(data)
 
-    iv = encrypted_data[:CAST5_IV_SIZE]
+    except OSError as exc:
+        raise FileOperationError(f"Failed to write file: {file_path}") from exc
 
-    ciphertext = encrypted_data[CAST5_IV_SIZE:]
 
-    cipher = Cipher(
-        algorithms.CAST5(key),
-        modes.CBC(iv),
-    )
+def create_parent_folder(path):
+    """
+    Create parent directory if it does not exist.
 
-    decryptor = cipher.decryptor()
+    Args:
+        path: File path whose parent folder must be created.
 
-    padded_data = (
-        decryptor.update(ciphertext) +
-        decryptor.finalize()
-    )
+    Raises:
+        FileOperationError: If directory cannot be created.
+    """
+    folder = Path(path).parent
 
-    unpadder = PKCS7(CAST5_BLOCK_SIZE).unpadder()
+    if str(folder) == ".":
+        return
 
-    data = (
-        unpadder.update(padded_data) +
-        unpadder.finalize()
-    )
+    try:
+        folder.mkdir(parents=True, exist_ok=True)
 
-    write_bytes(output_path, data)
+    except OSError as exc:
+        raise FileOperationError(f"Failed to create directory: {folder}") from exc
+
+
+def get_file_size_str(path):
+    """
+    Convert file size to human-readable string.
+
+    Args:
+        path: Path to file.
+
+    Returns:
+        Formatted file size string or "unknown" if cannot read.
+    """
+    file_path = Path(path)
+
+    try:
+        size = file_path.stat().st_size
+
+    except OSError:
+        return "unknown"
+
+    if size < 1024:
+        return f"{size} B"
+
+    if size < 1024 * 1024:
+        return f"{size / 1024:.1f} KB"
+
+    return f"{size / (1024 * 1024):.2f} MB"
