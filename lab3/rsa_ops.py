@@ -1,153 +1,291 @@
-import json
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa, padding as asym_padding
-from exceptions import KeyGenerationError, KeyLoadError, EncryptionError, DecryptionError, FileProcessingError
+from cryptography.hazmat.primitives import (
+    hashes,
+    serialization
+)
+from cryptography.hazmat.primitives.asymmetric import (
+    rsa,
+    padding as asym_padding
+)
 
-_SETTINGS_PATH = "settings.json"
+from exceptions import (
+    KeyGenerationError,
+    KeyLoadError,
+    EncryptionError,
+    DecryptionError,
+    FileProcessingError
+)
 
-def _load_rsa_constants():
+from file_utils import (
+    read_bytes,
+    write_bytes
+)
+
+
+def generate_rsa_keys(
+        public_exponent: int,
+        key_size: int
+):
     """
-    Загружает константы для RSA из файла settings.json.
+    Генерирует пару RSA ключей.
 
-    :return: Словарь с параметрами RSA (public exponent, key size).
-    :raises FileProcessingError: Если файл не найден или содержит некорректный JSON.
+    :param public_exponent:
+        Публичная экспонента RSA.
+    :param key_size:
+        Размер ключа RSA.
+    :return:
+        Кортеж из private_key
+        и public_key.
+    :raises KeyGenerationError:
+        При ошибке генерации.
     """
     try:
-        with open(_SETTINGS_PATH, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return data
-    except Exception as e:
-        raise FileProcessingError(f"Не удалось загрузить {_SETTINGS_PATH}: {e}") from e
-
-_constants = _load_rsa_constants()
-
-RSA_PUBLIC_EXPONENT = _constants["rsa_public_exponent"]
-RSA_KEY_SIZE = _constants["rsa_key_size"]
-
-
-def generate_rsa_keys():
-    """
-    Генерирует пару ключей RSA (приватный и публичный).
-
-    :return: Кортеж (private_key, public_key) объектов криптографии.
-    :raises KeyGenerationError: При сбое генерации ключей.
-    """
-    try:
-        private_key = rsa.generate_private_key(
-            public_exponent=RSA_PUBLIC_EXPONENT,
-            key_size=RSA_KEY_SIZE
+        private_key = (
+            rsa.generate_private_key(
+                public_exponent=(
+                    public_exponent
+                ),
+                key_size=key_size
+            )
         )
-        return private_key, private_key.public_key()
+
+        return (
+            private_key,
+            private_key.public_key()
+        )
+
     except Exception as error:
-        raise KeyGenerationError(f"Ошибка генерации RSA: {error}") from error
+        raise KeyGenerationError(
+            f"Ошибка генерации "
+            f"RSA: {error}"
+        ) from error
 
 
-def save_private_key(private_key, path: str) -> None:
+def save_private_key(
+        private_key,
+        path: str
+) -> None:
     """
-    Сохраняет приватный ключ RSA в файл в формате PEM (без шифрования паролем).
+    Сохраняет private key.
 
-    :param private_key: Приватный ключ (объект, полученный из generate_rsa_keys).
-    :param path: Путь к файлу для сохранения.
-    :raises FileProcessingError: При ошибке записи в файл.
+    :param private_key:
+        Приватный RSA ключ.
+    :param path:
+        Путь сохранения.
+    :raises FileProcessingError:
+        При ошибке записи.
     """
     try:
-        with open(path, "wb") as f:
-            f.write(private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
-            ))
+        private_key_bytes = (
+            private_key.private_bytes(
+                encoding=(
+                    serialization
+                    .Encoding
+                    .PEM
+                ),
+                format=(
+                    serialization
+                    .PrivateFormat
+                    .TraditionalOpenSSL
+                ),
+                encryption_algorithm=(
+                    serialization
+                    .NoEncryption()
+                )
+            )
+        )
+
+        write_bytes(
+            path,
+            private_key_bytes
+        )
+
     except Exception as error:
-        raise FileProcessingError(f"Ошибка сохранения private key: {error}") from error
+        raise FileProcessingError(
+            f"Ошибка сохранения "
+            f"private key: {error}"
+        ) from error
 
 
-def save_public_key(public_key, path: str) -> None:
+def save_public_key(
+        public_key,
+        path: str
+) -> None:
     """
-    Сохраняет публичный ключ RSA в файл в формате PEM.
+    Сохраняет public key.
 
-    :param public_key: Публичный ключ (объект).
-    :param path: Путь к файлу для сохранения.
-    :raises FileProcessingError: При ошибке записи в файл.
+    :param public_key:
+        Публичный RSA ключ.
+    :param path:
+        Путь сохранения.
+    :raises FileProcessingError:
+        При ошибке записи.
     """
     try:
-        with open(path, "wb") as f:
-            f.write(public_key.public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo
-            ))
+        public_key_bytes = (
+            public_key.public_bytes(
+                encoding=(
+                    serialization
+                    .Encoding
+                    .PEM
+                ),
+                format=(
+                    serialization
+                    .PublicFormat
+                    .SubjectPublicKeyInfo
+                )
+            )
+        )
+
+        write_bytes(
+            path,
+            public_key_bytes
+        )
+
     except Exception as error:
-        raise FileProcessingError(f"Ошибка сохранения public key: {error}") from error
+        raise FileProcessingError(
+            f"Ошибка сохранения "
+            f"public key: {error}"
+        ) from error
 
 
-def load_private_key(path: str):
+def load_private_key(
+        path: str
+):
     """
-    Загружает приватный ключ RSA из PEM-файла (без пароля).
+    Загружает private key.
 
-    :param path: Путь к файлу с приватным ключом.
-    :return: Объект приватного ключа.
-    :raises KeyLoadError: При ошибке чтения файла или загрузки ключа.
+    :param path:
+        Путь к PEM файлу.
+    :return:
+        Объект private key.
+    :raises KeyLoadError:
+        При ошибке загрузки.
     """
     try:
-        with open(path, "rb") as f:
-            return serialization.load_pem_private_key(f.read(), password=None)
+        key_data = read_bytes(path)
+
+        return (
+            serialization
+            .load_pem_private_key(
+                key_data,
+                password=None
+            )
+        )
+
     except Exception as error:
-        raise KeyLoadError(f"Ошибка загрузки private key: {error}") from error
+        raise KeyLoadError(
+            f"Ошибка загрузки "
+            f"private key: {error}"
+        ) from error
 
 
-def load_public_key(path: str):
+def load_public_key(
+        path: str
+):
     """
-    Загружает публичный ключ RSA из PEM-файла.
+    Загружает public key.
 
-    :param path: Путь к файлу с публичным ключом.
-    :return: Объект публичного ключа.
-    :raises KeyLoadError: При ошибке чтения файла или загрузки ключа.
+    :param path:
+        Путь к PEM файлу.
+    :return:
+        Объект public key.
+    :raises KeyLoadError:
+        При ошибке загрузки.
     """
     try:
-        with open(path, "rb") as f:
-            return serialization.load_pem_public_key(f.read())
+        key_data = read_bytes(path)
+
+        return (
+            serialization
+            .load_pem_public_key(
+                key_data
+            )
+        )
+
     except Exception as error:
-        raise KeyLoadError(f"Ошибка загрузки public key: {error}") from error
+        raise KeyLoadError(
+            f"Ошибка загрузки "
+            f"public key: {error}"
+        ) from error
 
 
-def encrypt_symmetric_key(key: bytes, public_key) -> bytes:
+def encrypt_symmetric_key(
+        key: bytes,
+        public_key
+) -> bytes:
     """
-    Шифрует симметричный ключ с помощью RSA (схема OAEP, хеш SHA-256).
+    Шифрует симметричный ключ.
 
-    :param key: Симметричный ключ (байты, например, ключ CAST5).
-    :param public_key: Публичный ключ RSA (объект).
-    :return: Зашифрованный ключ в виде байтов.
-    :raises EncryptionError: При ошибке шифрования.
+    :param key:
+        Симметричный ключ.
+    :param public_key:
+        Публичный RSA ключ.
+    :return:
+        Зашифрованный ключ.
+    :raises EncryptionError:
+        При ошибке шифрования.
     """
     try:
         return public_key.encrypt(
             key,
             asym_padding.OAEP(
-                mgf=asym_padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
+                mgf=(
+                    asym_padding.MGF1(
+                        algorithm=(
+                            hashes.SHA256()
+                        )
+                    )
+                ),
+                algorithm=(
+                    hashes.SHA256()
+                ),
                 label=None
             )
         )
+
     except Exception as error:
-        raise EncryptionError(f"Ошибка шифрования ключа: {error}") from error
+        raise EncryptionError(
+            f"Ошибка шифрования "
+            f"ключа: {error}"
+        ) from error
 
 
-def decrypt_symmetric_key(encrypted_key: bytes, private_key) -> bytes:
+def decrypt_symmetric_key(
+        encrypted_key: bytes,
+        private_key
+) -> bytes:
     """
-    Расшифровывает симметричный ключ, зашифрованный функцией encrypt_symmetric_key.
+    Расшифровывает ключ.
 
-    :param encrypted_key: Зашифрованный ключ (байты).
-    :param private_key: Приватный ключ RSA (объект).
-    :return: Расшифрованный симметричный ключ (байты).
-    :raises DecryptionError: При ошибке расшифрования.
+    :param encrypted_key:
+        Зашифрованный ключ.
+    :param private_key:
+        Приватный RSA ключ.
+    :return:
+        Расшифрованный ключ.
+    :raises DecryptionError:
+        При ошибке дешифрования.
     """
     try:
         return private_key.decrypt(
             encrypted_key,
             asym_padding.OAEP(
-                mgf=asym_padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
+                mgf=(
+                    asym_padding.MGF1(
+                        algorithm=(
+                            hashes.SHA256()
+                        )
+                    )
+                ),
+                algorithm=(
+                    hashes.SHA256()
+                ),
                 label=None
             )
         )
+
     except Exception as error:
-        raise DecryptionError(f"Ошибка дешифрования ключа: {error}") from error
+        raise DecryptionError(
+            f"Ошибка дешифрования "
+            f"ключа: {error}"
+        ) from error
