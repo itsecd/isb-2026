@@ -1,49 +1,57 @@
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
-
-from config_loader import load_crypto_config
-
-
-CONFIG = load_crypto_config()
-
-RSA_KEY_SIZE = CONFIG["rsa_key_size"]
-
-RSA_PUBLIC_EXPONENT = CONFIG[
-    "rsa_public_exponent"
-]
-
-from file_utils import (
-    read_bytes,
-    write_bytes,
-)
+from exceptions import KeyLoadError, KeyGenerationError, DecryptionError
+from file_utils import read_bytes, write_bytes
 
 
-def generate_private_key():
+def rsa_oaep_padding():
+    """
+    Create RSA-OAEP padding object.
+
+    Returns:
+        RSA-OAEP padding configuration.
+    """
+    return padding.OAEP(
+        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+        algorithm=hashes.SHA256(),
+        label=None,
+    )
+
+
+def generate_private_key(key_size, public_exponent):
     """
     Generate RSA private key.
 
-    return:
-        RSA private key object
-    """
+    Args:
+        key_size: RSA key size in bits.
+        public_exponent: RSA public exponent.
 
-    return rsa.generate_private_key(
-        public_exponent=RSA_PUBLIC_EXPONENT,
-        key_size=RSA_KEY_SIZE,
-    )
+    Returns:
+        RSA private key object.
+
+    Raises:
+        KeyGenerationError: If key generation fails.
+    """
+    try:
+        return rsa.generate_private_key(
+            public_exponent=public_exponent,
+            key_size=key_size,
+        )
+    except Exception as exc:
+        raise KeyGenerationError(f"Failed to generate RSA private key: {exc}") from exc
 
 
 def save_private_key(private_key, private_key_path):
     """
     Save RSA private key to PEM file.
 
-    args:
-        private_key:
-            RSA private key object
+    Args:
+        private_key: RSA private key object.
+        private_key_path: Path to PEM private key file.
 
-        private_key_path:
-            path to PEM private key file
+    Raises:
+        FileOperationError: If file cannot be written.
     """
-
     write_bytes(
         private_key_path,
         private_key.private_bytes(
@@ -58,14 +66,13 @@ def save_public_key(public_key, public_key_path):
     """
     Save RSA public key to PEM file.
 
-    args:
-        public_key:
-            RSA public key object
+    Args:
+        public_key: RSA public key object.
+        public_key_path: Path to PEM public key file.
 
-        public_key_path:
-            path to PEM public key file
+    Raises:
+        FileOperationError: If file cannot be written.
     """
-
     write_bytes(
         public_key_path,
         public_key.public_bytes(
@@ -79,144 +86,107 @@ def load_public_key(public_key_path):
     """
     Load RSA public key from PEM file.
 
-    args:
-        public_key_path:
-            path to PEM public key file
+    Args:
+        public_key_path: Path to PEM public key file.
 
-    return:
-        RSA public key object
+    Returns:
+        RSA public key object.
+
+    Raises:
+        KeyLoadError: If key cannot be loaded.
     """
-
-    return serialization.load_pem_public_key(
-        read_bytes(public_key_path)
-    )
+    try:
+        return serialization.load_pem_public_key(read_bytes(public_key_path))
+    except Exception as exc:
+        raise KeyLoadError(f"Failed to load public key from {public_key_path}: {exc}") from exc
 
 
 def load_private_key(private_key_path):
     """
     Load RSA private key from PEM file.
 
-    args:
-        private_key_path:
-            path to PEM private key file
+    Args:
+        private_key_path: Path to PEM private key file.
 
-    return:
-        RSA private key object
+    Returns:
+        RSA private key object.
+
+    Raises:
+        KeyLoadError: If key cannot be loaded.
     """
-
-    return serialization.load_pem_private_key(
-        read_bytes(private_key_path),
-        password=None,
-    )
-
-
-def rsa_oaep_padding():
-    """
-    Create RSA-OAEP padding object.
-
-    return:
-        RSA-OAEP padding configuration
-    """
-
-    return padding.OAEP(
-        mgf=padding.MGF1(
-            algorithm=hashes.SHA256()
-        ),
-        algorithm=hashes.SHA256(),
-        label=None,
-    )
+    try:
+        return serialization.load_pem_private_key(
+            read_bytes(private_key_path),
+            password=None,
+        )
+    except Exception as exc:
+        raise KeyLoadError(f"Failed to load private key from {private_key_path}: {exc}") from exc
 
 
-def generate_rsa_keys(public_key_path, private_key_path):
+def generate_rsa_keys(public_key_path, private_key_path, key_size, public_exponent):
     """
     Generate RSA key pair and save keys.
 
-    args:
-        public_key_path:
-            path to PEM public key file
+    Args:
+        public_key_path: Path to PEM public key file.
+        private_key_path: Path to PEM private key file.
+        key_size: RSA key size in bits.
+        public_exponent: RSA public exponent.
 
-        private_key_path:
-            path to PEM private key file
+    Returns:
+        Generated RSA key pair (private_key, public_key).
 
-    return:
-        generated RSA key pair
+    Raises:
+        KeyGenerationError: If key generation fails.
+        FileOperationError: If files cannot be written.
     """
-
-    private_key = generate_private_key()
+    private_key = generate_private_key(key_size, public_exponent)
     public_key = private_key.public_key()
 
-    save_private_key(
-        private_key,
-        private_key_path,
-    )
-
-    save_public_key(
-        public_key,
-        public_key_path,
-    )
+    save_private_key(private_key, private_key_path)
+    save_public_key(public_key, public_key_path)
 
     return private_key, public_key
 
 
-def encrypt_symmetric_key(
-    sym_key,
-    public_key_path,
-    encrypted_key_path,
-):
+def encrypt_symmetric_key(sym_key, public_key_path, encrypted_key_path):
     """
     Encrypt symmetric key using RSA public key.
 
-    args:
-        sym_key:
-            symmetric encryption key
+    Args:
+        sym_key: Symmetric encryption key.
+        public_key_path: Path to RSA public key.
+        encrypted_key_path: Path to encrypted symmetric key file.
 
-        public_key_path:
-            path to RSA public key
-
-        encrypted_key_path:
-            path to encrypted symmetric key file
+    Raises:
+        KeyLoadError: If public key cannot be loaded.
+        FileOperationError: If encrypted key cannot be written.
     """
-
     public_key = load_public_key(public_key_path)
-
-    encrypted_key = public_key.encrypt(
-        sym_key,
-        rsa_oaep_padding(),
-    )
-
-    write_bytes(
-        encrypted_key_path,
-        encrypted_key,
-    )
+    encrypted_key = public_key.encrypt(sym_key, rsa_oaep_padding())
+    write_bytes(encrypted_key_path, encrypted_key)
 
 
-def decrypt_symmetric_key(
-    private_key_path,
-    encrypted_key_path,
-):
+def decrypt_symmetric_key(private_key_path, encrypted_key_path):
     """
     Decrypt symmetric key using RSA private key.
 
-    args:
-        private_key_path:
-            path to RSA private key
+    Args:
+        private_key_path: Path to RSA private key.
+        encrypted_key_path: Path to encrypted symmetric key file.
 
-        encrypted_key_path:
-            path to encrypted symmetric key file
+    Returns:
+        Decrypted symmetric key.
 
-    return:
-        decrypted symmetric key
+    Raises:
+        KeyLoadError: If private key cannot be loaded.
+        FileOperationError: If encrypted key cannot be read.
+        DecryptionError: If decryption fails.
     """
+    private_key = load_private_key(private_key_path)
+    encrypted_key = read_bytes(encrypted_key_path)
 
-    private_key = load_private_key(
-        private_key_path
-    )
-
-    encrypted_key = read_bytes(
-        encrypted_key_path
-    )
-
-    return private_key.decrypt(
-        encrypted_key,
-        rsa_oaep_padding(),
-    )
+    try:
+        return private_key.decrypt(encrypted_key, rsa_oaep_padding())
+    except Exception as exc:
+        raise DecryptionError(f"Failed to decrypt symmetric key: {exc}") from exc
