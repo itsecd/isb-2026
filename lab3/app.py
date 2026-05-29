@@ -10,37 +10,25 @@ from PyQt5.QtWidgets import (
 )
 
 from config_loader import load_crypto_config
-
-
-CONFIG = load_crypto_config()
-
-CAST5_MIN_BITS = CONFIG["cast5_min_bits"]
-CAST5_MAX_BITS = CONFIG["cast5_max_bits"]
-
 from rsa_utils import (
     generate_rsa_keys,
     encrypt_symmetric_key,
     decrypt_symmetric_key,
 )
-
 from cast5_utils import (
     generate_cast5_key,
     encrypt_file,
     decrypt_file,
+    check_cast5_key_size,
 )
-
-from cli import (
-    keygen_mode,
-    encrypt_mode,
-    decrypt_mode,
-)
+from cli import keygen_mode, encrypt_mode, decrypt_mode
 from file_utils import load_settings, save_settings, get_file_size_str
 
 
 class WorkerThread(QThread):
-    log_signal      = pyqtSignal(str)
+    log_signal = pyqtSignal(str)
     progress_signal = pyqtSignal(int)
-    done_signal     = pyqtSignal(bool, str)
+    done_signal = pyqtSignal(bool, str)
 
     def __init__(self, task_fn):
         super().__init__()
@@ -58,7 +46,7 @@ class PathField(QWidget):
     def __init__(self, placeholder="", file_filter="All files (*)", save_mode=False):
         super().__init__()
         self._file_filter = file_filter
-        self._save_mode   = save_mode
+        self._save_mode = save_mode
 
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
@@ -81,16 +69,20 @@ class PathField(QWidget):
         if path:
             self.edit.setText(path)
 
-    def text(self):       return self.edit.text().strip()
-    def setText(self, t): self.edit.setText(t)
+    def text(self):
+        return self.edit.text().strip()
+
+    def setText(self, t):
+        self.edit.setText(t)
 
 
 class CryptoApp(QWidget):
-    def __init__(self, initial_settings=None):
+    def __init__(self, config, initial_settings=None):
         super().__init__()
-        self.settings     = initial_settings or {}
-        self._worker      = None
-        self._valid_sizes = list(range(CAST5_MIN_BITS, CAST5_MAX_BITS + 1, 8))
+        self.config = config
+        self.settings = initial_settings or {}
+        self._worker = None
+        self._valid_sizes = list(range(config["cast5_min_bits"], config["cast5_max_bits"] + 1, 8))
 
         self.setWindowTitle("RSA + CAST5  //  КРИПТОВАЛЮТА")
         self.setMinimumSize(860, 660)
@@ -104,7 +96,7 @@ class CryptoApp(QWidget):
             self._apply_settings(self.settings)
 
     def _create_widgets(self):
-        self.btn_keygen  = QPushButton("Сгенерировать ключи")
+        self.btn_keygen = QPushButton("Сгенерировать ключи")
         self.btn_encrypt = QPushButton("Зашифровать файл")
         self.btn_decrypt = QPushButton("Расшифровать файл")
         for b in (self.btn_keygen, self.btn_encrypt, self.btn_decrypt):
@@ -118,11 +110,11 @@ class CryptoApp(QWidget):
             b.setObjectName("cfgBtn")
             b.setFixedHeight(30)
 
-        self.input_path    = PathField("не задан")
-        self.enc_out_path  = PathField("не задан", "Binary (*.bin);;All (*)", save_mode=True)
-        self.dec_out_path  = PathField("не задан", save_mode=True)
-        self.enc_key_path  = PathField("не задан", "Key (*.enc);;All (*)", save_mode=True)
-        self.pub_key_path  = PathField("не задан", "PEM (*.pem);;All (*)", save_mode=True)
+        self.input_path = PathField("не задан")
+        self.enc_out_path = PathField("не задан", "Binary (*.bin);;All (*)", save_mode=True)
+        self.dec_out_path = PathField("не задан", save_mode=True)
+        self.enc_key_path = PathField("не задан", "Key (*.enc);;All (*)", save_mode=True)
+        self.pub_key_path = PathField("не задан", "PEM (*.pem);;All (*)", save_mode=True)
         self.priv_key_path = PathField("не задан", "PEM (*.pem);;All (*)", save_mode=True)
 
         self.key_slider = QSlider(Qt.Horizontal)
@@ -186,12 +178,12 @@ class CryptoApp(QWidget):
         grid.setHorizontalSpacing(12)
         grid.setColumnMinimumWidth(0, 160)
         path_rows = [
-            ("Исходный файл",        self.input_path),
-            ("Зашифрованный файл",   self.enc_out_path),
-            ("Расшифрованный файл",  self.dec_out_path),
-            ("Ключ CAST5  .enc",     self.enc_key_path),
-            ("Открытый ключ  .pem",  self.pub_key_path),
-            ("Закрытый ключ  .pem",  self.priv_key_path),
+            ("Исходный файл", self.input_path),
+            ("Зашифрованный файл", self.enc_out_path),
+            ("Расшифрованный файл", self.dec_out_path),
+            ("Ключ CAST5  .enc", self.enc_key_path),
+            ("Открытый ключ  .pem", self.pub_key_path),
+            ("Закрытый ключ  .pem", self.priv_key_path),
         ]
         for i, (lbl_text, widget) in enumerate(path_rows):
             lbl = QLabel(lbl_text)
@@ -218,7 +210,7 @@ class CryptoApp(QWidget):
         lbl_r = QLabel("RSA")
         lbl_r.setObjectName("fieldLbl")
         lbl_r.setFixedWidth(160)
-        rsa_val = QLabel("2048 бит  |  e = 65537  |  OAEP + SHA-256")
+        rsa_val = QLabel(f"{self.config['rsa_key_size']} бит  |  e = {self.config['rsa_public_exponent']}  |  OAEP + SHA-256")
         rsa_val.setObjectName("infoLbl")
         rsa_row.addWidget(lbl_r)
         rsa_row.addWidget(rsa_val)
@@ -379,7 +371,6 @@ class CryptoApp(QWidget):
         """)
 
     def _apply_settings(self, s):
-        """Apply a settings dict to all path fields and the key slider."""
         self.input_path.setText(s.get("input_file", ""))
         self.enc_out_path.setText(s.get("encrypted_file", ""))
         self.dec_out_path.setText(s.get("decrypted_file", ""))
@@ -404,7 +395,8 @@ class CryptoApp(QWidget):
     def _load_config(self):
         path = self.cfg_path.text()
         if not path:
-            self._err("Укажите путь к settings.json"); return
+            self._err("Укажите путь к settings.json")
+            return
         try:
             s = load_settings(path)
             self.settings = s
@@ -418,17 +410,18 @@ class CryptoApp(QWidget):
         if not path:
             path, _ = QFileDialog.getSaveFileName(
                 self, "Сохранить", "settings.json", "JSON (*.json)")
-            if not path: return
+            if not path:
+                return
             self.cfg_path.setText(path)
         try:
             save_settings(path, {
-                "input_file":         self.input_path.text(),
-                "encrypted_file":     self.enc_out_path.text(),
-                "decrypted_file":     self.dec_out_path.text(),
+                "input_file": self.input_path.text(),
+                "encrypted_file": self.enc_out_path.text(),
+                "decrypted_file": self.dec_out_path.text(),
                 "encrypted_key_file": self.enc_key_path.text(),
-                "public_key_file":    self.pub_key_path.text(),
-                "private_key_file":   self.priv_key_path.text(),
-                "cast5_key_size":     self._current_key_size(),
+                "public_key_file": self.pub_key_path.text(),
+                "private_key_file": self.priv_key_path.text(),
+                "cast5_key_size": self._current_key_size(),
             })
             self._log(f"Settings saved: {path}", "OK")
         except Exception as e:
@@ -460,33 +453,37 @@ class CryptoApp(QWidget):
                 raise ValueError(f"Не указан путь: {name}")
 
     def _run_keygen(self):
-        pub  = self.pub_key_path.text()
+        pub = self.pub_key_path.text()
         priv = self.priv_key_path.text()
-        enc  = self.enc_key_path.text()
+        enc = self.enc_key_path.text()
         bits = self._current_key_size()
         try:
             self._check(**{"Открытый ключ": pub,
                            "Закрытый ключ": priv,
-                           "Файл ключа":    enc})
+                           "Файл ключа": enc})
         except ValueError as e:
-            self._err(e); return
+            self._err(e)
+            return
 
         def task(log, prog):
-            log.emit("Генерация RSA-ключей (2048 бит)..."); prog.emit(20)
-            generate_rsa_keys(pub, priv)
-            log.emit(f"Генерация ключа CAST5 ({bits} бит)..."); prog.emit(50)
-            sym = generate_cast5_key(bits)
-            log.emit("Шифрование ключа CAST5 открытым RSA..."); prog.emit(75)
-            encrypt_symmetric_key(sym, pub, enc); prog.emit(100)
+            log.emit("Генерация RSA-ключей (2048 бит)...")
+            prog.emit(20)
+            generate_rsa_keys(pub, priv, self.config["rsa_key_size"], self.config["rsa_public_exponent"])
+            log.emit(f"Генерация ключа CAST5 ({bits} бит)...")
+            prog.emit(50)
+            sym = generate_cast5_key(bits, self.config["cast5_min_bits"], self.config["cast5_max_bits"])
+            log.emit("Шифрование ключа CAST5 открытым RSA...")
+            prog.emit(75)
+            encrypt_symmetric_key(sym, pub, enc)
+            prog.emit(100)
 
         self._start(task, "Ключи успешно созданы")
 
     def _run_crypto(self, mode):
-        """Shared logic for encrypt and decrypt operations."""
-        inp  = self.input_path.text() if mode == "encrypt" else self.enc_out_path.text()
-        out  = self.enc_out_path.text() if mode == "encrypt" else self.dec_out_path.text()
+        inp = self.input_path.text() if mode == "encrypt" else self.enc_out_path.text()
+        out = self.enc_out_path.text() if mode == "encrypt" else self.dec_out_path.text()
         priv = self.priv_key_path.text()
-        enc  = self.enc_key_path.text()
+        enc = self.enc_key_path.text()
 
         field_name = "Исходный файл" if mode == "encrypt" else "Зашифрованный файл"
         result_label = "Зашифрованный файл" if mode == "encrypt" else "Расшифрованный файл"
@@ -497,13 +494,17 @@ class CryptoApp(QWidget):
             self._check(**{field_name: inp, "Закрытый ключ": priv,
                            "Файл ключа": enc, result_label: out})
         except ValueError as e:
-            self._err(e); return
+            self._err(e)
+            return
 
         def task(log, prog):
-            log.emit("Расшифровка ключа CAST5..."); prog.emit(30)
+            log.emit("Расшифровка ключа CAST5...")
+            prog.emit(30)
             sym = decrypt_symmetric_key(priv, enc)
-            log.emit(f"Операция CAST5-CBC ({get_file_size_str(inp)})..."); prog.emit(60)
-            file_fn(inp, out, sym); prog.emit(100)
+            log.emit(f"Операция CAST5-CBC ({get_file_size_str(inp)})...")
+            prog.emit(60)
+            file_fn(inp, out, sym, self.config["cast5_block_size"], self.config["cast5_iv_size"])
+            prog.emit(100)
 
         self._start(task, ok_msg)
 
@@ -518,15 +519,15 @@ class CryptoApp(QWidget):
         QMessageBox.critical(self, "Ошибка", str(error))
 
 
-def run_gui(initial_settings=None):
+def run_gui(config, initial_settings=None):
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    w = CryptoApp(initial_settings=initial_settings)
+    w = CryptoApp(config, initial_settings=initial_settings)
     w.show()
     sys.exit(app.exec_())
 
 
-def run_cli():
+def run_cli(config):
     try:
         sys.stdout.reconfigure(encoding='utf-8')
         sys.stdin.reconfigure(encoding='utf-8')
@@ -537,15 +538,15 @@ def run_cli():
         description='Гибридная криптосистема RSA + CAST5'
     )
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--keygen',  action='store_true', help='Генерация ключей')
+    group.add_argument('--keygen', action='store_true', help='Генерация ключей')
     group.add_argument('--encrypt', action='store_true', help='Шифрование файла')
     group.add_argument('--decrypt', action='store_true', help='Дешифрование файла')
 
-    parser.add_argument('--public_key',    help='Путь к открытому ключу RSA (.pem)')
-    parser.add_argument('--private_key',   help='Путь к закрытому ключу RSA (.pem)')
+    parser.add_argument('--public_key', help='Путь к открытому ключу RSA (.pem)')
+    parser.add_argument('--private_key', help='Путь к закрытому ключу RSA (.pem)')
     parser.add_argument('--encrypted_key', help='Путь к зашифрованному симметричному ключу')
-    parser.add_argument('--input_file',    help='Путь к входному файлу')
-    parser.add_argument('--output_file',   help='Путь для сохранения результата')
+    parser.add_argument('--input_file', help='Путь к входному файлу')
+    parser.add_argument('--output_file', help='Путь для сохранения результата')
     parser.add_argument(
         '--key_size', type=int, default=128, metavar='BITS',
         help='Длина ключа CAST5 в битах: от 40 до 128 с шагом 8 (по умолчанию: 128)'
@@ -555,19 +556,21 @@ def run_cli():
 
     match True:
         case _ if args.keygen:
-            keygen_mode(args)
+            keygen_mode(args, config)
         case _ if args.encrypt:
-            encrypt_mode(args)
+            encrypt_mode(args, config)
         case _:
-            decrypt_mode(args)
+            decrypt_mode(args, config)
 
 
 def main():
+    # Конфиг считывается ОДИН РАЗ в main
+    config = load_crypto_config()
+
     cli_flags = {'--keygen', '--encrypt', '--decrypt'}
     if any(arg in cli_flags for arg in sys.argv[1:]):
-        run_cli()
+        run_cli(config)
     else:
-        # Настройки считываются здесь, в main, до запуска GUI
         initial_settings = None
         cfg_path = sys.argv[1] if len(sys.argv) > 1 else None
         if cfg_path:
@@ -575,7 +578,7 @@ def main():
                 initial_settings = load_settings(cfg_path)
             except Exception as e:
                 print(f"[WARN] Не удалось загрузить настройки: {e}")
-        run_gui(initial_settings=initial_settings)
+        run_gui(config, initial_settings=initial_settings)
 
 
 if __name__ == '__main__':
