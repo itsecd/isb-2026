@@ -1,0 +1,8 @@
+{
+  "key_bits": 192,
+  "input_file": "data/input.txt",
+  "encrypted_symmetric_key": "data/symmetric.enc",
+  "public_key": "data/public.pem",
+  "private_key": "data/private.pem",
+  "output_file": "data/encrypted.bin"
+}
