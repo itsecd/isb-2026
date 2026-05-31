@@ -1,0 +1,9 @@
+{
+	  "initial_file": "data/source.txt",
+    "encrypted_file": "data/encrypted.bin",
+    "decrypted_file": "data/decrypted.txt",
+    "symmetric_key": "keys/symmetric_encrypted.bin",
+    "public_key": "keys/public.pem",
+    "private_key": "keys/private.pem",
+    "aes_key_size": "128"
+}
