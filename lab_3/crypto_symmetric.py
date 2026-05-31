@@ -1,113 +1,74 @@
-
-"""
-Модуль симметричного шифрования (Blowfish)
-"""
-
 import os
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
-from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
-def validate_blowfish_key_length(key_length: int) -> int:
+def validate_blowfish_key_length(key_length: int) -> None:
     """
-    Проверяет корректность длины ключа для алгоритма Blowfish.
+    Проверяет корректность длины ключа Blowfish.
     
     Args:
-        key_length: Длина ключа в битах.
-    
-    Returns:
-        Проверенную длину ключа в байтах.
+        key_length: Длина ключа в битах
     
     Raises:
-        ValueError: Если длина ключа не соответствует требованиям Blowfish.
+        ValueError: Если длина ключа не соответствует требованиям
     """
-    if key_length < 32 or key_length > 448:
-        raise ValueError(f"Длина ключа Blowfish должна быть от 32 до 448 бит, получено {key_length} бит")
-    
-    if key_length % 8 != 0:
-        raise ValueError(f"Длина ключа Blowfish должна быть кратна 8 битам, получено {key_length} бит")
-    
-    return key_length // 8
+    if not (32 <= key_length <= 448 and key_length % 8 == 0):
+        raise ValueError(f"Длина ключа Blowfish должна быть от 32 до 448 бит и кратна 8, получено {key_length}")
 
 
-def generate_symmetric_key(key_length_bits: int = 128) -> bytes:
+def generate_blowfish_key(key_length: int) -> bytes:
     """
-    Генерирует ключ для симметричного алгоритма Blowfish.
+    Генерирует симметричный ключ для алгоритма Blowfish.
     
     Args:
-        key_length_bits: Длина ключа в битах (от 32 до 448, кратно 8).
+        key_length: Длина ключа в битах (должна быть от 32 до 448 и кратна 8)
     
     Returns:
-        Случайный ключ для алгоритма Blowfish.
+        bytes: Сгенерированный симметричный ключ
     """
-    key_length_bytes = validate_blowfish_key_length(key_length_bits)
-    return os.urandom(key_length_bytes)
+    validate_blowfish_key_length(key_length)
+    return os.urandom(key_length // 8)
 
 
-def encrypt_symmetric(symmetric_key: bytes, plaintext_bytes: bytes) -> tuple:
+def encrypt_blowfish(key: bytes, data: bytes) -> bytes:
     """
-    Шифрует данные симметричным алгоритмом Blowfish в режиме CBC.
+    Шифрует данные с использованием алгоритма Blowfish в режиме CBC.
     
     Args:
-        symmetric_key: Ключ Blowfish.
-        plaintext_bytes: Открытые данные для шифрования.
+        key: Симметричный ключ Blowfish
+        data: Данные для шифрования
     
     Returns:
-        Кортеж (iv, ciphertext).
+        bytes: Зашифрованные данные с добавленным вектором инициализации в начале
     """
-    if not plaintext_bytes:
-        raise ValueError("Нет данных для шифрования")
+    padder = padding.PKCS7(64).padder()
+    padded_data = padder.update(data) + padder.finalize()
     
     iv = os.urandom(8)
-    cipher = Cipher(algorithms.Blowfish(symmetric_key), modes.CBC(iv), backend=default_backend())
+    cipher = Cipher(algorithms.Blowfish(key), modes.CBC(iv))
     encryptor = cipher.encryptor()
-    
-    padder = padding.ANSIX923(64).padder()
-    padded_data = padder.update(plaintext_bytes) + padder.finalize()
-    
-    ciphertext = encryptor.update(padded_data) + encryptor.finalize()
-    return iv, ciphertext
+    cipher_text = encryptor.update(padded_data) + encryptor.finalize()
+    return iv + cipher_text
 
 
-def decrypt_symmetric(symmetric_key: bytes, iv: bytes, ciphertext_bytes: bytes) -> bytes:
+def decrypt_blowfish(key: bytes, encrypted_data: bytes) -> bytes:
     """
-    Расшифровывает данные симметричным алгоритмом Blowfish в режиме CBC.
+    Дешифрует данные с использованием алгоритма Blowfish.
     
     Args:
-        symmetric_key: Ключ Blowfish.
-        iv: Вектор инициализации длиной 8 байт.
-        ciphertext_bytes: Зашифрованные данные.
+        key: Симметричный ключ Blowfish
+        encrypted_data: Зашифрованные данные (IV + шифротекст)
     
     Returns:
-        Расшифрованные данные.
+        bytes: Расшифрованные исходные данные
     """
-    if len(iv) != 8:
-        raise ValueError(f"IV для Blowfish должен быть 8 байт, получено {len(iv)} байт")
+    iv = encrypted_data[:8]
+    cipher_text = encrypted_data[8:]
     
-    if not ciphertext_bytes:
-        raise ValueError("Нет данных для дешифрования")
-    
-    cipher = Cipher(algorithms.Blowfish(symmetric_key), modes.CBC(iv), backend=default_backend())
+    cipher = Cipher(algorithms.Blowfish(key), modes.CBC(iv))
     decryptor = cipher.decryptor()
+    padded_data = decryptor.update(cipher_text) + decryptor.finalize()
     
-    padded_plaintext = decryptor.update(ciphertext_bytes) + decryptor.finalize()
-    
-    unpadder = padding.ANSIX923(64).unpadder()
-    plaintext = unpadder.update(padded_plaintext) + unpadder.finalize()
-    return plaintext
-
-
-def save_symmetric_key(key: bytes, filepath: str) -> None:
-    """Сохраняет симметричный ключ в файл."""
-    with open(filepath, 'wb') as f:
-        f.write(key)
-
-
-def load_symmetric_key(filepath: str) -> bytes:
-    """Загружает симметричный ключ из файла."""
-    with open(filepath, 'rb') as f:
-        key = f.read()
-    if not key:
-        raise ValueError(f"Файл {filepath} пуст")
-    return key
+    unpadder = padding.PKCS7(64).unpadder()
+    return unpadder.update(padded_data) + unpadder.finalize()
