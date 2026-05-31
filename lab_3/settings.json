@@ -1,0 +1,8 @@
+{
+    "initial_file_path": "initial_file.txt",
+    "encrypted_file_path": "encrypted.bin",
+    "decrypted_file_path": "decrypted.txt",
+    "symmetric_key_path": "sym_key.enc",
+    "public_key_path": "public.pem",
+    "private_key_path": "private.pem"
+}
