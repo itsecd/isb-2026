@@ -1,0 +1,14 @@
+{
+    "выв": {
+        "algorithm": "sha256",
+        "salt": "705c2fa9e267caf29eac2cef02f2c480",
+        "hash": "f6de308016d3c407bad32380d0f9f77573614c50f88c647867fd7d21056a9a17",
+        "created_at": "2026-05-31T16:30:02.933884"
+    },
+    "ярик1": {
+        "algorithm": "sha256",
+        "salt": "07c1513ffc8aafcf97303fd4e7c806b5",
+        "hash": "bca4df70ff0a5f0796ade053d8c281106e88fb401c333f29287d081695b4c311",
+        "created_at": "2026-05-31T16:30:41.604296"
+    }
+}

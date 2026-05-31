@@ -1,0 +1,6 @@
+{
+    "users_file": "data/users.json",
+    "default_hash_algorithm": "sha256",
+    "salt_length": 16,
+    "encoding": "utf-8"
+}
