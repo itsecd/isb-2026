@@ -10,10 +10,16 @@ def save(path, settings):
         OSError: Error writing data
     """
     try:
+        normalized_settings = {}
+        for key, value in settings.items():
+            if isinstance(value, str) and ('\\' in value or '/' in value):
+                normalized_settings[key] = value.replace('\\', '/')
+            else:
+                normalized_settings[key] = value
         with open(path, "w", encoding="utf-8") as fp:
-            json.dump(settings, fp, indent=4, ensure_ascii=False)
+            json.dump(normalized_settings, fp, indent=4, ensure_ascii=False)
     except OSError as e:
-        raise OSError(f"Ошибка сохранения файла: {e}")
+        raise OSError(f"РћС€РёР±РєР° СЃРѕС…СЂР°РЅРµРЅРёСЏ С„Р°Р№Р»Р°: {e}")
 
 def load(path):
     """
@@ -30,6 +36,6 @@ def load(path):
         with open(path, "r", encoding="utf-8") as json_file:
             return json.load(json_file)
     except FileNotFoundError:
-        raise FileNotFoundError(f"Файл настроек не найден: {path}")
+        raise FileNotFoundError(f"Р¤Р°Р№Р» РЅР°СЃС‚СЂРѕРµРє РЅРµ РЅР°Р№РґРµРЅ: {path}")
     except json.JSONDecodeError as e:
-        raise ValueError(f"Ошибка чтения файла: {e}")
+        raise ValueError(f"РћС€РёР±РєР° С‡С‚РµРЅРёСЏ С„Р°Р№Р»Р°: {e}")

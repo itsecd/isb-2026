@@ -11,7 +11,7 @@ def serialize_public_key(public_key, public_pem_path: str):
     """
     Save public key as a .pem file
     Args:
-        public_key(str): public key
+        public_key(str): public key object
         public_pem_path(str): save path for the key 
     Raises:
         OSError: Error writing data
@@ -25,7 +25,7 @@ def serialize_public_key(public_key, public_pem_path: str):
                 )
             )
     except OSError as e:
-        raise OSError(f"Îøèáêà ñîõðàíåíèÿ ôàéëà: {e}")
+        raise OSError(f"ÐžÑˆÐ¸Ð±ÐºÐ° ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ñ Ñ„Ð°Ð¹Ð»Ð°: {e}")
 
 
 def serialize_private_key(private_key, private_pem_path: str):
@@ -47,7 +47,7 @@ def serialize_private_key(private_key, private_pem_path: str):
                 )
             )
     except OSError as e:
-        raise OSError(f"Îøèáêà ñîõðàíåíèÿ ôàéëà: {e}")
+        raise OSError(f"ÐžÑˆÐ¸Ð±ÐºÐ° ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ñ Ñ„Ð°Ð¹Ð»Ð°: {e}")
 
 def deserialize_public_key(public_pem_path: str):
     """
@@ -62,32 +62,31 @@ def deserialize_public_key(public_pem_path: str):
             public_bytes = pem_in.read()
         return load_pem_public_key(public_bytes)
     except FileNotFoundError as e:
-        raise FileNotFoundError(f"Îøèáêà ñîõðàíåíèÿ ôàéëà: {e}")
+        raise FileNotFoundError(f"ÐžÑˆÐ¸Ð±ÐºÐ° ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ñ Ñ„Ð°Ð¹Ð»Ð°: {e}")
 
 def deserialize_private_key(private_pem_path: str):
     """
-    Save private key as a .pem file
+    Read private key from a .pem file
     Args:
-        public_key(str): private key
-        public_pem_path(str): save path for the key 
+        private_pem_path(str): read path for the key 
     Raises:
-        OSError: Error writing data
+        FileNotFoundError: file not found
     """
     try:
         with open(private_pem_path, "rb") as pem_in:
             private_bytes = pem_in.read()
-        return load_pem_private_key(private_bytes)
+        return load_pem_private_key(private_bytes,password=None)
     except OSError as e:
-        raise OSError(f"Îøèáêà ñîõðàíåíèÿ ôàéëà: {e}")
+        raise OSError(f"ÐžÑˆÐ¸Ð±ÐºÐ° ÑÐ¾Ñ…Ñ€Ð°Ð½ÐµÐ½Ð¸Ñ Ñ„Ð°Ð¹Ð»Ð°: {e}")
 
-def encrypt_symmetric_key(public_key_path, symmetric_key):
+def encrypt_symmetric_key(public_key_path: str, symmetric_key: bytes) -> bytes:
     """
-    Encrypting symmetric key with RSA private key
+    Encrypt the symmetric key with RSA public key
     Args:
-        public_key_path(str): Path to oublic key
-        symmetric_key(str): symmetric key
+        public_key_path(str): Path to public key
+        symmetric_key(bytes): symmetric key
     Returns: 
-        encrypted_key(bytes): encrypted sym key
+        encrypted_key(bytes): encrypted symmetric key
     """
     public_key = deserialize_public_key (public_key_path)
     encrypted_key = public_key.encrypt(
@@ -98,16 +97,16 @@ def encrypt_symmetric_key(public_key_path, symmetric_key):
             label=None))
     return encrypted_key
 
-def decrypt_symmetric_key(private_key_path, encrypted_key_path):
+def decrypt_symmetric_key(private_key_path: str, encrypted_key_path: str) -> bytes:
     """
-    Decrypting symmetric key with RSA private key
+    Decrypt the symmetric key with RSA private key
     Args:
         private_key_path(str): Path to private key
         encrypted_key_path(str): Path to encrypted symmetric key
     Returns: 
-        decrypted_key(bytes): decrypted sym key
+        decrypted_key(bytes): decrypted symmetric key
     """
-    private_key = deserialize_private_key (private_key_path)
+    private_key = deserialize_private_key(private_key_path)
     encrypted_key = symmetric.deserialize_encrypted_key (encrypted_key_path)
     decrypted_key = private_key.decrypt(
         encrypted_key,
