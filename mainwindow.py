@@ -142,7 +142,6 @@ class MainWindow(QMainWindow):
             return
         if self.mode=="on":
             hash_,salt=hash.generate_hash(text_p)
-            print(hash_)
             database.add_user(self.path,text_l,hash_,salt)
         else:
             hash_=without_salt.hash_without_salt(text_p)
