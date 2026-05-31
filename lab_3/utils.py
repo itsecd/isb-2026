@@ -1,109 +1,104 @@
-
-"""
-Модуль вспомогательных функций и обработки ошибок
-"""
-
-import os
 import json
-import traceback
-from datetime import datetime
+import os
 
 
-class CryptoError(Exception):
-    """Базовый класс для ошибок криптосистемы."""
+class FileUtilsError(Exception):
+    """Исключение для ошибок при работе с файлами и директориями"""
     pass
 
 
-class KeyGenerationError(CryptoError):
-    """Ошибка при генерации ключей."""
-    pass
-
-
-class EncryptionError(CryptoError):
-    """Ошибка при шифровании."""
-    pass
-
-
-class DecryptionError(CryptoError):
-    """Ошибка при дешифровании."""
-    pass
-
-
-class FileOperationError(CryptoError):
-    """Ошибка при работе с файлами."""
-    pass
-
-
-def handle_error(error: Exception, context: str = "") -> str:
+def read_bytes(path: str) -> bytes:
     """
-    Обрабатывает ошибку и возвращает сообщение.
+    Считывает данные из файла.
     
     Args:
-        error: Исключение.
-        context: Контекст возникновения ошибки.
+        path (str): Путь к файлу для чтения
     
     Returns:
-        Отформатированное сообщение об ошибке.
+        bytes: Содержимое файла в виде байтов
+    
+    Raises:
+        FileUtilsError: Если файл не найден, недостаточно прав или другая ошибка ввода/вывода
     """
-    error_msg = f"[{datetime.now().strftime('%H:%M:%S')}] "
-    
-    if context:
-        error_msg += f"{context}: "
-    
-    if isinstance(error, FileNotFoundError):
-        error_msg += f"Файл не найден: {error.filename}"
-    elif isinstance(error, PermissionError):
-        error_msg += f"Нет прав доступа к файлу: {error.filename}"
-    elif isinstance(error, ValueError):
-        error_msg += f"Ошибка валидации: {str(error)}"
-    elif isinstance(error, CryptoError):
-        error_msg += str(error)
-    else:
-        error_msg += f"Неожиданная ошибка: {str(error)}"
-    
-    return error_msg
+    try:
+        with open(path, 'rb') as file:
+            return file.read()
+    except FileNotFoundError as err:
+        raise FileUtilsError(f"Файл не найден: {path}") from err
+    except PermissionError as err:
+        raise FileUtilsError(f"Недостаточно прав для чтения файла: {path}") from err
+    except Exception as err:
+        raise FileUtilsError(f"Ошибка при чтении файла {path}: {err}") from err
 
 
-def log_operation(operation: str, details: str = "") -> None:
+def write_bytes(path: str, data: bytes) -> None:
     """
-    Логирует операцию в консоль.
+    Записывает данные в файл.
     
     Args:
-        operation: Название операции.
-        details: Детали операции.
+        path (str): Путь к файлу для записи
+        data (bytes): Данные для записи
+    
+    Raises:
+        FileUtilsError: Если директория не найдена, недостаточно прав или другая ошибка ввода/вывода
     """
-    timestamp = datetime.now().strftime('%H:%M:%S')
-    print(f"[{timestamp}] [{operation}] {details}")
+    try:
+        with open(path, 'wb') as file:
+            file.write(data)
+    except FileNotFoundError as err:
+        raise FileUtilsError(f"Путь не найден: {path}") from err
+    except PermissionError as err:
+        raise FileUtilsError(f"Недостаточно прав для записи в файл: {path}") from err
+    except Exception as err:
+        raise FileUtilsError(f"Ошибка при записи в файл {path}: {err}") from err
 
 
-def save_settings(settings: dict, filepath: str) -> None:
-    """Сохраняет настройки в JSON файл."""
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(settings, f, indent=4, ensure_ascii=False)
+def load_settings(setting_file: str = 'settings.json') -> dict:
+    """
+    Загружает настройки из JSON файла. Если файл не существует, создаёт его с настройками по умолчанию.
+    
+    Args:
+        setting_file (str): Путь к JSON файлу с настройками. По умолчанию 'settings.json'
+    
+    Returns:
+        dict: Словарь с настройками
+    
+    Raises:
+        FileUtilsError: Если файл JSON повреждён или произошла ошибка при чтении/записи
+    """
+    if not os.path.exists(setting_file):
+        default_settings = {
+            'initial_file': 'test.txt',
+            'encrypted_file': 'encrypted.bin',
+            'decrypted_file': 'decrypted.txt',
+            'symmetric_key': 'symmetric_key.bin',
+            'public_key': 'public_key.pem',
+            'secret_key': 'secret_key.pem',
+            'symmetric_key_length': 128
+        }
+        save_settings(setting_file, default_settings)
+        return default_settings
+    
+    try:
+        with open(setting_file, 'r', encoding='utf-8') as json_file:
+            return json.load(json_file)
+    except Exception as err:
+        raise FileUtilsError(f"Ошибка при чтении JSON файла {setting_file}: {err}") from err
 
 
-def load_settings(filepath: str) -> dict:
-    """Загружает настройки из JSON файла."""
-    if not os.path.exists(filepath):
-        return {}
-    with open(filepath, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-
-def validate_file_exists(filepath: str) -> bool:
-    """Проверяет существование файла."""
-    return os.path.exists(filepath)
-
-
-def get_file_size_mb(filepath: str) -> float:
-    """Возвращает размер файла в мегабайтах."""
-    if os.path.exists(filepath):
-        return os.path.getsize(filepath) / (1024 * 1024)
-    return 0.0
-
-
-def ensure_directory_exists(filepath: str) -> None:
-    """Создает директорию для файла, если её нет."""
-    directory = os.path.dirname(filepath)
-    if directory and not os.path.exists(directory):
-        os.makedirs(directory)
+def save_settings(path: str, data: dict) -> None:
+    """
+    Сохраняет настройки в JSON файл.
+    
+    Args:
+        path (str): Путь для сохранения JSON файла
+        data (dict): Словарь с настройками для сохранения
+    
+    Raises:
+        FileUtilsError: Если произошла ошибка при сериализации или записи в файл
+    """
+    try:
+        with open(path, 'w', encoding='utf-8') as json_file:
+            json.dump(data, json_file, indent=2, ensure_ascii=False)
+    except Exception as err:
+        raise FileUtilsError(f"Ошибка при записи JSON файла {path}: {err}") from err
