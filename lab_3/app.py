@@ -9,59 +9,124 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QFont
 
-from crypto_hybrid import generate_hybrid_keys, encrypt_file, decrypt_file
-from utils import handle_error, load_settings, save_settings
+from crypto_hybrid import encrypt_data, decrypt_data, get_symmetric_key
+from crypto_symmetric import generate_blowfish_key
+from crypto_asymmetric import generate_key_pair, save_public_key, save_private_key, encrypt_rsa
+from utils import write_bytes, read_bytes, load_settings, save_settings, FileUtilsError
 
 
 class WorkerThread(QThread):
+    """
+    Поток для выполнения длительных криптографических операций без блокировки GUI.
+    """
     finished = pyqtSignal(bool, str)
     log = pyqtSignal(str)
 
     def __init__(self, operation, **kwargs):
+        """
+        Инициализирует рабочий поток с указанной операцией и параметрами.
+        
+        Args:
+            operation (str): Тип операции ('generate', 'encrypt', 'decrypt')
+            **kwargs: Параметры для выполнения операции
+        """
         super().__init__()
         self.operation = operation
         self.kwargs = kwargs
 
     def run(self):
+        """
+        Выполняет операцию в отдельном потоке.
+        """
         try:
             if self.operation == 'generate':
-                generate_hybrid_keys(
-                    public_path=self.kwargs['public_path'],
-                    secret_path=self.kwargs['secret_path'],
-                    encrypted_sym_key_path=self.kwargs['encrypted_sym_path'],
-                    sym_key_length=self.kwargs['key_length']
-                )
-                self.log.emit(f"[OK] Сгенерирован Blowfish ключ ({self.kwargs['key_length']} бит)")
-                self.log.emit(f"[OK] Сгенерирована пара RSA ключей (2048 бит)")
-                self.finished.emit(True, "Ключи успешно сгенерированы!")
-
+                self._generate_keys()
             elif self.operation == 'encrypt':
-                encrypt_file(
-                    input_file=self.kwargs['input_file'],
-                    output_file=self.kwargs['output_file'],
-                    private_key_path=self.kwargs['private_key_path'],
-                    encrypted_sym_key_path=self.kwargs['encrypted_sym_path']
-                )
-                self.log.emit(f"[OK] Файл зашифрован Blowfish: {self.kwargs['output_file']}")
-                self.finished.emit(True, "Файл успешно зашифрован!")
-
+                self._encrypt_file()
             elif self.operation == 'decrypt':
-                decrypt_file(
-                    input_file=self.kwargs['input_file'],
-                    output_file=self.kwargs['output_file'],
-                    private_key_path=self.kwargs['private_key_path'],
-                    encrypted_sym_key_path=self.kwargs['encrypted_sym_path']
-                )
-                self.log.emit(f"[OK] Файл расшифрован: {self.kwargs['output_file']}")
-                self.finished.emit(True, "Файл успешно расшифрован!")
-
+                self._decrypt_file()
         except Exception as e:
-            error_msg = handle_error(e, self.operation)
-            self.log.emit(f"[ERROR] {error_msg}")
-            self.finished.emit(False, error_msg)
+            self.log.emit(f"[ОШИБКА] {str(e)}")
+            self.finished.emit(False, str(e))
+
+    def _generate_keys(self):
+        """
+        Генерирует пару RSA ключей и симметричный ключ Blowfish.
+        """
+        key_length = self.kwargs['key_length']
+        self.log.emit(f"[INFO] Генерация Blowfish ключа длиной {key_length} бит")
+        symmetric_key = generate_blowfish_key(key_length)
+        
+        self.log.emit(f"[INFO] Генерация пары ключей RSA длиной 2048 бит")
+        private_key, public_key = generate_key_pair()
+        
+        save_private_key(self.kwargs['secret_path'], private_key)
+        save_public_key(self.kwargs['public_path'], public_key)
+        
+        encrypted_symmetric_key = encrypt_rsa(public_key, symmetric_key)
+        write_bytes(self.kwargs['encrypted_sym_path'], encrypted_symmetric_key)
+        
+        self.log.emit(f"[OK] Ключи успешно сгенерированы и сохранены")
+        self.finished.emit(True, "Ключи успешно сгенерированы!")
+
+    def _encrypt_file(self):
+        """
+        Шифрует файл с использованием гибридной схемы.
+        """
+        self.log.emit(f"[INFO] Чтение зашифрованного симметричного ключа")
+        encrypted_sym_key = read_bytes(self.kwargs['encrypted_sym_path'])
+        
+        self.log.emit(f"[INFO] Загрузка приватного ключа RSA")
+        from crypto_asymmetric import load_private_key
+        private_key = load_private_key(self.kwargs['private_key_path'])
+        
+        self.log.emit(f"[INFO] Расшифровка симметричного ключа через RSA")
+        from crypto_asymmetric import decrypt_rsa
+        symmetric_key = decrypt_rsa(private_key, encrypted_sym_key)
+        
+        self.log.emit(f"[INFO] Чтение исходного файла: {self.kwargs['input_file']}")
+        data = read_bytes(self.kwargs['input_file'])
+        
+        self.log.emit(f"[INFO] Шифрование данных алгоритмом Blowfish (CBC режим)")
+        from crypto_symmetric import encrypt_blowfish
+        encrypted_data = encrypt_blowfish(symmetric_key, data)
+        
+        write_bytes(self.kwargs['output_file'], encrypted_data)
+        self.log.emit(f"[OK] Файл успешно зашифрован: {self.kwargs['output_file']}")
+        self.finished.emit(True, "Файл успешно зашифрован!")
+
+    def _decrypt_file(self):
+        """
+        Расшифровывает файл с использованием гибридной схемы.
+        """
+        self.log.emit(f"[INFO] Чтение зашифрованного симметричного ключа")
+        encrypted_sym_key = read_bytes(self.kwargs['encrypted_sym_path'])
+        
+        self.log.emit(f"[INFO] Загрузка приватного ключа RSA")
+        from crypto_asymmetric import load_private_key
+        private_key = load_private_key(self.kwargs['private_key_path'])
+        
+        self.log.emit(f"[INFO] Расшифровка симметричного ключа через RSA")
+        from crypto_asymmetric import decrypt_rsa
+        symmetric_key = decrypt_rsa(private_key, encrypted_sym_key)
+        
+        self.log.emit(f"[INFO] Чтение зашифрованного файла: {self.kwargs['input_file']}")
+        encrypted_data = read_bytes(self.kwargs['input_file'])
+        
+        self.log.emit(f"[INFO] Дешифрование данных алгоритмом Blowfish (CBC режим)")
+        from crypto_symmetric import decrypt_blowfish
+        decrypted_data = decrypt_blowfish(symmetric_key, encrypted_data)
+        
+        write_bytes(self.kwargs['output_file'], decrypted_data)
+        self.log.emit(f"[OK] Файл успешно расшифрован: {self.kwargs['output_file']}")
+        self.finished.emit(True, "Файл успешно расшифрован!")
 
 
 class HybridCryptoApp(QMainWindow):
+    """
+    Главное окно приложения гибридной криптосистемы RSA + Blowfish.
+    """
+    
     def __init__(self):
         super().__init__()
         self.settings_file = "app_settings.json"
@@ -72,6 +137,9 @@ class HybridCryptoApp(QMainWindow):
         self.apply_style()
 
     def apply_style(self):
+        """
+        Применяет CSS стили для оформления интерфейса.
+        """
         self.setStyleSheet("""
             QMainWindow { background-color: #1e1e2e; }
             QLabel { color: #cdd6f4; font-size: 12px; }
@@ -114,6 +182,9 @@ class HybridCryptoApp(QMainWindow):
         """)
 
     def init_ui(self):
+        """
+        Инициализирует пользовательский интерфейс.
+        """
         self.setWindowTitle("Гибридная криптосистема RSA + Blowfish")
         self.setGeometry(100, 100, 1000, 700)
 
@@ -122,6 +193,17 @@ class HybridCryptoApp(QMainWindow):
         layout = QVBoxLayout(central)
         layout.setSpacing(10)
 
+        self._create_header(layout)
+        self._create_tabs(layout)
+        self._create_status_bar()
+
+    def _create_header(self, layout):
+        """
+        Создаёт верхнюю панель с заголовком приложения.
+        
+        Args:
+            layout: Родительский компоновщик
+        """
         header = QFrame()
         header.setStyleSheet("""
             QFrame {
@@ -139,7 +221,6 @@ class HybridCryptoApp(QMainWindow):
         title.setStyleSheet("color: #1e1e2e;")
         header_layout.addWidget(title)
         
-        # ВОТ ЗДЕСЬ ИСПРАВЛЕНО - теперь Blowfish!
         subtitle = QLabel("RSA (2048 бит) + Blowfish (32-448 бит, режим CBC)")
         subtitle.setAlignment(Qt.AlignCenter)
         subtitle.setStyleSheet("color: #1e1e2e; font-size: 12px;")
@@ -147,6 +228,13 @@ class HybridCryptoApp(QMainWindow):
         
         layout.addWidget(header)
 
+    def _create_tabs(self, layout):
+        """
+        Создаёт вкладки приложения.
+        
+        Args:
+            layout: Родительский компоновщик
+        """
         self.tabs = QTabWidget()
         layout.addWidget(self.tabs)
 
@@ -155,6 +243,10 @@ class HybridCryptoApp(QMainWindow):
         self.setup_decryption_tab()
         self.setup_log_tab()
 
+    def _create_status_bar(self):
+        """
+        Создаёт строку состояния с индикатором прогресса.
+        """
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage("Готов к работе")
@@ -165,6 +257,9 @@ class HybridCryptoApp(QMainWindow):
         self.status_bar.addPermanentWidget(self.progress)
 
     def setup_generation_tab(self):
+        """
+        Настраивает вкладку генерации ключей.
+        """
         tab = QWidget()
         layout = QVBoxLayout(tab)
 
@@ -193,7 +288,7 @@ class HybridCryptoApp(QMainWindow):
         btn.clicked.connect(lambda: self.browse_file(self.enc_key, save=True))
         grid.addWidget(btn, 2, 2)
 
-        grid.addWidget(QLabel("Длина ключа Blowfish (32-448):"), 3, 0)
+        grid.addWidget(QLabel("Длина ключа Blowfish (32-448, кратно 8):"), 3, 0)
         self.key_len = QSpinBox()
         self.key_len.setMinimum(32)
         self.key_len.setMaximum(448)
@@ -211,6 +306,9 @@ class HybridCryptoApp(QMainWindow):
         self.tabs.addTab(tab, "Генерация")
 
     def setup_encryption_tab(self):
+        """
+        Настраивает вкладку шифрования файлов.
+        """
         tab = QWidget()
         layout = QVBoxLayout(tab)
 
@@ -256,6 +354,9 @@ class HybridCryptoApp(QMainWindow):
         self.tabs.addTab(tab, "Шифрование")
 
     def setup_decryption_tab(self):
+        """
+        Настраивает вкладку дешифрования файлов.
+        """
         tab = QWidget()
         layout = QVBoxLayout(tab)
 
@@ -301,6 +402,9 @@ class HybridCryptoApp(QMainWindow):
         self.tabs.addTab(tab, "Дешифрование")
 
     def setup_log_tab(self):
+        """
+        Настраивает вкладку с логами операций.
+        """
         tab = QWidget()
         layout = QVBoxLayout(tab)
         
@@ -315,6 +419,13 @@ class HybridCryptoApp(QMainWindow):
         self.tabs.addTab(tab, "Лог операций")
 
     def browse_file(self, line_edit, save=False):
+        """
+        Открывает диалог выбора или сохранения файла.
+        
+        Args:
+            line_edit: Поле для ввода пути
+            save (bool): Если True - диалог сохранения, иначе - открытия
+        """
         if save:
             path, _ = QFileDialog.getSaveFileName(self, "Сохранить файл", "", "Все файлы (*.*)")
         else:
@@ -324,6 +435,9 @@ class HybridCryptoApp(QMainWindow):
             self.save_current_paths()
 
     def save_current_paths(self):
+        """
+        Сохраняет текущие пути из полей ввода в файл настроек.
+        """
         settings = {
             'public_key': self.pub_key.text(),
             'private_key': self.priv_key.text(),
@@ -341,6 +455,9 @@ class HybridCryptoApp(QMainWindow):
         save_settings(settings, self.settings_file)
 
     def load_saved_paths(self):
+        """
+        Загружает сохранённые пути из файла настроек в поля ввода.
+        """
         self.pub_key.setText(self.settings.get('public_key', ''))
         self.priv_key.setText(self.settings.get('private_key', ''))
         self.enc_key.setText(self.settings.get('encrypted_sym_key', ''))
@@ -355,11 +472,23 @@ class HybridCryptoApp(QMainWindow):
         self.dec_sym.setText(self.settings.get('dec_sym', ''))
 
     def add_log(self, message):
+        """
+        Добавляет сообщение в лог с временной меткой.
+        
+        Args:
+            message (str): Сообщение для добавления
+        """
         from datetime import datetime
         timestamp = datetime.now().strftime('%H:%M:%S')
         self.log_text.appendPlainText(f"[{timestamp}] {message}")
 
     def set_buttons_enabled(self, enabled):
+        """
+        Включает или отключает кнопки управления.
+        
+        Args:
+            enabled (bool): True - кнопки активны, False - заблокированы
+        """
         self.gen_btn.setEnabled(enabled)
         self.enc_btn.setEnabled(enabled)
         self.dec_btn.setEnabled(enabled)
@@ -371,6 +500,13 @@ class HybridCryptoApp(QMainWindow):
             self.status_bar.showMessage("Готов к работе")
 
     def on_finished(self, success, message):
+        """
+        Обрабатывает завершение операции в рабочем потоке.
+        
+        Args:
+            success (bool): Успешность выполнения операции
+            message (str): Сообщение о результате
+        """
         self.set_buttons_enabled(True)
         if success:
             QMessageBox.information(self, "Успех", message)
@@ -378,8 +514,16 @@ class HybridCryptoApp(QMainWindow):
             QMessageBox.critical(self, "Ошибка", message)
 
     def generate_keys(self):
+        """
+        Запускает процесс генерации ключей.
+        """
         if not self.pub_key.text() or not self.priv_key.text() or not self.enc_key.text():
             QMessageBox.warning(self, "Ошибка", "Заполните все пути для сохранения ключей")
+            return
+        
+        key_len = self.key_len.value()
+        if key_len % 8 != 0:
+            QMessageBox.warning(self, "Ошибка", "Длина ключа Blowfish должна быть кратна 8")
             return
         
         self.set_buttons_enabled(False)
@@ -388,13 +532,16 @@ class HybridCryptoApp(QMainWindow):
             public_path=self.pub_key.text(),
             secret_path=self.priv_key.text(),
             encrypted_sym_path=self.enc_key.text(),
-            key_length=self.key_len.value()
+            key_length=key_len
         )
         self.worker.log.connect(self.add_log)
         self.worker.finished.connect(self.on_finished)
         self.worker.start()
 
     def encrypt_file(self):
+        """
+        Запускает процесс шифрования файла.
+        """
         if not all([self.enc_input.text(), self.enc_output.text(), 
                     self.enc_priv.text(), self.enc_sym.text()]):
             QMessageBox.warning(self, "Ошибка", "Заполните все поля")
@@ -417,6 +564,9 @@ class HybridCryptoApp(QMainWindow):
         self.worker.start()
 
     def decrypt_file(self):
+        """
+        Запускает процесс дешифрования файла.
+        """
         if not all([self.dec_input.text(), self.dec_output.text(),
                     self.dec_priv.text(), self.dec_sym.text()]):
             QMessageBox.warning(self, "Ошибка", "Заполните все поля")
@@ -440,6 +590,9 @@ class HybridCryptoApp(QMainWindow):
 
 
 def main():
+    """
+    Главная функция запуска приложения.
+    """
     app = QApplication(sys.argv)
     window = HybridCryptoApp()
     window.show()
