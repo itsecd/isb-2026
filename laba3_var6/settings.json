@@ -1,0 +1,14 @@
+{
+    "input_file": "data/initial.txt",
+    "encrypted_file": "data/encrypted.bin",
+    "decrypted_file": "data/decrypted.txt",
+    "encrypted_sym_key": "keys/encrypted_symmetric_key.bin",
+    "public_key": "keys/public_key.pem",
+    "private_key": "keys/private_key.pem",
+    "seed_block_bits": 128,
+    "seed_key_bytes": 16,
+    "seed_iv_bytes": 16,
+    "rsa_key_bits": 2048,
+    "rsa_exponent": 65537,
+    "text_encoding": "utf-8"
+}
