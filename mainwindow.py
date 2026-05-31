@@ -118,9 +118,7 @@ class MainWindow(QMainWindow):
         if not result:
             QMessageBox.information(self, "Failure", "Invalid password!")
             return
-        if user_info:
-            QMessageBox.information(self, "Success", "You have successfully logged in!")
-            return
+        QMessageBox.information(self, "Success", "You have successfully logged in!")
 
 
     def signup_button(self,text_l,text_p):
