@@ -1,0 +1,5 @@
+{
+    "bits": [8,12,16],
+    "experiments": 100,
+    "str_length": 16
+}
