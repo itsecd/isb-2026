@@ -4,6 +4,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from functions_file import read_symmetric_key
 
 
 def generate_symmetric_key():
@@ -78,24 +79,6 @@ def encrypt_symmetric_key(key, public_key):
 
 
 
-def read_symmetric_key(symmetric_key_file):
-    """
-    считывание зашифрованного симметричного ключа из файла
-
-    аргументы: 
-            symmetric_key_file: путь к файлу, в котором хранится зашифрованный симметричный ключ
-    возвращает:
-            содержимое: байты зашифрованного симметричного ключа
-    """
-    try:
-        with open(symmetric_key_file, 'rb') as key_file: 
-                content = key_file.read()
-        return content
-    
-    except FileNotFoundError:
-        raise FileNotFoundError(f"{symmetric_key_file} такой файл не найден")
-
-
 def read_private_pem(private_pem):
     """
     считывание закрытого ключа из файла
@@ -107,8 +90,7 @@ def read_private_pem(private_pem):
     """
 
     try:
-        with open(private_pem, 'rb') as pem_in:
-                private_bytes = pem_in.read()
+        private_bytes = read_symmetric_key(private_pem)
         d_private_key = load_pem_private_key(private_bytes,password=None,)
         return d_private_key
     
