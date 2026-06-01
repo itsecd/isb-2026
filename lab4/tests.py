@@ -129,6 +129,7 @@ class TestAuth(unittest.TestCase):
 
     def test_authenticate_nonexistent_user(self):
         """Проверка авторизации несуществующего пользователя."""
+        register_user("alice", "secret", self.db_path, use_salt=True)
         result = authenticate_user("ghost", "pass", self.db_path, use_salt=True)
         self.assertIn("не найден", result)
 
