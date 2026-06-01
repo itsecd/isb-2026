@@ -86,17 +86,16 @@ class RSAKeyPair:
         except Exception as e:
             
             raise AsymmetricCryptoError(f"Ошибка загрузки RSA-ключей: {e}")
-
-    def save_to_files(self, priv_path, pub_path):
+        
+    def save_public_key(self, pub_path):
         """
-        Сохраняет RSA-ключи в файлы в формате PEM.
+        Сохраняет публичный ключ в файл в формате PEM.
 
         Args:
-            priv_path (str): Путь для сохранения приватного ключа.
             pub_path (str): Путь для сохранения публичного ключа.
 
         Raises:
-            AsymmetricCryptoError: Для ошибок сериализации или ввода-вывода.
+            AsymmetricCryptoError: При ошибках сериализации или записи.
         """
         try:
             pub_bytes = self.public_key.public_bytes(
@@ -104,17 +103,29 @@ class RSAKeyPair:
                 format=serialization.PublicFormat.SubjectPublicKeyInfo
             )
             write_binary_file(pub_path, pub_bytes)
-          
+        except Exception as e:
+            raise AsymmetricCryptoError(f"Ошибка сохранения публичного ключа в '{pub_path}': {e}")
+
+    def save_private_key(self, priv_path):
+        """
+        Сохраняет приватный ключ в файл в формате PEM.
+
+        Args:
+            priv_path (str): Путь для сохранения приватного ключа.
+
+        Raises:
+            AsymmetricCryptoError: При ошибках сериализации или записи.
+        """
+        try:
             priv_bytes = self.private_key.private_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PrivateFormat.TraditionalOpenSSL,
                 encryption_algorithm=serialization.NoEncryption()
             )
             write_binary_file(priv_path, priv_bytes)
-        except Exception as e: 
-            
-            raise AsymmetricCryptoError(f"Ошибка сохранения RSA-ключей: {e}")
-
+        except Exception as e:
+            raise AsymmetricCryptoError(f"Ошибка сохранения приватного ключа в '{priv_path}': {e}")
+        
     def encrypt_symmetric_key(self, symmetric_key):
         """
         Шифрует симметричный ключ (например, AES) с помощью публичного RSA-ключа.
