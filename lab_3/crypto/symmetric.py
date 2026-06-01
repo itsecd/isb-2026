@@ -9,15 +9,9 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
 
 
-# Значения по умолчанию для SM4
-SM4_BLOCK_SIZE_BITS = 128
-SM4_KEY_SIZE_BYTES = 16
-SM4_IV_SIZE_BYTES = 16
-
-# Для обратной совместимости
-BLOCK_SIZE_BITS = SM4_BLOCK_SIZE_BITS
-KEY_SIZE_BYTES = SM4_KEY_SIZE_BYTES
-IV_SIZE_BYTES = SM4_IV_SIZE_BYTES
+BLOCK_SIZE_BITS = None
+KEY_SIZE_BYTES = None
+IV_SIZE_BYTES = None
 
 
 def set_parameters(block_size_bits: int, key_size_bytes: int, iv_size_bytes: int) -> None:
@@ -37,7 +31,12 @@ def set_parameters(block_size_bits: int, key_size_bytes: int, iv_size_bytes: int
 
 def generate_symmetric_key() -> bytes:
     """Генерирует случайный ключ SM4 (128 бит)."""
-    return os.urandom(KEY_SIZE_BYTES)
+    if KEY_SIZE_BYTES is None:
+        raise RuntimeError("Параметры SM4 не заданы. Проверьте файл настроек.")
+    try:
+        return os.urandom(KEY_SIZE_BYTES)
+    except ValueError as e:
+        raise RuntimeError(f"Неверный размер ключа SM4: {e}")
 
 
 def encrypt(plaintext: bytes, key: bytes) -> bytes:
@@ -51,13 +50,18 @@ def encrypt(plaintext: bytes, key: bytes) -> bytes:
     Returns:
         IV (16 байт) + зашифрованный текст.
     """
-    iv = os.urandom(IV_SIZE_BYTES)
-    padder = padding.PKCS7(BLOCK_SIZE_BITS).padder()
-    padded = padder.update(plaintext) + padder.finalize()
+    if IV_SIZE_BYTES is None or BLOCK_SIZE_BITS is None:
+        raise RuntimeError("Параметры SM4 не заданы. Проверьте файл настроек.")
+    try:
+        iv = os.urandom(IV_SIZE_BYTES)
+        padder = padding.PKCS7(BLOCK_SIZE_BITS).padder()
+        padded = padder.update(plaintext) + padder.finalize()
 
-    cipher = Cipher(algorithms.SM4(key), modes.CBC(iv))
-    encryptor = cipher.encryptor()
-    ciphertext = encryptor.update(padded) + encryptor.finalize()
+        cipher = Cipher(algorithms.SM4(key), modes.CBC(iv))
+        encryptor = cipher.encryptor()
+        ciphertext = encryptor.update(padded) + encryptor.finalize()
+    except Exception as e:
+        raise RuntimeError(f"Ошибка при шифровании SM4: {e}")
 
     return iv + ciphertext
 
@@ -73,12 +77,17 @@ def decrypt(data: bytes, key: bytes) -> bytes:
     Returns:
         Расшифрованный открытый текст.
     """
-    iv = data[:IV_SIZE_BYTES]
-    ciphertext = data[IV_SIZE_BYTES:]
+    if IV_SIZE_BYTES is None or BLOCK_SIZE_BITS is None:
+        raise RuntimeError("Параметры SM4 не заданы. Проверьте файл настроек.")
+    try:
+        iv = data[:IV_SIZE_BYTES]
+        ciphertext = data[IV_SIZE_BYTES:]
 
-    cipher = Cipher(algorithms.SM4(key), modes.CBC(iv))
-    decryptor = cipher.decryptor()
-    padded = decryptor.update(ciphertext) + decryptor.finalize()
+        cipher = Cipher(algorithms.SM4(key), modes.CBC(iv))
+        decryptor = cipher.decryptor()
+        padded = decryptor.update(ciphertext) + decryptor.finalize()
 
-    unpadder = padding.PKCS7(BLOCK_SIZE_BITS).unpadder()
-    return unpadder.update(padded) + unpadder.finalize()
+        unpadder = padding.PKCS7(BLOCK_SIZE_BITS).unpadder()
+        return unpadder.update(padded) + unpadder.finalize()
+    except Exception as e:
+        raise RuntimeError(f"Ошибка при расшифровке SM4: {e}")

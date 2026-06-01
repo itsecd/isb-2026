@@ -9,6 +9,7 @@
 """
 
 import argparse
+import sys
 from crypto.file_utils import load_settings
 from crypto.scenarios import generate_keys, encrypt_file, decrypt_file
 
@@ -31,15 +32,22 @@ def main():
                        help="Режим дешифрования файла")
 
     args = parser.parse_args()
-    cfg = load_settings(args.settings)
+    try:
+        cfg = load_settings(args.settings)
+    except Exception as e:
+        print(f"[!] Ошибка загрузки настроек: {e}")
+        sys.exit(1)
 
-    match (args.generation, args.encryption, args.decryption):
-        case (True, _, _):
+    try:
+        if args.generation:
             generate_keys(cfg)
-        case (_, True, _):
+        elif args.encryption:
             encrypt_file(cfg)
-        case (_, _, True):
+        elif args.decryption:
             decrypt_file(cfg)
+    except Exception as e:
+        print(f"[!] Выполнение сценария завершилось ошибкой: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

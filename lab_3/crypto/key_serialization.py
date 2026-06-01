@@ -51,8 +51,15 @@ def load_public_key(path: str):
     Returns:
         Открытый RSA-ключ.
     """
-    with open(path, "rb") as f:
-        return load_pem_public_key(f.read())
+    try:
+        with open(path, "rb") as f:
+            return load_pem_public_key(f.read())
+    except FileNotFoundError:
+        raise RuntimeError(f"Открытый ключ не найден: {path}")
+    except ValueError as e:
+        raise RuntimeError(f"Неверный PEM-формат открытого ключа: {path}: {e}")
+    except OSError as e:
+        raise RuntimeError(f"Не удалось прочитать открытый ключ {path}: {e}")
 
 
 def load_private_key(path: str):
@@ -65,5 +72,12 @@ def load_private_key(path: str):
     Returns:
         Закрытый RSA-ключ.
     """
-    with open(path, "rb") as f:
-        return load_pem_private_key(f.read(), password=None)
+    try:
+        with open(path, "rb") as f:
+            return load_pem_private_key(f.read(), password=None)
+    except FileNotFoundError:
+        raise RuntimeError(f"Закрытый ключ не найден: {path}")
+    except ValueError as e:
+        raise RuntimeError(f"Неверный PEM-формат закрытого ключа: {path}: {e}")
+    except OSError as e:
+        raise RuntimeError(f"Не удалось прочитать закрытый ключ {path}: {e}")
