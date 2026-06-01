@@ -1,8 +1,7 @@
 import argparse
-import json
-from key import (generate_symmetric_key, generate_asymmetric_keys, write_public_key, write_private_key, encrypt_symmetric_key, read_symmetric_key, read_private_pem, decrypt_symmetric_key)
+from key_functions import (generate_symmetric_key, generate_asymmetric_keys, write_public_key, write_private_key, encrypt_symmetric_key, read_private_pem, decrypt_symmetric_key)
 from crypt import encrypt_text, decrypt_text
-from file_func import read_text_file, write_encrypt_text, read_encrypt_text, write_decrypt_text
+from functions_file import read_text_file, write_encrypt_text, read_encrypt_text, write_decrypt_text, read_symmetric_key, read_json_file
 
 
 def main():
@@ -13,23 +12,24 @@ def main():
     parser.add_argument('-json', '--settings', default='settings.json', help='путь к файлу с настройками')
     args = parser.parse_args()
 
-    try:
-        with open(args.settings, 'r') as json_file:
-            json_data = json.load(json_file)
 
-            initial_file = json_data['initial_file']
-            encrypted_file = json_data['encrypted_file']
-            decrypted_file = json_data['decrypted_file']
-            symmetric_key_file = json_data['symmetric_key']
-            public_key_file = json_data['public_key']
-            secret_key_file = json_data['secret_key']
+    try:
+
+        json_data = read_json_file(args.settings)
+
+        initial_file = json_data['initial_file']
+        encrypted_file = json_data['encrypted_file']
+        decrypted_file = json_data['decrypted_file']
+        symmetric_key_file = json_data['symmetric_key']
+        public_key_file = json_data['public_key']
+        secret_key_file = json_data['secret_key']
         print("Настройки загружены, всё норм")
 
     except FileNotFoundError:
         print("Кто-то съел файл с настройками")
         return
     except Exception as error:
-        print(f"Произошла ошибка: {error}")
+        print(f"Произошла ошибка 4: {error}")
         return
 
 
@@ -53,7 +53,7 @@ def main():
                 encrypt_key = encrypt_symmetric_key(key, public_key)
                 print("1.4.1 Симметричный ключ зашифрован публичным ключом")
             
-                write_decrypt_text(encrypt_key, symmetric_key_file)
+                write_decrypt_text(symmetric_key_file, encrypt_key)
                 print("1.4.2 Зашифрованный симметричный ключ сохранен в файл .txt")
             
 
@@ -105,7 +105,7 @@ def main():
                 print("Ошибка: неверные параметры")
              
     except Exception as error:
-        print(f"Произошла ошибка: {error}")
+        print(f"Произошла ошибка 3: {error}")
 
 if __name__ == "__main__" :
     main()
