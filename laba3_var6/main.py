@@ -112,12 +112,19 @@ def main():
 
     try:
         app = CryptoHybrid(args.config)
-        if args.generate:
-            app.mode_generate()
-        elif args.encrypt:
-            app.mode_encrypt()
-        elif args.decrypt:
-            app.mode_decrypt()
+        
+        # Используем match/case вместо if/elif по требованию преподавателя
+        match (args.generate, args.encrypt, args.decrypt):
+            case (True, False, False):
+                app.mode_generate()
+            case (False, True, False):
+                app.mode_encrypt()
+            case (False, False, True):
+                app.mode_decrypt()
+            case _:
+                print("Неизвестный режим работы")
+                sys.exit(1)
+                
     except HybridSystemError as err:
         print(f"\n[ОШИБКА] {err}")
         sys.exit(1)
