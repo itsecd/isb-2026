@@ -1,4 +1,5 @@
 from cryptography.hazmat.primitives import serialization
+from os import makedirs, path
 
 def load_private_key(settings):
     """
@@ -28,11 +29,24 @@ def load_private_key(settings):
         Exception:
             При любой другой ошибке ввода/вывода или десериализации.
     """
-    with open(settings['private_key'], 'rb') as file:
-        return serialization.load_pem_private_key(
-            file.read(),
-            password=None
-        )
+    try:
+        with open(settings['private_key'], 'rb') as file:
+            return serialization.load_pem_private_key(
+                file.read(),
+                password=None
+            )
+    except FileNotFoundError:
+        print(f'[-] Ошибка: файл не найден {settings["private_key"]}')
+        raise
+    except PermissionError:
+        print(f'[-] Ошибка: нет прав для чтения {settings["private_key"]}')
+        raise
+    except ValueError:
+        print(f'[-] Ошибка: некорректный PEM-формат или ключ защищён паролем')
+        raise
+    except Exception as e:
+        print(f'[-] Непредвиденная ошибка: {e}')
+        raise
 
 def load_public_key(settings):
     """
@@ -62,8 +76,21 @@ def load_public_key(settings):
         Exception:
             При любой другой ошибке ввода/вывода или десериализации.
     """
-    with open(settings['public_key'], 'rb') as file:
-        return serialization.load_pem_public_key(file.read())
+    try:
+        with open(settings['public_key'], 'rb') as file:
+            return serialization.load_pem_public_key(file.read())
+    except FileNotFoundError:
+        print(f'[-] Ошибка: файл не найден {settings["public_key"]}')
+        raise
+    except PermissionError:
+        print(f'[-] Ошибка: нет прав для чтения {settings["public_key"]}')
+        raise
+    except ValueError:
+        print(f'[-] Ошибка: некорректный PEM-формат')
+        raise
+    except Exception as e:
+        print(f'[-] Непредвиденная ошибка: {e}')
+        raise
 
 
 def save_rsa_keys(settings, private_key, public_key):
@@ -93,19 +120,32 @@ def save_rsa_keys(settings, private_key, public_key):
         Exception:
             При любой другой ошибке сериализации или ввода/вывода.
     """
-    with open(settings['public_key'], 'wb') as file:
-        file.write(
-            public_key.public_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PublicFormat.SubjectPublicKeyInfo
-            )
-        )
+    try:
+        makedirs(path.dirname(settings['public_key']), exist_ok=True)
+        makedirs(path.dirname(settings['private_key']), exist_ok=True)
 
-    with open(settings['private_key'], 'wb') as file:
-        file.write(
-            private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
+        with open(settings['public_key'], 'wb') as file:
+            file.write(
+                public_key.public_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PublicFormat.SubjectPublicKeyInfo
+                )
             )
-        )
+
+        with open(settings['private_key'], 'wb') as file:
+            file.write(
+                private_key.private_bytes(
+                    encoding=serialization.Encoding.PEM,
+                    format=serialization.PrivateFormat.TraditionalOpenSSL,
+                    encryption_algorithm=serialization.NoEncryption()
+                )
+            )
+    except PermissionError:
+        print(f'[-] Ошибка: нет прав для записи')
+        raise
+    except OSError as e:
+        print(f'[-] Ошибка при создании директории или записи файла: {e}')
+        raise
+    except Exception as e:
+        print(f'[-] Непредвиденная ошибка: {e}')
+        raise
