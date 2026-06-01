@@ -51,16 +51,11 @@ class AESCipher:
             
             cipher = Cipher(algorithms.AES(self.key), modes.CBC(iv))
             encryptor = cipher.encryptor()
-            
-            
-            
             padder = padding.PKCS7(128).padder()
             padded_data = padder.update(plaintext) + padder.finalize()
             
-            
             return encryptor.update(padded_data) + encryptor.finalize()
         except Exception as e:
-            
             
             raise SymmetricCryptoError(f"Ошибка шифрования AES: {e}")
 
