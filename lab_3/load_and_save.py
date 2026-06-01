@@ -1,6 +1,11 @@
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import load_pem_public_key, load_pem_private_key
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
+import json
+
+def _read_binary_file(file_path: str) -> bytes:
+    with open(file_path, 'rb') as f:
+        return f.read()
 
 def write_symmetric_key(symmetric_key: bytes, symmetric_path:str) -> None:
     """
@@ -18,26 +23,22 @@ def write_symmetric_key(symmetric_key: bytes, symmetric_path:str) -> None:
     except Exception as ex:
         print(f"Ошибка!: {ex}")
 
-def write_asymmetric_key(public_key:RSAPublicKey, private_key:RSAPrivateKey, public_path:str, private_path:str) -> None:
-    """
-    Сериализация асимметричных ключей в файл
-    Входные данные:
-    public_key - открытый RSA ключ
-    private_key - закрытый RSA ключ
-    public_path - зашифрованный симметричный ключ шифрования
-    private_path - путь к сохранению ключа
-    Сохраняет ключи в файл
-    Возвращает:
-    None
-    """
+def write_public_key(public_key: RSAPublicKey, public_path: str) -> None:
     try:
         with open(public_path, 'wb') as public_out:
-                public_out.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,
-                    format=serialization.PublicFormat.SubjectPublicKeyInfo))
+            public_out.write(public_key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo))
+    except Exception as ex:
+        print(f"Ошибка!: {ex}")
+
+def write_private_key(private_key: RSAPrivateKey, private_path: str) -> None:
+    try:
         with open(private_path, 'wb') as private_out:
-                private_out.write(private_key.private_bytes(encoding=serialization.Encoding.PEM,
-                    format=serialization.PrivateFormat.TraditionalOpenSSL,
-                    encryption_algorithm=serialization.NoEncryption()))
+            private_out.write(private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption()))
     except Exception as ex:
         print(f"Ошибка!: {ex}")
 
@@ -50,9 +51,7 @@ def read_symmetric_key(symmetric_key_path:str) -> bytes:
     Зашифрованный симметричный ключ шифрования (bytes)
     """
     try:
-        with open(symmetric_key_path, mode='rb') as key_file: 
-            key = key_file.read()
-            return key
+        return _read_binary_file(symmetric_key_path)
     except Exception as ex:
         print(f"Ошибка!: {ex}")
 
@@ -66,12 +65,10 @@ def read_asymmetric_key(public_key_path:str, private_key_path) -> tuple:
     Зашифрованный симметричный ключ шифрования (bytes)
     """
     try:
-        with open(public_key_path, 'rb') as pem_in:
-            public_bytes = pem_in.read()
-            public_key = load_pem_public_key(public_bytes)
-        with open(private_key_path, 'rb') as pem_in:
-            private_bytes = pem_in.read()
-            private_key = load_pem_private_key(private_bytes,password=None,)
+        public_bytes = _read_binary_file(public_key_path)
+        private_bytes = _read_binary_file(private_key_path)
+        public_key = load_pem_public_key(public_bytes)
+        private_key = load_pem_private_key(private_bytes, password=None)
         return public_key, private_key
     except Exception as ex:
         print(f"Ошибка!: {ex}")
@@ -104,5 +101,13 @@ def write_text(text: bytes,  enc_file_path: str) -> None:
     try:
         with open(enc_file_path, 'wb') as f:
             f.write(text)
+    except Exception as ex:
+        print(f"Ошибка!: {ex}")
+
+def load_settings(settings_path: str = "settings.json") -> dict:
+    try:
+        with open(settings_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+        return config
     except Exception as ex:
         print(f"Ошибка!: {ex}")
