@@ -11,17 +11,23 @@ def verify_hmac(key:str, data: str, hmac_hash: str) -> bool:
     return hmac.compare_digest(true_hmac, hmac_hash)
 
 def send_message(data:str, hmac_hash: str, file_path:str) -> None:
-    message = {
-        "data": data,
-        "hmac_hash": hmac_hash,
-    }
-    write_data(json.dumps(message, ensure_ascii=False, indent=2), file_path)
+    try:
+        message = {
+            "data": data,
+            "hmac_hash": hmac_hash,
+        }
+        write_data(json.dumps(message, ensure_ascii=False, indent=2), file_path)
+    except Exception:
+        return
 
 def receive_message(key: str, file_path: str) -> bool:
-    message = json.loads(read_data(file_path))
-    data = message["data"]
-    hmac_hash = message["hmac_hash"]
-    return verify_hmac(key, data, hmac_hash)
+    try:
+        message = json.loads(read_data(file_path))
+        data = message["data"]
+        hmac_hash = message["hmac_hash"]
+        return verify_hmac(key, data, hmac_hash)
+    except Exception:
+        return False
 
 def read_data(data_path:str) -> str:
     """
@@ -34,8 +40,7 @@ def read_data(data_path:str) -> str:
     try:
         with open(data_path, 'r', encoding='utf-8') as f:
             return f.read()
-    except Exception as ex:
-        print(f"Ошибка!: {ex}")
+    except Exception:
         return ""
 
 def write_data(data: str,  file_path: str) -> None:
@@ -50,5 +55,5 @@ def write_data(data: str,  file_path: str) -> None:
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(data)
-    except Exception as ex:
-        print(f"Ошибка!: {ex}")
+    except Exception:
+        return
