@@ -13,6 +13,10 @@ import collision
 
 class HMACApp(QMainWindow):
     def __init__(self):
+        """
+        Инициализирует графическую оболочку, сетку интерфейса и привязывает обработчики кнопок.
+
+        """
         super().__init__()
         self.setWindowTitle("Интерфейс контроля целостности данных (HMAC)")
         self.setGeometry(100, 100, 750, 550)
@@ -31,7 +35,7 @@ class HMACApp(QMainWindow):
         text_layout.addWidget(QLabel("Текст сообщения:"))
         self.text_input = QLineEdit()
         text_layout.addWidget(self.text_input)
-        self.btn_load_file = QPushButton("Загрузить файл")
+        self.btn_load_file = QPushButton("Загрузить текст (.txt)")
         text_layout.addWidget(self.btn_load_file)
         main_layout.addLayout(text_layout)
 
@@ -46,14 +50,19 @@ class HMACApp(QMainWindow):
         self.btn_verify = QPushButton("Проверить пакет")
         self.btn_attack = QPushButton("Имитировать атаку")
         self.btn_collision = QPushButton("Подобрать коллизию")
-        self.btn_save_packet = QPushButton("Сохранить пакет")
         
         btn_layout.addWidget(self.btn_create)
         btn_layout.addWidget(self.btn_verify)
         btn_layout.addWidget(self.btn_attack)
         btn_layout.addWidget(self.btn_collision)
-        btn_layout.addWidget(self.btn_save_packet)
         main_layout.addLayout(btn_layout)
+
+        file_btn_layout = QHBoxLayout()
+        self.btn_load_packet = QPushButton("Загрузить пакет (.json)")
+        self.btn_save_packet = QPushButton("Сохранить пакет (.json)")
+        file_btn_layout.addWidget(self.btn_load_packet)
+        file_btn_layout.addWidget(self.btn_save_packet)
+        main_layout.addLayout(file_btn_layout)
 
         main_layout.addWidget(QLabel("Журнал событий:"))
         self.log_output = QTextEdit()
@@ -61,6 +70,7 @@ class HMACApp(QMainWindow):
         main_layout.addWidget(self.log_output)
 
         self.btn_load_file.clicked.connect(self.on_load_file)
+        self.btn_load_packet.clicked.connect(self.on_load_packet)
         self.btn_save_packet.clicked.connect(self.on_save_packet)
         self.btn_create.clicked.connect(self.on_create)
         self.btn_verify.clicked.connect(self.on_verify)
@@ -68,15 +78,27 @@ class HMACApp(QMainWindow):
         self.btn_collision.clicked.connect(self.on_collision)
 
     def log(self, message: str):
+        """
+        Добавляет строку лога в текстовое поле журнала событий приложения.
+
+        """
         self.log_output.append(message)
 
     def get_key(self) -> str:
+        """
+        Извлекает и валидирует секретный ключ из графического инпута.
+
+        """
         key = self.key_input.text().strip()
         if not key:
             raise ValueError("отсутствует секретный ключ.")
         return key
 
     def on_load_file(self):
+        """
+        Вызывает диалоговое окно для чтения текстового содержимого файла.
+
+        """
         try:
             file_path, _ = QFileDialog.getOpenFileName(self, "Открыть текстовый файл", "", "Text Files (*.txt);;All Files (*)")
             if file_path:
@@ -87,7 +109,33 @@ class HMACApp(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Ошибка при чтении файла", str(e))
 
+    def on_load_packet(self):
+        """
+        Загружает из JSON-файла готовый пакет и автоматически заполняет поля текста и подписи.
+
+        """
+        try:
+            file_path, _ = QFileDialog.getOpenFileName(self, "Открыть пакет данных", "", "JSON Files (*.json);;All Files (*)")
+            if file_path:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    packet_data = json.load(f)
+                
+                text = packet_data.get("data", "")
+                sig = packet_data.get("hmac_hex", "")
+                
+                self.text_input.setText(text)
+                self.sig_input.setText(sig)
+                self.log(f"Успешно загружен пакет из JSON: {file_path}")
+                self.log(f"Текст: '{text}'")
+                self.log(f"HMAC: {sig}\n")
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка при чтении пакета", str(e))
+
     def on_save_packet(self):
+        """
+        Вызывает файловый менеджер для экспорта структуры пакета в JSON формат.
+
+        """
         try:
             text = self.text_input.text().strip()
             sig = self.sig_input.text().strip()
@@ -105,6 +153,10 @@ class HMACApp(QMainWindow):
             QMessageBox.critical(self, "Ошибка при сохранении файла", str(e))
 
     def on_create(self):
+        """
+        Триггерит генерацию HMAC-SHA256 подписи и обновление UI.
+
+        """
         try:
             key = self.get_key()
             text = self.text_input.text().strip()
@@ -121,6 +173,10 @@ class HMACApp(QMainWindow):
             QMessageBox.critical(self, "Ошибка", str(e))
 
     def on_verify(self):
+        """
+        Запускает верификацию пакета на основе текущих заполненных полей формы.
+
+        """
         try:
             key = self.get_key()
             text = self.text_input.text().strip()
@@ -142,6 +198,10 @@ class HMACApp(QMainWindow):
             QMessageBox.critical(self, "Ошибка", str(e))
 
     def on_attack(self):
+        """
+        Инициирует тестовую модификацию данных для проверки детектора атак.
+
+        """
         try:
             key = self.get_key()
             text = self.text_input.text().strip()
@@ -164,6 +224,10 @@ class HMACApp(QMainWindow):
             QMessageBox.critical(self, "Ошибка", str(e))
 
     def on_collision(self):
+        """
+        Запускает перебор коллизий с временным изменением курсора мыши.
+
+        """
         try:
             key = self.get_key()
             self.log("Запуск процесса подбора коллизии для усеченного HMAC...")
