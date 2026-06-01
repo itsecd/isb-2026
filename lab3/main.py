@@ -8,36 +8,7 @@ import sys
 from file_utils import read_binary_file, write_binary_file, generate_random_bytes
 from symmetric_crypto import AESCipher, generate_aes_key, SymmetricCryptoError
 from asymmetric_crypto import RSAKeyPair, AsymmetricCryptoError
-
-def load_settings():
-    """
-    Загружает настройки из файла settings.json.
-    Возвращает словарь с настройками или безопасные значения по умолчанию.
-    """
-    default_settings = {
-        'secret_key': 'private_key.pem',
-        'public_key': 'public_key.pem',
-        'symmetric_key': 'symmetric_key.bin',
-        'initial_file': 'input.txt',
-        'encrypted_file': 'encrypted.bin',
-        'decrypted_file': 'decrypted.txt'
-    }
-    
-    try:
-        with open('settings.json', 'r', encoding='utf-8') as f:
-            loaded_settings = json.load(f)
-            
-            return {**default_settings, **loaded_settings}
-    except FileNotFoundError:
-        print("[!] Файл settings.json не найден. Используются стандартные имена файлов.")
-        return default_settings
-    except json.JSONDecodeError as e:
-        print(f"[!] Ошибка чтения settings.json: {e}. Используются стандартные имена файлов.")
-        return default_settings
-    except Exception as e:
-        print(f"[!] Неожиданная ошибка при загрузке настроек: {e}. Используются стандартные имена файлов.")
-        return default_settings
-
+from config_manager import load_settings
 
 def main():
     """
@@ -65,10 +36,8 @@ def main():
                 print(f"  Сгенерирован симметричный ключ AES ({args.key_size} бит)")
 
                 rsa_keys = RSAKeyPair()
-                rsa_keys.save_to_files(
-                    settings['secret_key'],
-                    settings['public_key']
-                )
+                rsa_keys.save_private_key(settings['secret_key'])
+                rsa_keys.save_public_key(settings['public_key'])
                 print("  Сохранены RSA-ключи")
 
                 enc_sym_key = rsa_keys.encrypt_symmetric_key(sym_key)
