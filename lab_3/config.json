@@ -1,0 +1,9 @@
+{
+    "source_file": "init.txt",
+    "output_encrypted": "enc.bin",
+    "output_decrypted": "dec.txt",
+    "encrypted_session_key": "sym_key.enc",
+    "rsa_public_key": "pub_key.pem",
+    "rsa_private_key": "pri_key.pem",
+    "key_length": 40
+}
