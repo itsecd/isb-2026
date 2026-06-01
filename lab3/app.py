@@ -6,18 +6,26 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QComboBox, QProgressBar)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QFont
+from typing import Dict, Any, Optional
+from datetime import datetime
 
 import key_generation
 import RSA
-import symmetric
+import text
 import Camellia
 import settings_manager
 
 
-def normalize_path(path):
+def normalize_path(path: str) -> str:
     """
-    Нормализует путь для отображения и хранения
-    Преобразует обратные слеши в прямые для кроссплатформенности
+    Нормализует путь для отображения и хранения.
+    Преобразует обратные слеши в прямые для кроссплатформенности.
+    
+    Args:
+        path (str): Исходный путь для нормализации
+        
+    Returns:
+        str: Нормализованный путь с прямыми слешами
     """
     if isinstance(path, str):
         return path.replace('\\', '/')
@@ -25,32 +33,55 @@ def normalize_path(path):
 
 
 class CryptoThread(QThread):
-    """Поток для выполнения криптографических операций"""
-    finished = pyqtSignal(bool, str)
-    progress = pyqtSignal(int)
-    
-    def __init__(self, operation, **kwargs):
+    """
+    Поток для выполнения криптографических операций (шифрование/расшифрование).
+    Позволяет не блокировать интерфейс при длительных операциях.
+    """
+    finished = pyqtSignal(bool, str)  
+    progress = pyqtSignal(int)       
+
+    def __init__(self, operation: str, **kwargs):
+        """
+        Инициализация потока криптографии.
+        
+        Args:
+            operation (str): Тип операции ('encrypt' или 'decrypt')
+            **kwargs: Параметры для операции:
+                - text_file: путь к файлу с данными
+                - symmetric_key: путь к зашифрованному симметричному ключу
+                - private_key: путь к приватному ключу RSA
+                - output_file: путь для сохранения результата
+        """
         super().__init__()
         self.operation = operation
         self.kwargs = kwargs
         
-    def run(self):
+    def run(self) -> None:
+        """
+        Запуск операции в отдельном потоке.
+        Вызывает соответствующий метод Camellia в зависимости от операции.
+        """
         try:
             self.progress.emit(10)
-            if self.operation == 'encrypt':
-                Camellia.encrypt(
-                    self.kwargs['text_file'],
-                    self.kwargs['symmetric_key'],
-                    self.kwargs['private_key'],
-                    self.kwargs['output_file']
-                )
-            elif self.operation == 'decrypt':
-                Camellia.decrypt(
-                    self.kwargs['text_file'],
-                    self.kwargs['symmetric_key'],
-                    self.kwargs['private_key'],
-                    self.kwargs['output_file']
-                )
+            
+            match self.operation:
+                case 'encrypt':
+                    Camellia.encrypt(
+                        self.kwargs['text_file'],
+                        self.kwargs['symmetric_key'],
+                        self.kwargs['private_key'],
+                        self.kwargs['output_file']
+                    )
+                case 'decrypt':
+                    Camellia.decrypt(
+                        self.kwargs['text_file'],
+                        self.kwargs['symmetric_key'],
+                        self.kwargs['private_key'],
+                        self.kwargs['output_file']
+                    )
+                case _:
+                    raise ValueError(f"Неизвестная операция: {self.operation}")
+                    
             self.progress.emit(100)
             self.finished.emit(True, "Операция выполнена успешно!")
         except Exception as e:
@@ -58,18 +89,32 @@ class CryptoThread(QThread):
 
 
 class KeyGenerationThread(QThread):
-    """Поток для генерации ключей"""
-    finished = pyqtSignal(bool, str)
+    """
+    Поток для генерации ключей (RSA + симметричный ключ).
+    Позволяет не блокировать интерфейс при генерации.
+    """
+    finished = pyqtSignal(bool, str) 
     
-    def __init__(self, key_size, output_dir):
+    def __init__(self, key_size: int, output_dir: str):
+        """
+        Инициализация потока генерации ключей.
+        
+        Args:
+            key_size (int): Размер симметричного ключа в битах (128, 192 или 256)
+            output_dir (str): Директория для сохранения ключей
+        """
         super().__init__()
         self.key_size = key_size
         self.output_dir = normalize_path(output_dir)
         
-    def run(self):
+    def run(self) -> None:
+        """
+        Запуск генерации ключей в отдельном потоке.
+        Генерирует пару RSA ключей и симметричный ключ Camellia.
+        """
         try:
             os.makedirs(self.output_dir, exist_ok=True)
-            
+
             private_key, public_key = key_generation.generate_asymmetric()
             
             private_path = normalize_path(os.path.join(self.output_dir, "private.pem"))
@@ -83,7 +128,7 @@ class KeyGenerationThread(QThread):
             encrypted_symmetric = key_generation.encrypt_symmetric_key(symmetric_key, public_key)
             
             symmetric_path = normalize_path(os.path.join(self.output_dir, "symmetric_encrypted.bin"))
-            symmetric.serialize_symmetric_key(encrypted_symmetric, symmetric_path)
+            text.save_text(encrypted_symmetric, symmetric_path)
             
             self.finished.emit(True, f"Ключи успешно сгенерированы в папке: {self.output_dir}")
         except Exception as e:
@@ -91,40 +136,98 @@ class KeyGenerationThread(QThread):
 
 
 class HybridCryptoApp(QMainWindow):
-    def __init__(self):
+    """
+    Главное окно приложения гибридной криптосистемы (RSA + Camellia).
+    Предоставляет интерфейс для генерации ключей, шифрования и расшифрования файлов.
+    """
+    
+    def __init__(self, settings_file: Optional[str] = None):
+        """
+        Инициализация главного окна приложения.
+        
+        Args:
+            settings_file (str, optional): Путь к файлу с настройками.
+                                          Если None, используется путь по умолчанию.
+        """
         super().__init__()
+        if settings_file is None:
+            settings_file = "settings.json"
+        
+        self.settings_file = normalize_path(settings_file)
         self.settings = self.load_settings()
         self.initUI()
         
-    def load_settings(self):
-        """Загрузка настроек из файла"""
+    def load_settings(self) -> Dict[str, Any]:
+        """
+        Загрузка настроек из файла.
+        
+        Returns:
+            Dict[str, Any]: Словарь с настройками приложения
+            
+        Note:
+            Если файл настроек не найден, возвращаются значения по умолчанию
+        """
+        default_settings = {
+            "initial_file": "data/source.txt",
+            "encrypted_file": "data/encrypted.bin",
+            "decrypted_file": "data/decrypted.txt",
+            "symmetric_key": "keys/symmetric_encrypted.bin",
+            "public_key": "keys/public.pem",
+            "private_key": "keys/private.pem",
+            "camellia_key_size": "128",
+            "keys_directory": "keys"
+        }
+        
         try:
-            settings = settings_manager.load("settings.json")
-            for key in ['initial_file', 'encrypted_file', 'decrypted_file', 
-                       'symmetric_key', 'public_key', 'private_key']:
-                if key in settings and isinstance(settings[key], str):
+            if not os.path.exists(self.settings_file):
+                self.log_message_to_console(f"Файл настроек не найден: {self.settings_file}")
+                return default_settings.copy()
+            
+            settings = settings_manager.load(self.settings_file)
+
+            for key in settings:
+                if isinstance(settings[key], str) and key not in ["camellia_key_size"]:
                     settings[key] = normalize_path(settings[key])
+            
+            for key, default_value in default_settings.items():
+                if key not in settings:
+                    settings[key] = default_value
+                    
             return settings
-        except:
-            return {
-                "initial_file": "data/source.txt",
-                "encrypted_file": "data/encrypted.bin",
-                "decrypted_file": "data/decrypted.txt",
-                "symmetric_key": "keys/symmetric_encrypted.bin",
-                "public_key": "keys/public.pem",
-                "private_key": "keys/private.pem",
-                "camellia_key_size": "128"
-            }
+            
+        except (FileNotFoundError, ValueError) as e:
+            self.log_message_to_console(f"Ошибка загрузки настроек: {e}")
+            return default_settings.copy()
     
-    def save_settings(self):
-        """Сохранение настроек"""
+    def log_message_to_console(self, message: str) -> None:
+        """
+        Вывод сообщения в консоль (для отладки).
+        
+        Args:
+            message (str): Сообщение для вывода
+        """
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        print(f"[{timestamp}] {message}")
+    
+    def save_settings(self) -> None:
+        """Сохранение текущих настроек в файл."""
         try:
-            settings_manager.save("settings.json", self.settings)
+            settings_dir = os.path.dirname(self.settings_file)
+            if settings_dir:
+                os.makedirs(settings_dir, exist_ok=True)
+            
+            settings_manager.save(self.settings_file, self.settings)
+            self.log(f"Настройки сохранены в {self.settings_file}")
         except Exception as e:
             QMessageBox.warning(self, "Предупреждение", f"Не удалось сохранить настройки: {e}")
+            self.log(f"Ошибка сохранения настроек: {e}")
     
-    def initUI(self):
-        self.setWindowTitle("Гибридная криптосистема (RSA + Camellia)")
+    def initUI(self) -> None:
+        """
+        Инициализация пользовательского интерфейса.
+        Создает все виджеты и размещает их в окне.
+        """
+        self.setWindowTitle(f"Гибридная криптосистема (RSA + Camellia) - {self.settings_file}")
         self.setGeometry(100, 100, 900, 700)
         
         central_widget = QWidget()
@@ -138,6 +241,11 @@ class HybridCryptoApp(QMainWindow):
         title.setFont(title_font)
         title.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title)
+
+        settings_info = QLabel(f"Файл настроек: {self.settings_file}")
+        settings_info.setAlignment(Qt.AlignCenter)
+        settings_info.setStyleSheet("color: gray; font-size: 10px;")
+        main_layout.addWidget(settings_info)
 
         key_group = QGroupBox("Управление ключами")
         key_layout = QVBoxLayout()
@@ -155,7 +263,8 @@ class HybridCryptoApp(QMainWindow):
         
         self.keys_dir_edit = QLineEdit()
         self.keys_dir_edit.setPlaceholderText("Папка для сохранения ключей")
-        self.keys_dir_edit.setText("keys")
+        default_keys_dir = self.settings.get("keys_directory", "keys")
+        self.keys_dir_edit.setText(default_keys_dir)
         gen_layout.addWidget(self.keys_dir_edit)
         
         self.browse_keys_btn = QPushButton("Обзор")
@@ -173,7 +282,7 @@ class HybridCryptoApp(QMainWindow):
         
         key_group.setLayout(key_layout)
         main_layout.addWidget(key_group)
-        
+
         encrypt_group = QGroupBox("Шифрование")
         encrypt_layout = QVBoxLayout()
         
@@ -183,7 +292,8 @@ class HybridCryptoApp(QMainWindow):
         self.source_file_edit.setText(self.settings.get("initial_file", "data/source.txt"))
         source_layout.addWidget(self.source_file_edit)
         self.browse_source_btn = QPushButton("Обзор")
-        self.browse_source_btn.clicked.connect(lambda: self.browse_file(self.source_file_edit, "Text files (*.txt);;All files (*.*)"))
+        self.browse_source_btn.clicked.connect(
+            lambda: self.browse_file(self.source_file_edit, "Text files (*.txt);;All files (*.*)"))
         source_layout.addWidget(self.browse_source_btn)
         encrypt_layout.addLayout(source_layout)
         
@@ -193,7 +303,8 @@ class HybridCryptoApp(QMainWindow):
         self.encrypted_file_edit.setText(self.settings.get("encrypted_file", "data/encrypted.bin"))
         encrypted_layout.addWidget(self.encrypted_file_edit)
         self.browse_encrypted_btn = QPushButton("Обзор")
-        self.browse_encrypted_btn.clicked.connect(lambda: self.save_file(self.encrypted_file_edit, "Binary files (*.bin);;All files (*.*)"))
+        self.browse_encrypted_btn.clicked.connect(
+            lambda: self.save_file(self.encrypted_file_edit, "Binary files (*.bin);;All files (*.*)"))
         encrypted_layout.addWidget(self.browse_encrypted_btn)
         encrypt_layout.addLayout(encrypted_layout)
         
@@ -203,7 +314,8 @@ class HybridCryptoApp(QMainWindow):
         self.sym_key_edit.setText(self.settings.get("symmetric_key", "keys/symmetric_encrypted.bin"))
         sym_key_layout.addWidget(self.sym_key_edit)
         self.browse_sym_btn = QPushButton("Обзор")
-        self.browse_sym_btn.clicked.connect(lambda: self.browse_file(self.sym_key_edit, "All files (*.*)"))
+        self.browse_sym_btn.clicked.connect(
+            lambda: self.browse_file(self.sym_key_edit, "All files (*.*)"))
         sym_key_layout.addWidget(self.browse_sym_btn)
         encrypt_layout.addLayout(sym_key_layout)
         
@@ -213,7 +325,8 @@ class HybridCryptoApp(QMainWindow):
         self.priv_key_encrypt_edit.setText(self.settings.get("private_key", "keys/private.pem"))
         priv_layout.addWidget(self.priv_key_encrypt_edit)
         self.browse_priv_encrypt_btn = QPushButton("Обзор")
-        self.browse_priv_encrypt_btn.clicked.connect(lambda: self.browse_file(self.priv_key_encrypt_edit, "PEM files (*.pem);;All files (*.*)"))
+        self.browse_priv_encrypt_btn.clicked.connect(
+            lambda: self.browse_file(self.priv_key_encrypt_edit, "PEM files (*.pem);;All files (*.*)"))
         priv_layout.addWidget(self.browse_priv_encrypt_btn)
         encrypt_layout.addLayout(priv_layout)
         
@@ -224,7 +337,7 @@ class HybridCryptoApp(QMainWindow):
         
         encrypt_group.setLayout(encrypt_layout)
         main_layout.addWidget(encrypt_group)
-        
+
         decrypt_group = QGroupBox("Расшифрование")
         decrypt_layout = QVBoxLayout()
         
@@ -234,7 +347,8 @@ class HybridCryptoApp(QMainWindow):
         self.enc_for_decrypt_edit.setText(self.settings.get("encrypted_file", "data/encrypted.bin"))
         enc_for_decrypt_layout.addWidget(self.enc_for_decrypt_edit)
         self.browse_enc_decrypt_btn = QPushButton("Обзор")
-        self.browse_enc_decrypt_btn.clicked.connect(lambda: self.browse_file(self.enc_for_decrypt_edit, "Binary files (*.bin);;All files (*.*)"))
+        self.browse_enc_decrypt_btn.clicked.connect(
+            lambda: self.browse_file(self.enc_for_decrypt_edit, "Binary files (*.bin);;All files (*.*)"))
         enc_for_decrypt_layout.addWidget(self.browse_enc_decrypt_btn)
         decrypt_layout.addLayout(enc_for_decrypt_layout)
         
@@ -244,7 +358,8 @@ class HybridCryptoApp(QMainWindow):
         self.decrypted_file_edit.setText(self.settings.get("decrypted_file", "data/decrypted.txt"))
         decrypted_layout.addWidget(self.decrypted_file_edit)
         self.browse_decrypted_btn = QPushButton("Обзор")
-        self.browse_decrypted_btn.clicked.connect(lambda: self.save_file(self.decrypted_file_edit, "Text files (*.txt);;All files (*.*)"))
+        self.browse_decrypted_btn.clicked.connect(
+            lambda: self.save_file(self.decrypted_file_edit, "Text files (*.txt);;All files (*.*)"))
         decrypted_layout.addWidget(self.browse_decrypted_btn)
         decrypt_layout.addLayout(decrypted_layout)
         
@@ -254,7 +369,8 @@ class HybridCryptoApp(QMainWindow):
         self.sym_key_decrypt_edit.setText(self.settings.get("symmetric_key", "keys/symmetric_encrypted.bin"))
         sym_key_decrypt_layout.addWidget(self.sym_key_decrypt_edit)
         self.browse_sym_decrypt_btn = QPushButton("Обзор")
-        self.browse_sym_decrypt_btn.clicked.connect(lambda: self.browse_file(self.sym_key_decrypt_edit, "All files (*.*)"))
+        self.browse_sym_decrypt_btn.clicked.connect(
+            lambda: self.browse_file(self.sym_key_decrypt_edit, "All files (*.*)"))
         sym_key_decrypt_layout.addWidget(self.browse_sym_decrypt_btn)
         decrypt_layout.addLayout(sym_key_decrypt_layout)
         
@@ -264,7 +380,8 @@ class HybridCryptoApp(QMainWindow):
         self.priv_key_decrypt_edit.setText(self.settings.get("private_key", "keys/private.pem"))
         priv_decrypt_layout.addWidget(self.priv_key_decrypt_edit)
         self.browse_priv_decrypt_btn = QPushButton("Обзор")
-        self.browse_priv_decrypt_btn.clicked.connect(lambda: self.browse_file(self.priv_key_decrypt_edit, "PEM files (*.pem);;All files (*.*)"))
+        self.browse_priv_decrypt_btn.clicked.connect(
+            lambda: self.browse_file(self.priv_key_decrypt_edit, "PEM files (*.pem);;All files (*.*)"))
         priv_decrypt_layout.addWidget(self.browse_priv_decrypt_btn)
         decrypt_layout.addLayout(priv_decrypt_layout)
         
@@ -275,11 +392,11 @@ class HybridCryptoApp(QMainWindow):
         
         decrypt_group.setLayout(decrypt_layout)
         main_layout.addWidget(decrypt_group)
-        
+
         self.progress_bar = QProgressBar()
         self.progress_bar.setVisible(False)
         main_layout.addWidget(self.progress_bar)
-        
+
         log_group = QGroupBox("Лог операций")
         log_layout = QVBoxLayout()
         self.log_text = QTextEdit()
@@ -288,7 +405,7 @@ class HybridCryptoApp(QMainWindow):
         log_layout.addWidget(self.log_text)
         log_group.setLayout(log_layout)
         main_layout.addWidget(log_group)
-        
+
         save_settings_btn = QPushButton("Сохранить настройки")
         save_settings_btn.clicked.connect(self.save_current_settings)
         main_layout.addWidget(save_settings_btn)
@@ -296,37 +413,60 @@ class HybridCryptoApp(QMainWindow):
         self.statusBar().showMessage("Готов")
         
         os.makedirs("data", exist_ok=True)
-        os.makedirs("keys", exist_ok=True)
+        os.makedirs(self.keys_dir_edit.text(), exist_ok=True)
         
-        self.log("Приложение запущено")
+        self.log(f"Приложение запущено. Файл настроек: {self.settings_file}")
     
-    def browse_file(self, line_edit, file_filter):
-        """Выбор файла с нормализацией пути"""
+    def browse_file(self, line_edit: QLineEdit, file_filter: str) -> None:
+        """
+        Открытие диалога выбора файла.
+        
+        Args:
+            line_edit (QLineEdit): Поле для отображения выбранного пути
+            file_filter (str): Фильтр типов файлов
+        """
         file_path, _ = QFileDialog.getOpenFileName(self, "Выберите файл", "", file_filter)
         if file_path:
             normalized_path = normalize_path(file_path)
             line_edit.setText(normalized_path)
     
-    def save_file(self, line_edit, file_filter):
-        """Выбор пути для сохранения файла с нормализацией"""
+    def save_file(self, line_edit: QLineEdit, file_filter: str) -> None:
+        """
+        Открытие диалога сохранения файла.
+        
+        Args:
+            line_edit (QLineEdit): Поле для отображения выбранного пути
+            file_filter (str): Фильтр типов файлов
+        """
         file_path, _ = QFileDialog.getSaveFileName(self, "Сохранить файл", "", file_filter)
         if file_path:
             normalized_path = normalize_path(file_path)
             line_edit.setText(normalized_path)
     
-    def browse_folder(self, line_edit):
-        """Выбор папки с нормализацией"""
+    def browse_folder(self, line_edit: QLineEdit) -> None:
+        """
+        Открытие диалога выбора папки.
+        
+        Args:
+            line_edit (QLineEdit): Поле для отображения выбранного пути
+        """
         folder_path = QFileDialog.getExistingDirectory(self, "Выберите папку")
         if folder_path:
             normalized_path = normalize_path(folder_path)
             line_edit.setText(normalized_path)
     
-    def log(self, message):
-        """Добавление сообщения в лог"""
-        self.log_text.append(f"[{QApplication.instance().applicationDisplayName}] {message}")
+    def log(self, message: str) -> None:
+        """
+        Добавление сообщения в лог с временной меткой.
+        
+        Args:
+            message (str): Сообщение для добавления в лог
+        """
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        self.log_text.append(f"[{timestamp}] {message}")
     
-    def generate_keys(self):
-        """Генерация ключей"""
+    def generate_keys(self) -> None:
+        """Запуск процесса генерации ключей в отдельном потоке."""
         key_size = int(self.key_size_combo.currentText())
         output_dir = normalize_path(self.keys_dir_edit.text())
         
@@ -344,8 +484,14 @@ class HybridCryptoApp(QMainWindow):
         
         self.log(f"Начата генерация ключей (размер Camellia: {key_size} бит)")
     
-    def on_keys_generated(self, success, message):
-        """Обработка завершения генерации ключей"""
+    def on_keys_generated(self, success: bool, message: str) -> None:
+        """
+        Обработка завершения генерации ключей.
+        
+        Args:
+            success (bool): Флаг успешности операции
+            message (str): Сообщение о результате
+        """
         self.gen_keys_btn.setEnabled(True)
         self.progress_bar.setVisible(False)
         
@@ -361,10 +507,11 @@ class HybridCryptoApp(QMainWindow):
             self.priv_key_decrypt_edit.setText(private_path)
             self.sym_key_edit.setText(symmetric_path)
             self.sym_key_decrypt_edit.setText(symmetric_path)
-   
+            
             self.settings["private_key"] = private_path
             self.settings["public_key"] = normalize_path(os.path.join(output_dir, "public.pem"))
             self.settings["symmetric_key"] = symmetric_path
+            self.settings["keys_directory"] = output_dir
             self.save_settings()
             
             self.public_key_label.setText(f"Публичный ключ: {normalize_path(os.path.join(output_dir, 'public.pem'))}")
@@ -373,8 +520,8 @@ class HybridCryptoApp(QMainWindow):
             QMessageBox.critical(self, "Ошибка", message)
             self.log(f"Ошибка: {message}")
     
-    def encrypt_file(self):
-        """Шифрование файла"""
+    def encrypt_file(self) -> None:
+        """Запуск процесса шифрования файла в отдельном потоке."""
         text_file = normalize_path(self.source_file_edit.text())
         sym_key = normalize_path(self.sym_key_edit.text())
         priv_key = normalize_path(self.priv_key_encrypt_edit.text())
@@ -385,11 +532,13 @@ class HybridCryptoApp(QMainWindow):
             return
         
         if not os.path.exists(sym_key):
-            QMessageBox.warning(self, "Предупреждение", f"Файл симметричного ключа не найден: {sym_key}\nСначала сгенерируйте ключи.")
+            QMessageBox.warning(self, "Предупреждение", 
+                               f"Файл симметричного ключа не найден: {sym_key}\nСначала сгенерируйте ключи.")
             return
         
         if not os.path.exists(priv_key):
-            QMessageBox.warning(self, "Предупреждение", f"Приватный ключ не найден: {priv_key}\nСначала сгенерируйте ключи.")
+            QMessageBox.warning(self, "Предупреждение", 
+                               f"Приватный ключ не найден: {priv_key}\nСначала сгенерируйте ключи.")
             return
         
         self.encrypt_btn.setEnabled(False)
@@ -409,8 +558,14 @@ class HybridCryptoApp(QMainWindow):
         
         self.log(f"Начато шифрование файла: {text_file}")
     
-    def on_encrypt_finished(self, success, message):
-        """Обработка завершения шифрования"""
+    def on_encrypt_finished(self, success: bool, message: str) -> None:
+        """
+        Обработка завершения шифрования.
+        
+        Args:
+            success (bool): Флаг успешности операции
+            message (str): Сообщение о результате
+        """
         self.encrypt_btn.setEnabled(True)
         self.progress_bar.setVisible(False)
         
@@ -423,8 +578,8 @@ class HybridCryptoApp(QMainWindow):
             self.log(f"Ошибка: {message}")
             self.statusBar().showMessage("Ошибка шифрования")
     
-    def decrypt_file(self):
-        """Расшифрование файла"""
+    def decrypt_file(self) -> None:
+        """Запуск процесса расшифрования файла в отдельном потоке."""
         text_file = normalize_path(self.enc_for_decrypt_edit.text())
         sym_key = normalize_path(self.sym_key_decrypt_edit.text())
         priv_key = normalize_path(self.priv_key_decrypt_edit.text())
@@ -459,8 +614,14 @@ class HybridCryptoApp(QMainWindow):
         
         self.log(f"Начато расшифрование файла: {text_file}")
     
-    def on_decrypt_finished(self, success, message):
-        """Обработка завершения расшифрования"""
+    def on_decrypt_finished(self, success: bool, message: str) -> None:
+        """
+        Обработка завершения расшифрования.
+        
+        Args:
+            success (bool): Флаг успешности операции
+            message (str): Сообщение о результате
+        """
         self.decrypt_btn.setEnabled(True)
         self.progress_bar.setVisible(False)
         
@@ -473,31 +634,45 @@ class HybridCryptoApp(QMainWindow):
             self.log(f"Ошибка: {message}")
             self.statusBar().showMessage("Ошибка расшифрования")
     
-    def save_current_settings(self):
-        """Сохранение текущих настроек"""
+    def save_current_settings(self) -> None:
+        """Сохранение текущих настроек интерфейса в файл настроек."""
         self.settings["initial_file"] = normalize_path(self.source_file_edit.text())
         self.settings["encrypted_file"] = normalize_path(self.encrypted_file_edit.text())
         self.settings["decrypted_file"] = normalize_path(self.decrypted_file_edit.text())
         self.settings["symmetric_key"] = normalize_path(self.sym_key_edit.text())
         self.settings["private_key"] = normalize_path(self.priv_key_encrypt_edit.text())
         self.settings["camellia_key_size"] = self.key_size_combo.currentText()
+        self.settings["keys_directory"] = normalize_path(self.keys_dir_edit.text())
         
         self.save_settings()
         QMessageBox.information(self, "Успех", "Настройки сохранены")
         self.log("Настройки сохранены")
 
 
-def main():
+def main(settings_file: Optional[str] = None) -> int:
+    """
+    Главная функция запуска приложения.
+    
+    Args:
+        settings_file (str, optional): Путь к файлу с настройками.
+                                      Если None, используется "settings.json".
+    
+    Returns:
+        int: Код возврата приложения
+    """
     app = QApplication(sys.argv)
     app.setApplicationName("HybridCrypto")
     
     os.makedirs("data", exist_ok=True)
-    os.makedirs("keys", exist_ok=True)
     
-    window = HybridCryptoApp()
+    window = HybridCryptoApp(settings_file=settings_file)
     window.show()
-    sys.exit(app.exec_())
+    
+    return sys.exit(app.exec_())
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        main(sys.argv[1])
+    else:
+        main()

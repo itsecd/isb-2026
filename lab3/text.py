@@ -13,9 +13,9 @@ def read_text(path: str):
         with open(path, "rb") as file:
             return file.read()
     except FileNotFoundError:
-        raise FileNotFoundError(f"‘айл не найден: {path}")
+        raise FileNotFoundError(f"Файл не найден: {path}")
     except OSError as e:
-        raise OSError(f"ќшибка чтени¤ файла: {e}")
+        raise OSError(f"Ошибка чтения файла: {e}")
 
 def save_text(data: bytes, path: str):
     """
@@ -30,7 +30,7 @@ def save_text(data: bytes, path: str):
         with open(path, "wb") as file:
             file.write(data)
     except OSError as e:
-        raise OSError(f"ќшибка сохранени¤ файла: {e}")
+        raise OSError(f"Ошибка сохранения файла: {e}")
 
 def read_encrypted(path: str):
     """
@@ -49,6 +49,6 @@ def read_encrypted(path: str):
             encrypted = f.read()
             return iv, encrypted
     except FileNotFoundError:
-        raise FileNotFoundError(f"‘айл не найден: {path}")
+        raise FileNotFoundError(f"Файл не найден: {path}")
     except OSError as e:
-        raise OSError(f"ќшибка чтени¤ файла: {e}")
+        raise OSError(f"Ошибка чтения файла: {e}")

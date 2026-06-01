@@ -1,4 +1,4 @@
-import symmetric
+import text
 
 from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.primitives.serialization import (
@@ -107,7 +107,7 @@ def decrypt_symmetric_key(private_key_path: str, encrypted_key_path: str) -> byt
         decrypted_key(bytes): decrypted symmetric key
     """
     private_key = deserialize_private_key(private_key_path)
-    encrypted_key = symmetric.deserialize_encrypted_key (encrypted_key_path)
+    encrypted_key = text.read_text (encrypted_key_path)
     decrypted_key = private_key.decrypt(
         encrypted_key,
         asym_padding.OAEP(

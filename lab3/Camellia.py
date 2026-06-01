@@ -1,5 +1,4 @@
 import os
-import symmetric
 import RSA
 import text
 
