@@ -1,10 +1,6 @@
-from utils import (
-    load_private_key,
-    rsa_decrypt,
-    load_bytes,
-    seed_encrypt,
-    save_bytes,
-)
+from asymmetric_crypto import load_private_key, rsa_decrypt
+from symmetric_crypto import seed_encrypt
+from file_utils import load_bytes, save_bytes
 
 
 def encrypt_file(
@@ -22,8 +18,7 @@ def encrypt_file(
     print("Symmetric key decrypted.")
 
     print(f"Reading plaintext from: {input_path}")
-    with open(input_path, 'rb') as f:
-        plaintext = f.read()
+    plaintext = load_bytes(input_path)
     print(f"Read {len(plaintext)} bytes.")
 
     print(f"Encrypting with SEED-CBC and saving to: {output_path}")

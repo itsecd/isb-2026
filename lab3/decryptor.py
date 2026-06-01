@@ -1,10 +1,7 @@
-from utils import (
-    load_private_key,
-    rsa_decrypt,
-    load_bytes,
-    seed_decrypt,
-    IV_SIZE,
-)
+from asymmetric_crypto import load_private_key, rsa_decrypt
+from symmetric_crypto import seed_decrypt
+from file_utils import load_bytes
+from config import IV_SIZE
 
 
 def decrypt_file(
@@ -25,11 +22,14 @@ def decrypt_file(
     data = load_bytes(encrypted_input_path)
     iv = data[:IV_SIZE]
     ciphertext = data[IV_SIZE:]
-    print(f" Read {len(data)} bytes (IV: {IV_SIZE}, ciphertext: {len(ciphertext)}).")
+    print(f"Read {len(data)} bytes (IV: {IV_SIZE}, ciphertext: {len(ciphertext)}).")
 
     print(f"Decrypting with SEED-CBC and saving to: {output_path}")
     plaintext = seed_decrypt(symmetric_key, iv, ciphertext)
-    with open(output_path, 'wb') as f:
-        f.write(plaintext)
+    try:
+        with open(output_path, 'wb') as f:
+            f.write(plaintext)
+    except OSError as e:
+        raise OSError(f"Failed to save decrypted file '{output_path}': {e}")
     print(f"Decrypted {len(ciphertext)} bytes -> {len(plaintext)} bytes.")
     print("Decryption completed successfully.\n")

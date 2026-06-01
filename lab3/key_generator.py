@@ -1,11 +1,11 @@
-from utils import (
-    generate_symmetric_key,
+from symmetric_crypto import generate_symmetric_key
+from asymmetric_crypto import (
     generate_asymmetric_keys,
     serialize_private_key,
     serialize_public_key,
     rsa_encrypt,
-    save_bytes,
 )
+from file_utils import save_bytes
 
 
 def generate_keys(
@@ -21,7 +21,7 @@ def generate_keys(
 
     print("Generating asymmetric key pair (RSA-2048)...")
     private_key, public_key = generate_asymmetric_keys()
-    print(" Done.")
+    print("Done.")
 
     print("Saving public and private keys...")
     serialize_public_key(public_key, public_key_path)
