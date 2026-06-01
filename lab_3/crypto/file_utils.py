@@ -14,8 +14,11 @@ def log(msg: str) -> None:
 def load_settings(path: str) -> dict:
     """Загружает конфигурацию из JSON-файла."""
     log(f"Загрузка настроек из {path}...")
-    with open(path) as f:
-        cfg = json.load(f)
+    try:
+        with open(path) as f:
+            cfg = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        raise RuntimeError(f"Ошибка при загрузке настроек: {e}")
 
     base_dir = os.path.dirname(os.path.abspath(path))
     for key, value in cfg.items():

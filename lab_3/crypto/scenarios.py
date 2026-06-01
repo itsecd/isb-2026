@@ -14,6 +14,9 @@ from crypto.file_utils import log, save_bytes, load_bytes
 def generate_keys(cfg: dict) -> None:
     """
     Сценарий 1: Генерация ключей гибридной системы.
+    
+    Args:
+        cfg: Словарь конфигурации с путями для сохранения ключей.
 
     Шаги:
     1.1 Генерация симметричного ключа SM4.
@@ -21,6 +24,18 @@ def generate_keys(cfg: dict) -> None:
     1.3 Сериализация RSA-ключей в PEM-файлы.
     1.4 Шифрование симметричного ключа открытым RSA-ключом и сохранение.
     """
+    # Загрузиув параметры криптографии из конфигурации
+    if 'crypto' in cfg:
+        symmetric.set_parameters(
+            cfg['crypto'].get('sm4_block_size_bits', 128),
+            cfg['crypto'].get('sm4_key_size_bytes', 16),
+            cfg['crypto'].get('sm4_iv_size_bytes', 16),
+        )
+        asymmetric.set_parameters(
+            cfg['crypto'].get('rsa_key_size', 2048),
+            cfg['crypto'].get('rsa_public_exponent', 65537),
+        )
+    
     log("Шаг 1.1 — Генерация симметричного ключа SM4 (128 бит)...")
     sym_key = symmetric.generate_symmetric_key()
 
@@ -45,6 +60,9 @@ def generate_keys(cfg: dict) -> None:
 def encrypt_file(cfg: dict) -> None:
     """
     Сценарий 2: Шифрование данных гибридной системой.
+    
+    Args:
+        cfg: Словарь конфигурации с путями ключей и файлов.
 
     Шаги:
     2.1 Расшифровка симметричного ключа закрытым RSA-ключом.
@@ -74,6 +92,9 @@ def encrypt_file(cfg: dict) -> None:
 def decrypt_file(cfg: dict) -> None:
     """
     Сценарий 3: Дешифрование данных гибридной системой.
+    
+    Args:
+        cfg: Словарь конфигурации с путями ключей и файлов.
 
     Шаги:
     3.1 Расшифровка симметричного ключа закрытым RSA-ключом.

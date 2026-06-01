@@ -2,51 +2,68 @@
 Сериализация и десериализация RSA-ключей (PEM-формат).
 """
 
-import os
-
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import (
     load_pem_public_key,
     load_pem_private_key,
 )
-
-
-def _ensure_dir(path: str) -> None:
-    parent = os.path.dirname(path)
-    if parent:
-        os.makedirs(parent, exist_ok=True)
+from crypto.file_utils import save_bytes
 
 
 def save_public_key(public_key, path: str) -> None:
-    """Сохраняет открытый RSA-ключ в PEM-файл."""
-    _ensure_dir(path)
+    """
+    Сохраняет открытый RSA-ключ в PEM-файл.
+    
+    Args:
+        public_key: Открытый RSA-ключ для сохранения.
+        path: Путь к файлу для сохранения.
+    """
     pem = public_key.public_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo,
     )
-    with open(path, "wb") as f:
-        f.write(pem)
+    save_bytes(pem, path)
 
 
 def save_private_key(private_key, path: str) -> None:
-    """Сохраняет закрытый RSA-ключ в PEM-файл (без парольной защиты)."""
-    _ensure_dir(path)
+    """
+    Сохраняет закрытый RSA-ключ в PEM-файл (без парольной защиты).
+    
+    Args:
+        private_key: Закрытый RSA-ключ для сохранения.
+        path: Путь к файлу для сохранения.
+    """
     pem = private_key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.TraditionalOpenSSL,
         encryption_algorithm=serialization.NoEncryption(),
     )
-    with open(path, "wb") as f:
-        f.write(pem)
+    save_bytes(pem, path)
 
 
 def load_public_key(path: str):
-    """Загружает открытый RSA-ключ из PEM-файла."""
+    """
+    Загружает открытый RSA-ключ из PEM-файла.
+    
+    Args:
+        path: Путь к PEM-файлу с открытым ключом.
+    
+    Returns:
+        Открытый RSA-ключ.
+    """
     with open(path, "rb") as f:
         return load_pem_public_key(f.read())
 
 
 def load_private_key(path: str):
-    """Загружает закрытый RSA-ключ из PEM-файла."""
+    """
+    Загружает закрытый RSA-ключ из PEM-файла.
+    
+    Args:
+        path: Путь к PEM-файлу с закрытым ключом.
+    
+    Returns:
+        Закрытый RSA-ключ.
+    """
     with open(path, "rb") as f:
         return load_pem_private_key(f.read(), password=None)

@@ -4,5 +4,12 @@
     "decrypted_file": "../data/decrypted.txt",
     "symmetric_key": "../keys/symmetric.bin",
     "public_key": "../keys/public.pem",
-    "secret_key": "../keys/private.pem"
+    "secret_key": "../keys/private.pem",
+    "crypto": {
+        "sm4_block_size_bits": 128,
+        "sm4_key_size_bytes": 16,
+        "sm4_iv_size_bytes": 16,
+        "rsa_key_size": 2048,
+        "rsa_public_exponent": 65537
+    }
 }

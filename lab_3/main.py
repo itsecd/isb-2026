@@ -33,12 +33,13 @@ def main():
     args = parser.parse_args()
     cfg = load_settings(args.settings)
 
-    if args.generation:
-        generate_keys(cfg)
-    elif args.encryption:
-        encrypt_file(cfg)
-    elif args.decryption:
-        decrypt_file(cfg)
+    match (args.generation, args.encryption, args.decryption):
+        case (True, _, _):
+            generate_keys(cfg)
+        case (_, True, _):
+            encrypt_file(cfg)
+        case (_, _, True):
+            decrypt_file(cfg)
 
 
 if __name__ == "__main__":
