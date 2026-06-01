@@ -12,8 +12,9 @@ def read_file(filepath: str) -> bytes:
     try:
         with open(filepath, 'rb') as f:
             return f.read()
-    except OSError as e:
-        raise OSError(f"Не удалось открыть файл {filepath}, увы") from e
+    except Exception as e:
+        print(f"Не удалось открыть файл {filepath}: {e}")
+        raise
 
 def read_json_file(filepath: str) -> dict:
     """
@@ -27,9 +28,9 @@ def read_json_file(filepath: str) -> dict:
         with open(filepath, 'r') as fp:
             json_data = json.load(fp)
         return json_data
-    except OSError as e:
-        raise OSError(f"Не удалось открыть файл {filepath}, увы") from e
-    
+    except Exception as e:
+        print(f"Не удалось открыть файл {filepath}: {e}")
+        raise
 
 def write_public_key(public_pem: str, public_key: bytes,) -> None:
     """
@@ -42,8 +43,9 @@ def write_public_key(public_pem: str, public_key: bytes,) -> None:
         with open(public_pem, 'wb') as public_out:
                     public_out.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,
                         format=serialization.PublicFormat.SubjectPublicKeyInfo))
-    except OSError as e:
-        raise OSError(f"В ходе работы произошла ошибка {e}") from e  
+    except Exception as e:
+        print(f"Не удалось сделать запись в файл {public_pem}: {e}")
+        raise
 
 def write_private_key(private_pem: str, private_key: bytes) -> None:
     """
@@ -57,8 +59,9 @@ def write_private_key(private_pem: str, private_key: bytes) -> None:
                     private_out.write(private_key.private_bytes(encoding=serialization.Encoding.PEM,
                         format=serialization.PrivateFormat.TraditionalOpenSSL,
                         encryption_algorithm=serialization.NoEncryption()))
-    except OSError as e:
-        raise OSError(f"В ходе работы произошла ошибка {e}") from e  
+    except Exception as e:
+        print(f"Не удалось сделать запись в файл {private_pem}: {e}")
+        raise 
 
 
 def write_file(filepath: str, text: str) -> None:
@@ -71,5 +74,6 @@ def write_file(filepath: str, text: str) -> None:
     try:
         with open (filepath, "wb") as f:
             f.write(text)
-    except OSError as e:
-        raise OSError(f"В ходе работы произошла ошибка {e}") from e
+    except Exception as e:
+        print(f"Не удалось сделать запись в файл {filepath}: {e}")
+        raise 
