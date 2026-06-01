@@ -1,8 +1,7 @@
 import json
 from logic import enc_logic, dec_logic, gen_logic
-
 import argparse
-
+from load_and_save import load_settings
 
 def parser():
     parser = argparse.ArgumentParser()
@@ -14,20 +13,10 @@ def parser():
     parser.add_argument('output', nargs='?', help='Путь к файлу результата')
     args = parser.parse_args()
     return args
-    
-
-def json_parser() -> dict:
-    try:
-        with open("settings.json", 'r', encoding='utf-8') as f:
-            config = json.load(f)
-        return config
-    except Exception as ex:
-        print(f"Ошибка!: {ex}")
-
 
 def main():
     action = parser()
-    settings = json_parser()
+    settings = load_settings()
     input_path = action.input
     output_path = action.output
     match action:
