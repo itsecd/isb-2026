@@ -1,3 +1,4 @@
+import json
 def read_text_file(initial_file):
         """
         считывание исходного текста из файла и преобразование его в байты для шифрования
@@ -32,6 +33,8 @@ def write_encrypt_text(encrypted_file, iv, etext_in_bytes):
 
         except FileNotFoundError:
                 raise FileNotFoundError(f"Нет такого файла {encrypted_file}")
+        except Exception:
+                raise Exception("Произошла ошибка 2")
         
 
 
@@ -72,3 +75,32 @@ def write_decrypt_text(decrypted_file_in_bytes, decrypted_file):
                         
         except FileNotFoundError:
                 raise FileNotFoundError(f"Такой файл мы не находили {decrypted_file_in_bytes}")
+        except Exception:
+                raise Exception("Произошла ошибка 1")
+
+def read_symmetric_key(symmetric_key_file):
+    """
+    считывание зашифрованного симметричного ключа из файла
+
+    аргументы: 
+            symmetric_key_file: путь к файлу, в котором хранится зашифрованный симметричный ключ
+    возвращает:
+            содержимое: байты зашифрованного симметричного ключа
+    """
+    try:
+        with open(symmetric_key_file, 'rb') as key_file: 
+                content = key_file.read()
+        return content
+    
+    except FileNotFoundError:
+        raise FileNotFoundError(f"{symmetric_key_file} такой файл не найден")
+    
+def read_json_file(settings_path):
+    try:
+        with open(settings_path, 'r') as json_file:
+                json_data = json.load(json_file)
+        return json_data
+    
+    except FileNotFoundError:
+        raise FileNotFoundError(f"{settings_path} такой файл не найден")
+    
