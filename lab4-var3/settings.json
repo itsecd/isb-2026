@@ -1,0 +1,7 @@
+{
+  "db_path": "database.db",
+  "use_salt": true,
+  "salt_length": 16,
+  "bruteforce_iters": 5000,
+  "bcrypt_rounds": 12
+}
