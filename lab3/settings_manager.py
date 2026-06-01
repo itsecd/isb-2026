@@ -8,6 +8,7 @@ def save(path, settings):
         settings(dict): Dictionary with data from settings file
     Raises:
         OSError: Error writing data
+        Exception: Unexpected error
     """
     try:
         normalized_settings = {}
@@ -20,6 +21,8 @@ def save(path, settings):
             json.dump(normalized_settings, fp, indent=4, ensure_ascii=False)
     except OSError as e:
         raise OSError(f"Ошибка сохранения файла: {e}")
+    except Exception as e:
+        raise Exception(f"Ошибка при сохранении настроек: {e}")
 
 def load(path):
     """
@@ -31,6 +34,7 @@ def load(path):
     Raises:
         FileNotFoundError: file not found
         ValueError: Incorrect data
+        Exception: Unexpected error
     """
     try:
         with open(path, "r", encoding="utf-8") as json_file:
@@ -39,3 +43,5 @@ def load(path):
         raise FileNotFoundError(f"Файл настроек не найден: {path}")
     except json.JSONDecodeError as e:
         raise ValueError(f"Ошибка чтения файла: {e}")
+    except Exception as e:
+        raise Exception(f"Ошибка при загрузке настроек: {e}")

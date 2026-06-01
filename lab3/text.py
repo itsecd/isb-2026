@@ -8,6 +8,7 @@ def read_text(path: str):
     Raises:
         OSError: Error reading data
         FileNotFoundError: File not found
+        Exception: Unexpected error
     """
     try:
         with open(path, "rb") as file:
@@ -16,6 +17,8 @@ def read_text(path: str):
         raise FileNotFoundError(f"Файл не найден: {path}")
     except OSError as e:
         raise OSError(f"Ошибка чтения файла: {e}")
+    except Exception as e:
+        raise Exception(f"Неожиданная ошибка при чтении файла: {e}")
 
 def save_text(data: bytes, path: str):
     """
@@ -25,12 +28,15 @@ def save_text(data: bytes, path: str):
         data(bytes): Data to save
     Raises:
         OSError: Error writing data
+        Exception: Unexpected error
     """
     try:
         with open(path, "wb") as file:
             file.write(data)
     except OSError as e:
         raise OSError(f"Ошибка сохранения файла: {e}")
+    except Exception as e:
+        raise Exception(f"Неожиданная ошибка при сохранении файла: {e}")
 
 def read_encrypted(path: str):
     """
@@ -42,6 +48,7 @@ def read_encrypted(path: str):
     Raises:
         OSError: Error reading data
         FileNotFoundError: File not found
+        Exception: Unexpected error
     """
     try:
         with open(path, "rb") as f:
@@ -52,3 +59,5 @@ def read_encrypted(path: str):
         raise FileNotFoundError(f"Файл не найден: {path}")
     except OSError as e:
         raise OSError(f"Ошибка чтения файла: {e}")
+    except Exception as e:
+        raise Exception(f"Неожиданная ошибка при чтении шифротекста: {e}")

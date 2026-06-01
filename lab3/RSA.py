@@ -15,6 +15,7 @@ def serialize_public_key(public_key, public_pem_path: str):
         public_pem_path(str): save path for the key 
     Raises:
         OSError: Error writing data
+        Exception: Unexpected error
     """
     try:
         with open(public_pem_path, "wb") as public_out:
@@ -26,6 +27,8 @@ def serialize_public_key(public_key, public_pem_path: str):
             )
     except OSError as e:
         raise OSError(f"Ошибка сохранения файла: {e}")
+    except Exception as e:
+        raise Exception(f"Неожиданная ошибка при сериализации открытого ключа: {e}")
 
 
 def serialize_private_key(private_key, private_pem_path: str):
@@ -36,6 +39,7 @@ def serialize_private_key(private_key, private_pem_path: str):
         public_pem_path(str): save path for the key 
     Raises:
         OSError: Error writing data
+        Exception: Unexpected error
     """
     try:
         with open(private_pem_path, "wb") as private_out:
@@ -48,6 +52,8 @@ def serialize_private_key(private_key, private_pem_path: str):
             )
     except OSError as e:
         raise OSError(f"Ошибка сохранения файла: {e}")
+    except Exception as e:
+        raise Exception(f"Неожиданная ошибка при сериализации закрытого ключа: {e}")
 
 def deserialize_public_key(public_pem_path: str):
     """
@@ -56,6 +62,7 @@ def deserialize_public_key(public_pem_path: str):
         public_pem_path(str): read path for the key 
     Raises:
         FileNotFoundError: file not found
+        Exception: Unexpected error
     """
     try:
         with open(public_pem_path, "rb") as pem_in:
@@ -63,6 +70,8 @@ def deserialize_public_key(public_pem_path: str):
         return load_pem_public_key(public_bytes)
     except FileNotFoundError as e:
         raise FileNotFoundError(f"Ошибка сохранения файла: {e}")
+    except Exception as e:
+        raise Exception(f"Неожиданная ошибка при десериализации открытого ключа: {e}")
 
 def deserialize_private_key(private_pem_path: str):
     """
@@ -71,6 +80,7 @@ def deserialize_private_key(private_pem_path: str):
         private_pem_path(str): read path for the key 
     Raises:
         FileNotFoundError: file not found
+        Exception: Unexpected error
     """
     try:
         with open(private_pem_path, "rb") as pem_in:
@@ -78,6 +88,8 @@ def deserialize_private_key(private_pem_path: str):
         return load_pem_private_key(private_bytes,password=None)
     except OSError as e:
         raise OSError(f"Ошибка сохранения файла: {e}")
+    except Exception as e:
+        raise Exception(f"Неожиданная ошибка при десериализации закрытого ключа: {e}")
 
 def encrypt_symmetric_key(public_key_path: str, symmetric_key: bytes) -> bytes:
     """
