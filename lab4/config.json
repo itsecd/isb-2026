@@ -1,0 +1,6 @@
+{
+    "db_salt": "users_salted.json",
+    "db_nosalt": "users_nosalt.json",
+    "hash_algorithm": "sha256",
+    "salt_length": 16
+}
