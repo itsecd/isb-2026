@@ -1,8 +1,0 @@
-{
-  "initial_file": "data\\source.txt",
-  "encrypted_file": "data\\encrypted_data.bin",
-  "decrypted_file": "data\\result.txt",
-  "symmetric_key": "key\\sym_key.enc",
-  "public_key": "key\\public.pem",
-  "secret_key": "key\\private.pem"
-}
