@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from utils import settings, FileUtilsError
+from utils import load_settings, FileUtilsError
 from crypto_hybrid import generate_hybrid_keys, encrypt_data, decrypt_data
 
 
@@ -35,12 +35,13 @@ def main() -> None:
         args = parse_arguments()
         settings = load_settings()
         
-        if args.generation:
-            generate_hybrid_keys(settings)
-        elif args.encryption:
-            encrypt_data(settings)
-        elif args.decryption:
-            decrypt_data(settings)
+        match args:
+            case _ if args.generation:
+                generate_hybrid_keys(settings)
+            case _ if args.encryption:
+                encrypt_data(settings)
+            case _ if args.decryption:
+                decrypt_data(settings)
             
     except FileUtilsError as err:
         print(f"Ошибка при работе с файлами: {err}", file=sys.stderr)
