@@ -1,4 +1,4 @@
-from tkinter import Tk, INSERT, END, Button, Label
+from tkinter import Tk, INSERT, END, Button, Label, Text
 from tkinter import Menu
 from hashing import deserialize, get_file_hash
 import tkinter.filedialog as fd
@@ -18,7 +18,7 @@ class App:
     
     def init_ui(self):
         self.window.title("Лабораторная работа №4")
-        self.window.geometry("500x500")
+        self.window.geometry("700x500")
 
         self.menu = Menu(self.window)
         self.file_menu = Menu(self.menu, tearoff=0)
@@ -27,21 +27,25 @@ class App:
         self.menu.add_cascade(label='Файл', menu=self.file_menu)
         self.window.config(menu=self.menu)
 
-        self.file_label = Label(self.window, width=60, text="Нет открытого файла")
+        self.file_label = Label(self.window, width=85, text="Нет открытого файла")
         self.file_label.grid(row=0, column=0, columnspan=2)
 
-        self.textfield = ScrolledText(self.window, wrap="word", width=60)
+        self.textfield = ScrolledText(self.window, wrap="word", width=85)
         self.textfield.configure(state='disabled')
         self.textfield.grid(row=1, column=0, columnspan=2)
 
         self.hash_button = Button(self.window, text="Вычислить хэш", command=self.hash_button_handler)
         self.hash_button.grid(row=2, column=0)
+        self.hash_button.configure(state='disabled')
 
         self.check_button = Button(self.window, text="Сравнить хэш", command=self.check_button_handler)
         self.check_button.grid(row=2, column=1)
+        self.check_button.configure(state='disabled')
 
-        self.hash_label = Label(self.window, width=60, text="")
+        self.hash_label = Text(self.window, width=85, height=1, borderwidth=0)
         self.hash_label.grid(row=3, column=0, columnspan=2)
+        self.hash_label.configure(state='disabled')
+        self.hash_label.configure(bg=self.window.cget('bg'), relief="flat")
 
         self.window.mainloop()
 
@@ -54,6 +58,8 @@ class App:
                 self.file_data = data
                 self.file_path = filename
                 self.file_label["text"] = f"Открыт: {self.file_path}"
+                self.hash_button.configure(state='normal')
+                self.check_button.configure(state='normal')
 
                 self.textfield.configure(state='normal')
                 self.textfield.delete("1.0", END)
@@ -72,8 +78,11 @@ class App:
     def hash_button_handler(self):
         if self.file_data:
             hash = get_file_hash(self.file_data, self.settings["hash_algorithm"])
-            self.hash_db[self.file_path] = hash
-            self.hash_label["text"] = f"Хэш: {hash}"
+
+            self.hash_label.configure(state='normal')
+            self.hash_label.delete("1.0", END)
+            self.hash_label.insert(1.0, f"Хеш: {hash}")
+            self.hash_label.configure(state='disabled')
     
     def check_button_handler(self):
         if self.file_data:
@@ -83,5 +92,6 @@ class App:
                     mb.showinfo("Успешно", "Хеши файлов совпадают!")
                 else:
                     mb.showwarning("Предупреждение", "Хеши файлов НЕ совпадают!")
-
-
+            else:
+                self.hash_db[self.file_path] = hash
+                mb.showinfo("Новый файл", "Хеш занесён в базу")

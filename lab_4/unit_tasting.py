@@ -2,8 +2,6 @@ import unittest
 import shutil
 import os
 import hashlib
-
-from yaml import serialize
 import hashing
 
 class HashModuleTests(unittest.TestCase):
