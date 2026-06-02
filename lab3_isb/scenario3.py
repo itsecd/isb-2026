@@ -1,60 +1,12 @@
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives import hashes   
 from cryptography.hazmat.primitives import padding as sym_padding
 from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from utilits import decrypt_symmetric_key
+from files import load_private_key, load_ciphertext, read_binary, save_binary
 
-
-
-def load_ciphertext(path: str) -> bytes:
-    """
-    Чтение зашифрованного текста из файла.
-    :param path: путь к файлу с зашифрованным текстом
-    :return: зашифрованный текст в виде байтов
-    """
-
-    with open(path, 'rb') as f:
-        enc_txt = f.read()
-    return enc_txt
-
-
-def load_private_key(path: str) -> RSAPrivateKey:
-    """
-    Загрузка закрытого RSA-ключа из PEM-файла.
-    :param path: путь к файлу с закрытым RSA-ключом
-    :return: закрытый RSA-ключ
-    """
-
-    with open(path, 'rb') as pem_in:
-        private_bytes = pem_in.read()
-        private_key = load_pem_private_key(private_bytes,password=None)
-    return private_key
-
-
-def load_encrypted_key(path: str) -> bytes:
-    """
-    Чтение зашифрованного симметричного AES-ключа из файла.
-    :param path: путь к файлу с зашифрованным симметричным ключом
-    :return: зашифрованный симметричный ключ в виде байтов
-    """
-
-    with open(path, 'rb') as f:
-        enc_key = f.read()
-    return enc_key
-
-
-def decrypt_symmetric_key(enc_key: bytes, private_key: RSAPrivateKey) -> bytes:
-    """
-    Расшифровка симметричного AES-ключа закрытым RSA-ключом.
-    :param enc_key: зашифрованный симметричный AES-ключ
-    :param private_key: закрытый RSA-ключ для дешифрования симметричного ключа
-    :return: расшифрованный симметричный AES-ключ в виде байтов
-    """
-
-    padder = asym_padding.OAEP(mgf=asym_padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None)
-    decrypted_key = private_key.decrypt(enc_key, padder)
-    return decrypted_key
+    
 
 
 def text_decrypt(enc_txt: bytes, key: bytes) -> bytes:
@@ -81,17 +33,6 @@ def text_decrypt(enc_txt: bytes, key: bytes) -> bytes:
     return text
 
 
-def save_decrypted_text(text: bytes, path: str) -> None:
-    """
-    Сохранение расшифрованных данных в файл.
-    :param text: расшифрованные данные в виде байтов
-    :param path: путь для сохранения расшифрованных данных
-    :return: не возвращается
-    """
-
-    with open(path, 'wb') as out:
-        out.write(text)
-
 
 def run_scenario3(enc_txt_path: str, prv_asym_key_path: str, enc_key_path: str, dec_txt_path: str) -> None:
     """
@@ -105,10 +46,10 @@ def run_scenario3(enc_txt_path: str, prv_asym_key_path: str, enc_key_path: str, 
 
     enc_txt = load_ciphertext(enc_txt_path)
     private_key = load_private_key(prv_asym_key_path)
-    enc_key = load_encrypted_key(enc_key_path)
+    enc_key = read_binary(enc_key_path)
     decrypted_key = decrypt_symmetric_key(enc_key, private_key)
     decrypted_text = text_decrypt(enc_txt, decrypted_key)
-    save_decrypted_text(decrypted_text, dec_txt_path)
+    save_binary(decrypted_text, dec_txt_path)
     print(f"Scenario 3 completed successfully. Encrypted text from {enc_txt_path} decrypted and saved to {dec_txt_path}.")
 
 

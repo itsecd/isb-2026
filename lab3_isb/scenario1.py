@@ -1,10 +1,10 @@
 import os
+from files import save_binary
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey, RSAPublicKey
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
-
 
 
 def generate_symmetric_key(size: int) -> bytes:
@@ -36,25 +36,31 @@ def generate_asymmetric_keys() -> tuple[RSAPrivateKey, RSAPublicKey]:
     return private_key, public_key
 
 
-def serialize_keys(public_key: RSAPublicKey, public_pem: str, private_key: RSAPrivateKey, private_pem: str) -> None:
+def serialize_public_key(public_key: RSAPublicKey, public_pem: str) -> None:
     """
     Сериализация открытого и закрытого RSA-ключей в PEM-файлы.
     :param public_key: открытый RSA-ключ
     :param public_pem: путь для сохранения открытого RSA-ключа
-    :param private_key: закрытый RSA-ключ
-    :param private_pem: путь для сохранения закрытого RSA-ключа
     :return: не возвращается
     """
 
     with open(public_pem, "wb") as public_out:
         public_out.write(public_key.public_bytes(encoding=serialization.Encoding.PEM,
              format=serialization.PublicFormat.SubjectPublicKeyInfo))
+    return
+
+
+def serialize_private_key(private_key: RSAPrivateKey, private_pem: str) -> None:
+    '''
+    Сериализация закрытого и открытого RSA-ключей в PEM-файлы.
+    :param private_key: закрытый RSA-ключ
+    :param private_pem: путь для сохранения закрытого RSA-ключа
+    :return: не возвращается
+    '''
     with open(private_pem, 'wb') as private_out:
         private_out.write(private_key.private_bytes(encoding=serialization.Encoding.PEM,
               format=serialization.PrivateFormat.TraditionalOpenSSL,
               encryption_algorithm=serialization.NoEncryption()))
-    return
-
 
 
 def encrypt_symmetric_key(key: bytes, public_key: RSAPublicKey, path: str) -> bytes:
@@ -67,8 +73,7 @@ def encrypt_symmetric_key(key: bytes, public_key: RSAPublicKey, path: str) -> by
     """
 
     ciphertext = public_key.encrypt(key, padding.OAEP(mgf=padding.MGF1(algorithm=hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
-    with open(path, 'wb') as out:
-        out.write(ciphertext)
+    save_binary(ciphertext, path)
     return ciphertext
 
 
@@ -84,6 +89,7 @@ def run_scenario1(enc_path: str, public_key_path: str, private_key_path: str, si
 
     symmetric_key = generate_symmetric_key(size)
     private_key, public_key = generate_asymmetric_keys()
-    serialize_keys(public_key, public_key_path, private_key, private_key_path)
+    serialize_public_key(public_key, public_key_path)
+    serialize_private_key(private_key, private_key_path)
     encrypt_symmetric_key(symmetric_key, public_key, enc_path)
     print(f"Scenario 1 completed successfully. Keys generated and saved to {public_key_path} and {private_key_path}. Encrypted symmetric key saved to {enc_path}.")

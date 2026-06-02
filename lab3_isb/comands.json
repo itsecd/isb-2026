@@ -1,0 +1,9 @@
+{
+  "encrypted_aes_key": "data/encrypted_aes_key.bin",
+  "public_key": "data/public.pem",
+  "private_key": "data/private.pem",
+  "aes_key_size": 256,
+  "input_text": "data/text.txt",
+  "encrypted_text": "data/encrypted_text.bin",
+  "decrypted_text": "data/decrypted_text.txt"
+}
