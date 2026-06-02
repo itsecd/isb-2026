@@ -24,7 +24,7 @@ def find_shortened_hash(init_hash: bytes, hash_len: int) -> bytes:
         init_hash - изначальный хэш
         hash_len - длина укороченного хэша
     Возвращает:
-        - укороченный хэш
+        - укороченный хэш (старшие hash_len битов изначального хэша)
     """
     try:
         val = int.from_bytes(init_hash[:4], 'big')

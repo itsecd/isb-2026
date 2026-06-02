@@ -3,7 +3,7 @@ import utils
 import hash
 import collisions
 
-class TestHashCollisionApp(unittest.TestCase):
+class TestHashCollision(unittest.TestCase):
 
     def test_random_string_generation_valid(self):
         """
@@ -46,7 +46,7 @@ class TestHashCollisionApp(unittest.TestCase):
         """
         Проверка на то, что функция поиска действительно находит коллизию
         """
-        res = collisions.find_collision(hash_len=8, str_len=10, disable_tqdm=True)
+        res = collisions.find_collision(hash_len=8, str_len=10)
         self.assertIsNotNone(res)
         s1, s2, h, attempts = res
         self.assertNotEqual(s1, s2)

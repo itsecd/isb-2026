@@ -39,7 +39,7 @@ def run_experiments(bits_list: tuple[int], experiments: int, str_len: int) -> di
         str_len - длина генерируемой случайной строки
     Возвращает:
         - словарь {"avg_attempts": среднее кол-во попыток на нахождение коллизии,
-                    "theoretical": теоритическое кол-во попыток на нахождение коллизии}
+                    "theoretical": теоретическое кол-во попыток на нахождение коллизии}
     """
     print(f"Запуск {experiments} экспериментов\n")
     results = {}
@@ -48,15 +48,17 @@ def run_experiments(bits_list: tuple[int], experiments: int, str_len: int) -> di
         for bits in bits_list:
             total_attempts = 0
             successful_experiments = 0
+            example = []
             
             print(f"Тестирование для {bits} бит:")
             
             for i in range(experiments):
                 res = find_collision(bits, str_len)
                 if res:
-                    attempts = res[-1]
+                    s1, s2, h, attempts = res
                     total_attempts += attempts
                     successful_experiments += 1
+                    example = [s1,s2,h]
             
             if successful_experiments == 0:
                 print(f"[{bits} бит] коллизий нет(")
@@ -65,6 +67,7 @@ def run_experiments(bits_list: tuple[int], experiments: int, str_len: int) -> di
             avg_attempts = total_attempts / successful_experiments
             theoretical = math.sqrt(math.pi * (2 ** bits) / 2)
             
+            print(f"    Пример коллизии для строк {example[0]} и {example[1]}: {example[2]}")
             print(f"    Среднее кол-во попыток (практика): {avg_attempts:.2f}")
             print(f"    Ожидаемое кол-во попыток (теория): {theoretical:.2f}")
             
