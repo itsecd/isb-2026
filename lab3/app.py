@@ -255,7 +255,6 @@ class CryptoApp(QMainWindow):
         btn_out.clicked.connect(lambda: self.choose_file(self.le_enc_out, save=True))
         grid.addWidget(btn_out, 1, 2)
 
-        # ИСПРАВЛЕНО: "Открытый ключ RSA" вместо "Закрытый ключ RSA"
         grid.addWidget(QLabel("Открытый ключ RSA:"), 2, 0)
         self.le_enc_pub = QLineEdit()
         grid.addWidget(self.le_enc_pub, 2, 1)
