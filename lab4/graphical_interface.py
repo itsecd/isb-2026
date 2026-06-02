@@ -17,7 +17,7 @@ class IntegrityCheckerWindow(QMainWindow):
         self.resize(650, 450)
 
         self.selected_file_path = ""
-        self.hash_storage_file = "calculated_hash.txt"
+        self.hash_storage_file = ""
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -87,6 +87,15 @@ class IntegrityCheckerWindow(QMainWindow):
     def action_save_hash(self):
         """логика кнопки создания эталонного хеша"""
 
+        file_path, _ = QFileDialog.getSaveFileName(self, "Сохранить хеш-файл как", "calculated_hash.txt", 
+        "Текстовые файлы (*.txt);;Все файлы (*)")
+        
+        if not file_path:
+            self.log_area.append("\nСохранение хеша отменено пользователем.")
+            return
+            
+        self.hash_storage_file = file_path
+
         try:
             current_hash = calculate_hash(self.selected_file_path)
             write_hash(self.hash_storage_file, current_hash)
@@ -102,14 +111,19 @@ class IntegrityCheckerWindow(QMainWindow):
     def action_check_integrity(self):
         """логика кнопки проверки целостности"""
 
-        if not os.path.exists(self.hash_storage_file):
-            QMessageBox.warning(self,"Проблема","Файл с эталонным хешем не найден.\nСначала создайте эталонный хеш и сохраните его.")
-            return
+        if not self.hash_storage_file or not os.path.exists(self.hash_storage_file):
+            file_path, _ = QFileDialog.getOpenFileName(self, "Укажите файл с эталонным хешем", "", 
+            "Текстовые файлы (*.txt);;Все файлы (*)")
+            if not file_path:
+                QMessageBox.warning(self, "Проблема", "Файл с эталонным хешем не выбран.")
+                return
+            self.hash_storage_file = file_path
 
         try:
             check_result = hash_comparison(self.selected_file_path, self.hash_storage_file)
 
             self.log_area.append("\nПроверка целостности")
+            self.log_area.append(f"Файл эталона: {os.path.basename(self.hash_storage_file)}")
             self.log_area.append(f"Эталонный хеш: {check_result['hash from file']}")
             self.log_area.append(f"Текущий хеш:   {check_result['calculated hash']}")
 
