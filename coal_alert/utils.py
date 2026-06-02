@@ -17,8 +17,8 @@ def generate_random_string(length: int) -> str:
         chars = string.ascii_letters + string.digits
         return ''.join(random.choices(chars, k=length))
     except Exception as e:
-        raise RuntimeError("Внутренняя ошибка при генерации строки") from e
-    
+        print(f"Внутренняя ошибка при генерации строки: {e}")
+        raise
 
 def read_json_file(filepath: str) -> dict:
     """

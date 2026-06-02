@@ -34,10 +34,8 @@ class ExperimentWorker(QThread):
                     
                     res = collisions.find_collision(bits, self.str_len)
                     if res:
-                        s1, s2, h, attempts = res
+                        attempts = res[-1]
                         total_attempts += attempts
-                        if example_collision is None:
-                            example_collision = (s1, s2, h)
                     
                     current_step += 1
                     progress_percent = int((current_step / total_steps) * 100)
@@ -59,7 +57,7 @@ class ExperimentWorker(QThread):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("COAL")
+        self.setWindowTitle("This app weren't no coal, it was a shining, glistening gem.")
         self.setMinimumSize(1000, 1000)
         
         self.background_pixmap = QPixmap("CobsonStardust.png")
@@ -146,7 +144,7 @@ class MainWindow(QMainWindow):
 
     def display_results(self, results):
         self.btn_start.setEnabled(True)
-        self.lbl_status.setText("Вычисления успешно завершены!")
+        self.lbl_status.setText("Гемчики успешно найдены (вычисления завершены)")
         
         out = []
         out.append("-= GEM ALERT =-")
@@ -159,7 +157,7 @@ class MainWindow(QMainWindow):
 
     def handle_error(self, e):
         self.btn_start.setEnabled(True)
-        self.lbl_status.setText("Произошла ошибка.")
+        self.lbl_status.setText("Произошла ошибка(")
         QMessageBox.critical(self, "Критическое исключение", f"Произошел сбой: {e}")
 
 def run_gui():

@@ -56,5 +56,6 @@ class TestHashCollisionApp(unittest.TestCase):
         self.assertEqual(h1, h2)
         self.assertEqual(h1, h)
 
+
 if __name__ == "__main__":
     unittest.main()
