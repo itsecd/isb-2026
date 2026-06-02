@@ -1,11 +1,5 @@
 """
 Задание 1: Шифрование текста шифром простой подстановки
-
-Изменения:
-- Добавлены докстринги
-- Текст вынесен в отдельный файл
-- Добавлена загрузка ключа из файла
-- Убраны эмодзи
 """
 
 import random
@@ -103,7 +97,7 @@ def main():
     print("=" * 60)
     
     # Читаем исходный текст из файла
-    original_text = read_file("data/task1/original.txt")
+    original_text = read_file("original.txt")
     if original_text is None:
         print("\nОшибка: файл data/task1/original.txt не найден!")
         return
@@ -129,8 +123,8 @@ def main():
     encrypted_text = encrypt(cleaned_text, key)
     
     # Сохраняем результаты
-    write_file("data/task1/encrypted.txt", encrypted_text)
-    save_key(key, "data/task1/key.txt")
+    write_file("encrypted.txt", encrypted_text)
+    save_key(key, "key.txt")
     
     print(f"\nРезультаты сохранены:")
     print(f"  - Зашифрованный текст: data/task1/encrypted.txt")
