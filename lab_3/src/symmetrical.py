@@ -1,6 +1,10 @@
 """
 Модуль для работы с симметричным шифрованием алгоритмом SM4.
 
+SM4 (ранее известный как SMS4) - блочный криптографический алгоритм, 
+разработанный китайским криптографическим агентством (OSCCA) в 2006 году.
+Используется в качестве национального стандарта КНР.
+
 Характеристики:
 - Размер блока: 128 бит
 - Размер ключа: 128 бит
@@ -17,31 +21,31 @@ from typing import Tuple
 from .io_utils import read_binary_file, write_binary_file
 
 
-SM4_KEY_SIZE = 16
-BLOCK_SIZE = 128
-
-
-def generate_symmetric_key() -> bytes:
+def generate_symmetric_key(key_size: int) -> bytes:
     """
     Генерирует случайный ключ для алгоритма SM4.
     
+    Args:
+        key_size: Размер ключа в байтах (по умолчанию 16 для 128 бит).
+        
     Returns:
-        bytes: Случайный ключ длиной 128 бит (16 байт).
+        bytes: Случайный ключ указанной длины.
         
     Note:
         Использует криптографически стойкий генератор псевдослучайных
         чисел из модуля os.urandom().
     """
-    return os.urandom(SM4_KEY_SIZE)
+    return os.urandom(key_size)
 
 
-def encrypt_sm4(plaintext: bytes, key: bytes) -> Tuple[bytes, bytes]:
+def encrypt_sm4(plaintext: bytes, key: bytes, block_size: int = 128) -> Tuple[bytes, bytes]:
     """
     Шифрует данные с использованием алгоритма SM4 в режиме CBC.
     
     Args:
         plaintext: Исходные данные для шифрования.
         key: Ключ шифрования длиной 128 бит.
+        block_size: Размер блока в битах (по умолчанию 128).
         
     Returns:
         Tuple[bytes, bytes]: Кортеж из (iv, ciphertext), где:
@@ -56,14 +60,13 @@ def encrypt_sm4(plaintext: bytes, key: bytes) -> Tuple[bytes, bytes]:
         2. Генерируется случайный IV
         3. Выполняется шифрование в режиме CBC
     """
-    if len(key) != SM4_KEY_SIZE:
-        raise ValueError(f"Key must be {SM4_KEY_SIZE} bytes, got {len(key)}")
+    if len(key) != 16:
+        raise ValueError(f"Key must be 16 bytes, got {len(key)}")
     
-    padder = padding.ANSIX923(BLOCK_SIZE).padder()
+    padder = padding.ANSIX923(block_size).padder()
     padded_data = padder.update(plaintext) + padder.finalize()
     
     iv = os.urandom(16)
-
     cipher = Cipher(
         algorithms.SM4(key),
         modes.CBC(iv),
@@ -75,7 +78,7 @@ def encrypt_sm4(plaintext: bytes, key: bytes) -> Tuple[bytes, bytes]:
     return iv, ciphertext
 
 
-def decrypt_sm4(iv: bytes, ciphertext: bytes, key: bytes) -> bytes:
+def decrypt_sm4(iv: bytes, ciphertext: bytes, key: bytes, block_size: int = 128) -> bytes:
     """
     Расшифровывает данные с использованием алгоритма SM4 в режиме CBC.
     
@@ -83,6 +86,7 @@ def decrypt_sm4(iv: bytes, ciphertext: bytes, key: bytes) -> bytes:
         iv: Вектор инициализации (16 байт).
         ciphertext: Зашифрованные данные.
         key: Ключ расшифрования длиной 128 бит.
+        block_size: Размер блока в битах (по умолчанию 128).
         
     Returns:
         bytes: Расшифрованные данные без паддинга.
@@ -95,8 +99,8 @@ def decrypt_sm4(iv: bytes, ciphertext: bytes, key: bytes) -> bytes:
         1. Выполняется дешифрование в режиме CBC
         2. Удаляется паддинг ANSIX923
     """
-    if len(key) != SM4_KEY_SIZE:
-        raise ValueError(f"Key must be {SM4_KEY_SIZE} bytes, got {len(key)}")
+    if len(key) != 16:
+        raise ValueError(f"Key must be 16 bytes, got {len(key)}")
     if len(iv) != 16:
         raise ValueError(f"IV must be 16 bytes, got {len(iv)}")
     
@@ -108,13 +112,13 @@ def decrypt_sm4(iv: bytes, ciphertext: bytes, key: bytes) -> bytes:
     decryptor = cipher.decryptor()
     decrypted_padded = decryptor.update(ciphertext) + decryptor.finalize()
     
-    unpadder = padding.ANSIX923(BLOCK_SIZE).unpadder()
+    unpadder = padding.ANSIX923(block_size).unpadder()
     plaintext = unpadder.update(decrypted_padded) + unpadder.finalize()
     
     return plaintext
 
 
-def encrypt_file_sm4(input_path: str, output_path: str, key: bytes) -> None:
+def encrypt_file_sm4(input_path: str, output_path: str, key: bytes, block_size: int = 128) -> None:
     """
     Шифрует файл с использованием алгоритма SM4.
     
@@ -122,16 +126,17 @@ def encrypt_file_sm4(input_path: str, output_path: str, key: bytes) -> None:
         input_path: Путь к исходному файлу.
         output_path: Путь для сохранения зашифрованного файла.
         key: Ключ шифрования длиной 128 бит.
+        block_size: Размер блока в битах (по умолчанию 128).
         
     Note:
         Формат выходного файла: [IV (16 байт)][Ciphertext]
     """
     plaintext = read_binary_file(input_path)
-    iv, ciphertext = encrypt_sm4(plaintext, key)
+    iv, ciphertext = encrypt_sm4(plaintext, key, block_size)
     write_binary_file(output_path, iv + ciphertext)
 
 
-def decrypt_file_sm4(input_path: str, output_path: str, key: bytes) -> None:
+def decrypt_file_sm4(input_path: str, output_path: str, key: bytes, block_size: int = 128) -> None:
     """
     Расшифровывает файл с использованием алгоритма SM4.
     
@@ -139,6 +144,7 @@ def decrypt_file_sm4(input_path: str, output_path: str, key: bytes) -> None:
         input_path: Путь к зашифрованному файлу.
         output_path: Путь для сохранения расшифрованного файла.
         key: Ключ расшифрования длиной 128 бит.
+        block_size: Размер блока в битах (по умолчанию 128).
         
     Note:
         Ожидается формат входного файла: [IV (16 байт)][Ciphertext]
@@ -146,5 +152,5 @@ def decrypt_file_sm4(input_path: str, output_path: str, key: bytes) -> None:
     data = read_binary_file(input_path)
     iv = data[:16]
     ciphertext = data[16:]
-    plaintext = decrypt_sm4(iv, ciphertext, key)
+    plaintext = decrypt_sm4(iv, ciphertext, key, block_size)
     write_binary_file(output_path, plaintext)

@@ -81,37 +81,22 @@ def main():
     args = parse_arguments()
     
     try:
-        print("Загрузка конфигурации...")
+        print("[*] Загрузка конфигурации...")
         config = io_utils.load_json_config(args.config)
         mode = 'generate' if args.generate else 'encrypt' if args.encrypt else 'decrypt'
         
         match mode:
             case 'generate':
                 print("Режим: Генерация ключей\n")
-                modes.generate_keys_mode(
-                    symmetric_key_path=config['symmetric_key'],
-                    encrypted_symmetric_key_path=config['encrypted_symmetric_key'],
-                    public_key_path=config['public_key'],
-                    private_key_path=config['private_key']
-                )
+                modes.generate_keys_mode(config)
                 
             case 'encrypt':
                 print("Режим: Шифрование\n")
-                modes.encrypt_mode(
-                    input_path=config['initial_file'],
-                    output_path=config['encrypted_file'],
-                    private_key_path=config['private_key'],
-                    encrypted_symmetric_key_path=config['encrypted_symmetric_key']
-                )
+                modes.encrypt_mode(config)
                 
             case 'decrypt':
                 print("Режим: Расшифровка\n")
-                modes.decrypt_mode(
-                    input_path=config['encrypted_file'],
-                    output_path=config['decrypted_file'],
-                    private_key_path=config['private_key'],
-                    encrypted_symmetric_key_path=config['encrypted_symmetric_key']
-                )
+                modes.decrypt_mode(config)
             
             case _:
                 print("Неизвестный режим работы", file=sys.stderr)
@@ -119,6 +104,15 @@ def main():
         
         print("\nОперация завершена успешно!")
         
+    except io_utils.FileReadError as e:
+        print(f"\nОшибка чтения: {e}", file=sys.stderr)
+        sys.exit(1)
+    except io_utils.FileWriteError as e:
+        print(f"\nОшибка записи: {e}", file=sys.stderr)
+        sys.exit(1)
+    except io_utils.ConfigLoadError as e:
+        print(f"\nОшибка конфигурации: {e}", file=sys.stderr)
+        sys.exit(1)
     except FileNotFoundError as e:
         print(f"\nОшибка: Файл не найден - {e.filename}", file=sys.stderr)
         sys.exit(1)

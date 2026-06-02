@@ -12,6 +12,21 @@ import os
 from typing import Any, Dict
 
 
+class FileReadError(Exception):
+    """Исключение, возникающее при ошибке чтения файла."""
+    pass
+
+
+class FileWriteError(Exception):
+    """Исключение, возникающее при ошибке записи файла."""
+    pass
+
+
+class ConfigLoadError(Exception):
+    """Исключение, возникающее при ошибке загрузки конфигурации."""
+    pass
+
+
 def read_binary_file(path: str) -> bytes:
     """
     Читает содержимое файла в бинарном режиме.
@@ -23,11 +38,17 @@ def read_binary_file(path: str) -> bytes:
         bytes: Содержимое файла в виде байтов.
         
     Raises:
-        FileNotFoundError: Если файл не найден.
-        IOError: Если произошла ошибка при чтении файла.
+        FileReadError: Если файл не найден или произошла ошибка чтения.
     """
-    with open(path, 'rb') as file:
-        return file.read()
+    try:
+        with open(path, 'rb') as file:
+            return file.read()
+    except FileNotFoundError:
+        raise FileReadError(f"Файл не найден: {path}")
+    except PermissionError:
+        raise FileReadError(f"Нет прав на чтение файла: {path}")
+    except IOError as e:
+        raise FileReadError(f"Ошибка при чтении файла {path}: {e}")
 
 
 def write_binary_file(path: str, data: bytes) -> None:
@@ -39,11 +60,16 @@ def write_binary_file(path: str, data: bytes) -> None:
         data: Данные для записи в файл.
         
     Raises:
-        IOError: Если произошла ошибка при записи файла.
+        FileWriteError: Если произошла ошибка при записи файла.
     """
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, 'wb') as file:
-        file.write(data)
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'wb') as file:
+            file.write(data)
+    except PermissionError:
+        raise FileWriteError(f"Нет прав на запись в файл: {path}")
+    except IOError as e:
+        raise FileWriteError(f"Ошибка при записи в файл {path}: {e}")
 
 
 def read_text_file(path: str, encoding: str = 'utf-8') -> str:
@@ -56,9 +82,19 @@ def read_text_file(path: str, encoding: str = 'utf-8') -> str:
         
     Returns:
         str: Содержимое файла в виде строки.
+        
+    Raises:
+        FileReadError: Если файл не найден или произошла ошибка чтения.
     """
-    with open(path, 'r', encoding=encoding) as file:
-        return file.read()
+    try:
+        with open(path, 'r', encoding=encoding) as file:
+            return file.read()
+    except FileNotFoundError:
+        raise FileReadError(f"Файл не найден: {path}")
+    except UnicodeDecodeError:
+        raise FileReadError(f"Ошибка декодирования файла {path}. Проверьте кодировку.")
+    except IOError as e:
+        raise FileReadError(f"Ошибка при чтении файла {path}: {e}")
 
 
 def write_text_file(path: str, content: str, encoding: str = 'utf-8') -> None:
@@ -69,10 +105,16 @@ def write_text_file(path: str, content: str, encoding: str = 'utf-8') -> None:
         path: Путь к файлу для записи.
         content: Строка для записи.
         encoding: Кодировка файла (по умолчанию 'utf-8').
+        
+    Raises:
+        FileWriteError: Если произошла ошибка при записи файла.
     """
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, 'w', encoding=encoding) as file:
-        file.write(content)
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w', encoding=encoding) as file:
+            file.write(content)
+    except IOError as e:
+        raise FileWriteError(f"Ошибка при записи в файл {path}: {e}")
 
 
 def load_json_config(path: str) -> Dict[str, Any]:
@@ -86,11 +128,17 @@ def load_json_config(path: str) -> Dict[str, Any]:
         Dict[str, Any]: Словарь с конфигурацией.
         
     Raises:
-        FileNotFoundError: Если файл конфигурации не найден.
-        json.JSONDecodeError: Если файл содержит невалидный JSON.
+        ConfigLoadError: Если файл конфигурации не найден или содержит невалидный JSON.
     """
-    with open(path, 'r', encoding='utf-8') as file:
-        return json.load(file)
+    try:
+        with open(path, 'r', encoding='utf-8') as file:
+            return json.load(file)
+    except FileNotFoundError:
+        raise ConfigLoadError(f"Файл конфигурации не найден: {path}")
+    except json.JSONDecodeError as e:
+        raise ConfigLoadError(f"Ошибка в формате JSON файла {path}: {e}")
+    except IOError as e:
+        raise ConfigLoadError(f"Ошибка при чтении файла конфигурации {path}: {e}")
 
 
 def ensure_directory(path: str) -> None:
@@ -99,7 +147,15 @@ def ensure_directory(path: str) -> None:
     
     Args:
         path: Путь к файлу, для которого нужно создать директорию.
+        
+    Raises:
+        FileWriteError: Если не удалось создать директорию.
     """
-    directory = os.path.dirname(path)
-    if directory:
-        os.makedirs(directory, exist_ok=True)
+    try:
+        directory = os.path.dirname(path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+    except PermissionError:
+        raise FileWriteError(f"Нет прав на создание директории для файла: {path}")
+    except OSError as e:
+        raise FileWriteError(f"Ошибка при создании директории для файла {path}: {e}")

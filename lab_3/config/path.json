@@ -5,5 +5,9 @@
     "symmetric_key": "keys/symmetric.key",
     "encrypted_symmetric_key": "keys/encrypted_symmetric.key",
     "public_key": "keys/public.pem",
-    "private_key": "keys/private.pem"
+    "private_key": "keys/private.pem",
+    "rsa_key_size": 2048,
+    "rsa_public_exponent": 65537,
+    "sm4_key_size": 16,
+    "block_size": 128
 }

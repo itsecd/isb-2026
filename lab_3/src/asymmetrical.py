@@ -1,6 +1,10 @@
 """
 Модуль для работы с асимметричным шифрованием алгоритмом RSA.
 
+RSA (Rivest-Shamir-Adleman) - один из первых алгоритмов асимметричного
+шифрования, опубликованный в 1977 году. Основан на вычислительной
+сложности задачи факторизации больших целых чисел.
+
 Характеристики:
 - Размер ключа: 2048 бит (рекомендуемый минимум)
 - Публичная экспонента: 65537 (стандартное значение)
@@ -15,24 +19,24 @@ from typing import Tuple
 from .io_utils import read_binary_file, write_binary_file
 
 
-RSA_KEY_SIZE = 2048
-PUBLIC_EXPONENT = 65537
-
-
-def generate_rsa_keypair() -> Tuple:
+def generate_rsa_keypair(key_size: int = 2048, public_exponent: int = 65537) -> Tuple:
     """
     Генерирует пару ключей RSA (приватный и публичный).
     
+    Args:
+        key_size: Размер ключа в битах (по умолчанию 2048).
+        public_exponent: Публичная экспонента (по умолчанию 65537).
+        
     Returns:
         Tuple: Кортеж, содержащий (private_key, public_key).
         
     Note:
-        Использует стандартную публичную экспоненту 65537 и
+        Использует стандартную публичную экспоненту 65537 и 
         размер ключа 2048 бит.
     """
     private_key = rsa.generate_private_key(
-        public_exponent=PUBLIC_EXPONENT,
-        key_size=RSA_KEY_SIZE,
+        public_exponent=public_exponent,
+        key_size=key_size,
         backend=default_backend()
     )
     public_key = private_key.public_key()
