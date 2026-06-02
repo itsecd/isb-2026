@@ -1,3 +1,10 @@
+"""
+Key generation module for hybrid cryptosystem.
+
+Orchestrates generation of both symmetric (SEED) and asymmetric (RSA) keys,
+then securely encrypts the symmetric key with RSA public key for storage.
+"""
+
 from symmetric_crypto import generate_symmetric_key
 from asymmetric_crypto import (
     generate_asymmetric_keys,
@@ -6,6 +13,7 @@ from asymmetric_crypto import (
     rsa_encrypt,
 )
 from file_utils import save_bytes
+from exceptions import KeyGenerationError, EncryptionError, FileOperationError
 
 
 def generate_keys(
@@ -13,6 +21,39 @@ def generate_keys(
     public_key_path,
     private_key_path,
 ):
+    """
+    Generate complete key set for hybrid cryptosystem.
+
+    Workflow:
+        1. Generate random SEED-128 symmetric key
+        2. Generate RSA-2048 key pair
+        3. Save RSA keys to PEM files
+        4. Encrypt symmetric key with RSA public key
+        5. Save encrypted symmetric key to file
+
+    Args:
+        encrypted_symmetric_key_path (str): Output path for RSA-encrypted symmetric key.
+        public_key_path (str): Output path for RSA public key (.pem format).
+        private_key_path (str): Output path for RSA private key (.pem format).
+
+    Raises:
+        KeyGenerationError: If key generation fails.
+        EncryptionError: If symmetric key encryption fails.
+        FileOperationError: If file writing fails.
+
+    Example:
+        >>> generate_keys(
+        ...     'encrypted_sym.key',
+        ...     'public.pem',
+        ...     'private.pem'
+        ... )
+        Starting key generation...
+        Generating symmetric key (SEED, 128 bit)...
+        Done.
+        Generating asymmetric key pair (RSA-2048)...
+        Done.
+        ...
+    """
     print("Starting key generation...")
 
     print("Generating symmetric key (SEED, 128 bit)...")
