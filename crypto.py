@@ -12,7 +12,7 @@ from cryptography.hazmat.primitives.asymmetric import padding as asym_padding
 from utils import load_bin_data, save_bin_data
 
 
-def _decrypt_sym_key(priv_key_path: str, enc_key_path: str) -> bytes:
+ef decrypt_sym_key(priv_key_path: str, enc_key_path: str) -> bytes:
     """
     Расшифровывает симметричный ключ закрытым ключом RSA.
 
@@ -28,12 +28,23 @@ def _decrypt_sym_key(priv_key_path: str, enc_key_path: str) -> bytes:
         ValueError: Если десериализация или расшифровка не удались.
         Exception: Прочие криптографические ошибки.
     """
-    # Загрузка закрытого ключа
+    private_key = _load_rsa_private_key(priv_key_path)
+
+    sym_key = _decrypt_symmetric_key(private_key, enc_key_path)
+
+    print(f"[INFO] Симметричный ключ расшифрован. "
+          f"Длина: {len(sym_key) * 8} бит.")
+    return sym_key
+
+
+def _load_rsa_private_key(priv_key_path: str):
+    """Загружает закрытый RSA ключ из PEM файла."""
     try:
         private_pem = load_bin_data(priv_key_path)
         private_key = serialization.load_pem_private_key(
             private_pem, password=None
         )
+        return private_key
     except FileNotFoundError as e:
         raise FileNotFoundError(f"Закрытый ключ RSA не найден: {e}")
     except ValueError as e:
@@ -41,7 +52,9 @@ def _decrypt_sym_key(priv_key_path: str, enc_key_path: str) -> bytes:
     except Exception as e:
         raise RuntimeError(f"Ошибка загрузки закрытого ключа: {e}")
 
-    # Расшифровка симметричного ключа
+
+def _decrypt_symmetric_key(private_key, enc_key_path: str):
+    """Расшифровывает симметричный ключ используя RSA-OAEP."""
     try:
         encrypted_sym_key = load_bin_data(enc_key_path)
         sym_key = private_key.decrypt(
@@ -52,13 +65,11 @@ def _decrypt_sym_key(priv_key_path: str, enc_key_path: str) -> bytes:
                 label=None
             )
         )
-        print(f"[INFO] Симметричный ключ расшифрован. "
-              f"Длина: {len(sym_key) * 8} бит.")
         return sym_key
     except FileNotFoundError as e:
         raise FileNotFoundError(f"Зашифрованный симметричный ключ не найден: {e}")
     except ValueError as e:
-        raise ValueError(f"Ошибка расшифровки симметричного ключа (неверный ключ?): {e}")
+        raise ValueError(f"Ошибка расшифровки симметричного ключа (неверный ключ): {e}")
     except Exception as e:
         raise RuntimeError(f"Критическая ошибка при расшифровке симметричного ключа: {e}")
 
