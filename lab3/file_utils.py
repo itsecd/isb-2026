@@ -1,13 +1,15 @@
 import json
 from exceptions import FileProcessingError
 
+
 def load_json(path: str) -> dict:
     """
     Загружает и парсит JSON-файл.
 
     :param path: Путь к JSON-файлу.
     :return: Словарь с данными из файла.
-    :raises FileProcessingError: Если файл не найден, нечитаем или содержит некорректный JSON.
+    :raises FileProcessingError: Если файл не найден,
+                                 нечитаем или содержит некорректный JSON.
     """
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -44,3 +46,14 @@ def write_bytes(path: str, data: bytes) -> None:
             f.write(data)
     except Exception as e:
         raise FileProcessingError(f"Ошибка записи бинарного файла {path}: {e}") from e
+
+
+def load_settings(path: str) -> dict:
+    """
+    Загружает настройки из JSON-файла.
+
+    :param path: Путь к settings.json.
+    :return: Словарь настроек.
+    :raises FileProcessingError: При ошибке загрузки.
+    """
+    return load_json(path)
