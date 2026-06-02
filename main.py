@@ -59,35 +59,41 @@ def main() -> None:
     Главная функция приложения.
 
     Загружает настройки, определяет пути по приоритету и вызывает
-    соответствующий режим работы. Перехватывает все исключения верхнего
-    уровня и выводит понятное сообщение об ошибке.
+    соответствующий режим работы через match/case. Перехватывает
+    все исключения верхнего уровня и выводит понятное сообщение
+    об ошибке.
+
+    Raises:
+        SystemExit: Завершает программу с кодом 1 при ошибке.
     """
     args = parse_args()
     settings = load_settings()
 
     try:
-        if args.generate:
-            pub_key_path = get_path(args.pub_key, settings, 'public_key', 'public.pem')
-            priv_key_path = get_path(args.priv_key, settings, 'secret_key', 'private.pem')
-            enc_sym_key_path = get_path(args.enc_sym_key, settings,
-                                        'symmetric_key_encrypted', 'sym_key.enc')
-            generate_keys(args.key_len, pub_key_path, priv_key_path, enc_sym_key_path)
+        # Определение путей через match/case
+        match True:
+            case _ if args.generate:
+                pub_key_path = get_path(args.pub_key, settings, 'public_key', 'public.pem')
+                priv_key_path = get_path(args.priv_key, settings, 'secret_key', 'private.pem')
+                enc_sym_key_path = get_path(args.enc_sym_key, settings,
+                                            'symmetric_key_encrypted', 'sym_key.enc')
+                generate_keys(args.key_len, pub_key_path, priv_key_path, enc_sym_key_path)
 
-        elif args.encrypt:
-            input_path = get_path(args.input, settings, 'initial_file', 'input.txt')
-            output_path = get_path(args.output, settings, 'encrypted_file', 'output.enc')
-            priv_key_path = get_path(args.loaded_priv_key, settings, 'secret_key', 'private.pem')
-            enc_sym_key_path = get_path(args.loaded_enc_sym_key, settings,
-                                        'symmetric_key_encrypted', 'sym_key.enc')
-            encrypt_data(input_path, priv_key_path, enc_sym_key_path, output_path)
+            case _ if args.encrypt:
+                input_path = get_path(args.input, settings, 'initial_file', 'input.txt')
+                output_path = get_path(args.output, settings, 'encrypted_file', 'output.enc')
+                priv_key_path = get_path(args.loaded_priv_key, settings, 'secret_key', 'private.pem')
+                enc_sym_key_path = get_path(args.loaded_enc_sym_key, settings,
+                                            'symmetric_key_encrypted', 'sym_key.enc')
+                encrypt_data(input_path, priv_key_path, enc_sym_key_path, output_path)
 
-        elif args.decrypt:
-            input_path = get_path(args.input, settings, 'encrypted_file', 'output.enc')
-            output_path = get_path(args.output, settings, 'decrypted_file', 'decrypted.txt')
-            priv_key_path = get_path(args.loaded_priv_key, settings, 'secret_key', 'private.pem')
-            enc_sym_key_path = get_path(args.loaded_enc_sym_key, settings,
-                                        'symmetric_key_encrypted', 'sym_key.enc')
-            decrypt_data(input_path, priv_key_path, enc_sym_key_path, output_path)
+            case _ if args.decrypt:
+                input_path = get_path(args.input, settings, 'encrypted_file', 'output.enc')
+                output_path = get_path(args.output, settings, 'decrypted_file', 'decrypted.txt')
+                priv_key_path = get_path(args.loaded_priv_key, settings, 'secret_key', 'private.pem')
+                enc_sym_key_path = get_path(args.loaded_enc_sym_key, settings,
+                                            'symmetric_key_encrypted', 'sym_key.enc')
+                decrypt_data(input_path, priv_key_path, enc_sym_key_path, output_path)
 
     except FileNotFoundError as e:
         print(f"\n[FATAL] Файл не найден: {e}", file=sys.stderr)
