@@ -83,34 +83,40 @@ def main():
     try:
         print("Загрузка конфигурации...")
         config = io_utils.load_json_config(args.config)
+        mode = 'generate' if args.generate else 'encrypt' if args.encrypt else 'decrypt'
         
-        if args.generate:
-            print("Режим: Генерация ключей\n")
-            modes.generate_keys_mode(
-                symmetric_key_path=config['symmetric_key'],
-                encrypted_symmetric_key_path=config['encrypted_symmetric_key'],
-                public_key_path=config['public_key'],
-                private_key_path=config['private_key']
-            )
+        match mode:
+            case 'generate':
+                print("Режим: Генерация ключей\n")
+                modes.generate_keys_mode(
+                    symmetric_key_path=config['symmetric_key'],
+                    encrypted_symmetric_key_path=config['encrypted_symmetric_key'],
+                    public_key_path=config['public_key'],
+                    private_key_path=config['private_key']
+                )
+                
+            case 'encrypt':
+                print("Режим: Шифрование\n")
+                modes.encrypt_mode(
+                    input_path=config['initial_file'],
+                    output_path=config['encrypted_file'],
+                    private_key_path=config['private_key'],
+                    encrypted_symmetric_key_path=config['encrypted_symmetric_key']
+                )
+                
+            case 'decrypt':
+                print("Режим: Расшифровка\n")
+                modes.decrypt_mode(
+                    input_path=config['encrypted_file'],
+                    output_path=config['decrypted_file'],
+                    private_key_path=config['private_key'],
+                    encrypted_symmetric_key_path=config['encrypted_symmetric_key']
+                )
             
-        elif args.encrypt:
-            print("Режим: Шифрование\n")
-            modes.encrypt_mode(
-                input_path=config['initial_file'],
-                output_path=config['encrypted_file'],
-                private_key_path=config['private_key'],
-                encrypted_symmetric_key_path=config['encrypted_symmetric_key']
-            )
-            
-        elif args.decrypt:
-            print("Режим: Расшифровка\n")
-            modes.decrypt_mode(
-                input_path=config['encrypted_file'],
-                output_path=config['decrypted_file'],
-                private_key_path=config['private_key'],
-                encrypted_symmetric_key_path=config['encrypted_symmetric_key']
-            )
-            
+            case _:
+                print("Неизвестный режим работы", file=sys.stderr)
+                sys.exit(1)
+        
         print("\nОперация завершена успешно!")
         
     except FileNotFoundError as e:

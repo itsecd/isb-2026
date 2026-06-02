@@ -81,7 +81,7 @@ def encrypt_mode(
     private_key = asymmetrical.load_private_key(private_key_path)
     encrypted_symmetric_key = io_utils.read_binary_file(encrypted_symmetric_key_path)
     symmetric_key = asymmetrical.decrypt_symmetric_key(
-        private_key, 
+        private_key,
         encrypted_symmetric_key
     )
     
