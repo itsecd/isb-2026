@@ -35,36 +35,37 @@ def main() -> None:
         settings = load_settings()
         crypto = HybridCrypto()
         
-        if args.keygen:
-            print("Генерация ключей")
-            crypto.generate_keys(
-                settings['public_key'],
-                settings['secret_key'],
-                settings['symmetric_key'],
-                settings['symmetric_key_length']
-            )
-            print("Готово")
+        match args:
+            case _ if args.keygen:
+                print("Генерация ключей")
+                crypto.generate_keys(
+                    settings['public_key'],
+                    settings['secret_key'],
+                    settings['symmetric_key'],
+                    settings['symmetric_key_length']
+                )
+                print("Готово")
             
-        elif args.encrypt:
-            print("Шифрование файла")
-            crypto.encrypt_file(
-                settings['initial_file'],
-                settings['encrypted_file'],
-                settings['public_key'],
-                settings['symmetric_key'],
-                settings['symmetric_key_length']
-            )
-            print("Готово")
+            case _ if args.encrypt:
+                print("Шифрование файла")
+                crypto.encrypt_file(
+                    settings['initial_file'],
+                    settings['encrypted_file'],
+                    settings['public_key'],
+                    settings['symmetric_key'],
+                    settings['symmetric_key_length']
+                )
+                print("Готово")
             
-        elif args.decrypt:
-            print("Расшифровка файла")
-            crypto.decrypt_file(
-                settings['encrypted_file'],
-                settings['decrypted_file'],
-                settings['secret_key'],
-                settings['symmetric_key']
-            )
-            print("Готово")
+            case _ if args.decrypt:
+                print("Расшифровка файла")
+                crypto.decrypt_file(
+                    settings['encrypted_file'],
+                    settings['decrypted_file'],
+                    settings['secret_key'],
+                    settings['symmetric_key']
+                )
+                print("Готово")
             
     except FileUtilsError as err:
         print(f"Ошибка при работе с файлами: {err}", file=sys.stderr)
