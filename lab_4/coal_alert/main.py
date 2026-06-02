@@ -46,7 +46,7 @@ def main():
                 subprocess.run("python collision_unittests.py")
             
     except Exception as e:
-        print(f"Критическая ошибка приложения: {e}")
+        print("Критическая ошибка приложения:", e)
 
 if __name__ == "__main__":
     main()

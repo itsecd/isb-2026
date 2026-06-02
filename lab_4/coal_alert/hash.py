@@ -13,7 +13,8 @@ def find_hash_sha256(init_str: str) -> bytes:
         res = hashlib.sha256(init_str.encode())
         return res.digest()
     except Exception as e:
-        raise AttributeError("Увынск, в процессе хэширования произошла ошибка", e)
+        print("В процессе хэширования произошла ошибка:", e)
+        raise
 
 
 def find_shortened_hash(init_hash: bytes, hash_len: int) -> bytes:
@@ -29,5 +30,6 @@ def find_shortened_hash(init_hash: bytes, hash_len: int) -> bytes:
         val = int.from_bytes(init_hash[:4], 'big')
         shortened_hash = val >> (32-hash_len)
         return shortened_hash
-    except Exception:
-        raise RuntimeError("Длина укороченного хэша должна быть натуральным числом")
+    except Exception as e:
+        print("В процессе поиска укороченного хэша произошла ошибка:", e)
+        raise
