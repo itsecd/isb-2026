@@ -158,15 +158,16 @@ def main() -> None:
         if args.key_size is not None:
             settings["key_size"] = args.key_size
 
-        if mode == (True, False, False):
-            print("Режим генерации ключей")
-            generation_mode(settings, settings_path)
-        elif mode == (False, True, False):
-            print("Режим шифрования")
-            encryption_mode(settings)
-        elif mode == (False, False, True):
-            print("Режим дешифрования")
-            decryption_mode(settings)
+        match mode:
+            case (True, False, False):
+                print("Режим генерации ключей")
+                generation_mode(settings, settings_path)
+            case (False, True, False):
+                print("Режим шифрования")
+                encryption_mode(settings)
+            case (False, False, True):
+                print("Режим дешифрования")
+                decryption_mode(settings)
     except (FileNotFoundError, OSError, ValueError) as error:
         print(f"Ошибка: {error}")
 
