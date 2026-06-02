@@ -8,7 +8,7 @@ Used primarily to securely encrypt and decrypt symmetric keys.
 
 from cryptography.hazmat.primitives.asymmetric import rsa, padding as asym_padding
 from cryptography.hazmat.primitives import hashes, serialization
-from config import RSA_KEY_SIZE, PUBLIC_EXPONENT
+from config import config
 from file_utils import save_bytes, load_bytes
 from exceptions import KeyGenerationError, KeyLoadError, EncryptionError, DecryptionError
 
@@ -53,8 +53,8 @@ def generate_asymmetric_keys():
     """
     try:
         private_key = rsa.generate_private_key(
-            public_exponent=PUBLIC_EXPONENT,
-            key_size=RSA_KEY_SIZE,
+            public_exponent=config.rsa_public_exponent,
+            key_size=config.rsa_key_size,
         )
         public_key = private_key.public_key()
         return private_key, public_key

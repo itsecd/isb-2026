@@ -9,7 +9,7 @@ binary data with proper IV handling.
 import os
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from config import SEED_KEY_SIZE, SEED_BLOCK_SIZE, IV_SIZE
+from config import config
 from exceptions import EncryptionError, DecryptionError, PaddingError
 
 
@@ -19,13 +19,13 @@ def generate_symmetric_key():
 
     Returns:
         bytes: Random symmetric key of length SEED_KEY_SIZE (16 bytes = 128 bits).
-    
+
     Example:
         >>> key = generate_symmetric_key()
         >>> len(key)
         16
     """
-    return os.urandom(SEED_KEY_SIZE)
+    return os.urandom(config.seed_key_size)
 
 
 def pad_data(data):
@@ -45,7 +45,7 @@ def pad_data(data):
         PaddingError: If padding operation fails.
     """
     try:
-        padder = padding.ANSIX923(SEED_BLOCK_SIZE).padder()
+        padder = padding.ANSIX923(config.seed_block_size).padder()
         return padder.update(data) + padder.finalize()
     except Exception as e:
         raise PaddingError(f"Padding failed: {e}")
@@ -65,7 +65,7 @@ def unpad_data(padded_data):
         PaddingError: If unpadding fails (invalid padding detected).
     """
     try:
-        unpadder = padding.ANSIX923(SEED_BLOCK_SIZE).unpadder()
+        unpadder = padding.ANSIX923(config.seed_block_size).unpadder()
         return unpadder.update(padded_data) + unpadder.finalize()
     except Exception as e:
         raise PaddingError(f"Unpadding failed: {e}")
@@ -94,7 +94,7 @@ def seed_encrypt(key, plaintext):
         >>> iv, ciphertext = seed_encrypt(key, b'Secret message')
     """
     try:
-        iv = os.urandom(IV_SIZE)
+        iv = os.urandom(config.seed_iv_size)
         cipher = Cipher(algorithms.SEED(key), modes.CBC(iv))
         encryptor = cipher.encryptor()
         padded_data = pad_data(plaintext)

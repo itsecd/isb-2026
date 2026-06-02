@@ -11,6 +11,11 @@ class CryptoError(Exception):
     pass
 
 
+class ConfigError(CryptoError):
+    """Raised when configuration loading fails."""
+    pass
+
+
 class KeyGenerationError(CryptoError):
     """Raised when cryptographic key generation fails."""
     pass

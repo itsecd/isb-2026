@@ -13,14 +13,11 @@ from asymmetric_crypto import (
     rsa_encrypt,
 )
 from file_utils import save_bytes
+from config import config
 from exceptions import KeyGenerationError, EncryptionError, FileOperationError
 
 
-def generate_keys(
-    encrypted_symmetric_key_path,
-    public_key_path,
-    private_key_path,
-):
+def generate_keys():
     """
     Generate complete key set for hybrid cryptosystem.
 
@@ -31,22 +28,13 @@ def generate_keys(
         4. Encrypt symmetric key with RSA public key
         5. Save encrypted symmetric key to file
 
-    Args:
-        encrypted_symmetric_key_path (str): Output path for RSA-encrypted symmetric key.
-        public_key_path (str): Output path for RSA public key (.pem format).
-        private_key_path (str): Output path for RSA private key (.pem format).
-
     Raises:
         KeyGenerationError: If key generation fails.
         EncryptionError: If symmetric key encryption fails.
         FileOperationError: If file writing fails.
 
     Example:
-        >>> generate_keys(
-        ...     'encrypted_sym.key',
-        ...     'public.pem',
-        ...     'private.pem'
-        ... )
+        >>> generate_keys()
         Starting key generation...
         Generating symmetric key (SEED, 128 bit)...
         Done.
@@ -55,6 +43,8 @@ def generate_keys(
         ...
     """
     print("Starting key generation...")
+
+    config.ensure_directories()
 
     print("Generating symmetric key (SEED, 128 bit)...")
     symmetric_key = generate_symmetric_key()
@@ -65,14 +55,14 @@ def generate_keys(
     print("Done.")
 
     print("Saving public and private keys...")
-    serialize_public_key(public_key, public_key_path)
-    serialize_private_key(private_key, private_key_path)
-    print(f"Public key  -> {public_key_path}")
-    print(f"Private key -> {private_key_path}")
+    serialize_public_key(public_key, config.public_key)
+    serialize_private_key(private_key, config.private_key)
+    print(f"Public key  -> {config.public_key}")
+    print(f"Private key -> {config.private_key}")
 
     print("Encrypting symmetric key with RSA public key...")
     encrypted_key = rsa_encrypt(public_key, symmetric_key)
-    save_bytes(encrypted_key, encrypted_symmetric_key_path)
-    print(f"Encrypted symmetric key -> {encrypted_symmetric_key_path}")
+    save_bytes(encrypted_key, config.symmetric_key)
+    print(f"Encrypted symmetric key -> {config.symmetric_key}")
 
     print("Key generation completed successfully.\n")

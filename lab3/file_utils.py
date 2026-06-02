@@ -18,7 +18,7 @@ def save_bytes(data, path):
 
     Raises:
         FileOperationError: If file cannot be opened for writing or write fails.
-    
+
     Example:
         >>> save_bytes(b'Hello World', '/tmp/output.bin')
     """
@@ -41,7 +41,7 @@ def load_bytes(path):
 
     Raises:
         FileOperationError: If file cannot be opened for reading or read fails.
-    
+
     Example:
         >>> data = load_bytes('/tmp/input.bin')
     """
