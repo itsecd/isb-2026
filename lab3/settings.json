@@ -8,7 +8,6 @@
     "private_key": "keys/private.pem",
 
     "cast5_key_size": 128,
-
     "cast5_block_size": 64,
     "cast5_iv_size": 8,
     "cast5_min_key_size": 40,
