@@ -10,7 +10,6 @@ def generate_random_string(length: int) -> str:
     Возвращает:
         Строку длиной length
     """
-    # Явная проверка на дурака: длина должна быть int и строго больше нуля
     if not isinstance(length, int) or length <= 0:
         raise ValueError("Длина строки должна быть натуральным числом")
     try:

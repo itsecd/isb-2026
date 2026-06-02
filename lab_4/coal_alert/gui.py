@@ -65,9 +65,6 @@ class MainWindow(QMainWindow):
         self.init_ui()
 
     def paintEvent(self, event):
-        """
-        Отрисовка фонового изображения на весь холст окна при перерисовках.
-        """
         painter = QPainter(self)
         if not self.background_pixmap.isNull():
             painter.drawPixmap(self.rect(), self.background_pixmap)
@@ -149,7 +146,7 @@ class MainWindow(QMainWindow):
         out = []
         out.append("-= GEM ALERT =-")
         for bits, data in results.items():
-            out.append(f"\n• Результаты для {bits} бит:")
+            out.append(f"\n- Результаты для {bits} бит:")
             out.append(f"  Практическое среднее число попыток: {data['avg_practice']:.2f}")
             out.append(f"  Теоретическое число попыток: {data['theory']:.2f}")
         
