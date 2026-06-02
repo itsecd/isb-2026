@@ -14,23 +14,9 @@ from rsa_ops import (
     decrypt_symmetric_key
 )
 from exceptions import FileProcessingError, CryptoSystemError
-from file_utils import load_json, read_bytes, write_bytes
+from file_utils import load_settings, read_bytes, write_bytes
 
 DEFAULT_SETTINGS_PATH = "settings.json"
-
-
-def load_settings(path: str = DEFAULT_SETTINGS_PATH) -> dict:
-    """
-    Загружает настройки из JSON-файла.
-
-    :param path: Путь к settings.json.
-    :return: Словарь настроек.
-    :raises FileProcessingError: При ошибке загрузки.
-    """
-    try:
-        return load_json(path)
-    except Exception as error:
-        raise FileProcessingError(f"Ошибка загрузки настроек: {error}") from error
 
 
 def generate_keys(settings: dict) -> None:
@@ -163,15 +149,14 @@ def main() -> None:
         args = parser.parse_args()
         settings = load_settings(args.settings)
 
-        match (args.generation, args.encryption, args.decryption):
-            case (True, False, False):
-                generate_keys(settings)
-            case (False, True, False):
-                encrypt_data(settings)
-            case (False, False, True):
-                decrypt_data(settings)
-            case _:
-                raise ValueError("Некорректный режим работы")
+        if args.generation:
+            generate_keys(settings)
+        elif args.encryption:
+            encrypt_data(settings)
+        elif args.decryption:
+            decrypt_data(settings)
+        else:
+            raise ValueError("Некорректный режим работы")
 
     except Exception as error:
         print(f"[!] Ошибка: {error}")
