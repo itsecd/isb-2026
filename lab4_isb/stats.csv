@@ -1,0 +1,4 @@
+bits,experiments,average_attempts,min_attempts,max_attempts,theory_attempts
+8,1000,21.009,2,68,16.0
+12,1000,81.86,4,259,64.0
+16,1000,320.811,10,934,256.0
