@@ -1,0 +1,9 @@
+{
+    "SYMMETRIC_KEY_DIR": "./keys/sym",
+    "PUBLIC_KEY_DIR": "./keys/pub",
+    "SECRET_KEY_FILE": "./keys/priv/private.pem",
+    "INITIAL_FILE": "./data/message.txt",
+    "SAVE_DIR": "./output",
+    "SYMMETRIC_KEY_FILE": "symmetric_encrypted.txt",
+    "ENCRYPTED_FILE": "encrypted.txt"
+}
