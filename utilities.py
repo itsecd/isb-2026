@@ -36,24 +36,6 @@ def read_txt_file(file_path: str) -> bytes:
         return b''
 
 
-def read_pem_file(file_path: str) -> bytes:
-    """
-    Читает PEM-файл в бинарном режиме.
-
-    Args:
-        file_path (str): путь к PEM-файлу.
-
-    Returns:
-        bytes: содержимое файла или b'' при ошибке.
-    """
-    try:
-        with open(file_path, "rb") as file:
-            return file.read()
-    except Exception as e:
-        print(f"Error: {e}")
-        return b''
-
-
 def write_pem_file(file_path: str, data) -> None:
     """
     Записывает бинарные данные в PEM-файл.
