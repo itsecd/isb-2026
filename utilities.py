@@ -36,18 +36,6 @@ def read_txt_file(file_path: str) -> bytes:
         return b''
 
 
-def write_pem_file(file_path: str, data) -> None:
-    """
-    Записывает бинарные данные в PEM-файл.
-
-    Args:
-        file_path (str): путь для сохранения.
-        data (bytes): данные для записи.
-    """
-    with open(file_path, 'wb') as file:
-        file.write(data)
-
-
 def write_txt_file(data: bytes, file_path: str) -> None:
     """
     Записывает байтовые данные в файл (бинарный режим).
