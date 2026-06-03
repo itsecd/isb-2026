@@ -78,7 +78,7 @@ def execute_key_generation(config: dict) -> None:
         rsa_public
     )
     encrypted_session_key = rsa_operations.encrypt_session_key(rsa_public, symmetric_key)
-    file_handler.store_symmetric_key(config['session_key_file'], encrypted_session_key)
+    file_handler._write_binary_file(config['session_key_file'], encrypted_session_key, "Запись симметричного ключа")
     print("Ключи успешно сгенерированы и сохранены.")
 
 
@@ -91,11 +91,11 @@ def execute_encryption(config: dict) -> None:
     """
     print("Запуск шифрования данных...")
     rsa_private = file_handler.retrieve_rsa_private_key(config['private_key_file'])
-    encrypted_session_key = file_handler.retrieve_symmetric_key(config['session_key_file'])
+    encrypted_session_key = file_handler._read_binary_file(config['session_key_file'], "Файл с симметричным ключом")
     session_key = rsa_operations.decrypt_session_key(rsa_private, encrypted_session_key)
     source_text = file_handler.load_plaintext(config['input_file'])
     encrypted_data = blowfish_cipher.encrypt_message(session_key, source_text)
-    file_handler.save_binary_data(encrypted_data, config['encrypted_output'])
+    file_handler._write_binary_file(config['encrypted_output'], encrypted_data, "Запись бинарного файла")
     print("Данные успешно зашифрованы.")
 
 
@@ -108,9 +108,9 @@ def execute_decryption(config: dict) -> None:
     """
     print("Запуск расшифровки данных...")
     rsa_private = file_handler.retrieve_rsa_private_key(config['private_key_file'])
-    encrypted_session_key = file_handler.retrieve_symmetric_key(config['session_key_file'])
+    encrypted_session_key = file_handler._read_binary_file(config['session_key_file'], "Файл с симметричным ключом")
     session_key = rsa_operations.decrypt_session_key(rsa_private, encrypted_session_key)
-    encrypted_data = file_handler.load_binary_data(config['encrypted_output'])
+    encrypted_data = file_handler._read_binary_file(config['encrypted_output'], "Бинарный файл")
     decrypted_text = blowfish_cipher.decrypt_message(session_key, encrypted_data)
     file_handler.save_plaintext(decrypted_text, config['decrypted_output'])
     print("Данные успешно расшифрованы.")

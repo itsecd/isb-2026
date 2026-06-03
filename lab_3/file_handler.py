@@ -1,5 +1,5 @@
 """
-Модуль для работы с файлами: чтение, запись, сериализация.
+Модуль для работы с файлами: чтение, запись, сериализации.
 
 Предоставляет функции для работы с:
 - JSON конфигурационными файлами
@@ -56,10 +56,16 @@ def _write_binary_file(file_path: str, data: bytes, operation_description: str) 
     try:
         with open(file_path, 'wb') as file:
             file.write(data)
+    except FileNotFoundError:
+        raise IOError(f"Путь не найден при операции: {operation_description} {file_path}")
     except PermissionError:
         raise IOError(f"Нет прав на запись в файл {file_path}")
+    except IsADirectoryError:
+        raise IOError(f"Указан каталог вместо файла: {file_path}")
     except OSError as err:
         raise IOError(f"{operation_description} {file_path}: {err}")
+    except Exception as err:
+        raise IOError(f"Неизвестная ошибка при операции {operation_description} {file_path}: {err}")
 
 
 def _read_binary_file(file_path: str, operation_description: str) -> bytes:
@@ -84,8 +90,12 @@ def _read_binary_file(file_path: str, operation_description: str) -> bytes:
         raise FileNotFoundError(f"{operation_description} {file_path} не найден")
     except PermissionError:
         raise IOError(f"Нет прав на чтение файла {file_path}")
+    except IsADirectoryError:
+        raise IOError(f"Указан каталог вместо файла: {file_path}")
     except OSError as err:
         raise IOError(f"{operation_description} {file_path}: {err}")
+    except Exception as err:
+        raise IOError(f"Неизвестная ошибка при операции {operation_description} {file_path}: {err}")
 
 
 def store_asymmetric_keys(pub_path: str, priv_path: str, priv_key_obj, pub_key_obj) -> None:
@@ -114,30 +124,6 @@ def store_asymmetric_keys(pub_path: str, priv_path: str, priv_key_obj, pub_key_o
         
     except Exception as err:
         raise IOError(f"Ошибка при сохранении RSA ключей: {err}")
-
-
-def store_symmetric_key(file_path: str, key_data: bytes) -> None:
-    """
-    Запись симметричного ключа в файл.
-    
-    Args:
-        file_path: Путь к файлу для записи ключа.
-        key_data: Бинарные данные симметричного ключа.
-    """
-    _write_binary_file(file_path, key_data, "Запись симметричного ключа")
-
-
-def retrieve_symmetric_key(file_path: str) -> bytes:
-    """
-    Чтение симметричного ключа из файла.
-    
-    Args:
-        file_path: Путь к файлу с симметричным ключом.
-        
-    Returns:
-        bytes: Данные симметричного ключа.
-    """
-    return _read_binary_file(file_path, "Файл с симметричным ключом")
 
 
 def retrieve_rsa_public_key(file_path: str) -> RSAPublicKey:
@@ -187,8 +173,12 @@ def save_plaintext(content: str, file_path: str) -> None:
             text_file.write(content)
     except PermissionError:
         raise IOError(f"Нет прав на запись в файл {file_path}")
+    except IsADirectoryError:
+        raise IOError(f"Указан каталог вместо файла: {file_path}")
     except OSError as err:
         raise IOError(f"Ошибка записи в файл {file_path}: {err}")
+    except Exception as err:
+        raise IOError(f"Неизвестная ошибка при записи в файл {file_path}: {err}")
 
 
 def load_plaintext(file_path: str) -> str:
@@ -208,29 +198,9 @@ def load_plaintext(file_path: str) -> str:
         raise FileNotFoundError(f"Текстовый файл {file_path} не найден")
     except PermissionError:
         raise PermissionError(f"Нет прав на чтение файла {file_path}")
+    except IsADirectoryError:
+        raise IOError(f"Указан каталог вместо файла: {file_path}")
     except UnicodeDecodeError:
-        raise UnicodeDecodeError(f"Ошибка декодирования файла {file_path}")
-
-
-def save_binary_data(data: bytes, file_path: str) -> None:
-    """
-    Запись бинарных данных в файл.
-    
-    Args:
-        data: Бинарные данные для записи.
-        file_path: Путь к файлу для записи.
-    """
-    _write_binary_file(file_path, data, "Запись бинарного файла")
-
-
-def load_binary_data(file_path: str) -> bytes:
-    """
-    Чтение бинарного файла.
-    
-    Args:
-        file_path: Путь к бинарному файлу.
-        
-    Returns:
-        bytes: Содержимое файла.
-    """
-    return _read_binary_file(file_path, "Бинарный файл")
+        raise UnicodeDecodeError(f"Ошибка декодирования файла {file_path}", b"", 0, 1, "utf-8")
+    except Exception as err:
+        raise IOError(f"Неизвестная ошибка при чтении файла {file_path}: {err}")
