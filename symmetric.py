@@ -1,7 +1,5 @@
 """Модуль для работы с симметричным шифром Camellia."""
 
-"""Модуль для работы с симметричным блочным шифром Camellia."""
-
 import os
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
