@@ -4,5 +4,7 @@
     "decrypted_file": "decrypted.txt",
     "symmetric_key": "symmetric_enc.key",
     "public_key": "public.pem",
-    "secret_key": "private.pem"
+    "secret_key": "private.pem",
+    "camellia_block_size_bits": 128,
+    "camellia_block_size_bytes": 16
 }
