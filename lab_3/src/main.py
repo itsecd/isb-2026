@@ -14,13 +14,13 @@
 
 import argparse
 import sys
-from pathlib import Path
+import json
 
 from . import io_utils
 from . import modes
 
 
-def parse_arguments():
+def parse_arguments() -> argparse.Namespace:
     """
     Парсит аргументы командной строки.
     
@@ -45,46 +45,31 @@ def parse_arguments():
     )
     
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        '--generate',
-        action='store_true',
-        help='Режим генерации ключей'
-    )
-    group.add_argument(
-        '--encrypt',
-        action='store_true',
-        help='Режим шифрования файла'
-    )
-    group.add_argument(
-        '--decrypt',
-        action='store_true',
-        help='Режим расшифровки файла'
-    )
+    group.add_argument('--generate', action='store_true', help='Генерация ключей')
+    group.add_argument('--encrypt', action='store_true', help='Шифрование файла')
+    group.add_argument('--decrypt', action='store_true', help='Расшифровка файла')
     
-    parser.add_argument(
-        '--config',
-        type=str,
-        required=True,
-        help='Путь к JSON файлу конфигурации'
-    )
+    parser.add_argument('--config', type=str, required=True, help='Путь к config/path.json')
     
     return parser.parse_args()
 
 
-def main():
-    """
-    Основная функция приложения.
-    
-    Загружает конфигурацию и запускает выбранный режим работы.
-    Обрабатывает ошибки и выводит сообщения об успехе/неудаче.
-    """
+def main() -> None:
+    """Основная функция приложения."""
     args = parse_arguments()
     
+    print("Загрузка конфигурации...")
     try:
-        print("[*] Загрузка конфигурации...")
         config = io_utils.load_json_config(args.config)
-        mode = 'generate' if args.generate else 'encrypt' if args.encrypt else 'decrypt'
+    except (FileNotFoundError, json.JSONDecodeError, ValueError) as e:
+        sys.exit(1)
+    except Exception as e:
+        print(f"Критическая ошибка: {e}")
+        sys.exit(1)
         
+    mode = 'generate' if args.generate else 'encrypt' if args.encrypt else 'decrypt'
+    
+    try:
         match mode:
             case 'generate':
                 print("Режим: Генерация ключей\n")
@@ -99,25 +84,22 @@ def main():
                 modes.decrypt_mode(config)
             
             case _:
-                print("Неизвестный режим работы", file=sys.stderr)
+                print("Неизвестный режим работы.", file=sys.stderr)
                 sys.exit(1)
-        
+                
         print("\nОперация завершена успешно!")
         
-    except io_utils.FileReadError as e:
-        print(f"\nОшибка чтения: {e}", file=sys.stderr)
-        sys.exit(1)
-    except io_utils.FileWriteError as e:
-        print(f"\nОшибка записи: {e}", file=sys.stderr)
-        sys.exit(1)
-    except io_utils.ConfigLoadError as e:
-        print(f"\nОшибка конфигурации: {e}", file=sys.stderr)
-        sys.exit(1)
     except FileNotFoundError as e:
-        print(f"\nОшибка: Файл не найден - {e.filename}", file=sys.stderr)
+        print(f"\nОшибка: необходимый файл отсутствует - {e.filename}")
+        sys.exit(1)
+    except PermissionError as e:
+        print(f"\nОшибка: нет прав доступа к файлу - {e.filename}")
+        sys.exit(1)
+    except ValueError as e:
+        print(f"\nОшибка параметров: {e}")
         sys.exit(1)
     except Exception as e:
-        print(f"\nПроизошла ошибка: {e}", file=sys.stderr)
+        print(f"\nПроизошла непредвиденная ошибка: {type(e).__name__}: {e}")
         sys.exit(1)
 
 
