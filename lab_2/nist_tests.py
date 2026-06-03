@@ -17,33 +17,19 @@ class NISTTests:
         return p_value
 
     @staticmethod
-def runs_test(sequence):
-    """
-    Тест на одинаковые подряд идущие биты (Runs Test).
-    """
-    n = len(sequence)
-    pi = sequence.count('1') / n
-    tau = 2 / math.sqrt(n)
-    
-    # Предварительное условие на частоту единиц
-    if abs(pi - 0.5) >= tau:
-        return 0.0
-    
-    # Подсчет runs (количество смен битов + 1)
-    v_n = 1
-    for i in range(1, n):
-        if sequence[i] != sequence[i-1]:
-            v_n += 1
-    
-    expected_runs = 2 * n * pi * (1 - pi)
-    
-    std_runs = 2 * math.sqrt(2 * n) * pi * (1 - pi)
-    
-    z = abs(v_n - expected_runs) / std_runs
-    
-    p_value = math.erfc(z / math.sqrt(2))
-    
-    return p_value
+    def runs_test(seq: str) -> float:
+        count = 0
+        for bit in seq:
+            count += int(bit)
+        ratio: float = count / len(seq)
+        if abs(ratio - 0.5) >= 2 / sqrt(len(seq)):
+            return 0.0
+        v = 1
+        for i in range(len(seq) - 1):
+            if seq[i] != seq[i + 1]:
+                v += 1
+        p = erfc(abs(v - 2 * len(seq) * ratio * (1 - ratio)) / (2 * sqrt(2 * len(seq)) * ratio * (1 - ratio)))
+        return p
 
     @staticmethod
     def longest_run_ones_in_block_test(sequence):
