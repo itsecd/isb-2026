@@ -4,6 +4,14 @@ from const import P_VALUE, BLOCK_SIZE, PI, SOURCE_FILES, OUTPUT_FILE
 
 
 def bit_frequency_check(sequence: str) -> float:
+    """Тест на частоту битов. Проверяет баланс нулей и единиц в последовательности.
+    
+    Args:
+        sequence: Строка с битовой последовательностью (0 и 1)
+    
+    Returns:
+        p-value (вероятность): от 0 до 1. Чем выше, тем лучше качество генератора
+    """
     length = len(sequence)
     count_ones = sequence.count('1')
     count_zeros = length - count_ones
@@ -13,6 +21,14 @@ def bit_frequency_check(sequence: str) -> float:
 
 
 def consecutive_runs_check(sequence: str) -> float:
+    """Тест на серии битов. Анализирует количество переходов между 0 и 1.
+    
+    Args:
+        sequence: Строка с битовой последовательностью
+    
+    Returns:
+        p-value: Чем выше, тем лучше качество генератора
+    """
     length = len(sequence)
     count_ones = sequence.count('1')
     ratio = count_ones / length
@@ -29,6 +45,14 @@ def consecutive_runs_check(sequence: str) -> float:
 
 
 def max_run_check(sequence: str) -> float:
+    """Тест на максимальную серию. Измеряет длину самой длинной последовательности одинаковых битов.
+    
+    Args:
+        sequence: Строка с битовой последовательностью
+    
+    Returns:
+        p-value: Чем выше, тем лучше качество генератора
+    """
     counters = [0, 0, 0, 0]
 
     for block_index in range(len(sequence) // BLOCK_SIZE):
@@ -65,6 +89,17 @@ def max_run_check(sequence: str) -> float:
 
 
 def load_sequence(file_name: str) -> str:
+    """Загружает битовую последовательность из файла.
+    
+    Args:
+        file_name: Путь к файлу с последовательностью
+    
+    Returns:
+        Строка с последовательностью битов (0 и 1)
+    
+    Raises:
+        SystemExit: Если файл не найден
+    """
     try:
         with open(file_name, encoding="utf-8") as file:
             return file.read().strip()
@@ -74,6 +109,14 @@ def load_sequence(file_name: str) -> str:
 
 
 def check_status(values):
+    """Определяет результат тестирования на основе p-values.
+    
+    Args:
+        values: Список [название, p_value1, p_value2, p_value3]
+    
+    Returns:
+        Строка "УСПЕШНО" если все p-values >= порога, иначе "НЕУСПЕШНО"
+    """
     return (
         "УСПЕШНО"
         if all(value >= P_VALUE for value in values[1:])
@@ -82,6 +125,7 @@ def check_status(values):
 
 
 def run_tests():
+    """Главная функция. Запускает все NIST тесты для трёх генераторов и выводит результаты."""
     cpp_data = load_sequence(SOURCE_FILES[0])
     java_data = load_sequence(SOURCE_FILES[1])
     python_data = load_sequence(SOURCE_FILES[2])
