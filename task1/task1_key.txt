@@ -1,0 +1,4 @@
+ROWS=4
+COLS=8
+KEY_COLS=черемша
+KEY_ROWS=брдыщ
