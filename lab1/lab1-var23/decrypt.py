@@ -1,3 +1,5 @@
+"""Модуль для частотного анализа и ручной расшифровки шифротекста."""
+
 from collections import Counter
 
 ALPHABET = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ '
@@ -10,6 +12,7 @@ LINE_WIDTH = 60
 
 def read_cipher_file():
     try:
+        """Прочитать `cod23.txt` и вернуть текст в нижнем регистре."""
         with open('cod23.txt', 'r', encoding='utf-8') as file:
             return file.read().lower()
     except FileNotFoundError:
@@ -22,6 +25,7 @@ def read_cipher_file():
 
 def analyze_frequencies(text):
     try:
+        """Выполнить частотный анализ и вернуть `Counter` со статистикой."""
         statistics = Counter(text)
 
         print('РЕЗУЛЬТАТЫ ЧАСТОТНОГО АНАЛИЗА')
@@ -41,6 +45,7 @@ def analyze_frequencies(text):
 
 def export_frequencies(statistics, total_chars, filename='frequencies.txt'):
     try:
+        """Сохранить результаты частотного анализа в файл.`"""
         with open(filename, 'w', encoding='utf-8') as file:
             file.write('СТАТИСТИКА ЧАСТОТ\n')
             file.write('=' * 40 + '\n')
@@ -69,6 +74,7 @@ def export_frequencies(statistics, total_chars, filename='frequencies.txt'):
 
 
 def decrypt_fragment(cipher_text, replacements):
+    """Применить текущие замены к шифротексту и вернуть расшифрованный фрагмент."""
     decoded = ''
 
     for symbol in cipher_text:
@@ -82,6 +88,7 @@ def decrypt_fragment(cipher_text, replacements):
 
 def write_output(cipher_text, replacements):
     try:
+        """Сохранить расшифрованный текст и найденные соответствия в файлы."""
         decoded_text = decrypt_fragment(cipher_text, replacements)
 
         with open('decrypted_text.txt', 'w', encoding='utf-8') as file:
@@ -117,6 +124,7 @@ def write_output(cipher_text, replacements):
 
 
 def start_program():
+    """Запустить интерактивную расшифровку с командами для подстановок."""
     cipher_text = read_cipher_file()
 
     if cipher_text is None:

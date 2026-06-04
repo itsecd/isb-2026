@@ -1,6 +1,9 @@
+"""Модуль: шифр Цезаря для русского алфавита."""
+
 ALPHABET = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ '
 
 def encode_text(text, shift):
+    """Зашифровать текст сдвигом Цезаря."""
     result = []
     for symbol in text:
         upper_symbol = symbol.upper()
@@ -13,6 +16,7 @@ def encode_text(text, shift):
     return ''.join(result)
 
 def decode_text(cipher_text, shift):
+    """Дешифровать текст сдвигом Цезаря."""
     result = []
     for symbol in cipher_text:
         upper_symbol = symbol.upper()
@@ -25,6 +29,7 @@ def decode_text(cipher_text, shift):
     return ''.join(result)
 
 def check_result(source_text, shift):
+    """Проверить, что дешифровка возвращает исходный текст."""
     encrypted = encode_text(source_text, shift)
     decrypted = decode_text(encrypted, shift)
 
@@ -38,6 +43,7 @@ def check_result(source_text, shift):
         return False, decrypted
 
 def run_program():
+    """CLI: выполнить шифрование файла `input_text.txt` и сохранить результаты."""
     try:
         try:
             shift_value = int(input("Введите величину сдвига: "))
