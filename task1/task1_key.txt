@@ -1,4 +1,4 @@
 ROWS=4
-COLS=8
-KEY_COLS=черемша
-KEY_ROWS=брдыщ
+COLS=6
+KEY_COLS=слово
+KEY_ROWS=буква
