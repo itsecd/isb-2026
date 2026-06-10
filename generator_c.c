@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define BIT_COUNT 1000000
+#define BIT_COUNT 128
 
 int main() {
     srand(time(NULL));
