@@ -3,7 +3,7 @@
 #include <random>
 
 int main() {
-    const long N = 1000000;
+    const long N = 128;
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dist(0, 1);
