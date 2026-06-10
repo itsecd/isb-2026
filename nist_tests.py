@@ -58,8 +58,9 @@ def runs_test(bits: str) -> float:
     try:
         _validate_bits(bits)
         n = len(bits)
-        pi = bits.count('1') / n
-        if abs(pi - 0.5) >= (2.0 / math.sqrt(n)):
+        n1 = bits.count('1')
+        n2 = n - n1
+        if n1 == 0 or n2 == 0:
             return 0.0
 
         runs = 1
@@ -67,11 +68,12 @@ def runs_test(bits: str) -> float:
             if bits[i] != bits[i - 1]:
                 runs += 1
 
-        numerator = abs(runs - 2 * n * pi * (1 - pi))
-        denominator = 2 * math.sqrt(2 * n) * pi * (1 - pi)
-        if denominator == 0:
+        mean = (2 * n1 * n2) / n + 1
+        var = (2 * n1 * n2 * (2 * n1 * n2 - n)) / (n * n * (n - 1))
+        if var <= 0:
             return 0.0
-        p_value = erfc(numerator / denominator)
+        z = (runs - mean) / math.sqrt(var)
+        p_value = erfc(abs(z) / math.sqrt(2))
         return p_value
     except Exception as e:
         print(f"Ошибка в runs_test: {e}", file=sys.stderr)
