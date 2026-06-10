@@ -100,9 +100,8 @@ def main() -> None:
         p_long = p_values['long']
 
         passed = (
-            p_mono != -1.0 and p_runs != -1.0 and
-            p_mono >= ALPHA and p_runs >= ALPHA and
-            (p_long == -1.0 or p_long >= ALPHA)
+            p_mono != -1.0 and p_runs != -1.0 and p_long != -1.0 and
+            p_mono >= ALPHA and p_runs >= ALPHA and p_long >= ALPHA
         )
         result_text = "пройден" if passed else "НЕ ПРОЙДЕН (ошибка или p<0.01)"
 
