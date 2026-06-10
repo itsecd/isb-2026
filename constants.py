@@ -2,7 +2,7 @@
 
 import os
 
-SEQUENCE_LENGTH = 1_000_000
+SEQUENCE_LENGTH = 128
 
 SEQUENCES_DIR = "generators/sequences"
 
