@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Утилиты для гибридной криптосистемы: AES-CBC и RSA-OAEP.
+Все функции работают с байтовыми данными, без файлового ввода-вывода.
 """
 
 import os
@@ -8,6 +9,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding, hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding as asym_padding
 from cryptography.hazmat.backends import default_backend
+
 
 
 def generate_aes_key(key_size_bits: int) -> bytes:
@@ -23,59 +25,37 @@ def generate_aes_key(key_size_bits: int) -> bytes:
     return os.urandom(key_size_bits // 8)
 
 
-def encrypt_file_aes(input_path: str, key: bytes, output_path: str) -> None:
+def encrypt_aes_data(plaintext: bytes, key: bytes) -> bytes:
     """
-    Шифрует файл алгоритмом AES в режиме CBC с PKCS7-паддингом.
-    Случайный инициализирующий вектор (IV) записывается в начало выходного файла.
-
-    :param input_path: путь к исходному (открытому) файлу
-    :param key: симметричный ключ AES (16, 24 или 32 байта)
-    :param output_path: путь для сохранения зашифрованного файла
-    :return: None
+    Шифрует байтовые данные AES-CBC с PKCS7-паддингом.
+    Возвращает: 16-байтовый IV + зашифрованные данные.
     """
     iv = os.urandom(16)
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     encryptor = cipher.encryptor()
     padder = padding.PKCS7(algorithms.AES.block_size).padder()
 
-    with open(input_path, 'rb') as fin, open(output_path, 'wb') as fout:
-        fout.write(iv)
-        while chunk := fin.read(64 * 1024):
-            padded = padder.update(chunk)
-            if padded:
-                fout.write(encryptor.update(padded))
-        final_padded = padder.finalize()
-        if final_padded:
-            fout.write(encryptor.update(final_padded))
-        fout.write(encryptor.finalize())
+    padded = padder.update(plaintext) + padder.finalize()
+    ciphertext = encryptor.update(padded) + encryptor.finalize()
+    return iv + ciphertext
 
 
-def decrypt_file_aes(input_path: str, key: bytes, output_path: str) -> None:
+def decrypt_aes_data(encrypted_data: bytes, key: bytes) -> bytes:
     """
-    Расшифровывает файл, зашифрованный функцией encrypt_file_aes().
-    IV считывается из первых 16 байт входного файла.
-
-    :param input_path: путь к зашифрованному файлу
-    :param key: симметричный ключ AES (16, 24 или 32 байта)
-    :param output_path: путь для сохранения расшифрованного файла
-    :return: None
-    :raises ValueError: если входной файл слишком короткий (не содержит IV)
+    Расшифровывает данные, полученные от encrypt_aes_data().
+    Ожидает: первые 16 байт – IV, остальное – шифротекст.
     """
-    with open(input_path, 'rb') as fin:
-        iv = fin.read(16)
-        if len(iv) != 16:
-            raise ValueError("Encrypted file too short: missing IV")
-        ciphertext = fin.read()
+    if len(encrypted_data) < 16:
+        raise ValueError("Encrypted data too short: missing IV")
+    iv = encrypted_data[:16]
+    ciphertext = encrypted_data[16:]
 
     cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
     decryptor = cipher.decryptor()
     padded_plain = decryptor.update(ciphertext) + decryptor.finalize()
-
     unpadder = padding.PKCS7(algorithms.AES.block_size).unpadder()
-    plain = unpadder.update(padded_plain) + unpadder.finalize()
+    return unpadder.update(padded_plain) + unpadder.finalize()
 
-    with open(output_path, 'wb') as fout:
-        fout.write(plain)
 
 
 def generate_rsa_keypair():

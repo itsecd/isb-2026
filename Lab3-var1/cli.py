@@ -8,8 +8,8 @@ import argparse
 import os
 from crypto_utils import (
     generate_aes_key,
-    encrypt_file_aes,
-    decrypt_file_aes,
+    encrypt_aes_data,
+    decrypt_aes_data,
     generate_rsa_keypair,
     save_rsa_private_key,
     save_rsa_public_key,
@@ -17,6 +17,19 @@ from crypto_utils import (
     encrypt_symmetric_key_rsa,
     decrypt_symmetric_key_rsa,
 )
+from config_manager import load_settings
+
+
+def _load_aes_key(private_key_path: str, enc_key_path: str) -> bytes:
+    """
+    Вспомогательная функция: загружает закрытый RSA-ключ, читает зашифрованный
+    AES-ключ из файла, расшифровывает его и возвращает открытый AES-ключ.
+    Используется в режимах шифрования и расшифровки для устранения дублирования.
+    """
+    rsa_priv = load_rsa_private_key(private_key_path)
+    with open(enc_key_path, 'rb') as f:
+        enc_aes_key = f.read()
+    return decrypt_symmetric_key_rsa(enc_aes_key, rsa_priv)
 
 
 def mode_generation(args):
@@ -64,19 +77,21 @@ def mode_encryption(args):
     :param args: аргументы командной строки с путями к файлам
     :return: None
     """
-    print("Загрузка закрытого RSA ключа...")
-    rsa_priv = load_rsa_private_key(args.private_key_path)
 
-    print("Загрузка зашифрованного AES ключа...")
-    with open(args.enc_symmetric_key_path, 'rb') as f:
-        enc_aes_key = f.read()
+    aes_key = _load_aes_key(args.private_key_path, args.enc_symmetric_key_path)
 
-    print("Расшифровка AES ключа с помощью RSA...")
-    aes_key = decrypt_symmetric_key_rsa(enc_aes_key, rsa_priv)
 
-    print(f"Шифрование файла: {args.input_file} -> {args.output_file}")
-    encrypt_file_aes(args.input_file, aes_key, args.output_file)
+    with open(args.input_file, 'rb') as f:
+        plaintext = f.read()
 
+
+    encrypted_data = encrypt_aes_data(plaintext, aes_key)
+
+
+    with open(args.output_file, 'wb') as f:
+        f.write(encrypted_data)
+
+    print(f"Файл зашифрован: {args.input_file} -> {args.output_file}")
     print("Шифрование завершено.")
 
 
@@ -90,19 +105,21 @@ def mode_decryption(args):
     :param args: аргументы командной строки с путями к файлам
     :return: None
     """
-    print("Загрузка закрытого RSA ключа...")
-    rsa_priv = load_rsa_private_key(args.private_key_path)
 
-    print("Загрузка зашифрованного AES ключа...")
-    with open(args.enc_symmetric_key_path, 'rb') as f:
-        enc_aes_key = f.read()
+    aes_key = _load_aes_key(args.private_key_path, args.enc_symmetric_key_path)
 
-    print("Расшифровка AES ключа с помощью RSA...")
-    aes_key = decrypt_symmetric_key_rsa(enc_aes_key, rsa_priv)
 
-    print(f"Расшифровка файла: {args.input_file} -> {args.output_file}")
-    decrypt_file_aes(args.input_file, aes_key, args.output_file)
+    with open(args.input_file, 'rb') as f:
+        encrypted_data = f.read()
 
+
+    plaintext = decrypt_aes_data(encrypted_data, aes_key)
+
+
+    with open(args.output_file, 'wb') as f:
+        f.write(plaintext)
+
+    print(f"Файл расшифрован: {args.input_file} -> {args.output_file}")
     print("Расшифровка завершена.")
 
 
@@ -110,35 +127,43 @@ def main():
     """
     Разбирает аргументы командной строки и запускает соответствующий режим.
     """
+
+    settings = load_settings()
+
     parser = argparse.ArgumentParser(description="Гибридная криптосистема (AES + RSA)")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     gen = subparsers.add_parser("gen", help="Сгенерировать ключи")
     gen.add_argument("--aes-key-size", type=int, choices=[128, 192, 256], required=True)
-    gen.add_argument("--public-key-path", required=True)
-    gen.add_argument("--private-key-path", required=True)
-    gen.add_argument("--enc-symmetric-key-path", required=True)
+    gen.add_argument("--public-key-path", default=settings.get("public_key_path"))
+    gen.add_argument("--private-key-path", default=settings.get("private_key_path"))
+    gen.add_argument("--enc-symmetric-key-path", default=settings.get("enc_symmetric_key_path"))
+
 
     enc = subparsers.add_parser("enc", help="Зашифровать файл")
-    enc.add_argument("--input-file", required=True)
-    enc.add_argument("--private-key-path", required=True)
-    enc.add_argument("--enc-symmetric-key-path", required=True)
-    enc.add_argument("--output-file", required=True)
+    enc.add_argument("--input-file", default=settings.get("default_input_file"))
+    enc.add_argument("--private-key-path", default=settings.get("private_key_path"))
+    enc.add_argument("--enc-symmetric-key-path", default=settings.get("enc_symmetric_key_path"))
+    enc.add_argument("--output-file", default=settings.get("default_encrypted_file"))
+
 
     dec = subparsers.add_parser("dec", help="Расшифровать файл")
-    dec.add_argument("--input-file", required=True)
-    dec.add_argument("--private-key-path", required=True)
-    dec.add_argument("--enc-symmetric-key-path", required=True)
-    dec.add_argument("--output-file", required=True)
+    dec.add_argument("--input-file", default=settings.get("default_encrypted_file"))
+    dec.add_argument("--private-key-path", default=settings.get("private_key_path"))
+    dec.add_argument("--enc-symmetric-key-path", default=settings.get("enc_symmetric_key_path"))
+    dec.add_argument("--output-file", default=settings.get("default_decrypted_file"))
 
     args = parser.parse_args()
 
-    if args.command == "gen":
-        mode_generation(args)
-    elif args.command == "enc":
-        mode_encryption(args)
-    elif args.command == "dec":
-        mode_decryption(args)
+    match args.command:
+        case "gen":
+            mode_generation(args)
+        case "enc":
+            mode_encryption(args)
+        case "dec":
+            mode_decryption(args)
+        case _:
+            raise ValueError(f"Неизвестная команда: {args.command}")
 
 
 if __name__ == "__main__":
