@@ -78,9 +78,9 @@ def write_file(file_name: str, text: str) -> None:
         file.write(text)
 
 
-def calculate_frequency(text: str) -> Counter[str]:
+def count_characters(text: str) -> Counter[str]:
     """
-    Подсчитывает частоту символов зашифрованного текста.
+    Подсчитывает количество появлений каждого символа в тексте.
 
     Учитываются любые символы, кроме символов новой строки
     и возврата каретки.
@@ -632,20 +632,20 @@ def main() -> None:
     try:
         encrypted_text = read_file(INPUT_FILE)
 
-        frequency = calculate_frequency(
+        characters_count = count_characters(
             encrypted_text
         )
 
-        if not frequency:
+        if not characters_count:
             raise ValueError(
                 "В зашифрованном тексте "
                 "отсутствуют символы заданного алфавита."
             )
 
-        print_frequency_table(frequency)
+        print_frequency_table(characters_count)
 
         frequency_text = create_frequency_file(
-            frequency
+            characters_count
         )
 
         write_file(
@@ -655,7 +655,7 @@ def main() -> None:
 
         key, save_result = interactive_decryption(
             encrypted_text,
-            frequency,
+            characters_count,
         )
 
         if not save_result:
