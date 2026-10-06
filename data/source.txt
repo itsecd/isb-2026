@@ -1,0 +1,4 @@
+SEED is a block cipher developed by the Korea Information Security Agency (KISA).
+It is used broadly throughout South Korean industry, but seldom found elsewhere.
+It gained popularity in Korea because 40-bit encryption was not considered strong enough,
+so the Korea Information Security Agency developed its own standard.
